@@ -14,6 +14,8 @@ type Client struct {
 	username string
 	repo     string
 	token    string
+
+	http *http.Client
 }
 
 func New(token, username, repo string) *Client {
@@ -22,42 +24,11 @@ func New(token, username, repo string) *Client {
 	}
 
 	ci := &circleci.Client{Token: token, HTTPClient: httpclient}
-	return &Client{ci, username, repo, token}
+	return &Client{
+		ci:       ci,
+		username: username,
+		repo:     repo,
+		token:    token,
+		http:     httpclient,
+	}
 }
-
-// func (c *Client) client() *http.Client {
-// 	return http.DefaultClient
-// }
-
-// func (c *Client) request(bodyStruct interface{}) error {
-// 	req, err := http.NewRequest(method, u.String(), nil)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	req.Header.Add("Accept", "application/json")
-// 	req.Header.Add("Content-Type", "application/json")
-
-// 	if bodyStruct != nil {
-// 		b, err := json.Marshal(bodyStruct)
-// 		if err != nil {
-// 			return err
-// 		}
-
-// 		req.Body = nopCloser{bytes.NewBuffer(b)}
-// 	}
-
-// 	resp, err := c.client().Do(req)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer resp.Body.Close()
-
-// 	if responseStruct != nil {
-// 		err = json.NewDecoder(resp.Body).Decode(responseStruct)
-// 		if err != nil {
-// 			return err
-// 		}
-// 	}
-
-// }

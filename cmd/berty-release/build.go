@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/spf13/cobra"
 )
@@ -19,12 +18,12 @@ var buildListCmd = &cobra.Command{
 	Short: "list last 30 builds, if branch is omitted list all 30 recent builds",
 	Run: func(cmd *cobra.Command, args []string) {
 		var pull string
-		if len(args) > 0 && args[0] != "" {
+		if len(args) > 0 {
 			pull = args[0]
 
 		}
 
-		bs, err := cfg.client.Builds(pull, 30, 0)
+		bs, err := cfg.client.Builds(pull, "", 30, 0)
 		if err != nil {
 			fmt.Println("client error: ", err)
 			return
@@ -42,13 +41,7 @@ var buildGetCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	Short: "get build info",
 	Run: func(cmd *cobra.Command, args []string) {
-		bn, err := strconv.Atoi(args[0])
-		if err != nil {
-			fmt.Println("args error: ", err)
-			return
-		}
-
-		bs, err := cfg.client.Build(bn)
+		bs, err := cfg.client.Build(args[0])
 		if err != nil {
 			fmt.Println("client error: ", err)
 			return
@@ -66,13 +59,7 @@ var buildGetArtifactsCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	Short: "get build artifacts",
 	Run: func(cmd *cobra.Command, args []string) {
-		bn, err := strconv.Atoi(args[0])
-		if err != nil {
-			fmt.Println("args error: ", err)
-			return
-		}
-
-		arts, err := cfg.client.GetArtifacts(bn, true)
+		arts, err := cfg.client.GetArtifacts(args[0], true)
 		if err != nil {
 			fmt.Println("client error: ", err)
 			return
