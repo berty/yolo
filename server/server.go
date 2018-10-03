@@ -34,6 +34,7 @@ func NewServer(client *circle.Client, hostname string) *Server {
 	e.GET("/release/ios/*", s.ReleaseIOS)
 	e.GET("/artifacts/:build_id", s.Artifacts)
 
+	e.Use(middleware.Logger())
 	e.Use(middleware.BasicAuth(basicAuth))
 
 	return s
