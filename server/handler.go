@@ -78,7 +78,7 @@ func (s *Server) getVersion(arts []*circleci.Artifact, kind string) (string, err
 }
 
 func (s *Server) GetIPA(c echo.Context) error {
-	id := c.Param("build_id")
+	id := c.Param("*")
 	arts, err := s.client.GetArtifacts(id, true)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -89,6 +89,7 @@ func (s *Server) GetIPA(c echo.Context) error {
 			continue
 		}
 
+		// Download client
 		rc, err := s.client.GetArtifact(art)
 		if err != nil {
 			return err
@@ -102,7 +103,27 @@ func (s *Server) GetIPA(c echo.Context) error {
 
 func (s *Server) ReleaseIOS(c echo.Context) error {
 	pull := c.Param("*")
-	builds, err := s.client.Builds(pull, JOB_IOS, 30, 0)
+	builds, err := s.client.Builds(pull, JOB_IOS, 100, 0)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	if len(builds) == 0 {
+		return echo.NewHTTPError(http.StatusInternalServerError, "no valid build(s) found")
+	}
+
+	token := s.getHash(pull)
+
+	download := fmt.Sprintf(`
+<h1><a href="itms-services://?action=download-manifest&url=https://%s/itms/release/%s/%[3]s">download - %[3]s </a></h1>
+`, s.hostname, token, pull)
+	return c.HTML(http.StatusOK, download)
+}
+
+func (s *Server) Itms(c echo.Context) error {
+	pull := c.Param("*")
+	fmt.Println(pull)
+	builds, err := s.client.Builds(pull, JOB_IOS, 100, 0)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -122,7 +143,8 @@ func (s *Server) ReleaseIOS(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	url := fmt.Sprintf("itms-services://?action=download-manifest&url=http://%s/ipa/build/%s", s.hostname, id)
+	token := s.getHash(id)
+	url := fmt.Sprintf("https://%s/ipa/build/%s/%s", s.hostname, token, id)
 
 	plist, err := NewPlistRelease(BUNDLE_ID, version, APP_NAME, url)
 	if err != nil {

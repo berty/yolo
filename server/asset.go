@@ -25,7 +25,7 @@ type ApplePlistItem struct {
 }
 
 type ApplePlistRelease struct {
-	Items []*ApplePlistItem
+	Items []*ApplePlistItem `plist:"items"`
 }
 
 func NewPlistRelease(bundle, version, title, url string) ([]byte, error) {

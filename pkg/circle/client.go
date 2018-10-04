@@ -20,7 +20,7 @@ type Client struct {
 
 func New(token, username, repo string) *Client {
 	httpclient := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Second * 1800,
 	}
 
 	ci := &circleci.Client{Token: token, HTTPClient: httpclient}

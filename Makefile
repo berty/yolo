@@ -5,8 +5,8 @@ install:
 
 .PHONY: docker.build
 docker.build:
-	docker build -t bertychat/release .
+	docker build -t bertychat/yolo .
 
 .PHONY: docker.push
 docker.push:
-	docker push bertychat/release
+	docker push bertychat/yolo
