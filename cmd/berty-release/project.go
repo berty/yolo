@@ -23,7 +23,7 @@ var projectsCmd = &cobra.Command{
 			panic(err)
 		}
 
-		fmt.Println(pret)
+		fmt.Println(string(pret))
 	},
 }
 
