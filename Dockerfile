@@ -1,6 +1,6 @@
 # build
 FROM golang:1.11.1-alpine as builder
-RUN apk add --update make git gcc musl-dev g++
+RUN apk add --no-cache make git gcc musl-dev g++
 WORKDIR /go/src/github.com/berty/staff/tools/release
 
 # install libs
@@ -14,6 +14,7 @@ RUN make install
 
 # runtime
 FROM alpine
+RUN apk add --no-cache ca-certificates
 COPY --from=builder /go/bin/berty-release /bin/
 EXPOSE $PORT
 ENTRYPOINT ["berty-release"]
