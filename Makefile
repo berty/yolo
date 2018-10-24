@@ -1,7 +1,6 @@
-
 .PHONY: install
 install:
-	go install -v ./cmd/...
+	GO111MODULE=on go install -v ./cmd/...
 
 .PHONY: docker.build
 docker.build:
