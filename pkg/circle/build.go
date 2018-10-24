@@ -13,6 +13,9 @@ func (c *Client) Builds(pull string, job string, limit, offset int) ([]*circleci
 	if job == "" {
 		return bs, err
 	}
+	if err != nil {
+		return nil, err
+	}
 
 	var jbuild []*circleci.Build
 	for _, b := range bs {

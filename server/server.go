@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"fmt"
 	"math/rand"
+	"net/http"
 	"regexp"
 
 	"github.com/berty/staff/tools/release/pkg/circle"
@@ -54,9 +55,14 @@ func NewServer(cfg *ServerConfig) *Server {
 		salt:     randStr,
 	}
 
+	e.GET("/", func(c echo.Context) error {
+		// FIXME: conditional depending on the user agent (android || ios)
+		return c.Redirect(http.StatusTemporaryRedirect, "/release/ios")
+	})
 	e.GET("/build/:build_id", s.Build)
 	e.GET("/builds/*", s.Builds)
 	e.GET("/release/ios/*", s.ReleaseIOS)
+	e.GET("/release/ios", s.ListReleaseIOS)
 	e.GET("/artifacts/:build_id", s.Artifacts)
 
 	// No auth
