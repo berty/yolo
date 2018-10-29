@@ -108,7 +108,7 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	html := `<table><thead>`
+	html := `<table style="width:100%;font-size:150%;text-align:left;"><thead>`
 	html += `<th>branch</th>`
 	html += `<th>build</th>`
 	html += `<th>user</th>`
