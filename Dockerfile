@@ -5,7 +5,7 @@ WORKDIR /go/src/github.com/berty/staff/tools/release
 
 # install libs
 COPY go.* ./
-RUN GO111MODULE=on go get .
+RUN GOPROXY=http://goproxy.berty.io:3000/ GO111MODULE=on go get .
 
 # build project
 COPY . .
