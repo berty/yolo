@@ -127,6 +127,11 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 			continue
 		}
 
+		branchLink := fmt.Sprintf("https://github.com/berty/berty/tree/%s", build.Branch)
+		if strings.HasPrefix(build.Branch, "pull/") {
+			branchLink = fmt.Sprintf("https://github.com/berty/berty/%s", build.Branch)
+		}
+
 		branchName := build.Branch
 		hover := ""
 		if build.Branch == "master" {
@@ -135,6 +140,7 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 				oncePerBranch["pull/"+matches[0][1]] = true
 				branchName = fmt.Sprintf("%s (%s)", build.Branch, matches[0][1])
 				hover = matches[0][2]
+				branchLink = "https://github.com/berty/berty/pull/" + matches[0][1]
 			}
 
 		}
@@ -148,11 +154,6 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 		if build.Status != "success" {
 			status = fmt.Sprintf(`<span color="red">%s</span>`, build.Status)
 		}*/
-
-		branchLink := fmt.Sprintf("https://github.com/berty/berty/tree/%s", build.Branch)
-		if strings.HasPrefix(build.Branch, "pull/") {
-			branchLink = fmt.Sprintf("https://github.com/berty/berty/%s", build.Branch)
-		}
 
 		branchColor := "#880088"
 		if build.Branch == "master" {
