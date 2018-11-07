@@ -1,7 +1,6 @@
 package server
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -9,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hako/durafmt"
 	circleci "github.com/jszwedko/go-circleci"
 	"github.com/labstack/echo"
 )
@@ -104,43 +104,59 @@ func (s *Server) GetIPA(c echo.Context) error {
 }
 
 func (s *Server) ListReleaseIOS(c echo.Context) error {
-	builds, err := s.client.Builds("", JOB_IOS, 100, 0)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
 	html := `<table style="width:100%;font-size:150%;text-align:left;"><thead>`
 	html += `<th>branch</th>`
 	html += `<th>build</th>`
 	html += `<th>user</th>`
-	html += `<th>status</th>`
+	//html += `<th>status</th>`
 	html += `<th>download</th>`
 	html += `<th>date</th>`
+	html += `<th>duration</th>`
+	html += `<th>diff</th>`
 	html += `</thead><tbody>`
-	for _, build := range builds {
-		out, _ := json.Marshal(build)
-		fmt.Println(string(out))
-		token := s.getHash(build.Branch)
+	oncePerBranch := map[string]bool{}
+	for _, build := range s.cache.builds {
+		if build.BuildParameters["CIRCLE_JOB"] != "client.rn.ios" {
+			continue
+		}
 
-		status := `<span style="color:green">success</span>`
+		token := s.getHash(build.Branch)
+		if _, found := oncePerBranch[build.Branch]; found && build.Branch != "master" {
+			continue
+		}
+
+		//out, _ := json.Marshal(build)
+		//fmt.Println(string(out))
+
+		oncePerBranch[build.Branch] = true
+
+		/*status := `<span style="color:green">success</span>`
 		if build.Status != "success" {
 			status = fmt.Sprintf(`<span color="red">%s</span>`, build.Status)
-		}
+		}*/
 
 		branchLink := fmt.Sprintf("https://github.com/berty/berty/tree/%s", build.Branch)
 		if strings.HasPrefix(build.Branch, "pull/") {
 			branchLink = fmt.Sprintf("https://github.com/berty/berty/%s", build.Branch)
 		}
 
+		branchColor := "#880088"
+		if build.Branch == "master" {
+			branchColor = "#008888"
+		}
+
 		elems := []string{
-			fmt.Sprintf(`<a href="%s">%s</a>`, branchLink, build.Branch),
+			fmt.Sprintf(`<a href="%s" style="color:%s">%s</a>`, branchLink, branchColor, build.Branch),
 			fmt.Sprintf(`<a href="%s">%d</a>`, build.BuildURL, build.BuildNum),
 			build.User.Login,
-			status,
+			//status,
 
 			// FIXME: create a link /itms/release/TOKEN/ID instead of /itms/release/TOKEN/BRANCH (this way we can handle multiple artifacts per branch)
 			fmt.Sprintf(`<a href="itms-services://?action=download-manifest&url=https://%s/itms/release/%s/%[3]s">download</a> `, s.hostname, token, build.Branch),
 
-			fmt.Sprintf("%s ago", time.Since(*build.StopTime)),
+			fmt.Sprintf("%s ago", durafmt.ParseShort(time.Since(*build.StopTime))),
+			fmt.Sprintf("%s", durafmt.ParseShort(time.Duration(*build.BuildTimeMillis)*time.Millisecond)),
+			fmt.Sprintf(`<a href="%s">diff</a>`, build.Compare),
 		}
 		html += fmt.Sprintf(`<tr><td>%s</td></tr>`, strings.Join(elems, "</td><td>"))
 	}

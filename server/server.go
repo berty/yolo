@@ -2,12 +2,16 @@ package server
 
 import (
 	"crypto/md5"
+	"encoding/json"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"regexp"
+	"time"
 
 	"github.com/berty/staff/tools/release/pkg/circle"
+	circleci "github.com/jszwedko/go-circleci"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
@@ -26,12 +30,23 @@ type ServerConfig struct {
 	Password string
 }
 
+type Cache struct {
+	builds          []*circleci.Build
+	mostRecentBuild time.Time
+}
+
+func (c Cache) String() string {
+	out, _ := json.Marshal(c)
+	return string(out)
+}
+
 type Server struct {
 	client   *circle.Client
 	addr     string
 	hostname string
 	salt     string
 	e        *echo.Echo
+	cache    Cache
 }
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -105,5 +120,66 @@ func (s *Server) getHash(id string) string {
 }
 
 func (s *Server) Start() error {
+	go func() {
+		for {
+			if err := s.refreshCache(); err != nil {
+				log.Printf("refresh failed: %+v", err)
+			}
+			time.Sleep(5 * time.Second)
+		}
+	}()
 	return s.e.Start(s.addr)
+}
+
+func (s *Server) refreshCache() error {
+	var (
+		allBuilds       []*circleci.Build
+		mostRecentBuild = s.cache.mostRecentBuild
+	)
+
+	if s.cache.mostRecentBuild.IsZero() { // first fill
+		log.Print("fetch all builds")
+		for page := 0; page < 10; page++ {
+			builds, err := s.client.Builds("", "", 100, page*100)
+			if err != nil {
+				return err
+			}
+			for _, build := range builds {
+				if build.StopTime.After(mostRecentBuild) {
+					mostRecentBuild = *build.StopTime
+				}
+			}
+			allBuilds = append(allBuilds, builds...)
+			if len(builds) < 100 {
+				break
+			}
+			s.cache.builds = allBuilds
+		}
+	} else { // just the difference
+		allBuilds = s.cache.builds
+		previousMostRecentBuild := mostRecentBuild
+		builds, err := s.client.Builds("", "", 100, 0)
+		if err != nil {
+			return err
+		}
+		hasChanged := false
+		for i := len(builds) - 1; i >= 0; i-- {
+			build := builds[i]
+			if build.StopTime.After(mostRecentBuild) {
+				mostRecentBuild = *build.StopTime
+			}
+			if build.StopTime.After(previousMostRecentBuild) {
+				allBuilds = append([]*circleci.Build{build}, allBuilds...)
+				hasChanged = true
+			}
+		}
+		if !hasChanged {
+			return nil
+		}
+	}
+
+	// FIXME: lock
+	s.cache.builds = allBuilds
+	s.cache.mostRecentBuild = mostRecentBuild
+	return nil
 }
