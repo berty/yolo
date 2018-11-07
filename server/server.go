@@ -139,7 +139,7 @@ func (s *Server) refreshCache() error {
 
 	if s.cache.mostRecentBuild.IsZero() { // first fill
 		log.Print("fetch all builds")
-		for page := 0; page < 10; page++ {
+		for page := 0; page < 20; page++ {
 			builds, err := s.client.Builds("", "", 100, page*100)
 			if err != nil {
 				return err

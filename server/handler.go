@@ -103,6 +103,8 @@ func (s *Server) GetIPA(c echo.Context) error {
 	return echo.NewHTTPError(http.StatusInternalServerError, "IPA not found")
 }
 
+var masterMerge = regexp.MustCompile(`^Merge pull request #([0-9]+) from (.*)$`)
+
 func (s *Server) ListReleaseIOS(c echo.Context) error {
 	html := `<table style="width:100%;font-size:150%;text-align:left;"><thead>`
 	html += `<th>branch</th>`
@@ -123,6 +125,18 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 		token := s.getHash(build.Branch)
 		if _, found := oncePerBranch[build.Branch]; found && build.Branch != "master" {
 			continue
+		}
+
+		branchName := build.Branch
+		hover := ""
+		if build.Branch == "master" {
+			matches := masterMerge.FindAllStringSubmatch(build.Subject, -1)
+			if len(matches) == 1 && len(matches[0]) == 3 {
+				oncePerBranch["pull/"+matches[0][1]] = true
+				branchName = fmt.Sprintf("%s (%s)", build.Branch, matches[0][1])
+				hover = matches[0][2]
+			}
+
 		}
 
 		//out, _ := json.Marshal(build)
@@ -146,7 +160,7 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 		}
 
 		elems := []string{
-			fmt.Sprintf(`<a href="%s" style="color:%s">%s</a>`, branchLink, branchColor, build.Branch),
+			fmt.Sprintf(`<a href="%s" title="%s" style="color:%s">%s</a>`, branchLink, hover, branchColor, branchName),
 			fmt.Sprintf(`<a href="%s">%d</a>`, build.BuildURL, build.BuildNum),
 			build.User.Login,
 			//status,
