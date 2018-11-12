@@ -121,8 +121,6 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 		if build.BuildParameters["CIRCLE_JOB"] != "client.rn.ios" {
 			continue
 		}
-
-		token := s.getHash(build.Branch)
 		if _, found := oncePerBranch[build.Branch]; found && build.Branch != "master" {
 			continue
 		}
@@ -132,18 +130,22 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 			branchLink = fmt.Sprintf("https://github.com/berty/berty/%s", build.Branch)
 		}
 
+		prBranch := build.Branch
 		branchName := build.Branch
 		hover := ""
 		if build.Branch == "master" {
 			matches := masterMerge.FindAllStringSubmatch(build.Subject, -1)
 			if len(matches) == 1 && len(matches[0]) == 3 {
-				oncePerBranch["pull/"+matches[0][1]] = true
-				branchName = fmt.Sprintf("%s (%s)", build.Branch, matches[0][1])
+				pr := matches[0][1]
+				prBranch = "pull/" + pr
+				oncePerBranch[prBranch] = true
+				branchName = fmt.Sprintf("%s (%s)", build.Branch, pr)
 				hover = matches[0][2]
-				branchLink = "https://github.com/berty/berty/pull/" + matches[0][1]
+				branchLink = "https://github.com/berty/berty/pull/" + pr
 			}
 
 		}
+		token := s.getHash(prBranch)
 
 		//out, _ := json.Marshal(build)
 		//fmt.Println(string(out))
@@ -167,12 +169,17 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 			//status,
 
 			// FIXME: create a link /itms/release/TOKEN/ID instead of /itms/release/TOKEN/BRANCH (this way we can handle multiple artifacts per branch)
-			fmt.Sprintf(`<a href="itms-services://?action=download-manifest&url=https://%s/itms/release/%s/%[3]s">download</a> `, s.hostname, token, build.Branch),
+			fmt.Sprintf(`<a href="itms-services://?action=download-manifest&url=https://%s/itms/release/%s/%[3]s">download</a> `, s.hostname, token, prBranch),
 
 			fmt.Sprintf("%s ago", durafmt.ParseShort(time.Since(*build.StopTime))),
 			fmt.Sprintf("%s", durafmt.ParseShort(time.Duration(*build.BuildTimeMillis)*time.Millisecond)),
-			fmt.Sprintf(`<a href="%s">diff</a>`, build.Compare),
 		}
+		if build != nil && build.Compare != nil {
+			elems = append(elems, fmt.Sprintf(`<a href="%s">diff</a>`, *build.Compare))
+		} else {
+			elems = append(elems, `n/a`)
+		}
+
 		html += fmt.Sprintf(`<tr><td>%s</td></tr>`, strings.Join(elems, "</td><td>"))
 	}
 	html += `</tbody></table>`
