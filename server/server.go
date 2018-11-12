@@ -83,18 +83,19 @@ func NewServer(cfg *ServerConfig) *Server {
 	// No auth
 	e.GET("/ipa/build/:token/*", s.GetIPA)
 	e.GET("/itms/release/:token/*", s.Itms)
-	exclude := regexp.MustCompile("^/ipa/build/.+$|^/itms/release/.+$")
+	excludeToken := regexp.MustCompile("^/ipa/build/.+$|^/itms/release/.+$")
+	exclude := regexp.MustCompile("^/release/ios/?$")
 
 	e.Use(middleware.Logger())
 	if cfg.Password != "" {
-		e.Use((s.basicAuth(cfg.Username, cfg.Password, exclude)))
+		e.Use((s.basicAuth(cfg.Username, cfg.Password, exclude, excludeToken)))
 	}
 
 	return s
 }
 
 // Basic auth
-func (s *Server) basicAuth(username, password string, exclude *regexp.Regexp) func(next echo.HandlerFunc) echo.HandlerFunc {
+func (s *Server) basicAuth(username, password string, exclude, excludeToken *regexp.Regexp) func(next echo.HandlerFunc) echo.HandlerFunc {
 	auth := middleware.BasicAuth(func(u, p string, c echo.Context) (bool, error) {
 		return username == u && password == p, nil
 	})
@@ -102,6 +103,10 @@ func (s *Server) basicAuth(username, password string, exclude *regexp.Regexp) fu
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			if exclude.MatchString(c.Path()) {
+				return next(c)
+			}
+
+			if excludeToken.MatchString(c.Path()) {
 				if token := c.Param("token"); token != "" {
 					h := s.getHash(c.Param("*"))
 					if h == token {
