@@ -106,16 +106,11 @@ func (s *Server) GetIPA(c echo.Context) error {
 var masterMerge = regexp.MustCompile(`^Merge pull request #([0-9]+) from (.*)$`)
 
 func (s *Server) ListReleaseIOS(c echo.Context) error {
-	html := `<table style="width:100%;font-size:150%;text-align:left;"><thead>`
-	html += `<th>branch</th>`
-	html += `<th>build</th>`
-	html += `<th>user</th>`
-	//html += `<th>status</th>`
-	html += `<th>download</th>`
-	html += `<th>date</th>`
-	html += `<th>duration</th>`
-	html += `<th>diff</th>`
-	html += `</thead><tbody>`
+	html := `<html><head><style>a,thead th{letter-spacing:1px}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";font-weight:400;background-color:#2B2E4D}.container{display:block;padding:10px 15px}table{border-spacing:0 20px;width:100%;text-align:left;font-size:1.5rem;line-height:1.5;color:rgba(255,255,255,.6)}.td-diff,.td-diff a,.td-download{text-align:right}thead th{color:#CDCFED;text-transform:uppercase}td,th{padding:15px 0}a{font-size:1.8rem;font-weight:500;color:#FFF}.btn{padding:15px 21px 15px 20px;border-radius:10px}.td-title{padding-left:25px;border-radius:10px 0 0 10px}.td-diff a{text-decoration:none}.td-download{width:70;border-radius:0 10px 10px 0;padding-left:20px;padding-right:25px}tbody tr{background-color:#76A8FF}.td-download .btn{background-color:#2D6FE2}.td-diff .btn{background-color:rgba(255,255,255,.4);color:#76A8FF}.tr-master{background-color:#35D1AF}.tr-master .td-download .btn{background-color:#18aa8b}.tr-master .td-diff .btn{color:#35D1AF}.tr-pull{background-color:#8878D7}.tr-pull .td-download .btn{background-color:#6350C8}.tr-pull .td-diff .btn{color:#8878D7}</style></head><body><div class="container">`
+	html += `<table><thead><th class="td-title">branch</th><th>build</th><th></th><th></th></thead><tbody>`
+
+	dlIcon := `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`
+
 	oncePerBranch := map[string]bool{}
 	for _, build := range s.cache.builds {
 		if build.BuildParameters["CIRCLE_JOB"] != "client.rn.ios" {
@@ -157,32 +152,28 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 			status = fmt.Sprintf(`<span color="red">%s</span>`, build.Status)
 		}*/
 
-		branchColor := "#880088"
+		branchKind := "pull"
 		if build.Branch == "master" {
-			branchColor = "#008888"
+			branchKind = "master"
 		}
+
+		diff := `<span class="btn">N/A</span>`
+		if build != nil && build.Compare != nil {
+			diff = fmt.Sprintf(`<a class="btn" href="%s">diff</a>`, *build.Compare)
 
 		elems := []string{
-			fmt.Sprintf(`<a href="%s" title="%s" style="color:%s">%s</a>`, branchLink, hover, branchColor, branchName),
-			fmt.Sprintf(`<a href="%s">%d</a>`, build.BuildURL, build.BuildNum),
-			build.User.Login,
+			fmt.Sprintf(`<td class="td-title"><a href="%s" title="%s">%s</a><br />%s</td>`, branchLink, hover, branchName, build.User.Login),
+			fmt.Sprintf(`<td class="td-build"><a href="%s">%d</a><br />%s ago (%s)</td>`, build.BuildURL, build.BuildNum, durafmt.ParseShort(time.Since(*build.StopTime)), durafmt.ParseShort(time.Duration(*build.BuildTimeMillis)*time.Millisecond)),
 			//status,
-
+			fmt.Sprintf(`<td class="td-diff">%s</td>`, diff),
+			fmt.Sprintf(`<td class="td-download"><a class="btn" href="itms-services://?action=download-manifest&url=https://%s/itms/release/%s/%[3]s">%s</a></td>`, s.hostname, token, prBranch, dlIcon),
 			// FIXME: create a link /itms/release/TOKEN/ID instead of /itms/release/TOKEN/BRANCH (this way we can handle multiple artifacts per branch)
-			fmt.Sprintf(`<a href="itms-services://?action=download-manifest&url=https://%s/itms/release/%s/%[3]s">download</a> `, s.hostname, token, prBranch),
-
-			fmt.Sprintf("%s ago", durafmt.ParseShort(time.Since(*build.StopTime))),
-			fmt.Sprintf("%s", durafmt.ParseShort(time.Duration(*build.BuildTimeMillis)*time.Millisecond)),
-		}
-		if build != nil && build.Compare != nil {
-			elems = append(elems, fmt.Sprintf(`<a href="%s">diff</a>`, *build.Compare))
-		} else {
-			elems = append(elems, `n/a`)
 		}
 
-		html += fmt.Sprintf(`<tr><td>%s</td></tr>`, strings.Join(elems, "</td><td>"))
+		html += fmt.Sprintf(`<tr class="tr-%s">%s</tr>`, branchKind, elems)
 	}
 	html += `</tbody></table>`
+	html += `</div></body></html>`
 	return c.HTML(http.StatusOK, html)
 }
 
