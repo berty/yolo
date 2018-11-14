@@ -157,9 +157,11 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 			branchKind = "master"
 		}
 
-		diff := `<span class="btn">N/A</span>`
+		//diff := `<span class="btn">N/A</span>`
+		diff := ""
 		if build != nil && build.Compare != nil {
 			diff = fmt.Sprintf(`<a class="btn" href="%s">diff</a>`, *build.Compare)
+		}
 
 		elems := []string{
 			fmt.Sprintf(`<td class="td-title"><a href="%s" title="%s">%s</a><br />%s</td>`, branchLink, hover, branchName, build.User.Login),
@@ -170,7 +172,7 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 			// FIXME: create a link /itms/release/TOKEN/ID instead of /itms/release/TOKEN/BRANCH (this way we can handle multiple artifacts per branch)
 		}
 
-		html += fmt.Sprintf(`<tr class="tr-%s">%s</tr>`, branchKind, elems)
+		html += fmt.Sprintf(`<tr class="tr-%s">%s</tr>`, branchKind, strings.Join(elems, " "))
 	}
 	html += `</tbody></table>`
 	html += `</div></body></html>`
