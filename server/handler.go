@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -106,12 +107,15 @@ func (s *Server) GetIPA(c echo.Context) error {
 var masterMerge = regexp.MustCompile(`^Merge pull request #([0-9]+) from (.*)$`)
 
 func (s *Server) ListReleaseIOS(c echo.Context) error {
-	html := `<html><head><style>a,thead th{letter-spacing:1px}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";font-weight:400;background-color:#2B2E4D}.container{display:block;padding:10px 15px}table{border-spacing:0 20px;width:100%;text-align:left;font-size:1.5rem;line-height:1.5;color:rgba(255,255,255,.6)}.td-diff,.td-diff a,.td-download{text-align:right}thead th{color:#CDCFED;text-transform:uppercase}td,th{padding:15px 0}a{font-size:1.8rem;font-weight:500;color:#FFF}.btn{padding:15px 21px 15px 20px;border-radius:10px}.td-title{padding-left:25px;border-radius:10px 0 0 10px}.td-diff a{text-decoration:none}.td-download{width:70;border-radius:0 10px 10px 0;padding-left:20px;padding-right:25px}tbody tr{background-color:#76A8FF}.td-download .btn{background-color:#2D6FE2}.td-diff .btn{background-color:rgba(255,255,255,.4);color:#76A8FF}.tr-master{background-color:#35D1AF}.tr-master .td-download .btn{background-color:#18aa8b}.tr-master .td-diff .btn{color:#35D1AF}.tr-pull{background-color:#8878D7}.tr-pull .td-download .btn{background-color:#6350C8}.tr-pull .td-diff .btn{color:#8878D7}</style></head><body><div class="container">`
-	html += `<table><thead><th class="td-title">branch</th><th>build</th><th></th><th></th></thead><tbody>`
+	html := `<html><head><style>a,thead th{letter-spacing:1px}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";font-weight:400;background-color:#2B2E4D}.container{display:block;padding:10px 15px}table{border-spacing:0 20px;width:100%;text-align:left;font-size:1.5rem;line-height:1.5;color:rgba(255,255,255,.6)}.td-diff,.td-diff a,.td-download{text-align:right}thead th{color:#CDCFED;text-transform:uppercase}td,th{padding:15px 0}a{font-size:1.8rem;font-weight:500;color:#FFF}.btn{padding:15px 21px 15px 20px;border-radius:10px}.td-title{padding-left:25px;border-radius:10px 0 0 10px}.td-diff a{text-decoration:none}.td-download{width:70;border-radius:0 10px 10px 0;padding-left:20px;padding-right:25px}tbody tr{background-color:#76A8FF}.td-download .btn{background-color:#2D6FE2}.td-diff .btn{background-color:rgba(255,255,255,.4);color:#76A8FF}.tr-master{background-color:#35D1AF}.tr-master .td-download .btn{background-color:#18aa8b}.tr-master .td-diff .btn{color:#35D1AF}.tr-pull{background-color:#8878D7}.tr-pull .td-download .btn{background-color:#6350C8}.tr-pull .td-diff .btn{color:#8878D7} .date-line{background:transparent; text-align: center;}</style></head><body><div class="container">`
+	//html += `<table><thead><th class="td-title">branch</th><th>build</th><th></th><th></th></thead><tbody>`
+	html += `<table><tbody>`
 
 	dlIcon := `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`
 
 	oncePerBranch := map[string]bool{}
+	previousDate := ""
+	now := time.Now().Truncate(time.Hour * 24)
 	for _, build := range s.cache.builds {
 		if build.BuildParameters["CIRCLE_JOB"] != "client.rn.ios" {
 			continue
@@ -119,6 +123,18 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 		if _, found := oncePerBranch[build.Branch]; found && build.Branch != "master" {
 			continue
 		}
+
+		currentDate := build.StopTime.Format("2006/01/02")
+		stopDay := build.StopTime.Truncate(time.Hour * 24)
+		dayDiff := math.Ceil(stopDay.Sub(now).Hours() / 24)
+		if dayDiff != 0 {
+			currentDate += fmt.Sprintf(" (%dd ago)", -int(dayDiff))
+		}
+		if currentDate != previousDate {
+			html += fmt.Sprintf(`<tr class="date-line"><td colspan=4>%s</td></tr>`, currentDate)
+		}
+
+		previousDate = currentDate
 
 		branchLink := fmt.Sprintf("https://github.com/berty/berty/tree/%s", build.Branch)
 		if strings.HasPrefix(build.Branch, "pull/") {
