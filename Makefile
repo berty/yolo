@@ -18,11 +18,13 @@ docker.push: docker.build
 
 .PHONY: deploy
 deploy:
-	ssh "$(HOST)" docker pull "$(IMAGE)" \
+	ssh $(HOST) "docker pull $(IMAGE) \
 		&& (docker rm -f yolo || true) \
 		&& docker run --name yolo -d -p 80:3670 bertychat/yolo \
-				-t "$(CIRCLE_TOKEN)" serve \
-				--hostname "$(HOSTNAME)" -p 'xor+=cool'
+				-t $(CIRCLE_TOKEN) serve \
+				--hostname $(HOSTNAME) -p 'xor+=cool'"
+
+
 
 .PHONY: release
 release: docker.build docker.push deploy
