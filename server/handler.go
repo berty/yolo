@@ -152,7 +152,6 @@ func (s *Server) ListReleaseIOSJson(c echo.Context) error {
 				break
 			}
 		}
-
 	}
 	return c.JSON(http.StatusOK, ret)
 }
