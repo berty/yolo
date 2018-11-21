@@ -27,7 +27,9 @@ deploy:
 		      -t $(CIRCLE_TOKEN) serve \
 		      --hostname $(HOSTNAME) -p 'xor+=cool'"
 
-
+.PHONY: prod-logs
+prod-logs:
+	ssh $(HOST) sh -xc '"docker logs -f `docker ps -lq`"'
 
 .PHONY: release
 release: docker.build docker.push deploy
