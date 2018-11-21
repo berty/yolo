@@ -7,5 +7,5 @@ docker.build:
 	docker build -t bertychat/yolo .
 
 .PHONY: docker.push
-docker.push:
+docker.push: docker.build
 	docker push bertychat/yolo
