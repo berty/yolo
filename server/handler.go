@@ -124,8 +124,13 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 			continue
 		}
 
-		currentDate := build.StopTime.Format("2006/01/02")
-		stopDay := build.StopTime.Truncate(time.Hour * 24)
+		updateTime := build.StartTime
+		if build.StopTime != nil {
+			updateTime = build.StopTime
+		}
+
+		currentDate := updateTime.Format("2006/01/02")
+		stopDay := updateTime.Truncate(time.Hour * 24)
 		dayDiff := math.Ceil(stopDay.Sub(now).Hours() / 24)
 		if dayDiff != 0 {
 			currentDate += fmt.Sprintf(" (%dd ago)", -int(dayDiff))
@@ -172,6 +177,9 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 		if build.Branch == "master" {
 			branchKind = "master"
 		}
+		if build.StopTime == nil {
+			branchKind = "inprogress"
+		}
 
 		//diff := `<span class="btn">N/A</span>`
 		diff := ""
@@ -179,9 +187,21 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 			diff = fmt.Sprintf(`<a class="btn" href="%s">diff</a>`, *build.Compare)
 		}
 
+		duration := "(in progress)"
+		if build.BuildTimeMillis != nil {
+			duration = fmt.Sprintf(
+				"(%s)",
+				durafmt.ParseShort(time.Duration(*build.BuildTimeMillis)*time.Millisecond),
+			)
+		}
 		elems := []string{
 			fmt.Sprintf(`<td class="td-title"><a href="%s" title="%s">%s</a><br />%s</td>`, branchLink, hover, branchName, build.User.Login),
-			fmt.Sprintf(`<td class="td-build"><a href="%s">%d</a><br />%s ago (%s)</td>`, build.BuildURL, build.BuildNum, durafmt.ParseShort(time.Since(*build.StopTime)), durafmt.ParseShort(time.Duration(*build.BuildTimeMillis)*time.Millisecond)),
+			fmt.Sprintf(`<td class="td-build"><a href="%s">%d</a><br />%s ago %s</td>`,
+				build.BuildURL,
+				build.BuildNum,
+				durafmt.ParseShort(time.Since(*updateTime)),
+				duration,
+			),
 			//status,
 			fmt.Sprintf(`<td class="td-diff">%s</td>`, diff),
 			fmt.Sprintf(`<td class="td-download"><a class="btn" href="itms-services://?action=download-manifest&url=https://%s/itms/release/%s/%[3]s">%s</a></td>`, s.hostname, token, prBranch, dlIcon),

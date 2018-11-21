@@ -150,7 +150,7 @@ func (s *Server) refreshCache() error {
 				return err
 			}
 			for _, build := range builds {
-				if build.StopTime.After(mostRecentBuild) {
+				if build.StopTime != nil && build.StopTime.After(mostRecentBuild) {
 					mostRecentBuild = *build.StopTime
 				}
 			}
@@ -170,10 +170,14 @@ func (s *Server) refreshCache() error {
 		hasChanged := false
 		for i := len(builds) - 1; i >= 0; i-- {
 			build := builds[i]
-			if build.StopTime.After(mostRecentBuild) {
-				mostRecentBuild = *build.StopTime
+			updateTime := build.StartTime
+			if build.StopTime != nil {
+				updateTime = build.StopTime
 			}
-			if build.StopTime.After(previousMostRecentBuild) {
+			if updateTime.After(mostRecentBuild) {
+				mostRecentBuild = *updateTime
+			}
+			if updateTime.After(previousMostRecentBuild) {
 				allBuilds = append([]*circleci.Build{build}, allBuilds...)
 				hasChanged = true
 			}

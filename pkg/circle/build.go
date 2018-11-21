@@ -9,7 +9,7 @@ import (
 )
 
 func (c *Client) Builds(pull string, job string, limit, offset int) ([]*circleci.Build, error) {
-	bs, err := c.ci.ListRecentBuildsForProject(c.username, c.repo, pull, "successful", limit, offset)
+	bs, err := c.ci.ListRecentBuildsForProject(c.username, c.repo, pull, "", limit, offset)
 	if job == "" {
 		return bs, err
 	}
