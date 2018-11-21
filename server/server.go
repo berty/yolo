@@ -96,7 +96,7 @@ func NewServer(cfg *ServerConfig) *Server {
 	e.GET("/ipa/build/:token/*", s.GetIPA)
 	e.GET("/itms/release/:token/*", s.Itms)
 	excludeToken := regexp.MustCompile("^/ipa/build/.+$|^/itms/release/.+$")
-	exclude := regexp.MustCompile("^/release/ios/?$")
+	exclude := regexp.MustCompile("^/release/ios")
 
 	e.Use(middleware.Logger())
 	if cfg.Password != "" {
