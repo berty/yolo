@@ -108,12 +108,13 @@ var masterMerge = regexp.MustCompile(`^Merge pull request #([0-9]+) from (.*)$`)
 
 func (s *Server) ListReleaseIOSJson(c echo.Context) error {
 	type release struct {
-		Branch   string    `json:"branch"`
-		StopTime time.Time `json:"stop-time"`
-		Author   string    `json:"author"`
-		GitSha   string    `json:"git-sha"`
-		BuildURL string    `json:"build-url"`
-		Body     string    `json:"body"`
+		Branch      string    `json:"branch"`
+		StopTime    time.Time `json:"stop-time"`
+		Author      string    `json:"author"`
+		GitSha      string    `json:"git-sha"`
+		BuildURL    string    `json:"build-url"`
+		Body        string    `json:"body"`
+		ManifestURL string    `json:"manifest-url"`
 	}
 	ret := struct {
 		Master    *release   `json:"master"`
@@ -122,13 +123,19 @@ func (s *Server) ListReleaseIOSJson(c echo.Context) error {
 	ret.LatestPRs = make([]*release, 0)
 	oncePerBranch := map[string]bool{}
 	releaseFromBuild := func(build *circleci.Build) *release {
+		manifestURL := fmt.Sprintf(
+			`itms-services://?action=download-manifest&url=https://%s/itms/release/%s/%[3]s`,
+			s.hostname, s.getHash(build.Branch), build.Branch,
+		)
+
 		return &release{
-			Branch:   build.Branch,
-			StopTime: *build.StopTime,
-			Author:   build.User.Login,
-			GitSha:   build.VcsRevision,
-			BuildURL: build.BuildURL,
-			Body:     build.Body,
+			Branch:      build.Branch,
+			StopTime:    *build.StopTime,
+			Author:      build.User.Login,
+			GitSha:      build.VcsRevision,
+			BuildURL:    build.BuildURL,
+			Body:        build.Body,
+			ManifestURL: manifestURL,
 		}
 	}
 	for _, build := range s.cache.builds {
@@ -277,7 +284,6 @@ func (s *Server) ReleaseIOS(c echo.Context) error {
 	}
 
 	token := s.getHash(pull)
-
 	html := fmt.Sprintf(`<h1><a href="itms-services://?action=download-manifest&url=https://%s/itms/release/%s/%[3]s">download - %[3]s </a></h1>`, s.hostname, token, pull)
 	if strings.HasPrefix(pull, "pull/") {
 		html += fmt.Sprintf(`<h2><a href="https://github.com/berty/berty/%s">GitHub PR</a></h2>`, pull)
