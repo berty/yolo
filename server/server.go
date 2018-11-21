@@ -182,6 +182,9 @@ func (s *Server) refreshCache() error {
 		hasChanged := false
 		for i := len(builds) - 1; i >= 0; i-- {
 			build := builds[i]
+			if build.StartTime == nil && build.StopTime != nil {
+				continue
+			}
 			updateTime := build.StartTime
 			if build.StopTime != nil {
 				updateTime = build.StopTime
