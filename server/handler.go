@@ -106,6 +106,57 @@ func (s *Server) GetIPA(c echo.Context) error {
 
 var masterMerge = regexp.MustCompile(`^Merge pull request #([0-9]+) from (.*)$`)
 
+func (s *Server) ListReleaseIOSJson(c echo.Context) error {
+	type release struct {
+		Branch   string    `json:"branch"`
+		StopTime time.Time `json:"stop-time"`
+		Author   string    `json:"author"`
+		GitSha   string    `json:"git-sha"`
+		BuildURL string    `json:"build-url"`
+		Body     string    `json:"body"`
+	}
+	ret := struct {
+		Master    *release   `json:"master"`
+		LatestPRs []*release `json:"latest-prs"`
+	}{}
+	ret.LatestPRs = make([]*release, 0)
+	oncePerBranch := map[string]bool{}
+	releaseFromBuild := func(build *circleci.Build) *release {
+		return &release{
+			Branch:   build.Branch,
+			StopTime: *build.StopTime,
+			Author:   build.User.Login,
+			GitSha:   build.VcsRevision,
+			BuildURL: build.BuildURL,
+			Body:     build.Body,
+		}
+	}
+	for _, build := range s.cache.builds {
+		if build.BuildParameters["CIRCLE_JOB"] != "client.rn.ios" {
+			continue
+		}
+		if _, found := oncePerBranch[build.Branch]; found {
+			continue
+		}
+		if build.Status != "success" {
+			continue
+		}
+		//out, _ := json.MarshalIndent(build, "", "  ")
+		//fmt.Println(string(out))
+		oncePerBranch[build.Branch] = true
+		if build.Branch == "master" {
+			ret.Master = releaseFromBuild(build)
+		} else {
+			ret.LatestPRs = append(ret.LatestPRs, releaseFromBuild(build))
+			if len(ret.LatestPRs) > 5 {
+				break
+			}
+		}
+
+	}
+	return c.JSON(http.StatusOK, ret)
+}
+
 func (s *Server) ListReleaseIOS(c echo.Context) error {
 	html := `<html><head><link rel="stylesheet" href="/assets/site.css">` + faviconHTMLHeader + `</head><body><div class="container">`
 	//html += `<table><thead><th class="td-title">branch</th><th>build</th><th></th><th></th></thead><tbody>`

@@ -89,6 +89,7 @@ func NewServer(cfg *ServerConfig) *Server {
 	e.GET("/builds/*", s.Builds)
 	e.GET("/release/ios/*", s.ReleaseIOS)
 	e.GET("/release/ios", s.ListReleaseIOS)
+	e.GET("/release/ios.json", s.ListReleaseIOSJson)
 	e.GET("/artifacts/:build_id", s.Artifacts)
 
 	// No auth
