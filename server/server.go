@@ -174,7 +174,7 @@ func (s *Server) refreshCache() error {
 	)
 
 	if s.cache.mostRecentBuild.IsZero() { // first fill
-		log.Print("fetch all builds")
+		log.Print("initial builds fetch")
 		for page := 0; page < 20; page++ {
 			builds, err := s.client.Builds("", "", 100, page*100)
 			if err != nil {
@@ -191,8 +191,11 @@ func (s *Server) refreshCache() error {
 			if len(builds) < 100 {
 				break
 			}
+			buildMapMutex.Lock()
 			s.cache.builds = allBuilds
+			buildMapMutex.Unlock()
 		}
+		log.Printf("fetched %d initial builds", len(s.cache.builds))
 	} else { // just the difference
 		allBuilds = s.cache.builds
 		previousMostRecentBuild := mostRecentBuild
@@ -200,7 +203,7 @@ func (s *Server) refreshCache() error {
 		if err != nil {
 			return err
 		}
-		hasChanged := false
+		changed := 0
 		for i := len(builds) - 1; i >= 0; i-- {
 			build := builds[i]
 			if build.StartTime == nil && build.StopTime == nil {
@@ -215,12 +218,13 @@ func (s *Server) refreshCache() error {
 			}
 			if updateTime.After(previousMostRecentBuild) {
 				allBuilds[build.BuildNum] = build
-				hasChanged = true
+				changed++
 			}
 		}
-		if !hasChanged {
+		if changed == 0 {
 			return nil
 		}
+		log.Printf("fetched %d new builds", changed)
 	}
 
 	buildMapMutex.Lock()

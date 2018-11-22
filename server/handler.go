@@ -181,6 +181,9 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 			continue
 		}
 
+		//out, _ := json.MarshalIndent(build, "", "  ")
+		//fmt.Println(string(out))
+
 		updateTime := build.StartTime
 		if build.StopTime != nil {
 			updateTime = build.StopTime
@@ -198,27 +201,30 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 
 		previousDate = currentDate
 
-		branchLink := fmt.Sprintf("https://github.com/berty/berty/tree/%s", build.Branch)
+		branchURL := fmt.Sprintf("https://github.com/berty/berty/tree/%s", build.Branch)
 		if strings.HasPrefix(build.Branch, "pull/") {
-			branchLink = fmt.Sprintf("https://github.com/berty/berty/%s", build.Branch)
+			branchURL = fmt.Sprintf("https://github.com/berty/berty/%s", build.Branch)
 		}
 
 		prBranch := build.Branch
 		branchName := build.Branch
-		hover := ""
+		subject := build.Subject
 		if build.Branch == "master" {
 			matches := masterMerge.FindAllStringSubmatch(build.Subject, -1)
 			if len(matches) == 1 && len(matches[0]) == 3 {
+				subject = matches[0][2]
 				pr := matches[0][1]
 				prBranch = "pull/" + pr
 				oncePerBranch[prBranch] = true
 				branchName = fmt.Sprintf("%s (%s)", build.Branch, pr)
-				hover = matches[0][2]
-				branchLink = "https://github.com/berty/berty/pull/" + pr
+				branchURL = "https://github.com/berty/berty/pull/" + pr
 			}
 
 		}
 		token := s.getHash(prBranch)
+		if subject == "" {
+			subject = "n/a"
+		}
 
 		//out, _ := json.Marshal(build)
 		//fmt.Println(string(out))
@@ -251,15 +257,14 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 				durafmt.ParseShort(time.Duration(*build.BuildTimeMillis)*time.Millisecond),
 			)
 		}
+		commitLink := fmt.Sprintf(`<a href="https://github.com/berty/berty/commit/%s">%s</a>`, build.VcsRevision, build.VcsRevision[:8])
+		branchLink := fmt.Sprintf(`<a href="%s">%s</a>`, branchURL, branchName)
+		buildLink := fmt.Sprintf(`<a href="%s">%d</a>`, build.BuildURL, build.BuildNum)
+		age := durafmt.ParseShort(time.Since(*updateTime))
+
 		elems := []string{
-			fmt.Sprintf(`<td class="td-title"><a href="%s" title="%s">%s</a><br />%s</td>`, branchLink, hover, branchName, build.User.Login),
-			fmt.Sprintf(`<td class="td-build"><a href="%s">%d</a><br />%s ago %s</td>`,
-				build.BuildURL,
-				build.BuildNum,
-				durafmt.ParseShort(time.Since(*updateTime)),
-				duration,
-			),
-			//status,
+			fmt.Sprintf(`<td class="td-title">%s<br/>%s</td>`, branchLink, build.User.Login),
+			fmt.Sprintf(`<td class="td-build">%s %s<br />%s %s %s</td>`, commitLink, subject, buildLink, age, duration),
 			fmt.Sprintf(`<td class="td-diff">%s</td>`, diff),
 			fmt.Sprintf(`<td class="td-download"><a class="btn" href="itms-services://?action=download-manifest&url=https://%s/itms/release/%s/%[3]s">%s</a></td>`, s.hostname, token, prBranch, dlIcon),
 			// FIXME: create a link /itms/release/TOKEN/ID instead of /itms/release/TOKEN/BRANCH (this way we can handle multiple artifacts per branch)
