@@ -1,7 +1,9 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"math"
 	"net/http"
 	"regexp"
@@ -124,7 +126,7 @@ func (s *Server) ListReleaseIOSJson(c echo.Context) error {
 	oncePerBranch := map[string]bool{}
 	releaseFromBuild := func(build *circleci.Build) *release {
 		manifestURL := fmt.Sprintf(
-			`itms-services://?action=download-manifest&url=https://%s/itms/release/%s/%[3]s`,
+			`itms-services://?action=download-manifest&url=https://%s/auth/itms/release/%s/%[3]s`,
 			s.hostname, s.getHash(build.Branch), build.Branch,
 		)
 
@@ -266,8 +268,8 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 			fmt.Sprintf(`<td class="td-title">%s<br/>%s</td>`, branchLink, build.User.Login),
 			fmt.Sprintf(`<td class="td-build">%s %s<br />%s %s %s</td>`, commitLink, subject, buildLink, age, duration),
 			fmt.Sprintf(`<td class="td-diff">%s</td>`, diff),
-			fmt.Sprintf(`<td class="td-download"><a class="btn" href="itms-services://?action=download-manifest&url=https://%s/itms/release/%s/%[3]s">%s</a></td>`, s.hostname, token, prBranch, dlIcon),
-			// FIXME: create a link /itms/release/TOKEN/ID instead of /itms/release/TOKEN/BRANCH (this way we can handle multiple artifacts per branch)
+			fmt.Sprintf(`<td class="td-download"><a class="btn" href="itms-services://?action=download-manifest&url=https://%s/auth/itms/release/%s/%[3]s">%s</a></td>`, s.hostname, token, prBranch, dlIcon),
+			// FIXME: create a link /auth/itms/release/TOKEN/ID instead of /auth/itms/release/TOKEN/BRANCH (this way we can handle multiple artifacts per branch)
 		}
 
 		html += fmt.Sprintf(`<tr class="tr-%s">%s</tr>`, branchKind, strings.Join(elems, " "))
@@ -289,7 +291,7 @@ func (s *Server) ReleaseIOS(c echo.Context) error {
 	}
 
 	token := s.getHash(pull)
-	html := fmt.Sprintf(`<h1><a href="itms-services://?action=download-manifest&url=https://%s/itms/release/%s/%[3]s">download - %[3]s </a></h1>`, s.hostname, token, pull)
+	html := fmt.Sprintf(`<h1><a href="itms-services://?action=download-manifest&url=https://%s/auth/itms/release/%s/%[3]s">download - %[3]s </a></h1>`, s.hostname, token, pull)
 	if strings.HasPrefix(pull, "pull/") {
 		html += fmt.Sprintf(`<h2><a href="https://github.com/berty/berty/%s">GitHub PR</a></h2>`, pull)
 	}
@@ -299,21 +301,35 @@ func (s *Server) ReleaseIOS(c echo.Context) error {
 
 func (s *Server) Itms(c echo.Context) error {
 	pull := c.Param("*")
-	fmt.Println(pull)
-	builds, err := s.client.Builds(pull, JOB_IOS, 100, 0)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+
+	var theBuild *circleci.Build
+	/*
+		for _, build := range s.cache.builds.Sorted() {
+			if build.Branch == pull && build.StopTime != nil {
+				theBuild = build
+				break
+			}
+		}
+	*/
+	if theBuild == nil {
+		builds, err := s.client.Builds(pull, JOB_IOS, 100, 0)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
+		if len(builds) == 0 {
+			return echo.NewHTTPError(http.StatusInternalServerError, "no valid build(s) found")
+		}
+		theBuild = builds[0]
 	}
 
-	if len(builds) == 0 {
-		return echo.NewHTTPError(http.StatusInternalServerError, "no valid build(s) found")
-	}
-
-	id := strconv.Itoa(builds[0].BuildNum)
+	id := strconv.Itoa(theBuild.BuildNum)
 	arts, err := s.client.GetArtifacts(id, true)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
+	out, _ := json.Marshal(arts)
+	log.Printf("build=%d artifacts=%s", theBuild.BuildNum, out)
 
 	version, err := s.getVersion(arts, "ios")
 	if err != nil {
@@ -321,12 +337,14 @@ func (s *Server) Itms(c echo.Context) error {
 	}
 
 	token := s.getHash(id)
-	url := fmt.Sprintf("https://%s/ipa/build/%s/%s", s.hostname, token, id)
+	url := fmt.Sprintf("https://%s/auth/ipa/build/%s/%s", s.hostname, token, id)
 
 	plist, err := NewPlistRelease(BUNDLE_ID, version, APP_NAME, url)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
+
+	// FIXME: put plist in cache
 
 	return c.Blob(http.StatusOK, "application/x-plist", plist)
 }

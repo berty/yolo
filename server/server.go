@@ -89,6 +89,7 @@ var faviconHTMLHeader = `<link rel="apple-touch-icon" sizes="180x180" href="/ass
 func NewServer(cfg *ServerConfig) *Server {
 	randStr := randStringRunes(10)
 	e := echo.New()
+	e.Use(middleware.Logger())
 	s := &Server{
 		client:   cfg.Client,
 		addr:     cfg.Addr,
@@ -99,44 +100,36 @@ func NewServer(cfg *ServerConfig) *Server {
 
 	e.File("/favicon.ico", "assets/favicon.ico")
 	e.Static("/assets", "assets")
-
+	e.GET("/release/ios/*", s.ReleaseIOS)
+	e.GET("/release/ios", s.ListReleaseIOS)
 	e.GET("/", func(c echo.Context) error {
 		// FIXME: conditional depending on the user agent (android || ios)
 		return c.Redirect(http.StatusTemporaryRedirect, "/release/ios")
 	})
-	e.GET("/build/:build_id", s.Build)
-	e.GET("/builds/*", s.Builds)
-	e.GET("/release/ios/*", s.ReleaseIOS)
-	e.GET("/release/ios", s.ListReleaseIOS)
 	e.GET("/release/ios.json", s.ListReleaseIOSJson)
-	e.GET("/artifacts/:build_id", s.Artifacts)
 
-	// No auth
-	e.GET("/ipa/build/:token/*", s.GetIPA)
-	e.GET("/itms/release/:token/*", s.Itms)
-	excludeToken := regexp.MustCompile("^/ipa/build/.+$|^/itms/release/.+$")
-	exclude := regexp.MustCompile("^/release/ios")
-
-	e.Use(middleware.Logger())
+	auth := e.Group("/auth")
 	if cfg.Password != "" {
-		e.Use((s.basicAuth(cfg.Username, cfg.Password, exclude, excludeToken)))
+		excludeToken := regexp.MustCompile("^/auth/ipa/build/.+$|^/auth/itms/release/.+$")
+		auth.Use((s.basicAuth(cfg.Username, cfg.Password, excludeToken)))
 	}
+	auth.GET("/build/:build_id", s.Build)
+	auth.GET("/builds/*", s.Builds)
+	auth.GET("/artifacts/:build_id", s.Artifacts)
+	auth.GET("/ipa/build/:token/*", s.GetIPA)
+	auth.GET("/itms/release/:token/*", s.Itms)
 
 	return s
 }
 
 // Basic auth
-func (s *Server) basicAuth(username, password string, exclude, excludeToken *regexp.Regexp) func(next echo.HandlerFunc) echo.HandlerFunc {
+func (s *Server) basicAuth(username, password string, excludeToken *regexp.Regexp) func(next echo.HandlerFunc) echo.HandlerFunc {
 	auth := middleware.BasicAuth(func(u, p string, c echo.Context) (bool, error) {
 		return username == u && password == p, nil
 	})
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			if exclude.MatchString(c.Path()) {
-				return next(c)
-			}
-
 			if excludeToken.MatchString(c.Path()) {
 				if token := c.Param("token"); token != "" {
 					h := s.getHash(c.Param("*"))
