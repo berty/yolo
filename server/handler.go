@@ -138,7 +138,7 @@ func (s *Server) ListReleaseIOSJson(c echo.Context) error {
 			ManifestURL: manifestURL,
 		}
 	}
-	for _, build := range s.cache.builds {
+	for _, build := range s.cache.builds.Sorted() {
 		if build.BuildParameters["CIRCLE_JOB"] != "client.rn.ios" {
 			continue
 		}
@@ -173,7 +173,7 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 	oncePerBranch := map[string]bool{}
 	previousDate := ""
 	now := time.Now().Truncate(time.Hour * 24)
-	for _, build := range s.cache.builds {
+	for _, build := range s.cache.builds.Sorted() {
 		if build.BuildParameters["CIRCLE_JOB"] != "client.rn.ios" {
 			continue
 		}

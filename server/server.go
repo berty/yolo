@@ -8,6 +8,8 @@ import (
 	"math/rand"
 	"net/http"
 	"regexp"
+	"sort"
+	"sync"
 	"time"
 
 	"github.com/berty/staff/tools/release/pkg/circle"
@@ -30,8 +32,25 @@ type ServerConfig struct {
 	Password string
 }
 
+type buildMap map[int]*circleci.Build
+
+func (m buildMap) Sorted() []*circleci.Build {
+	buildMapMutex.Lock()
+	defer buildMapMutex.Unlock()
+	keys := []int{}
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Sort(sort.Reverse(sort.IntSlice(keys)))
+	slice := []*circleci.Build{}
+	for _, k := range keys {
+		slice = append(slice, m[k])
+	}
+	return slice
+}
+
 type Cache struct {
-	builds          []*circleci.Build
+	builds          buildMap
 	mostRecentBuild time.Time
 }
 
@@ -150,7 +169,7 @@ func (s *Server) Start() error {
 
 func (s *Server) refreshCache() error {
 	var (
-		allBuilds       []*circleci.Build
+		allBuilds       = make(buildMap, 0)
 		mostRecentBuild = s.cache.mostRecentBuild
 	)
 
@@ -166,7 +185,9 @@ func (s *Server) refreshCache() error {
 					mostRecentBuild = *build.StopTime
 				}
 			}
-			allBuilds = append(allBuilds, builds...)
+			for _, build := range builds {
+				allBuilds[build.BuildNum] = build
+			}
 			if len(builds) < 100 {
 				break
 			}
@@ -193,7 +214,7 @@ func (s *Server) refreshCache() error {
 				mostRecentBuild = *updateTime
 			}
 			if updateTime.After(previousMostRecentBuild) {
-				allBuilds = append([]*circleci.Build{build}, allBuilds...)
+				allBuilds[build.BuildNum] = build
 				hasChanged = true
 			}
 		}
@@ -202,8 +223,11 @@ func (s *Server) refreshCache() error {
 		}
 	}
 
-	// FIXME: lock
+	buildMapMutex.Lock()
+	defer buildMapMutex.Unlock()
 	s.cache.builds = allBuilds
 	s.cache.mostRecentBuild = mostRecentBuild
 	return nil
 }
+
+var buildMapMutex sync.Mutex
