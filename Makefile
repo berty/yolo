@@ -7,6 +7,10 @@ CIRCLE_TOKEN   ?= ***REMOVED***
 install:
 	GOPROXY=http://goproxy.berty.io:3000/ GO111MODULE=on go install -v ./cmd/...
 
+.PHONY: run
+run: install
+	berty-release -t $(CIRCLE_TOKEN) serve
+
 .PHONY: docker.build
 docker.build:
 	docker build -t "$(IMAGE)" .
