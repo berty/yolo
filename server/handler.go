@@ -223,6 +223,9 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 			}
 
 		}
+		if build.StopTime != nil {
+			prBranch = fmt.Sprintf("build/%d", build.BuildNum)
+		}
 		token := s.getHash(prBranch)
 		if subject == "" {
 			subject = "n/a"
@@ -303,6 +306,14 @@ func (s *Server) Itms(c echo.Context) error {
 	pull := c.Param("*")
 
 	var theBuild *circleci.Build
+	if strings.HasPrefix(pull, "build/") {
+		parts := strings.Split(pull, "/")
+		id, err := strconv.Atoi(parts[1])
+		if err != nil {
+			return err
+		}
+		theBuild = s.cache.builds[id]
+	}
 	/*
 		for _, build := range s.cache.builds.Sorted() {
 			if build.Branch == pull && build.StopTime != nil {
