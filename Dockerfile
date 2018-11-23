@@ -4,8 +4,8 @@ RUN apk add --no-cache make git gcc musl-dev g++
 WORKDIR /go/src/github.com/berty/staff/tools/release
 
 # install libs
-COPY go.* ./
-RUN GOPROXY=http://goproxy.berty.io:3000/ GO111MODULE=on go get .
+COPY go.mod go.sum ./
+RUN GOPROXY=http://goproxy.berty.io:3000/ GO111MODULE=on go mod download
 
 # build project
 COPY . .
