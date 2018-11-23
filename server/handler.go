@@ -241,7 +241,7 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 			branchKind = "master"
 		}
 		if build.StopTime == nil {
-			branchKind = "inprogress"
+			branchKind += " in-progress"
 		}
 
 		//diff := `<span class="btn">N/A</span>`
