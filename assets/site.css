@@ -1,22 +1,23 @@
-a,thead th{letter-spacing:1px}
+a,.date-line, thead th{letter-spacing:1px}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";font-weight:400;background-color:#2B2E4D}
 .container{display:block;padding:10px 15px}
-table{border-spacing:0 20px;width:100%;text-align:left;font-size:1.5rem;line-height:1.5;color:rgba(255,255,255,.6)}
-.td-diff,.td-diff a,.td-download{text-align:right}
-thead th{color:#CDCFED;text-transform:uppercase}
-td,th{padding:15px 0}
+.date-line{background:transparent; text-align: center; font-weight:500;}
 a{font-size:1.8rem;font-weight:500;color:#FFF}
 .btn{padding:15px 21px 15px 20px;border-radius:10px}
-.td-title{padding-left:25px;border-radius:10px 0 0 10px}
-.td-diff a{text-decoration:none}
-.td-download{width:70;border-radius:0 10px 10px 0;padding-left:20px;padding-right:25px}
+table{border-spacing:0 20px;width:100%;text-align:left;font-size:1.5rem;line-height:1.5;color:rgba(255,255,255,.6)}
+thead th{color:#CDCFED;text-transform:uppercase}
+td,th{padding:15px 0;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;}
 tbody tr{background-color:#76A8FF}
-.td-download .btn{background-color:#2D6FE2}
+.td-title{padding-left:25px;border-radius:10px 0 0 10px; min-width:200px;}
+.td-build {width: 100%;max-width: 0;}
+.td-diff a{text-decoration:none}
 .td-diff .btn{background-color:rgba(255,255,255,.4);color:#76A8FF}
+.td-diff,.td-diff a,.td-download{text-align:right}
+.td-download{width:70;border-radius:0 10px 10px 0;padding-left:20px;padding-right:25px}
+.td-download .btn{background-color:#2D6FE2}
 .tr-master{background-color:#35D1AF}
 .tr-master .td-download .btn{background-color:#18aa8b}
 .tr-master .td-diff .btn{color:#35D1AF}
 .tr-pull{background-color:#8878D7}
 .tr-pull .td-download .btn{background-color:#6350C8}
 .tr-pull .td-diff .btn{color:#8878D7}
-.date-line{background:transparent; text-align: center;}
