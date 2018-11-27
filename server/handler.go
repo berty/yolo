@@ -167,10 +167,8 @@ func (s *Server) ListReleaseIOSJson(c echo.Context) error {
 
 func (s *Server) ListReleaseIOS(c echo.Context) error {
 	html := `<html><head><link rel="stylesheet" href="/assets/site.css">` + faviconHTMLHeader + `</head><body><div class="container">`
-	//html += `<table><thead><th class="td-title">branch</th><th>build</th><th></th><th></th></thead><tbody>`
-	html += `<table><tbody>`
 
-	dlIcon := `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`
+	dlIcon := `<svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`
 
 	oncePerBranch := map[string]bool{}
 	previousDate := ""
@@ -198,7 +196,7 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 			currentDate += fmt.Sprintf(" (%dd ago)", -int(dayDiff))
 		}
 		if currentDate != previousDate {
-			html += fmt.Sprintf(`<tr class="date-line"><td colspan=4>%s</td></tr>`, currentDate)
+			html += fmt.Sprintf(`<div class="block date-line">%s</div>`, currentDate)
 		}
 
 		previousDate = currentDate
@@ -263,21 +261,20 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 			)
 		}
 		commitLink := fmt.Sprintf(`<a href="https://github.com/berty/berty/commit/%s">%s</a>`, build.VcsRevision, build.VcsRevision[:8])
-		branchLink := fmt.Sprintf(`<a href="%s">%s</a>`, branchURL, branchName)
+		branchLink := fmt.Sprintf(`<a class="a-branch"href="%s">%s</a>`, branchURL, branchName)
 		buildLink := fmt.Sprintf(`<a href="%s">%d</a>`, build.BuildURL, build.BuildNum)
 		age := durafmt.ParseShort(time.Since(*updateTime))
 
 		elems := []string{
-			fmt.Sprintf(`<td class="td-title">%s<br/>%s</td>`, branchLink, build.User.Login),
-			fmt.Sprintf(`<td class="td-build">%s %s<br />%s %s %s</td>`, commitLink, subject, buildLink, age, duration),
-			fmt.Sprintf(`<td class="td-diff">%s</td>`, diff),
-			fmt.Sprintf(`<td class="td-download"><a class="btn" href="itms-services://?action=download-manifest&url=https://%s/auth/itms/release/%s/%[3]s">%s</a></td>`, s.hostname, token, prBranch, dlIcon),
+			fmt.Sprintf(`<div class="b-head">%s&nbsp;&nbsp;%s</div>`, branchLink, build.User.Login),
+			fmt.Sprintf(`<div class="b-body"><div class="b-left"><div class="b-build">%s&nbsp;&nbsp;%s<br />%s&nbsp;&nbsp;%s&nbsp;&nbsp;%s</div></div>`, commitLink, subject, buildLink, age, duration),
+			fmt.Sprintf(`<div class="b-right"><div class="b-diff">%s</div>`, diff),
+			fmt.Sprintf(`<div class="b-download"><a class="btn" href="itms-services://?action=download-manifest&url=https://%s/auth/itms/release/%s/%[3]s">%s</a></div></div></div>`, s.hostname, token, prBranch, dlIcon),
 			// FIXME: create a link /auth/itms/release/TOKEN/ID instead of /auth/itms/release/TOKEN/BRANCH (this way we can handle multiple artifacts per branch)
 		}
 
-		html += fmt.Sprintf(`<tr class="tr-%s">%s</tr>`, branchKind, strings.Join(elems, " "))
+		html += fmt.Sprintf(`<div class="block b-%s">%s</div>`, branchKind, strings.Join(elems, " "))
 	}
-	html += `</tbody></table>`
 	html += `</div></body></html>`
 	return c.HTML(http.StatusOK, html)
 }
