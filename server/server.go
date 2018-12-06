@@ -18,6 +18,9 @@ import (
 	"github.com/labstack/echo/middleware"
 )
 
+var reAndroidAgent = regexp.MustCompile("(?i)android")
+var reIOSAgent = regexp.MustCompile("(?i)iPad|iPhone|iPod")
+
 type httperror struct {
 	message string `json:message`
 }
@@ -100,23 +103,33 @@ func NewServer(cfg *ServerConfig) *Server {
 
 	e.File("/favicon.ico", "assets/favicon.ico")
 	e.Static("/assets", "assets")
+
 	e.GET("/release/ios/*", s.ReleaseIOS)
 	e.GET("/release/ios", s.ListReleaseIOS)
+	e.GET("/release/android", s.ListReleaseAndroid)
 	e.GET("/", func(c echo.Context) error {
-		// FIXME: conditional depending on the user agent (android || ios)
+		header := c.Request().Header
+		if agent := header.Get("User-Agent"); agent != "" {
+			fmt.Println(agent)
+			if reAndroidAgent.MatchString(agent) {
+				return c.Redirect(http.StatusTemporaryRedirect, "/release/android")
+			}
+		}
+
 		return c.Redirect(http.StatusTemporaryRedirect, "/release/ios")
 	})
 	e.GET("/release/ios.json", s.ListReleaseIOSJson)
 
 	auth := e.Group("/auth")
 	if cfg.Password != "" {
-		excludeToken := regexp.MustCompile("^/auth/ipa/build/.+$|^/auth/itms/release/.+$")
+		excludeToken := regexp.MustCompile("^/auth/ipa/build/.+$|^/auth/apk/build/.+$|^/auth/itms/release/.+$")
 		auth.Use((s.basicAuth(cfg.Username, cfg.Password, excludeToken)))
 	}
 	auth.GET("/build/:build_id", s.Build)
 	auth.GET("/builds/*", s.Builds)
 	auth.GET("/artifacts/:build_id", s.Artifacts)
 	auth.GET("/ipa/build/:token/*", s.GetIPA)
+	auth.GET("/apk/build/:token/*", s.GetAPK)
 	auth.GET("/itms/release/:token/*", s.Itms)
 
 	return s

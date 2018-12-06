@@ -17,12 +17,14 @@ import (
 )
 
 const (
-	BUNDLE_ID = "chat.berty.ios"
-	APP_NAME  = "berty"
-	JOB_IOS   = "client.rn.ios"
+	BUNDLE_ID   = "chat.berty.ios"
+	APP_NAME    = "berty"
+	IOS_JOB     = "client.rn.ios"
+	ANDROID_JOB = "client.rn.android"
 )
 
 var reIPA = regexp.MustCompile("/([^/]+).ipa$")
+var reAPK = regexp.MustCompile("/([^/]+).apk$")
 var reVersion = regexp.MustCompile("/version$")
 
 func (s *Server) Build(c echo.Context) error {
@@ -106,6 +108,30 @@ func (s *Server) GetIPA(c echo.Context) error {
 	return echo.NewHTTPError(http.StatusInternalServerError, "IPA not found")
 }
 
+func (s *Server) GetAPK(c echo.Context) error {
+	id := c.Param("*")
+	arts, err := s.client.GetArtifacts(id, true)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	for _, art := range arts {
+		if !reAPK.MatchString(art.PrettyPath) {
+			continue
+		}
+
+		// Download client
+		rc, err := s.client.GetArtifact(art)
+		if err != nil {
+			return err
+		}
+
+		return c.Stream(http.StatusOK, "application/vnd.android.package-archive", rc)
+	}
+
+	return echo.NewHTTPError(http.StatusInternalServerError, "APK not found")
+}
+
 var masterMerge = regexp.MustCompile(`^Merge pull request #([0-9]+) from (.*)$`)
 
 func (s *Server) ListReleaseIOSJson(c echo.Context) error {
@@ -141,7 +167,7 @@ func (s *Server) ListReleaseIOSJson(c echo.Context) error {
 		}
 	}
 	for _, build := range s.cache.builds.Sorted() {
-		if build.BuildParameters["CIRCLE_JOB"] != "client.rn.ios" {
+		if build.BuildParameters["CIRCLE_JOB"] != IOS_JOB {
 			continue
 		}
 		if _, found := oncePerBranch[build.Branch]; found {
@@ -165,7 +191,15 @@ func (s *Server) ListReleaseIOSJson(c echo.Context) error {
 	return c.JSON(http.StatusOK, ret)
 }
 
+func (s *Server) ListReleaseAndroid(c echo.Context) error {
+	return s.ListRelease(c, ANDROID_JOB)
+}
+
 func (s *Server) ListReleaseIOS(c echo.Context) error {
+	return s.ListRelease(c, IOS_JOB)
+}
+
+func (s *Server) ListRelease(c echo.Context, job string) error {
 	html := `<html><head><link rel="stylesheet" href="/assets/site.css">` + faviconHTMLHeader + `</head><body><div class="container">`
 
 	dlIcon := `<svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`
@@ -174,7 +208,7 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 	previousDate := ""
 	now := time.Now().Truncate(time.Hour * 24)
 	for _, build := range s.cache.builds.Sorted() {
-		if build.BuildParameters["CIRCLE_JOB"] != "client.rn.ios" {
+		if job != build.BuildParameters["CIRCLE_JOB"] {
 			continue
 		}
 		if _, found := oncePerBranch[build.Branch]; found && build.Branch != "master" {
@@ -189,7 +223,13 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 			updateTime = build.StopTime
 		}
 
-		currentDate := updateTime.Format("2006/01/02")
+		var currentDate string
+		if updateTime != nil {
+			currentDate = updateTime.Format("2006/01/02")
+		} else {
+			currentDate = "n/a"
+		}
+
 		stopDay := updateTime.Truncate(time.Hour * 24)
 		dayDiff := math.Ceil(stopDay.Sub(now).Hours() / 24)
 		if dayDiff != 0 {
@@ -224,7 +264,7 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 		if build.StopTime != nil {
 			prBranch = fmt.Sprintf("build/%d", build.BuildNum)
 		}
-		token := s.getHash(prBranch)
+
 		if subject == "" {
 			subject = "n/a"
 		}
@@ -265,11 +305,24 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 		buildLink := fmt.Sprintf(`<a href="%s">%d</a>`, build.BuildURL, build.BuildNum)
 		age := durafmt.ParseShort(time.Since(*updateTime))
 
+		var href string
+		switch job {
+		case IOS_JOB:
+			iosToken := s.getHash(prBranch)
+			href = fmt.Sprintf(`itms-services://?action=download-manifest&url=https://%s/auth/itms/release/%s/%s`, s.hostname, iosToken, prBranch)
+		case ANDROID_JOB:
+			id := strconv.Itoa(build.BuildNum)
+			androidToken := s.getHash(id)
+			href = fmt.Sprintf(`https://%s/auth/apk/build/%s/%s`, s.hostname, androidToken, id)
+		default:
+			return echo.NewHTTPError(http.StatusInternalServerError, "unknow job")
+		}
+
 		elems := []string{
 			fmt.Sprintf(`<div class="b-head">%s&nbsp;&nbsp;%s</div>`, branchLink, build.User.Login),
 			fmt.Sprintf(`<div class="b-body"><div class="b-left"><div class="b-build">%s&nbsp;&nbsp;%s<br />%s&nbsp;&nbsp;%s&nbsp;&nbsp;%s</div></div>`, commitLink, subject, buildLink, age, duration),
 			fmt.Sprintf(`<div class="b-right"><div class="b-diff">%s</div>`, diff),
-			fmt.Sprintf(`<div class="b-download"><a class="btn" href="itms-services://?action=download-manifest&url=https://%s/auth/itms/release/%s/%[3]s">%s</a></div></div></div>`, s.hostname, token, prBranch, dlIcon),
+			fmt.Sprintf(`<div class="b-download"><a class="btn" href="%s">%s</a></div></div></div>`, href, dlIcon),
 			// FIXME: create a link /auth/itms/release/TOKEN/ID instead of /auth/itms/release/TOKEN/BRANCH (this way we can handle multiple artifacts per branch)
 		}
 
@@ -281,7 +334,7 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 
 func (s *Server) ReleaseIOS(c echo.Context) error {
 	pull := c.Param("*")
-	builds, err := s.client.Builds(pull, JOB_IOS, 100, 0)
+	builds, err := s.client.Builds(pull, IOS_JOB, 100, 0)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -320,7 +373,7 @@ func (s *Server) Itms(c echo.Context) error {
 		}
 	*/
 	if theBuild == nil {
-		builds, err := s.client.Builds(pull, JOB_IOS, 100, 0)
+		builds, err := s.client.Builds(pull, IOS_JOB, 100, 0)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
