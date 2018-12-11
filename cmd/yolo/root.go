@@ -20,7 +20,7 @@ var cfg config
 
 // Root
 var rootCmd = &cobra.Command{
-	Use:   "berty-release",
+	Use:   "yolo",
 	Short: "Manage berty build",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if cfg.token != "" {

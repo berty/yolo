@@ -15,7 +15,7 @@ RUN make install
 FROM alpine
 WORKDIR /tmp
 RUN apk add --no-cache ca-certificates
-COPY --from=builder /go/bin/berty-release /bin/
+COPY --from=builder /go/bin/yolo /bin/
 COPY --from=builder /go/src/github.com/berty/staff/tools/release/assets /tmp/assets
 EXPOSE $PORT
-ENTRYPOINT ["berty-release"]
+ENTRYPOINT ["yolo"]

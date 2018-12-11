@@ -9,7 +9,7 @@ install:
 
 .PHONY: run
 run: install
-	berty-release -t $(CIRCLE_TOKEN) serve
+	yolo -t $(CIRCLE_TOKEN) serve
 
 .PHONY: docker.build
 docker.build:
