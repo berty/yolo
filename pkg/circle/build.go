@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"strconv"
+	"strings"
 
 	circleci "github.com/jszwedko/go-circleci"
 )
@@ -20,7 +21,7 @@ func (c *Client) Builds(pull string, job string, limit, offset int) ([]*circleci
 	var jbuild []*circleci.Build
 	for _, b := range bs {
 		if j, ok := b.BuildParameters["CIRCLE_JOB"]; ok {
-			if j == job {
+			if strings.HasPrefix(j, job) {
 				jbuild = append(jbuild, b)
 			}
 

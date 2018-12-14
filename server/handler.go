@@ -17,10 +17,11 @@ import (
 )
 
 const (
-	BUNDLE_ID   = "chat.berty.ios"
-	APP_NAME    = "berty"
-	IOS_JOB     = "client.rn.ios"
-	ANDROID_JOB = "client.rn.android"
+	BUNDLE_ID     = "chat.berty.ios"
+	APP_NAME      = "berty"
+	IOS_JOB       = "client.rn.ios"
+	IOS_HOUSE_JOB = "client.rn.ios-beta"
+	ANDROID_JOB   = "client.rn.android"
 )
 
 var reIPA = regexp.MustCompile("/([^/]+).ipa$")
@@ -199,6 +200,10 @@ func (s *Server) ListReleaseIOS(c echo.Context) error {
 	return s.ListRelease(c, IOS_JOB)
 }
 
+func (s *Server) ListReleaseIOSBeta(c echo.Context) error {
+	return s.ListRelease(c, IOS_HOUSE_JOB)
+}
+
 func (s *Server) ListRelease(c echo.Context, job string) error {
 	html := `<html><head><link rel="stylesheet" href="/assets/site.css">` + faviconHTMLHeader + `</head><body><div class="container">`
 
@@ -307,6 +312,9 @@ func (s *Server) ListRelease(c echo.Context, job string) error {
 
 		var href string
 		switch job {
+		case IOS_HOUSE_JOB:
+			iosToken := s.getHash(prBranch)
+			href = fmt.Sprintf(`itms-services://?action=download-manifest&url=https://%s/auth/itms/release/%s/%s`, s.hostname, iosToken, prBranch)
 		case IOS_JOB:
 			iosToken := s.getHash(prBranch)
 			href = fmt.Sprintf(`itms-services://?action=download-manifest&url=https://%s/auth/itms/release/%s/%s`, s.hostname, iosToken, prBranch)

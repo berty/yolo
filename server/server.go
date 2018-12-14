@@ -106,6 +106,7 @@ func NewServer(cfg *ServerConfig) *Server {
 
 	e.GET("/release/ios/*", s.ReleaseIOS)
 	e.GET("/release/ios", s.ListReleaseIOS)
+	e.GET("/release/beta/ios", s.ListReleaseIOSBeta)
 	e.GET("/release/android", s.ListReleaseAndroid)
 	e.GET("/", func(c echo.Context) error {
 		header := c.Request().Header
