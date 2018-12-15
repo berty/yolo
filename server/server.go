@@ -117,7 +117,7 @@ func NewServer(cfg *ServerConfig) *Server {
 			}
 		}
 
-		return c.Redirect(http.StatusTemporaryRedirect, "/release/ios")
+		return c.Redirect(http.StatusTemporaryRedirect, "/release/beta/ios")
 	})
 	e.GET("/release/ios.json", s.ListReleaseIOSJson)
 
