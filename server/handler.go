@@ -167,7 +167,8 @@ func (s *Server) ListReleaseJson(c echo.Context, job string) error {
 		href := ""
 		switch job {
 		case IOS_HOUSE_JOB, IOS_JOB:
-			href = fmt.Sprintf(`itms-services://?action=download-manifest&url=https://%s/auth/itms/release/%s/%s`, s.hostname, s.getHash(build.Branch), build.Branch)
+			prBranch := fmt.Sprintf("build/%d", build.BuildNum)
+			href = fmt.Sprintf(`itms-services://?action=download-manifest&url=https://%s/auth/itms/release/%s/%s`, s.hostname, s.getHash(prBranch), prBranch)
 		case ANDROID_JOB:
 			id := strconv.Itoa(build.BuildNum)
 			androidToken := s.getHash(id)
