@@ -104,10 +104,17 @@ func NewServer(cfg *ServerConfig) *Server {
 	e.File("/favicon.ico", "assets/favicon.ico")
 	e.Static("/assets", "assets")
 
+	basicAuth := middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
+		if cfg.Password == "" {
+			return true, nil
+		}
+		return cfg.Username == username && cfg.Password == password, nil
+	})
+
 	e.GET("/release/ios/*", s.ReleaseIOS)
 	e.GET("/release/ios", s.ListReleaseIOS)
-	e.GET("/release/beta/ios", s.ListReleaseIOSBeta)
-	e.GET("/release/android", s.ListReleaseAndroid)
+	e.GET("/release/beta/ios", s.ListReleaseIOSBeta, basicAuth)
+	e.GET("/release/android", s.ListReleaseAndroid, basicAuth)
 	e.GET("/", func(c echo.Context) error {
 		header := c.Request().Header
 		if agent := header.Get("User-Agent"); agent != "" {
