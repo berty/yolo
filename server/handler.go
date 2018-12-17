@@ -136,6 +136,18 @@ func (s *Server) GetAPK(c echo.Context) error {
 var masterMerge = regexp.MustCompile(`^Merge pull request #([0-9]+) from (.*)$`)
 
 func (s *Server) ListReleaseIOSJson(c echo.Context) error {
+	return s.ListReleaseJson(c, IOS_JOB)
+}
+
+func (s *Server) ListReleaseIOSBetaJson(c echo.Context) error {
+	return s.ListReleaseJson(c, IOS_HOUSE_JOB)
+}
+
+func (s *Server) ListReleaseAndroidJson(c echo.Context) error {
+	return s.ListReleaseJson(c, ANDROID_JOB)
+}
+
+func (s *Server) ListReleaseJson(c echo.Context, job string) error {
 	type release struct {
 		Branch      string    `json:"branch"`
 		StopTime    time.Time `json:"stop-time"`
@@ -152,10 +164,17 @@ func (s *Server) ListReleaseIOSJson(c echo.Context) error {
 	ret.LatestPRs = make([]*release, 0)
 	oncePerBranch := map[string]bool{}
 	releaseFromBuild := func(build *circleci.Build) *release {
-		manifestURL := fmt.Sprintf(
-			`itms-services://?action=download-manifest&url=https://%s/auth/itms/release/%s/%[3]s`,
-			s.hostname, s.getHash(build.Branch), build.Branch,
-		)
+		href := ""
+		switch job {
+		case IOS_HOUSE_JOB, IOS_JOB:
+			href = fmt.Sprintf(`itms-services://?action=download-manifest&url=https://%s/auth/itms/release/%s/%s`, s.hostname, s.getHash(build.Branch), build.Branch)
+		case ANDROID_JOB:
+			id := strconv.Itoa(build.BuildNum)
+			androidToken := s.getHash(id)
+			href = fmt.Sprintf(`https://%s/auth/apk/build/%s/%s`, s.hostname, androidToken, id)
+		default:
+			return nil
+		}
 
 		return &release{
 			Branch:      build.Branch,
@@ -164,11 +183,11 @@ func (s *Server) ListReleaseIOSJson(c echo.Context) error {
 			GitSha:      build.VcsRevision,
 			BuildURL:    build.BuildURL,
 			Body:        build.Body,
-			ManifestURL: manifestURL,
+			ManifestURL: href,
 		}
 	}
 	for _, build := range s.cache.builds.Sorted() {
-		if build.BuildParameters["CIRCLE_JOB"] != IOS_JOB {
+		if build.BuildParameters["CIRCLE_JOB"] != job {
 			continue
 		}
 		if _, found := oncePerBranch[build.Branch]; found {
@@ -312,10 +331,7 @@ func (s *Server) ListRelease(c echo.Context, job string) error {
 
 		var href string
 		switch job {
-		case IOS_HOUSE_JOB:
-			iosToken := s.getHash(prBranch)
-			href = fmt.Sprintf(`itms-services://?action=download-manifest&url=https://%s/auth/itms/release/%s/%s`, s.hostname, iosToken, prBranch)
-		case IOS_JOB:
+		case IOS_HOUSE_JOB, IOS_JOB:
 			iosToken := s.getHash(prBranch)
 			href = fmt.Sprintf(`itms-services://?action=download-manifest&url=https://%s/auth/itms/release/%s/%s`, s.hostname, iosToken, prBranch)
 		case ANDROID_JOB:

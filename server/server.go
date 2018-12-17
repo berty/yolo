@@ -120,6 +120,8 @@ func NewServer(cfg *ServerConfig) *Server {
 		return c.Redirect(http.StatusTemporaryRedirect, "/release/beta/ios")
 	})
 	e.GET("/release/ios.json", s.ListReleaseIOSJson)
+	e.GET("/release/ios-beta.json", s.ListReleaseIOSBetaJson)
+	e.GET("/release/android.json", s.ListReleaseAndroidJson)
 
 	auth := e.Group("/auth")
 	if cfg.Password != "" {
