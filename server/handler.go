@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"math/rand"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -19,8 +20,8 @@ import (
 const (
 	BUNDLE_ID       = "chat.berty.ios"
 	BUNDLE_HOUSE_ID = "chat.berty.house.ios"
-	APP_NAME        = "Berty"
-	APP_HOUSE_NAME  = "Berty"
+	APP_NAME        = "Berty Staff"
+	APP_HOUSE_NAME  = "Berty Yolo"
 	IOS_JOB         = "client.rn.ios"
 	IOS_HOUSE_JOB   = "client.rn.ios-beta"
 	ANDROID_JOB     = "client.rn.android"
@@ -428,15 +429,26 @@ func (s *Server) Itms(c echo.Context) error {
 	token := s.getHash(id)
 	url := fmt.Sprintf("https://%s/auth/ipa/build/%s/%s", s.hostname, token, id)
 
-	var plist []byte
+	previewTexts := []string{
+		"😱",
+		"🤡",
+		"🧚‍♀️",
+		"🥰",
+		"🙌",
+		"XOR",
+		"yolo",
+	}
+	previewText := previewTexts[rand.Intn(len(previewTexts))]
+	var bundleID string
 	switch theBuild.BuildParameters["CIRCLE_JOB"] {
 	case "client.rn.ios":
-		plist, err = NewPlistRelease(BUNDLE_ID, version, APP_NAME, url)
+		bundleID = BUNDLE_ID
 	case "client.rn.ios-beta":
-		plist, err = NewPlistRelease(BUNDLE_HOUSE_ID, version, APP_HOUSE_NAME, url)
+		bundleID = BUNDLE_HOUSE_ID
 	default:
 		return echo.NewHTTPError(http.StatusInternalServerError, "invalid job type")
 	}
+	plist, err := NewPlistRelease(bundleID, version, previewText, url)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
