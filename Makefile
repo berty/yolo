@@ -3,13 +3,13 @@ HOST           ?= root@167.99.223.55
 HOSTNAME       ?= yolo.berty.io
 CIRCLE_TOKEN   ?= ***REMOVED***
 
-.PHONY: install
-install:
-	GOPROXY=http://goproxy.berty.io:3000/ GO111MODULE=on go install -v ./cmd/...
-
 .PHONY: run
 run: install
 	yolo -t $(CIRCLE_TOKEN) serve
+
+.PHONY: install
+install:
+	GOPROXY=http://goproxy.berty.io:3000/ GO111MODULE=on go install -v ./cmd/...
 
 .PHONY: docker.build
 docker.build:
