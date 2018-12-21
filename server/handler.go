@@ -17,11 +17,13 @@ import (
 )
 
 const (
-	BUNDLE_ID     = "chat.berty.ios"
-	APP_NAME      = "berty"
-	IOS_JOB       = "client.rn.ios"
-	IOS_HOUSE_JOB = "client.rn.ios-beta"
-	ANDROID_JOB   = "client.rn.android"
+	BUNDLE_ID       = "chat.berty.ios"
+	BUNDLE_HOUSE_ID = "chat.berty.house.ios"
+	APP_NAME        = "Berty"
+	APP_HOUSE_NAME  = "Berty"
+	IOS_JOB         = "client.rn.ios"
+	IOS_HOUSE_JOB   = "client.rn.ios-beta"
+	ANDROID_JOB     = "client.rn.android"
 )
 
 var reIPA = regexp.MustCompile("/([^/]+).ipa$")
@@ -397,6 +399,7 @@ func (s *Server) Itms(c echo.Context) error {
 			}
 		}
 	*/
+
 	if theBuild == nil {
 		builds, err := s.client.Builds(pull, IOS_JOB, 100, 0)
 		if err != nil {
@@ -415,7 +418,7 @@ func (s *Server) Itms(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	out, _ := json.Marshal(arts)
-	log.Printf("build=%d artifacts=%s", theBuild.BuildNum, out)
+	log.Printf("build=%d artifacts=%s", theBuild.BuildNum, string(out))
 
 	version, err := s.getVersion(arts, "ios")
 	if err != nil {
@@ -425,7 +428,15 @@ func (s *Server) Itms(c echo.Context) error {
 	token := s.getHash(id)
 	url := fmt.Sprintf("https://%s/auth/ipa/build/%s/%s", s.hostname, token, id)
 
-	plist, err := NewPlistRelease(BUNDLE_ID, version, APP_NAME, url)
+	var plist []byte
+	switch theBuild.BuildParameters["CIRCLE_JOB"] {
+	case "client.rn.ios":
+		plist, err = NewPlistRelease(BUNDLE_ID, version, APP_NAME, url)
+	case "client.rn.ios-beta":
+		plist, err = NewPlistRelease(BUNDLE_HOUSE_ID, version, APP_HOUSE_NAME, url)
+	default:
+		return echo.NewHTTPError(http.StatusInternalServerError, "invalid job type")
+	}
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
