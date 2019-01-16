@@ -24,5 +24,11 @@ a{font-size:2.1rem;line-height:1.5;font-weight:500;color:#FFF; text-decoration:n
 .b-pull .b-head {background-color:#7f70ce;}
 .b-pull .b-body {background-color:#8878D7;}
 .b-pull .b-download .btn{background-color:#6350C8}
+.b-pull .b-download {position:relative;}
+.b-pull .b-download:after {content:url("data:image/svg+xml,%3Csvg width='54' height='54' viewBox='0 0 30 30' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'%3E%3Cg id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' stroke-linejoin='round'%3E%3Cg id='check-circle' transform='translate(14.500000, 15.000000) scale(-1, 1) translate(-14.500000, -15.000000) translate(1.000000, 2.000000)' stroke='%23FFFFFF' stroke-linecap='round' stroke-width='2'%3E%3Cpath d='M23.1689403,12.0056849 L23.1689403,12.9256849 C23.1664081,17.3543707 20.2512342,21.2538978 16.0042927,22.5095858 C11.7573511,23.7652738 7.19033381,22.077997 4.77989535,18.3627512 C2.36945689,14.6475054 2.68980371,9.78932383 5.56721446,6.422757 C8.44462521,3.05619016 13.1936529,1.98321014 17.2389403,3.78568485' id='Path' transform='translate(13.168912, 12.920111) rotate(-21.000000) translate(-13.168912, -12.920111) '%3E%3C/path%3E%3Cpath d='M18.1793173,14.5831795 L16.0393413,12.4432035 L18.1793173,14.5831795 Z' id='Path' transform='translate(17.109329, 13.513192) rotate(-45.000000) translate(-17.109329, -13.513192) '%3E%3C/path%3E%3C/g%3E%3Cpolygon id='1' stroke='%23FFFFFF' fill='%23FFFFFF' points='19.4619141 19 14.7519531 19 14.7519531 18.0922852 16.6499023 18.0922852 16.6499023 11.1352539 14.8598633 12.0302734 14.8598633 10.9892578 16.7958984 9.99267578 17.690918 9.99267578 17.690918 18.0922852 19.4619141 18.0922852'%3E%3C/polygon%3E%3C/g%3E%3C/svg%3E"); width:54px; height:54px; position:absolute; right:-14px; bottom:-14px; border-radius:30px; background-color:#6350C8; border:2px solid #6350C8;}
 .b-pull .b-diff .btn{color:#8878D7}
 .b-pull.in-progress .b-body{background: repeating-linear-gradient(-55deg,#7f70ce,#7f70ce 15px,#8878D7 15px, #8878D7 30px);}
+.b-pull.error, .b-pull.error .b-download .btn {color:#fdd4dc;}
+.b-pull.error .b-body, .b-pull.error .b-download .btn{background-color: #EE5B77;}
+.b-pull.error .b-head{background-color: #E94E6B;}
+.b-pull.error .b-info {padding:10px; color: #FFF;

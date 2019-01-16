@@ -232,6 +232,8 @@ func (s *Server) ListRelease(c echo.Context, job string) error {
 
 	dlIcon := `<svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`
 
+	errorIcon := `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-triangle"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12" y2="17"></line></svg>`
+
 	oncePerBranch := map[string]bool{}
 	previousDate := ""
 	now := time.Now().Truncate(time.Hour * 24)
@@ -345,15 +347,19 @@ func (s *Server) ListRelease(c echo.Context, job string) error {
 		default:
 			return echo.NewHTTPError(http.StatusInternalServerError, "unknow job")
 		}
+		divRight := fmt.Sprintf(`<div class="b-download"><a class="btn" href="%s">%s</a></div>`, href, dlIcon)
+
+		if build.Failed != nil && *build.Failed == true {
+			branchKind += " error"
+			divRight = fmt.Sprintf(`<div class="b-info">%s</div>`, errorIcon)
+		}
 
 		elems := []string{
 			fmt.Sprintf(`<div class="b-head">%s&nbsp;&nbsp;%s</div>`, branchLink, build.User.Login),
-			fmt.Sprintf(`<div class="b-body"><div class="b-left"><div class="b-build">%s&nbsp;&nbsp;%s<br />%s&nbsp;&nbsp;%s&nbsp;&nbsp;%s</div></div>`, commitLink, subject, buildLink, age, duration),
-			fmt.Sprintf(`<div class="b-right"><div class="b-diff">%s</div>`, diff),
-			fmt.Sprintf(`<div class="b-download"><a class="btn" href="%s">%s</a></div></div></div>`, href, dlIcon),
+			fmt.Sprintf(`<div class="b-body"><div class="b-left"><div class="b-build">%s&nbsp;&nbsp;%s<br />%s&nbsp;&nbsp;%s&nbsp;ago&nbsp;&nbsp;%s</div></div>`, commitLink, subject, buildLink, age, duration),
+			fmt.Sprintf(`<div class="b-right"><div class="b-diff">%s</div>%s</div></div>`, diff, divRight),
 			// FIXME: create a link /auth/itms/release/TOKEN/ID instead of /auth/itms/release/TOKEN/BRANCH (this way we can handle multiple artifacts per branch)
 		}
-
 		html += fmt.Sprintf(`<div class="block b-%s">%s</div>`, branchKind, strings.Join(elems, " "))
 	}
 	html += `</div></body></html>`
