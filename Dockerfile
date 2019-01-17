@@ -5,7 +5,7 @@ WORKDIR /go/src/github.com/berty/staff/tools/release
 
 # install libs
 COPY go.mod go.sum ./
-RUN GOPROXY=http://goproxy.berty.io:3000/ GO111MODULE=on go mod download
+RUN GO111MODULE=on go mod download
 
 # build project
 COPY . .

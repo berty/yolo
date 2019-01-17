@@ -2,6 +2,8 @@ IMAGE          ?= bertychat/yolo
 HOST           ?= root@167.99.223.55
 HOSTNAME       ?= yolo.berty.io
 CIRCLE_TOKEN   ?= ***REMOVED***
+PASSWORD       ?= 'xor+=cool'
+
 
 .PHONY: run
 run: install
@@ -29,7 +31,7 @@ deploy:
 		    --name yolo -d -p 80:3670 \
 		    bertychat/yolo \
 		      -t $(CIRCLE_TOKEN) serve \
-		      --hostname $(HOSTNAME) -p 'xor+=cool'"
+		      --hostname $(HOSTNAME) -p $(PASSWORD)"
 
 .PHONY: prod-logs
 prod-logs:
