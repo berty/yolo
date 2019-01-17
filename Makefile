@@ -11,7 +11,7 @@ run: install
 
 .PHONY: install
 install:
-	GOPROXY=http://goproxy.berty.io:3000/ GO111MODULE=on go install -v ./cmd/...
+	GO111MODULE=on go install -v ./cmd/...
 
 .PHONY: docker.build
 docker.build:

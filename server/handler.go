@@ -449,7 +449,7 @@ func (s *Server) Itms(c echo.Context) error {
 	switch theBuild.BuildParameters["CIRCLE_JOB"] {
 	case "client.rn.ios":
 		bundleID = BUNDLE_ID
-	case "client.rn.ios-beta":
+	case IOS_HOUSE_JOB:
 		bundleID = BUNDLE_HOUSE_ID
 	default:
 		return echo.NewHTTPError(http.StatusInternalServerError, "invalid job type")

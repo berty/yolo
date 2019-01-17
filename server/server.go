@@ -111,9 +111,9 @@ func NewServer(cfg *ServerConfig) *Server {
 		return cfg.Username == username && cfg.Password == password, nil
 	})
 
-	e.GET("/release/ios/*", s.ReleaseIOS)
-	e.GET("/release/ios", s.ListReleaseIOS)
-	e.GET("/release/beta/ios", s.ListReleaseIOSBeta, basicAuth)
+	e.GET("/release/staff/ios/*", s.ReleaseIOS)
+	e.GET("/release/staff/ios", s.ListReleaseIOS)
+	e.GET("/release/ios", s.ListReleaseIOSBeta, basicAuth)
 	e.GET("/release/android", s.ListReleaseAndroid, basicAuth)
 	e.GET("/", func(c echo.Context) error {
 		header := c.Request().Header
@@ -124,10 +124,10 @@ func NewServer(cfg *ServerConfig) *Server {
 			}
 		}
 
-		return c.Redirect(http.StatusTemporaryRedirect, "/release/beta/ios")
+		return c.Redirect(http.StatusTemporaryRedirect, "/release/ios")
 	})
-	e.GET("/release/ios.json", s.ListReleaseIOSJson)
-	e.GET("/release/ios-beta.json", s.ListReleaseIOSBetaJson)
+	e.GET("/release/ios-staff.json", s.ListReleaseIOSJson)
+	e.GET("/release/ios.json", s.ListReleaseIOSBetaJson)
 	e.GET("/release/android.json", s.ListReleaseAndroidJson)
 
 	auth := e.Group("/auth")
