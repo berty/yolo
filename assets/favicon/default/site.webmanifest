@@ -1,6 +1,6 @@
 {
-    "name": "",
-    "short_name": "",
+    "name": "Builds",
+    "short_name": "Builds",
     "icons": [
         {
             "src": "/assets/android-chrome-192x192.png",
@@ -13,7 +13,7 @@
             "type": "image/png"
         }
     ],
-    "theme_color": "#ffffff",
-    "background_color": "#ffffff",
+    "theme_color": "#262844",
+    "background_color": "#262844",
     "display": "standalone"
 }
