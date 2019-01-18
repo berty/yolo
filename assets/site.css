@@ -32,4 +32,4 @@ a{font-size:2.1rem;line-height:1.5;font-weight:500;color:#FFF; text-decoration:n
 .error .b-body, .error .b-download .btn{background-color: #EE5B77;}
 .error .b-head{background-color: #E94E6B;}
 .error .b-diff .btn {color:#EE5B77;}
-.error .b-info {padding:10px; color: #FFF;}
+.b-info {padding:10px; color: #FFF;}
