@@ -1,6 +1,6 @@
 .b-head a,.date-line{letter-spacing:1px}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";font-weight:400;background-color:#2B2E4D; font-size:1.8rem;}
-.container{display:block;padding:10px 15px}
+.page-container{display:block;padding:10px 15px}
 .block {display:block;width:100%;margin-bottom:25px;color:rgba(255,255,255,.6);font-size:1.8rem; line-height:1.5;}
 .date-line{background:transparent; text-align: center; font-weight:500;margin-top:50px;}
 a{font-size:2.1rem;line-height:1.5;font-weight:500;color:#FFF; text-decoration:none;}
@@ -33,3 +33,8 @@ a{font-size:2.1rem;line-height:1.5;font-weight:500;color:#FFF; text-decoration:n
 .error .b-head{background-color: #E94E6B;}
 .error .b-diff .btn {color:#EE5B77;}
 .b-info {padding:10px; color: #FFF;}
+.page-head {margin: -8px 15px 0 15px;padding: 30px 25px 30px 25px;border-radius: 0 0 25px 25px;display:block;background-color:#a7a8b336;color:#2B2E4D;height:72px;}
+.page-head .ph-icon {fill:#2B2E4D;height:65px;width:65px;}
+.page-head .ph-text {font-size:2.1rem;line-height:1.5;font-weight:500;padding:14px 0 0 20px;}
+.page-head .ph-text b {text-transform:uppercase;}
+.page-head div {display:inline-block; float:left;}
