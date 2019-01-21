@@ -235,7 +235,7 @@ func (s *Server) ListRelease(c echo.Context, job string) error {
 		case IOS_HOUSE_JOB:
 			pageKind = "yolo"
 	}
-	faviconHTMLHeader := `<link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/` + pageKind + `/apple-touch-icon.png + "><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/` + pageKind + `/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/` + pageKind + `/favicon-16x16.png"><link rel="manifest" href="/assets/favicon/` + pageKind + `/site.webmanifest"><link rel="mask-icon" href="/assets/favicon/` + pageKind + `/safari-pinned-tab.svg" color="#262844"><meta name="msapplication-TileColor" content="#262844"><meta name="theme-color" content="#262844">`
+	faviconHTMLHeader := `<link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/` + pageKind + `/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/` + pageKind + `/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/` + pageKind + `/favicon-16x16.png"><link rel="manifest" href="/assets/favicon/` + pageKind + `/site.webmanifest"><link rel="mask-icon" href="/assets/favicon/` + pageKind + `/safari-pinned-tab.svg" color="#262844"><meta name="msapplication-TileColor" content="#262844"><meta name="theme-color" content="#262844">`
 
 	html := `<html><head><title>` + pageKind + ` - Berty</title><meta http-equiv="refresh" content="30"><link rel="stylesheet" href="/assets/site.css">` + faviconHTMLHeader + `</head><body><div class="container">`
 
