@@ -14,13 +14,13 @@ a{font-size:2.1rem;line-height:1.5;font-weight:500;color:#FFF; text-decoration:n
 .b-right {height:100px;display:flex;align-items: center;justify-content: flex-end;flex:1 0 auto;}
 .b-diff a{text-decoration:none}
 .b-diff .btn{background-color:rgba(255,255,255,.4);color:#76A8FF;margin-right:25px;}
-.b-master{color:#ABE9DB;}
+.b-master{color:#cffff4;}
 .b-master .b-head {background-color:#2cc5a4;}
 .b-master .b-body {background-color:#35D1AF;}
 .b-master .b-download .btn{background-color:#18aa8b}
 .b-master .b-diff .btn{color:#35D1AF}
 .b-master.in-progress .b-body{background: repeating-linear-gradient(-55deg,#2cc5a4,#2cc5a4 15px,#35D1AF 15px,#35D1AF 30px);}
-.b-pull{ color:#CBC4EC;}
+.b-pull{ color:#d9d2f9;}
 .b-pull .b-head {background-color:#7f70ce;}
 .b-pull .b-body {background-color:#8878D7;}
 .b-pull .b-download .btn{background-color:#6350C8}
