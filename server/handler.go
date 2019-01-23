@@ -375,8 +375,8 @@ func (s *Server) ListRelease(c echo.Context, job string) error {
 
 		elems := []string{
 			fmt.Sprintf(`<div class="b-head">%s&nbsp;&nbsp;%s</div>`, branchLink, build.User.Login),
-			fmt.Sprintf(`<div class="b-body"><div class="b-left"><div class="b-build">%s&nbsp;&nbsp;%s<br />%s&nbsp;&nbsp;%s&nbsp;ago&nbsp;&nbsp;%s</div></div>`, commitLink, subject, buildLink, age, duration),
-			fmt.Sprintf(`<div class="b-right"><div class="b-diff">%s</div>%s</div></div>`, diff, divRight),
+			fmt.Sprintf(`<div class="b-body"><div class="b-body-overlay"></div><div class="b-body-content"><div class="b-left"><div class="b-build">%s&nbsp;&nbsp;%s<br />%s&nbsp;&nbsp;%s&nbsp;ago&nbsp;&nbsp;%s</div></div>`, commitLink, subject, buildLink, age, duration),
+			fmt.Sprintf(`<div class="b-right"><div class="b-diff">%s</div>%s</div></div></div>`, diff, divRight),
 			// FIXME: create a link /auth/itms/release/TOKEN/ID instead of /auth/itms/release/TOKEN/BRANCH (this way we can handle multiple artifacts per branch)
 		}
 		html += fmt.Sprintf(`<div class="block b-%s">%s</div>`, branchKind, strings.Join(elems, " "))
