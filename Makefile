@@ -18,7 +18,6 @@ docker.build:
 	docker build -t "$(IMAGE)" .
 
 .PHONY: docker.push
-
 docker.push: docker.build
 	docker push "$(IMAGE)"
 
@@ -29,13 +28,13 @@ deploy:
 		&& docker run \
 		    --restart unless-stopped \
 		    --name yolo -d -p 80:3670 \
-		    bertychat/yolo \
+		    $(IMAGE) \
 		      -t $(CIRCLE_TOKEN) serve \
 		      --hostname $(HOSTNAME) -p $(PASSWORD)"
 
 .PHONY: prod-logs
 prod-logs:
-	ssh $(HOST) sh -xc '"docker logs -f `docker ps -lq`"'
+	ssh $(HOST) docker logs -f yolo
 
 .PHONY: release
 release: docker.build docker.push deploy
