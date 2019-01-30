@@ -94,19 +94,21 @@ func NewServer(cfg *ServerConfig) *Server {
 	}
 
 	e.File("/favicon.ico", "assets/favicon.ico")
-	e.Static("/assets", "assets")
+	e.Static("/public/assets", "assets")
 
-	basicAuth := middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
-		if cfg.Password == "" {
-			return true, nil
-		}
-		return cfg.Username == username && cfg.Password == password, nil
-	})
+	redirectUrl := fmt.Sprintf("http://%s/oauth/callback", s.hostname)
+	o := NewOAuth(redirectUrl, e)
+
+	oauth := e.Group("/oauth")
+	oauth.GET("/callback", o.CallbackHandler("/"))
+	oauth.GET("/login", o.LoginHandler())
+
+	e.Use(o.Middleware("/oauth/login"))
 
 	e.GET("/release/staff/ios/*", s.ReleaseIOS)
 	e.GET("/release/staff/ios", s.ListReleaseIOS)
-	e.GET("/release/ios", s.ListReleaseIOSBeta, basicAuth)
-	e.GET("/release/android", s.ListReleaseAndroid, basicAuth)
+	e.GET("/release/ios", s.ListReleaseIOSBeta)
+	e.GET("/release/android", s.ListReleaseAndroid)
 	e.GET("/", func(c echo.Context) error {
 		header := c.Request().Header
 		if agent := header.Get("User-Agent"); agent != "" {
