@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/gob"
 	"encoding/json"
-	"fmt"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -160,7 +159,6 @@ func (o *OAuth) CallbackHandler(redirectUrl string) func(echo.Context) error {
 
 		defer resp.Body.Close()
 
-		fmt.Printf("\nbody: %+v\n", resp.Body)
 		var profile map[string]interface{}
 		if err = json.NewDecoder(resp.Body).Decode(&profile); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
