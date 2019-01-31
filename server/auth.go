@@ -5,8 +5,11 @@ import (
 	"encoding/base64"
 	"encoding/gob"
 	"encoding/json"
+	"fmt"
 	"math/rand"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
@@ -50,19 +53,30 @@ func NewOAuth(redirectUrl string, e *echo.Echo) *OAuth {
 	return &OAuth{conf, sf}
 }
 
-func (o *OAuth) Middleware(loginUrl string) func(next echo.HandlerFunc) echo.HandlerFunc {
+func (o *OAuth) ProtectMiddleware(failureRedirect string, fverify func(map[string]interface{}) bool) func(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			if c.Path() == loginUrl {
+			if strings.HasSuffix(c.Path(), ".json") {
 				return next(c)
 			}
 
-			_, err := session.Get("auth-session", c)
+			sess, err := session.Get("auth-session", c)
 			if err != nil {
-				return c.Redirect(http.StatusTemporaryRedirect, loginUrl)
+				return c.Redirect(http.StatusTemporaryRedirect, failureRedirect)
 			}
 
-			return next(c)
+			profile, ok := sess.Values["profile"]
+			if !ok {
+				return c.Redirect(http.StatusTemporaryRedirect, failureRedirect)
+			}
+
+			if mapProfile, ok := profile.(map[string]interface{}); ok {
+				if fverify(mapProfile) {
+					return next(c)
+				}
+			}
+
+			return echo.NewHTTPError(http.StatusUnauthorized)
 		}
 	}
 }
@@ -71,7 +85,7 @@ func (o *OAuth) LoginHandler() func(echo.Context) error {
 	return func(c echo.Context) error {
 		aud := "https://" + AuthDomain + "/userinfo"
 
-		sess, err := session.Get("session", c)
+		sess, err := session.Get("state", c)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -92,6 +106,34 @@ func (o *OAuth) LoginHandler() func(echo.Context) error {
 	}
 }
 
+func (o *OAuth) LogoutHandler(redirectUrl string) func(echo.Context) error {
+	return func(c echo.Context) error {
+		var logoutUrl *url.URL
+		logoutUrl, err := url.Parse("https://" + AuthDomain)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
+		cookie, err := c.Cookie("auth-session")
+		if err == nil {
+			cookie.Value = ""
+			cookie.MaxAge = -1 // erase the cookie
+			c.SetCookie(cookie)
+
+		} else {
+			c.Logger().Warn("tryin to logout with no cookie set")
+		}
+
+		logoutUrl.Path += "/v2/logout"
+		parameters := url.Values{}
+		parameters.Add("returnTo", redirectUrl)
+		parameters.Add("client_id", ClientID)
+		logoutUrl.RawQuery = parameters.Encode()
+
+		return c.Redirect(http.StatusTemporaryRedirect, logoutUrl.String())
+	}
+}
+
 func (o *OAuth) CallbackHandler(redirectUrl string) func(echo.Context) error {
 	return func(c echo.Context) error {
 		state := c.QueryParam("state")
@@ -101,7 +143,7 @@ func (o *OAuth) CallbackHandler(redirectUrl string) func(echo.Context) error {
 		}
 
 		if state != sess.Values["state"] {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, "invalid state")
 		}
 
 		code := c.QueryParam("code")
@@ -118,6 +160,7 @@ func (o *OAuth) CallbackHandler(redirectUrl string) func(echo.Context) error {
 
 		defer resp.Body.Close()
 
+		fmt.Printf("\nbody: %+v\n", resp.Body)
 		var profile map[string]interface{}
 		if err = json.NewDecoder(resp.Body).Decode(&profile); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -131,7 +174,7 @@ func (o *OAuth) CallbackHandler(redirectUrl string) func(echo.Context) error {
 		sessAuth.Values["id_token"] = token.Extra("id_token")
 		sessAuth.Values["access_token"] = token.AccessToken
 		sessAuth.Values["profile"] = profile
-		if err := sess.Save(c.Request(), c.Response()); err != nil {
+		if err := sessAuth.Save(c.Request(), c.Response()); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 

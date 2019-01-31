@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"regexp"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -66,6 +67,7 @@ type Server struct {
 	client   *circle.Client
 	addr     string
 	hostname string
+	hostUrl  string
 	salt     string
 	e        *echo.Echo
 	cache    Cache
@@ -82,6 +84,13 @@ func randStringRunes(n int) string {
 }
 
 func NewServer(cfg *ServerConfig) *Server {
+	var hostUrl string
+	if strings.HasPrefix(cfg.Hostname, "localhost") || strings.HasPrefix(cfg.Hostname, "127.0.0.1") {
+		hostUrl = fmt.Sprintf("http://%s", cfg.Hostname)
+	} else {
+		hostUrl = fmt.Sprintf("https://%s", cfg.Hostname)
+	}
+
 	randStr := randStringRunes(10)
 	e := echo.New()
 	e.Use(middleware.Logger())
@@ -89,26 +98,14 @@ func NewServer(cfg *ServerConfig) *Server {
 		client:   cfg.Client,
 		addr:     cfg.Addr,
 		hostname: cfg.Hostname,
+		hostUrl:  hostUrl,
 		e:        e,
 		salt:     randStr,
 	}
 
 	e.File("/favicon.ico", "assets/favicon.ico")
-	e.Static("/public/assets", "assets")
+	e.Static("/assets", "assets")
 
-	redirectUrl := fmt.Sprintf("http://%s/oauth/callback", s.hostname)
-	o := NewOAuth(redirectUrl, e)
-
-	oauth := e.Group("/oauth")
-	oauth.GET("/callback", o.CallbackHandler("/"))
-	oauth.GET("/login", o.LoginHandler())
-
-	e.Use(o.Middleware("/oauth/login"))
-
-	e.GET("/release/staff/ios/*", s.ReleaseIOS)
-	e.GET("/release/staff/ios", s.ListReleaseIOS)
-	e.GET("/release/ios", s.ListReleaseIOSBeta)
-	e.GET("/release/android", s.ListReleaseAndroid)
 	e.GET("/", func(c echo.Context) error {
 		header := c.Request().Header
 		if agent := header.Get("User-Agent"); agent != "" {
@@ -120,9 +117,54 @@ func NewServer(cfg *ServerConfig) *Server {
 
 		return c.Redirect(http.StatusTemporaryRedirect, "/release/ios")
 	})
-	e.GET("/release/ios-staff.json", s.ListReleaseIOSJson)
-	e.GET("/release/ios.json", s.ListReleaseIOSBetaJson)
-	e.GET("/release/android.json", s.ListReleaseAndroidJson)
+
+	redirectUrl := fmt.Sprintf(s.hostUrl + "/oauth/callback")
+
+	o := NewOAuth(redirectUrl, e)
+	oauth := e.Group("/oauth")
+	oauth.GET("/callback", o.CallbackHandler("/"))
+	oauth.GET("/login", o.LoginHandler())
+	oauth.GET("/logout", o.LogoutHandler(s.hostUrl))
+
+	release := e.Group("release")
+	release.Use(o.ProtectMiddleware("/oauth/login", func(profile map[string]interface{}) bool {
+		if v, ok := profile["https://yolo.berty.io/groups"]; ok {
+			if groups, ok := v.([]interface{}); ok {
+				for _, group := range groups {
+					if g, ok := group.(string); ok && g == "yolo" {
+						return true
+					}
+				}
+			}
+		}
+
+		return false
+	}))
+
+	release.GET("/ios", s.ListReleaseIOSBeta)
+	release.GET("/android", s.ListReleaseAndroidBeta)
+
+	release.GET("/ios-staff.json", s.ListReleaseIOSJson)
+	release.GET("/ios.json", s.ListReleaseIOSBetaJson)
+	release.GET("/android.json", s.ListReleaseAndroidJson)
+
+	staffRelease := e.Group("/release/staff")
+	staffRelease.Use(o.ProtectMiddleware("/oauth/login", func(profile map[string]interface{}) bool {
+		if v, ok := profile["https://yolo.berty.io/groups"]; ok {
+			if groups, ok := v.([]interface{}); ok {
+				for _, group := range groups {
+					if g, ok := group.(string); ok && g == "staff" {
+						return true
+					}
+				}
+			}
+		}
+
+		return false
+	}))
+	staffRelease.GET("/ios/*", s.ReleaseIOS)
+	staffRelease.GET("/ios", s.ListReleaseIOS)
+	staffRelease.GET("/android", s.ListReleaseAndroid)
 
 	auth := e.Group("/auth")
 	if cfg.Password != "" {
