@@ -12,11 +12,16 @@ var serverCfg server.ServerConfig
 var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Server release tool",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		serverCfg.Client = cfg.client
 
 		log.Printf("Starting server on %s", serverCfg.Addr)
-		panic(server.NewServer(&serverCfg).Start())
+		s, err := server.NewServer(&serverCfg)
+		if err != nil {
+			return err
+		}
+		panic(s.Start())
+		return nil
 	},
 }
 
@@ -25,6 +30,7 @@ func init() {
 	serveCmd.PersistentFlags().StringVarP(&serverCfg.Hostname, "hostname", "n", "localhost:3670", "hostname")
 	serveCmd.PersistentFlags().StringVarP(&serverCfg.Username, "username", "u", "berty", "user")
 	serveCmd.PersistentFlags().StringVarP(&serverCfg.Password, "password", "p", "", "password")
+	serveCmd.PersistentFlags().BoolVarP(&serverCfg.Debug, "debug", "", false, "debug mode")
 
 	rootCmd.AddCommand(serveCmd)
 }

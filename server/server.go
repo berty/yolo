@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"log"
 	"math/rand"
 	"net/http"
@@ -14,9 +15,11 @@ import (
 	"time"
 
 	"github.com/berty/staff/tools/release/pkg/circle"
+	"github.com/gobuffalo/packr"
 	circleci "github.com/jszwedko/go-circleci"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"github.com/oxtoacart/bpool"
 )
 
 var reAndroidAgent = regexp.MustCompile("(?i)android")
@@ -34,6 +37,8 @@ type ServerConfig struct {
 
 	Username string
 	Password string
+
+	Debug bool
 }
 
 type buildMap map[int]*circleci.Build
@@ -71,6 +76,15 @@ type Server struct {
 	salt     string
 	e        *echo.Echo
 	cache    Cache
+	Debug    bool
+
+	// templates/static
+	funcmap        *ctxFuncmap
+	templatesMutex sync.Mutex
+	templates      map[string]*template.Template
+	bufpool        *bpool.BufferPool
+	StaticBox      *packr.Box
+	TemplatesBox   *packr.Box
 }
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -83,7 +97,7 @@ func randStringRunes(n int) string {
 	return string(b)
 }
 
-func NewServer(cfg *ServerConfig) *Server {
+func NewServer(cfg *ServerConfig) (*Server, error) {
 	var hostUrl string
 	if strings.HasPrefix(cfg.Hostname, "localhost") || strings.HasPrefix(cfg.Hostname, "127.0.0.1") {
 		hostUrl = fmt.Sprintf("http://%s", cfg.Hostname)
@@ -94,17 +108,25 @@ func NewServer(cfg *ServerConfig) *Server {
 	randStr := randStringRunes(10)
 	e := echo.New()
 	e.Use(middleware.Logger())
+	templatesBox := packr.NewBox("../templates")
 	s := &Server{
-		client:   cfg.Client,
-		addr:     cfg.Addr,
-		hostname: cfg.Hostname,
-		hostUrl:  hostUrl,
-		e:        e,
-		salt:     randStr,
+		client:       cfg.Client,
+		addr:         cfg.Addr,
+		hostname:     cfg.Hostname,
+		hostUrl:      hostUrl,
+		e:            e,
+		salt:         randStr,
+		TemplatesBox: &templatesBox,
+		Debug:        cfg.Debug,
+	}
+	e.Renderer = s // see https://echo.labstack.com/guide/templates for details
+
+	if err := s.loadTemplates(); err != nil {
+		return nil, err
 	}
 
 	e.File("/favicon.ico", "assets/favicon.ico")
-	e.Static("/assets", "assets")
+	e.Static("/assets", "assets") // FIXME: use packr box
 
 	e.GET("/", func(c echo.Context) error {
 		header := c.Request().Header
@@ -178,7 +200,7 @@ func NewServer(cfg *ServerConfig) *Server {
 	auth.GET("/apk/build/:token/*", s.GetAPK)
 	auth.GET("/itms/release/:token/*", s.Itms)
 
-	return s
+	return s, nil
 }
 
 // Basic auth

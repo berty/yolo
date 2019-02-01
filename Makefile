@@ -7,7 +7,7 @@ PASSWORD       ?= 'xor+=cool'
 
 .PHONY: run
 run: install
-	yolo -t $(CIRCLE_TOKEN) serve
+	yolo -t $(CIRCLE_TOKEN) serve --debug
 
 .PHONY: install
 install:

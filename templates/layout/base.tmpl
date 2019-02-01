@@ -1,0 +1,19 @@
+{{define "base"}}
+<html>
+  <head>
+    <title>{{.job|jobToKind}} - Berty</title>
+    <meta http-equiv="refresh" content="30">
+    <link rel="stylesheet" href="/assets/site.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/{{.job|jobToKind}}/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/{{.job|jobToKind}}/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/{{.job|jobToKind}}/favicon-16x16.png">
+    <link rel="manifest" href="/assets/favicon/{{.job|jobToKind}}/site.webmanifest">
+    <link rel="mask-icon" href="/assets/favicon/{{.job|jobToKind}}/safari-pinned-tab.svg" color="#262844">
+    <meta name="msapplication-TileColor" content="#262844">
+    <meta name="theme-color" content="#262844">
+  </head>
+  <body>
+    {{block "content" .}}{{end}}
+  </body>
+</html>
+{{end}}
