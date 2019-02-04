@@ -20,9 +20,6 @@ import (
 
 const (
 	AuthDomain            = "berty.eu.auth0.com"
-	ClientID              = "yqYy0K16xwgWbwS3dISg87Iacz06PMmX"
-	ClientSecret          = "laLoKBfijXRDkyksnX4OP-LgsWzWqMl41kcQp_XwUmM1KbWnI3dKRxdveuheHdue"
-	SessionSecret         = "***REMOVED***"
 	authSessionCookieName = "yolo-auth-session"
 	stateCookieName       = "yolo-state"
 )
