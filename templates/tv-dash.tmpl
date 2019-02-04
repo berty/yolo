@@ -1,0 +1,17 @@
+{{define "title"}}TV{{end}}
+
+{{define "head"}}
+{{end}}
+
+{{define "content"}}
+<div class="page-container">
+  <table>
+    <tr>
+      <td>{{block "release-list-partial" (dict "dates" .android_staff "job" .android_staff_job) }}{{end}}</td>
+      <td>{{block "release-list-partial" (dict "dates" .android_yolo "job" .android_yolo_job) }}{{end}}</td>
+      <td>{{block "release-list-partial" (dict "dates" .ios_staff "job" .ios_staff_job) }}{{end}}</td>
+      <td>{{block "release-list-partial" (dict "dates" .ios_yolo "job" .ios_yolo_job) }}{{end}}</td>
+    </tr>
+  </table>
+</div>
+{{end}}

@@ -1,4 +1,13 @@
-{{define "title"}}YOLO{{end}}
+{{define "title"}}{{.job|jobToKind}}{{end}}
+
+
+{{define "head"}}
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/{{.job|jobToKind}}/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/{{.job|jobToKind}}/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/{{.job|jobToKind}}/favicon-16x16.png">
+    <link rel="manifest" href="/assets/favicon/{{.job|jobToKind}}/site.webmanifest">
+    <link rel="mask-icon" href="/assets/favicon/{{.job|jobToKind}}/safari-pinned-tab.svg" color="#262844">
+{{end}}
 
 {{define "content"}}
 <div class="page-head">
@@ -8,46 +17,6 @@
   </div>
 </div>
 <div class="page-container">
-  {{ range $date := .ReleasesByDate }}
-    <div class="block date-line">{{$date.Date}}</div>
-    {{ range $release := $date.Releases }}
-      <div class="block b-{{$release.BranchKind}}{{if $release.Failed}} error{{end}}{{if $release.InProgress}} in-progress{{end}}">
-        <div class="b-head">{{$release.BranchLink|safeHTML}}&nbsp;&nbsp;{{$release.Author}}</div>
-        <div class="b-body">
-          <div class="b-body-overlay"></div>
-          <div class="b-body-content">
-            <div class="b-left">
-              <div class="b-build">
-                {{$release.CommitLink|safeHTML}}
-                &nbsp;&nbsp;
-                {{$release.Subject}}
-                <br />
-                {{$release.BuildLink|safeHTML}}
-                &nbsp;&nbsp;
-                {{$release.Age}}
-                &nbsp;ago&nbsp;&nbsp;
-                {{$release.Duration}}
-              </div>
-            </div>
-            <div class="b-right">
-              <div class="b-diff">{{$release.Diff|safeHTML}}</div>
-
-              {{if $release.Failed}}
-              <div class="b-info">
-                <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-triangle"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12" y2="17"></line></svg>
-              </div>
-              {{else}}
-              <div class="b-download">
-                <a class="btn" href="{{$release.HREF|safeURL}}">
-	          <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                </a>
-              </div>
-              {{end}}
-            </div>
-          </div>
-        </div>
-      </div>
-    {{end}}
-  {{end}}
+  {{block "release-list-partial" (dict "dates" .ReleasesByDate "job" .job) }}{{end}}
 </div>
 {{end}}

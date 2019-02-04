@@ -238,6 +238,30 @@ func (s *Server) ListReleaseIOSBeta(c echo.Context) error {
 	return s.ListRelease(c, IOS_YOLO_JOB)
 }
 
+func (s *Server) TVDash(c echo.Context) error {
+	data := map[string]interface{}{}
+
+	var err error
+	if data["android_staff"], err = s.GetReleasesByDate(c, ANDROID_STAFF_JOB); err != nil {
+		return err
+	}
+	if data["android_yolo"], err = s.GetReleasesByDate(c, ANDROID_YOLO_JOB); err != nil {
+		return err
+	}
+	if data["ios_staff"], err = s.GetReleasesByDate(c, IOS_STAFF_JOB); err != nil {
+		return err
+	}
+	if data["ios_yolo"], err = s.GetReleasesByDate(c, IOS_YOLO_JOB); err != nil {
+		return err
+	}
+	data["android_staff_job"] = ANDROID_STAFF_JOB
+	data["android_yolo_job"] = ANDROID_YOLO_JOB
+	data["ios_staff_job"] = IOS_STAFF_JOB
+	data["ios_yolo_job"] = IOS_YOLO_JOB
+
+	return c.Render(http.StatusOK, "tv-dash.tmpl", data)
+}
+
 type ReleaseEntry struct {
 	Failed     bool
 	InProgress bool

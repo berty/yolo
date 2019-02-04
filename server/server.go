@@ -190,6 +190,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	staffRelease.GET("/ios/*", s.ReleaseIOS)
 	staffRelease.GET("/ios", s.ListReleaseIOS)
 	staffRelease.GET("/android", s.ListReleaseAndroid)
+	staffRelease.GET("/tv", s.TVDash)
 
 	auth := e.Group("/auth")
 	if cfg.Password != "" {
