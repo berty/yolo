@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
@@ -86,7 +87,11 @@ func (o *OAuth) LoginHandler() func(echo.Context) error {
 
 		sess, err := session.Get("state", c)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			c.Logger().Warn("invalid session: ", err.Error())
+		}
+
+		if sess == nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, "invalid session")
 		}
 
 		b := make([]byte, 32)
@@ -113,14 +118,19 @@ func (o *OAuth) LogoutHandler(redirectUrl string) func(echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		cookie, err := c.Cookie("auth-session")
-		if err == nil {
-			cookie.Value = ""
-			cookie.MaxAge = -1 // erase the cookie
-			c.SetCookie(cookie)
+		for _, ck := range []string{"auth-session", "state"} {
+			cookie, err := c.Cookie(ck)
+			if err == nil {
+				cookie.MaxAge = -1 // erase the cookie
+				cookie.Value = ""
+				cookie.Path = "/"
+				cookie.Expires = time.Unix(0, 0)
+				cookie.HttpOnly = true
+				c.SetCookie(cookie)
 
-		} else {
-			c.Logger().Warn("tryin to logout with no cookie set")
+			} else {
+				c.Logger().Warn("tryin to logout with no cookie set")
+			}
 		}
 
 		logoutUrl.Path += "/v2/logout"
