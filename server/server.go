@@ -206,6 +206,9 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	auth.GET("/artifacts/:build_id", s.Artifacts)
 	auth.GET("/ipa/build/:token/*", s.GetIPA)
 	auth.GET("/apk/build/:token/*", s.GetAPK)
+	auth.HEAD("/ipa/build/:token/*", func(c echo.Context) error {
+		return c.String(405, "405")
+	})
 	auth.GET("/itms/release/:token/*", s.Itms)
 
 	return s, nil

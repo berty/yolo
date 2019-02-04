@@ -102,10 +102,16 @@ func sendUserActionToSlack(c echo.Context, action string, color string) {
 	}
 
 	attachment := slack.Attachment{}
-	profile := sessAuth.Values["profile"].(map[string]interface{})
-	if profile["picture"] != nil {
-		profilePicture := profile["picture"].(string)
-		attachment.ThumbnailUrl = &profilePicture
+	auth := c.RealIP()
+	username := fmt.Sprintf("anonymous (%s)", c.RealIP())
+	if sessAuth != nil && sessAuth.Values != nil && sessAuth.Values["profile"] != nil {
+		profile := sessAuth.Values["profile"].(map[string]interface{})
+		if profile["picture"] != nil {
+			profilePicture := profile["picture"].(string)
+			attachment.ThumbnailUrl = &profilePicture
+		}
+		auth = fmt.Sprintf("realip=%q nickname=%q sub=%q", c.RealIP(), profile["nickname"].(string), profile["sub"].(string))
+		username = profile["name"].(string)
 	}
 	//username := fmt.Sprintf("%s - %s (%s)", profile["nickname"].(string), profile["name"].(string), profile["sub"].(string))
 	//attachment.AddField(slack.Field{Title: "action", Value: action, Short: true})
@@ -114,13 +120,13 @@ func sendUserActionToSlack(c echo.Context, action string, color string) {
 	//attachment.AddField(slack.Field{Title: "path", Value: c.Path(), Short: true})
 	//attachment.AddField(slack.Field{Title: "groups", Value: strings.Join(profile["groups"].([]string), ","), Short: true})
 	attachment.AddField(slack.Field{Title: "user-agent", Value: c.Request().UserAgent(), Short: true})
-	attachment.AddField(slack.Field{Title: "auth", Value: fmt.Sprintf("nickname=%q sub=%q", profile["nickname"].(string), profile["sub"].(string)), Short: true})
+	attachment.AddField(slack.Field{Title: "auth", Value: auth, Short: true})
 	attachment.Color = &color
 
 	payload := slack.Payload{
 		Text: fmt.Sprintf("%s (%s)", action, c.Path()),
 		//Username: "yolo",
-		Username:  profile["name"].(string),
+		Username:  username,
 		Channel:   "#yolologs",
 		IconEmoji: ":yolo:",
 		//IconUrl:     profile["picture"].(string),
@@ -138,7 +144,7 @@ func sendUserErrorToSlack(c echo.Context, err error) {
 }
 
 func (s *Server) GetIPA(c echo.Context) error {
-	sendUserActionToSlack(c, "iOS download", "#0000ff")
+	sendUserActionToSlack(c, "IPA download", "#0000ff")
 	id := c.Param("*")
 	arts, err := s.client.GetArtifacts(id, true)
 	if err != nil {
@@ -507,6 +513,8 @@ func (s *Server) ReleaseIOS(c echo.Context) error {
 }
 
 func (s *Server) Itms(c echo.Context) error {
+	sendUserActionToSlack(c, "ITMS download", "#0000ff")
+
 	pull := c.Param("*")
 
 	var theBuild *circleci.Build
