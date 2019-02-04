@@ -111,6 +111,10 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.Gzip())
+	e.HTTPErrorHandler = func(err error, c echo.Context) {
+		sendUserErrorToSlack(c, err)
+		e.DefaultHTTPErrorHandler(err, c)
+	}
 	templatesBox := packr.NewBox("../templates")
 	s := &Server{
 		client:       cfg.Client,

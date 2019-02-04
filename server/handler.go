@@ -13,9 +13,11 @@ import (
 	"strings"
 	"time"
 
+	slack "github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/hako/durafmt"
 	circleci "github.com/jszwedko/go-circleci"
 	"github.com/labstack/echo"
+	"github.com/labstack/echo-contrib/session"
 )
 
 const (
@@ -27,6 +29,7 @@ const (
 	IOS_YOLO_JOB      = "client.rn.ios-beta"
 	ANDROID_STAFF_JOB = "client.rn.android"
 	ANDROID_YOLO_JOB  = "client.rn.android-beta"
+	SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/T2AJ2MM5Z/BFX8ZASKW/***REMOVED***"
 )
 
 var reIPA = regexp.MustCompile("/([^/]+).ipa$")
@@ -90,7 +93,52 @@ func (s *Server) getVersion(arts []*circleci.Artifact, kind string) (string, err
 	return "", fmt.Errorf("no version found")
 }
 
+func sendUserActionToSlack(c echo.Context, action string, color string) {
+	sessAuth, err := session.Get(authSessionCookieName, c)
+	if err != nil {
+		c.Logger().Warn("failed to parse cookie:", err.Error())
+		//c.Redirect(http.StatusTemporaryRedirect, "/oauth/logout")
+		return
+	}
+
+	attachment := slack.Attachment{}
+	profile := sessAuth.Values["profile"].(map[string]interface{})
+	if profile["picture"] != nil {
+		profilePicture := profile["picture"].(string)
+		attachment.ThumbnailUrl = &profilePicture
+	}
+	//username := fmt.Sprintf("%s - %s (%s)", profile["nickname"].(string), profile["name"].(string), profile["sub"].(string))
+	//attachment.AddField(slack.Field{Title: "action", Value: action, Short: true})
+	//attachment.AddField(slack.Field{Title: "author", Value: username, Short: true})
+	//attachment.AddField(slack.Field{Title: "ip", Value: c.RealIP(), Short: true})
+	//attachment.AddField(slack.Field{Title: "path", Value: c.Path(), Short: true})
+	//attachment.AddField(slack.Field{Title: "groups", Value: strings.Join(profile["groups"].([]string), ","), Short: true})
+	attachment.AddField(slack.Field{Title: "user-agent", Value: c.Request().UserAgent(), Short: true})
+	attachment.AddField(slack.Field{Title: "auth", Value: fmt.Sprintf("nickname=%q sub=%q", profile["nickname"].(string), profile["sub"].(string)), Short: true})
+	attachment.Color = &color
+
+	payload := slack.Payload{
+		Text: fmt.Sprintf("%s (%s)", action, c.Path()),
+		//Username: "yolo",
+		Username:  profile["name"].(string),
+		Channel:   "#yolologs",
+		IconEmoji: ":yolo:",
+		//IconUrl:     profile["picture"].(string),
+		Attachments: []slack.Attachment{attachment},
+	}
+	go func() { // do it asynchronously to avoid blocking
+		if err := slack.Send(SLACK_WEBHOOK_URL, "", payload); len(err) > 0 {
+			c.Logger().Warn("failed to send user action to slack: ", fmt.Sprintf("%v", err))
+		}
+	}()
+}
+
+func sendUserErrorToSlack(c echo.Context, err error) {
+	sendUserActionToSlack(c, fmt.Sprintf("error: %v", err), "#ff0000")
+}
+
 func (s *Server) GetIPA(c echo.Context) error {
+	sendUserActionToSlack(c, "iOS download", "#0000ff")
 	id := c.Param("*")
 	arts, err := s.client.GetArtifacts(id, true)
 	if err != nil {
@@ -115,6 +163,7 @@ func (s *Server) GetIPA(c echo.Context) error {
 }
 
 func (s *Server) GetAPK(c echo.Context) error {
+	sendUserActionToSlack(c, "Android download", "#00ff00")
 	id := c.Param("*")
 	arts, err := s.client.GetArtifacts(id, true)
 	if err != nil {
