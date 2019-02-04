@@ -3,11 +3,9 @@ FROM            golang:1.11.4-alpine as builder
 RUN             apk add --no-cache make git gcc musl-dev g++
 RUN             go get -u github.com/gobuffalo/packr/packr
 WORKDIR         /go/src/github.com/berty/staff/tools/release
-COPY            go.mod go.sum ./
-RUN             GO111MODULE=on go mod download
 COPY            . .
 RUN             packr
-RUN             make install
+RUN             GO111MODULE=on go install -mod=vendor -v ./cmd/...
 
 # runtime
 FROM            alpine

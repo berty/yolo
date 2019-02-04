@@ -107,7 +107,10 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 
 	randStr := randStringRunes(10)
 	e := echo.New()
+	e.Debug = cfg.Debug
 	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+	e.Use(middleware.Gzip())
 	templatesBox := packr.NewBox("../templates")
 	s := &Server{
 		client:       cfg.Client,

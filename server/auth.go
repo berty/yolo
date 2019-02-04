@@ -14,19 +14,22 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo-contrib/session"
+	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 )
 
 const (
-	AuthDomain    = "berty.eu.auth0.com"
-	ClientID      = "yqYy0K16xwgWbwS3dISg87Iacz06PMmX"
-	ClientSecret  = "laLoKBfijXRDkyksnX4OP-LgsWzWqMl41kcQp_XwUmM1KbWnI3dKRxdveuheHdue"
-	SessionSecret = "***REMOVED***"
+	AuthDomain            = "berty.eu.auth0.com"
+	ClientID              = "yqYy0K16xwgWbwS3dISg87Iacz06PMmX"
+	ClientSecret          = "laLoKBfijXRDkyksnX4OP-LgsWzWqMl41kcQp_XwUmM1KbWnI3dKRxdveuheHdue"
+	SessionSecret         = "***REMOVED***"
+	authSessionCookieName = "yolo-auth-session"
+	stateCookieName       = "yolo-state"
 )
 
 type OAuth struct {
 	conf *oauth2.Config
-	sf   *sessions.FilesystemStore
+	sf   *sessions.CookieStore
 }
 
 func NewOAuth(redirectUrl string, e *echo.Echo) *OAuth {
@@ -41,7 +44,7 @@ func NewOAuth(redirectUrl string, e *echo.Echo) *OAuth {
 		},
 	}
 
-	sf := sessions.NewFilesystemStore("", []byte(SessionSecret))
+	sf := sessions.NewCookieStore([]byte(SessionSecret))
 	gob.Register(map[string]interface{}{})
 
 	e.Use(session.Middleware(sf))
@@ -60,7 +63,7 @@ func (o *OAuth) ProtectMiddleware(failureRedirect string, fverify func(map[strin
 				return next(c)
 			}
 
-			sess, err := session.Get("auth-session", c)
+			sess, err := session.Get(authSessionCookieName, c)
 			if err != nil {
 				return c.Redirect(http.StatusTemporaryRedirect, failureRedirect)
 			}
@@ -85,22 +88,22 @@ func (o *OAuth) LoginHandler() func(echo.Context) error {
 	return func(c echo.Context) error {
 		aud := "https://" + AuthDomain + "/userinfo"
 
-		sess, err := session.Get("state", c)
+		sess, err := session.Get(stateCookieName, c)
 		if err != nil {
-			c.Logger().Warn("invalid session: ", err.Error())
+			c.Logger().Warn("Login: invalid session: ", err.Error())
 		}
 
 		if sess == nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, "invalid session")
+			return errors.Wrap(err, "Login: failed to get session")
 		}
 
 		b := make([]byte, 32)
 		rand.Read(b)
 		state := base64.StdEncoding.EncodeToString(b)
 
-		sess.Values["state"] = state
+		sess.Values[stateCookieName] = state
 		if err := sess.Save(c.Request(), c.Response()); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return errors.Wrap(err, "Login: failed to save session")
 		}
 
 		audience := oauth2.SetAuthURLParam("audience", aud)
@@ -115,10 +118,10 @@ func (o *OAuth) LogoutHandler(redirectUrl string) func(echo.Context) error {
 		var logoutUrl *url.URL
 		logoutUrl, err := url.Parse("https://" + AuthDomain)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return errors.Wrap(err, "Logout: failed to parse auth domain")
 		}
 
-		for _, ck := range []string{"auth-session", "state"} {
+		for _, ck := range []string{authSessionCookieName, stateCookieName} {
 			cookie, err := c.Cookie(ck)
 			if err == nil {
 				cookie.MaxAge = -1 // erase the cookie
@@ -146,44 +149,44 @@ func (o *OAuth) LogoutHandler(redirectUrl string) func(echo.Context) error {
 func (o *OAuth) CallbackHandler(redirectUrl string) func(echo.Context) error {
 	return func(c echo.Context) error {
 		state := c.QueryParam("state")
-		sess, err := session.Get("state", c)
+		sess, err := session.Get(stateCookieName, c)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return errors.Wrap(err, "Callback: failed to get state")
 		}
 
-		if state != sess.Values["state"] {
-			return echo.NewHTTPError(http.StatusInternalServerError, "invalid state")
+		if state != sess.Values[stateCookieName] {
+			return errors.Errorf("Callback: invalid state (%q != %q)", state, sess.Values[stateCookieName])
 		}
 
 		code := c.QueryParam("code")
 		token, err := o.conf.Exchange(context.TODO(), code)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return errors.Wrap(err, "Callback: failed to do the code exchange")
 		}
 
 		client := o.conf.Client(context.TODO(), token)
 		resp, err := client.Get("https://" + AuthDomain + "/userinfo")
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return errors.Wrap(err, "Callback: failed to get userinfo")
 		}
 
 		defer resp.Body.Close()
 
 		var profile map[string]interface{}
 		if err = json.NewDecoder(resp.Body).Decode(&profile); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return errors.Wrap(err, "Callback: failed to decode profile")
 		}
 
-		sessAuth, err := session.Get("auth-session", c)
+		sessAuth, err := session.Get(authSessionCookieName, c)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return errors.Wrap(err, "Callback: failed to get auth-session")
 		}
 
 		sessAuth.Values["id_token"] = token.Extra("id_token")
 		sessAuth.Values["access_token"] = token.AccessToken
 		sessAuth.Values["profile"] = profile
 		if err := sessAuth.Save(c.Request(), c.Response()); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return errors.Wrap(err, "failed to save session")
 		}
 
 		return c.Redirect(http.StatusSeeOther, redirectUrl)

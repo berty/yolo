@@ -15,6 +15,7 @@ install:
 
 .PHONY: docker.build
 docker.build:
+	go mod vendor
 	docker build -t "$(IMAGE)" .
 
 .PHONY: docker.push
