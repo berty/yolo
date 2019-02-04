@@ -1,5 +1,23 @@
+# github.com/Masterminds/semver v1.4.2
+github.com/Masterminds/semver
+# github.com/Masterminds/sprig v2.17.1+incompatible
+github.com/Masterminds/sprig
+# github.com/aokoli/goutils v1.1.0
+github.com/aokoli/goutils
 # github.com/dgrijalva/jwt-go v3.2.0+incompatible
 github.com/dgrijalva/jwt-go
+# github.com/gobuffalo/envy v1.6.12
+github.com/gobuffalo/envy
+# github.com/gobuffalo/packd v0.0.0-20181212173646-eca3b8fd6687
+github.com/gobuffalo/packd
+# github.com/gobuffalo/packr v1.22.0
+github.com/gobuffalo/packr
+# github.com/gobuffalo/syncx v0.0.0-20181120194010-558ac7de985f
+github.com/gobuffalo/syncx
+# github.com/golang/protobuf v1.2.0
+github.com/golang/protobuf/proto
+# github.com/google/uuid v1.1.0
+github.com/google/uuid
 # github.com/gorilla/context v1.1.1
 github.com/gorilla/context
 # github.com/gorilla/securecookie v1.1.1
@@ -8,8 +26,14 @@ github.com/gorilla/securecookie
 github.com/gorilla/sessions
 # github.com/hako/durafmt v0.0.0-20180520121703-7b7ae1e72ead
 github.com/hako/durafmt
+# github.com/huandu/xstrings v1.2.0
+github.com/huandu/xstrings
+# github.com/imdario/mergo v0.3.7
+github.com/imdario/mergo
 # github.com/inconshreveable/mousetrap v1.0.0
 github.com/inconshreveable/mousetrap
+# github.com/joho/godotenv v1.3.0
+github.com/joho/godotenv
 # github.com/jszwedko/go-circleci v0.2.0
 github.com/jszwedko/go-circleci
 # github.com/labstack/echo v3.3.10+incompatible
@@ -26,18 +50,53 @@ github.com/labstack/gommon/random
 github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.4
 github.com/mattn/go-isatty
+# github.com/oxtoacart/bpool v0.0.0-20150712133111-4e1c5567d7c2
+github.com/oxtoacart/bpool
+# github.com/pkg/errors v0.8.1
+github.com/pkg/errors
+# github.com/rogpeppe/go-internal v1.1.0
+github.com/rogpeppe/go-internal/modfile
+github.com/rogpeppe/go-internal/module
+github.com/rogpeppe/go-internal/semver
 # github.com/spf13/cobra v0.0.3
 github.com/spf13/cobra
-# github.com/spf13/pflag v1.0.2
+# github.com/spf13/pflag v1.0.3
 github.com/spf13/pflag
 # github.com/valyala/bytebufferpool v1.0.0
 github.com/valyala/bytebufferpool
 # github.com/valyala/fasttemplate v0.0.0-20170224212429-dcecefd839c4
 github.com/valyala/fasttemplate
-# golang.org/x/crypto v0.0.0-20181001203147-e3636079e1a4
+# go.uber.org/atomic v1.3.2
+go.uber.org/atomic
+# go.uber.org/multierr v1.1.0
+go.uber.org/multierr
+# go.uber.org/zap v1.9.1
+go.uber.org/zap
+go.uber.org/zap/internal/bufferpool
+go.uber.org/zap/zapcore
+go.uber.org/zap/buffer
+go.uber.org/zap/internal/color
+go.uber.org/zap/internal/exit
+# golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc
+golang.org/x/crypto/scrypt
 golang.org/x/crypto/acme/autocert
+golang.org/x/crypto/pbkdf2
 golang.org/x/crypto/acme
-# golang.org/x/sys v0.0.0-20180928133829-e4b3c5e90611
+# golang.org/x/net v0.0.0-20190108225652-1e06a53dbb7e
+golang.org/x/net/context/ctxhttp
+golang.org/x/net/context
+# golang.org/x/oauth2 v0.0.0-20190130055435-99b60b757ec1
+golang.org/x/oauth2
+golang.org/x/oauth2/internal
+# golang.org/x/sys v0.0.0-20190116161447-11f53e031339
 golang.org/x/sys/unix
+# google.golang.org/appengine v1.4.0
+google.golang.org/appengine/urlfetch
+google.golang.org/appengine/internal
+google.golang.org/appengine/internal/urlfetch
+google.golang.org/appengine/internal/base
+google.golang.org/appengine/internal/datastore
+google.golang.org/appengine/internal/log
+google.golang.org/appengine/internal/remote_api
 # howett.net/plist v0.0.0-20180609054337-500bd5b9081b
 howett.net/plist
