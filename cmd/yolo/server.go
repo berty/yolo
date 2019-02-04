@@ -31,6 +31,7 @@ func init() {
 	serveCmd.PersistentFlags().StringVarP(&serverCfg.Username, "username", "u", "berty", "user")
 	serveCmd.PersistentFlags().StringVarP(&serverCfg.Password, "password", "p", "", "password")
 	serveCmd.PersistentFlags().BoolVarP(&serverCfg.Debug, "debug", "", false, "debug mode")
+	serveCmd.PersistentFlags().BoolVarP(&serverCfg.NoSlack, "no-slack", "", false, "disable-slack")
 
 	rootCmd.AddCommand(serveCmd)
 }

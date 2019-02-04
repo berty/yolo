@@ -93,7 +93,10 @@ func (s *Server) getVersion(arts []*circleci.Artifact, kind string) (string, err
 	return "", fmt.Errorf("no version found")
 }
 
-func sendUserActionToSlack(c echo.Context, action string, color string) {
+func (s *Server) sendUserActionToSlack(c echo.Context, action string, color string) {
+	if s.NoSlack {
+		return
+	}
 	sessAuth, err := session.Get(authSessionCookieName, c)
 	if err != nil {
 		c.Logger().Warn("failed to parse cookie:", err.Error())
@@ -139,12 +142,12 @@ func sendUserActionToSlack(c echo.Context, action string, color string) {
 	}()
 }
 
-func sendUserErrorToSlack(c echo.Context, err error) {
-	sendUserActionToSlack(c, fmt.Sprintf("error: %v", err), "#ff0000")
+func (s *Server) sendUserErrorToSlack(c echo.Context, err error) {
+	s.sendUserActionToSlack(c, fmt.Sprintf("error: %v", err), "#ff0000")
 }
 
 func (s *Server) GetIPA(c echo.Context) error {
-	sendUserActionToSlack(c, "IPA download", "#0000ff")
+	s.sendUserActionToSlack(c, "IPA download", "#0000ff")
 	id := c.Param("*")
 	arts, err := s.client.GetArtifacts(id, true)
 	if err != nil {
@@ -169,7 +172,7 @@ func (s *Server) GetIPA(c echo.Context) error {
 }
 
 func (s *Server) GetAPK(c echo.Context) error {
-	sendUserActionToSlack(c, "Android download", "#00ff00")
+	s.sendUserActionToSlack(c, "Android download", "#00ff00")
 	id := c.Param("*")
 	arts, err := s.client.GetArtifacts(id, true)
 	if err != nil {
@@ -340,6 +343,8 @@ type ReleasesDay struct {
 }
 
 func (s *Server) ListRelease(c echo.Context, job string) error {
+	s.sendUserActionToSlack(c, fmt.Sprintf("List Releases (%s)", job), "#00ffff")
+
 	data := map[string]interface{}{}
 
 	var err error
@@ -513,7 +518,7 @@ func (s *Server) ReleaseIOS(c echo.Context) error {
 }
 
 func (s *Server) Itms(c echo.Context) error {
-	sendUserActionToSlack(c, "ITMS download", "#0000ff")
+	s.sendUserActionToSlack(c, "ITMS download", "#0000ff")
 
 	pull := c.Param("*")
 
