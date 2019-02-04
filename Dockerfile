@@ -1,14 +1,12 @@
-# build
+# builder
 FROM            golang:1.11.4-alpine as builder
 RUN             apk add --no-cache make git gcc musl-dev g++
+RUN             go get -u github.com/gobuffalo/packr/packr
 WORKDIR         /go/src/github.com/berty/staff/tools/release
-
-# install libs
 COPY            go.mod go.sum ./
 RUN             GO111MODULE=on go mod download
-
-# build project
 COPY            . .
+RUN             packr
 RUN             make install
 
 # runtime
