@@ -20,8 +20,8 @@ import (
 
 const (
 	AuthDomain            = "berty.eu.auth0.com"
-	authSessionCookieName = "yolo-auth-session"
-	stateCookieName       = "yolo-state"
+	authSessionCookieName = "yolo2-auth-session"
+	stateCookieName       = "yolo2-state"
 )
 
 type OAuth struct {
@@ -148,7 +148,8 @@ func (o *OAuth) CallbackHandler(redirectUrl string) func(echo.Context) error {
 		state := c.QueryParam("state")
 		sess, err := session.Get(stateCookieName, c)
 		if err != nil {
-			return errors.Wrap(err, "Callback: failed to get state")
+			//return errors.Wrap(err, "Callback: failed to get state")
+			return c.Redirect(http.StatusTemporaryRedirect, "/oauth/logout")
 		}
 
 		if state != sess.Values[stateCookieName] {

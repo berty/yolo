@@ -157,6 +157,7 @@ func (s *Server) ListReleaseAndroidBetaJson(c echo.Context) error {
 }
 
 func (s *Server) ListReleaseJson(c echo.Context, job string) error {
+	// FIXME: reuse code from ListRelease
 	type release struct {
 		Branch      string    `json:"branch"`
 		StopTime    time.Time `json:"stop-time"`
@@ -263,7 +264,7 @@ func (s *Server) ListRelease(c echo.Context, job string) error {
 	data := map[string]interface{}{}
 
 	var err error
-	if data["ReleasesByDate"], err = s.GetReleasesByDate(job); err != nil {
+	if data["ReleasesByDate"], err = s.GetReleasesByDate(c, job); err != nil {
 		return err
 	}
 	data["job"] = job
@@ -271,7 +272,7 @@ func (s *Server) ListRelease(c echo.Context, job string) error {
 	return c.Render(http.StatusOK, "release-list.tmpl", data)
 }
 
-func (s *Server) GetReleasesByDate(job string) (*ReleasesByDate, error) {
+func (s *Server) GetReleasesByDate(c echo.Context, job string) (*ReleasesByDate, error) {
 	releasesByDateMap := map[string][]ReleaseEntry{}
 
 	oncePerBranch := map[string]bool{}
@@ -363,6 +364,12 @@ func (s *Server) GetReleasesByDate(job string) (*ReleasesByDate, error) {
 		case IOS_YOLO_JOB, IOS_STAFF_JOB:
 			iosToken := s.getHash(prBranch)
 			href = fmt.Sprintf(`itms-services://?action=download-manifest&url=%s/auth/itms/release/%s/%s`, s.hostUrl, iosToken, prBranch)
+
+			// if not on mobile, don't use the itms-services:// prefix
+			if c.Request().Host == "localhost:3670" {
+				// FIXME: replace by a user-agent check for mobile vs desktop
+				href = fmt.Sprintf(`%s/auth/itms/release/%s/%s`, s.hostUrl, iosToken, prBranch)
+			}
 		case ANDROID_YOLO_JOB, ANDROID_STAFF_JOB:
 			id := strconv.Itoa(build.BuildNum)
 			androidToken := s.getHash(id)
