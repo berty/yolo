@@ -238,7 +238,7 @@ func (s *Server) Start() error {
 			if err := s.refreshCache(); err != nil {
 				log.Printf("refresh failed: %+v", err)
 			}
-			time.Sleep(5 * time.Second)
+			time.Sleep(10 * time.Second)
 		}
 	}()
 	return s.e.Start(s.addr)

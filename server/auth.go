@@ -20,8 +20,8 @@ import (
 
 const (
 	AuthDomain            = "berty.eu.auth0.com"
-	authSessionCookieName = "yolo2-auth-session"
-	stateCookieName       = "yolo2-state"
+	authSessionCookieName = "session"
+	stateCookieName       = "state"
 )
 
 type OAuth struct {
@@ -177,7 +177,8 @@ func (o *OAuth) CallbackHandler(redirectUrl string) func(echo.Context) error {
 
 		sessAuth, err := session.Get(authSessionCookieName, c)
 		if err != nil {
-			return errors.Wrap(err, "Callback: failed to get auth-session")
+			//return errors.Wrap(err, "Callback: failed to get auth-session")
+			return c.Redirect(http.StatusTemporaryRedirect, "/oauth/logout")
 		}
 
 		sessAuth.Values["id_token"] = token.Extra("id_token")
