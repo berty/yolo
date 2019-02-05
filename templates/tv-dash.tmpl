@@ -4,14 +4,25 @@
 {{end}}
 
 {{define "content"}}
-<div class="page-container">
-  <table>
-    <tr>
-      <td>{{block "release-list-partial" (dict "dates" .android_staff "job" .android_staff_job) }}{{end}}</td>
-      <td>{{block "release-list-partial" (dict "dates" .android_yolo "job" .android_yolo_job) }}{{end}}</td>
-      <td>{{block "release-list-partial" (dict "dates" .ios_staff "job" .ios_staff_job) }}{{end}}</td>
-      <td>{{block "release-list-partial" (dict "dates" .ios_yolo "job" .ios_yolo_job) }}{{end}}</td>
-    </tr>
-  </table>
-</div>
+<div class="page-container tv">
+	<div class="tv-container">
+		<div class="tv-col">
+			{{block "tv-head-partial" (dict "platform" "android" "version" "staff") }}{{end}}
+
+			{{block "release-list-partial" (dict "dates" .android_staff "job" .android_staff_job) }}{{end}}
+		</div><!-- /.tv-col -->
+	    <div class="tv-col">
+	    	{{block "tv-head-partial" (dict "platform" "android" "version" "yolo") }}{{end}}
+	    	{{block "release-list-partial" (dict "dates" .android_yolo "job" .android_yolo_job) }}{{end}}
+	    </div><!-- /.tv-col -->
+	    <div class="tv-col">
+	    	{{block "tv-head-partial" (dict "platform" "ios" "version" "staff") }}{{end}}
+	    	{{block "release-list-partial" (dict "dates" .ios_staff "job" .ios_staff_job) }}{{end}}
+	    </div><!-- /.tv-col -->
+	    <div class="tv-col">
+	    	{{block "tv-head-partial" (dict "platform" "ios" "version" "yolo") }}{{end}}
+	    	{{block "release-list-partial" (dict "dates" .ios_yolo "job" .ios_yolo_job) }}{{end}}
+	    </div><!-- /.tv-col -->
+	</div><!-- /.tv-container -->
+</div><!-- /.page-container -->
 {{end}}
