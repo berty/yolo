@@ -23,7 +23,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .page-head .ph-text b {text-transform:uppercase;}
 .page-head div {display:inline-block; float:left;}
 
-.page-container{display:block;padding:10px 15px}
+.page-container{display:block;padding:10px 15px;}
 
 .b-head a,.date-line{letter-spacing:1px}
 .block {display:block;width:100%;margin-bottom:25px;color:rgba(255,255,255,.6);font-size:1.8rem; line-height:1.5;}
@@ -65,5 +65,35 @@ a{font-size:2.1rem;line-height:1.5;font-weight:500;color:#FFF; text-decoration:n
 .error .b-head{background-color: #E94E6B;}
 .error .b-diff .btn {color:#EE5B77;}
 
-
-
+.page-container.tv {width:100%;display:block;position:relative;padding:0;}
+.tv-container {display:flex;}
+.tv-col {
+	flex-grow:0;
+	flex-shrink:1;
+	padding:15px;
+}
+.tv-head {
+	color:rgba(255,255,255,.6);
+	font-size:4rem;
+	display:flex;
+}
+.th-icon {fill:rgba(255,255,255,.6);height:200px;width:200px;margin-right:25px;}
+.th-text {
+	margin-top:50px;
+}
+.tv-head b {
+	text-transform: uppercase;
+}
+.tv-head b.c-staff {
+	color:#E94E6B;
+}
+.tv-head b.c-yolo {
+	color:#2cc5a4;
+}
+.tv .b-head {
+	width:590px;
+	font-size:2.8rem;
+}
+.tv .b-head a {
+	font-size:3rem;
+}
