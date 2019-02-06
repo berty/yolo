@@ -38,7 +38,8 @@ type ServerConfig struct {
 	Username string
 	Password string
 
-	Debug bool
+	Debug   bool
+	NoSlack bool
 }
 
 type buildMap map[int]*circleci.Build
@@ -77,6 +78,7 @@ type Server struct {
 	e        *echo.Echo
 	cache    Cache
 	Debug    bool
+	NoSlack  bool
 
 	// templates/static
 	funcmap        *ctxFuncmap
@@ -111,10 +113,6 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.Gzip())
-	e.HTTPErrorHandler = func(err error, c echo.Context) {
-		sendUserErrorToSlack(c, err)
-		e.DefaultHTTPErrorHandler(err, c)
-	}
 	templatesBox := packr.NewBox("../templates")
 	s := &Server{
 		client:       cfg.Client,
@@ -125,6 +123,11 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 		salt:         randStr,
 		TemplatesBox: &templatesBox,
 		Debug:        cfg.Debug,
+		NoSlack:      cfg.NoSlack,
+	}
+	e.HTTPErrorHandler = func(err error, c echo.Context) {
+		s.sendUserErrorToSlack(c, err)
+		e.DefaultHTTPErrorHandler(err, c)
 	}
 	e.Renderer = s // see https://echo.labstack.com/guide/templates for details
 
@@ -206,6 +209,9 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	auth.GET("/artifacts/:build_id", s.Artifacts)
 	auth.GET("/ipa/build/:token/*", s.GetIPA)
 	auth.GET("/apk/build/:token/*", s.GetAPK)
+	auth.HEAD("/ipa/build/:token/*", func(c echo.Context) error {
+		return c.String(405, "405")
+	})
 	auth.GET("/itms/release/:token/*", s.Itms)
 
 	return s, nil

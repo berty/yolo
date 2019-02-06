@@ -4,6 +4,8 @@ github.com/Masterminds/semver
 github.com/Masterminds/sprig
 # github.com/aokoli/goutils v1.1.0
 github.com/aokoli/goutils
+# github.com/ashwanthkumar/slack-go-webhook v0.0.0-20181208062437-4a19b1a876b7
+github.com/ashwanthkumar/slack-go-webhook
 # github.com/dgrijalva/jwt-go v3.2.0+incompatible
 github.com/dgrijalva/jwt-go
 # github.com/gobuffalo/envy v1.6.12
@@ -50,8 +52,12 @@ github.com/labstack/gommon/random
 github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.4
 github.com/mattn/go-isatty
+# github.com/moul/http2curl v1.0.0
+github.com/moul/http2curl
 # github.com/oxtoacart/bpool v0.0.0-20150712133111-4e1c5567d7c2
 github.com/oxtoacart/bpool
+# github.com/parnurzeal/gorequest v0.2.15
+github.com/parnurzeal/gorequest
 # github.com/pkg/errors v0.8.1
 github.com/pkg/errors
 # github.com/rogpeppe/go-internal v1.1.0
@@ -83,6 +89,7 @@ golang.org/x/crypto/acme/autocert
 golang.org/x/crypto/pbkdf2
 golang.org/x/crypto/acme
 # golang.org/x/net v0.0.0-20190108225652-1e06a53dbb7e
+golang.org/x/net/publicsuffix
 golang.org/x/net/context/ctxhttp
 golang.org/x/net/context
 # golang.org/x/oauth2 v0.0.0-20190130055435-99b60b757ec1

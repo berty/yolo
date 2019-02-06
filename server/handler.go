@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	slack "github.com/ashwanthkumar/slack-go-webhook"
@@ -32,9 +33,13 @@ const (
 	SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/T2AJ2MM5Z/BFX8ZASKW/***REMOVED***"
 )
 
-var reIPA = regexp.MustCompile("/([^/]+).ipa$")
-var reAPK = regexp.MustCompile("/([^/]+).apk$")
-var reVersion = regexp.MustCompile("/version$")
+var (
+	reIPA           = regexp.MustCompile("/([^/]+).ipa$")
+	reAPK           = regexp.MustCompile("/([^/]+).apk$")
+	reVersion       = regexp.MustCompile("/version$")
+	slackFloodMap   = map[string]time.Time{}
+	slackFloodMutex = sync.Mutex{}
+)
 
 func (s *Server) Build(c echo.Context) error {
 	id := c.Param("build_id")
@@ -93,35 +98,68 @@ func (s *Server) getVersion(arts []*circleci.Artifact, kind string) (string, err
 	return "", fmt.Errorf("no version found")
 }
 
-func sendUserActionToSlack(c echo.Context, action string, color string) {
+func userProfileFromContext(c echo.Context) (map[string]interface{}, error) {
 	sessAuth, err := session.Get(authSessionCookieName, c)
 	if err != nil {
-		c.Logger().Warn("failed to parse cookie:", err.Error())
-		//c.Redirect(http.StatusTemporaryRedirect, "/oauth/logout")
+		return nil, err
+	}
+	if sessAuth != nil && sessAuth.Values != nil && sessAuth.Values["profile"] != nil {
+		return sessAuth.Values["profile"].(map[string]interface{}), nil
+	}
+	return nil, nil
+}
+
+func (s *Server) sendUserActionToSlack(c echo.Context, action, color, channel, floodChannel string) {
+	if s.NoSlack {
 		return
 	}
 
+	profile, err := userProfileFromContext(c)
 	attachment := slack.Attachment{}
-	profile := sessAuth.Values["profile"].(map[string]interface{})
-	if profile["picture"] != nil {
-		profilePicture := profile["picture"].(string)
-		attachment.ThumbnailUrl = &profilePicture
+	auth := c.RealIP()
+
+	username := "anonymous"
+	if err != nil {
+		username = err.Error()
 	}
-	//username := fmt.Sprintf("%s - %s (%s)", profile["nickname"].(string), profile["name"].(string), profile["sub"].(string))
+	if profile != nil {
+		username = profile["name"].(string)
+		if profile["picture"] != nil {
+			profilePicture := profile["picture"].(string)
+			attachment.ThumbnailUrl = &profilePicture
+		}
+		auth = fmt.Sprintf("realip=%q nickname=%q sub=%q", c.RealIP(), profile["nickname"].(string), profile["sub"].(string))
+	}
+
+	username += fmt.Sprintf(" (%s)", c.RealIP())
 	//attachment.AddField(slack.Field{Title: "action", Value: action, Short: true})
 	//attachment.AddField(slack.Field{Title: "author", Value: username, Short: true})
 	//attachment.AddField(slack.Field{Title: "ip", Value: c.RealIP(), Short: true})
 	//attachment.AddField(slack.Field{Title: "path", Value: c.Path(), Short: true})
 	//attachment.AddField(slack.Field{Title: "groups", Value: strings.Join(profile["groups"].([]string), ","), Short: true})
-	attachment.AddField(slack.Field{Title: "user-agent", Value: c.Request().UserAgent(), Short: true})
-	attachment.AddField(slack.Field{Title: "auth", Value: fmt.Sprintf("nickname=%q sub=%q", profile["nickname"].(string), profile["sub"].(string)), Short: true})
+	ua := c.Request().UserAgent()
+	attachment.AddField(slack.Field{Title: "user-agent", Value: ua, Short: true})
+	attachment.AddField(slack.Field{Title: "auth", Value: auth, Short: true})
 	attachment.Color = &color
+
+	if channel != floodChannel {
+		slackFloodMutex.Lock()
+		defer slackFloodMutex.Unlock()
+		key := fmt.Sprintf("%s:%s:%s:%s", username, action, auth, ua)
+		last, found := slackFloodMap[key]
+
+		floodDuration := 300 * time.Second
+		if found && -time.Until(last) < floodDuration {
+			channel = floodChannel
+		}
+		slackFloodMap[key] = time.Now()
+	}
 
 	payload := slack.Payload{
 		Text: fmt.Sprintf("%s (%s)", action, c.Path()),
 		//Username: "yolo",
-		Username:  profile["name"].(string),
-		Channel:   "#yolologs",
+		Username:  username,
+		Channel:   channel,
 		IconEmoji: ":yolo:",
 		//IconUrl:     profile["picture"].(string),
 		Attachments: []slack.Attachment{attachment},
@@ -133,12 +171,12 @@ func sendUserActionToSlack(c echo.Context, action string, color string) {
 	}()
 }
 
-func sendUserErrorToSlack(c echo.Context, err error) {
-	sendUserActionToSlack(c, fmt.Sprintf("error: %v", err), "#ff0000")
+func (s *Server) sendUserErrorToSlack(c echo.Context, err error) {
+	s.sendUserActionToSlack(c, fmt.Sprintf("error: %v", err), "#ff0000", "#yolodebug", "#yolodebug")
 }
 
 func (s *Server) GetIPA(c echo.Context) error {
-	sendUserActionToSlack(c, "iOS download", "#0000ff")
+	s.sendUserActionToSlack(c, "IPA download", "#0000ff", "#yolologs", "#yolologs")
 	id := c.Param("*")
 	arts, err := s.client.GetArtifacts(id, true)
 	if err != nil {
@@ -163,7 +201,7 @@ func (s *Server) GetIPA(c echo.Context) error {
 }
 
 func (s *Server) GetAPK(c echo.Context) error {
-	sendUserActionToSlack(c, "Android download", "#00ff00")
+	s.sendUserActionToSlack(c, "Android download", "#00ff00", "#yolologs", "#yolologs")
 	id := c.Param("*")
 	arts, err := s.client.GetArtifacts(id, true)
 	if err != nil {
@@ -334,6 +372,8 @@ type ReleasesDay struct {
 }
 
 func (s *Server) ListRelease(c echo.Context, job string) error {
+	s.sendUserActionToSlack(c, fmt.Sprintf("List Releases (%s)", job), "#00ffff", "#yolologs", "#yolodebug")
+
 	data := map[string]interface{}{}
 
 	var err error
@@ -507,6 +547,8 @@ func (s *Server) ReleaseIOS(c echo.Context) error {
 }
 
 func (s *Server) Itms(c echo.Context) error {
+	s.sendUserActionToSlack(c, "ITMS download", "#0000ff", "#yolologs", "#yolologs")
+
 	pull := c.Param("*")
 
 	var theBuild *circleci.Build

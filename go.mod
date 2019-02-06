@@ -5,15 +5,18 @@ require (
 	github.com/aokoli/goutils v1.1.0 // indirect
 	github.com/ashwanthkumar/slack-go-webhook v0.0.0-20181208062437-4a19b1a876b7
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
+	github.com/elazarl/goproxy v0.0.0-20181111060418-2ce16c963a8a // indirect
 	github.com/gobuffalo/packd v0.0.0-20181212173646-eca3b8fd6687
 	github.com/gobuffalo/packr v1.22.0
 	github.com/google/uuid v1.1.0 // indirect
+	github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e // indirect
 	github.com/gorilla/mux v1.7.0 // indirect
 	github.com/gorilla/sessions v1.1.3
 	github.com/hako/durafmt v0.0.0-20180520121703-7b7ae1e72ead
 	github.com/huandu/xstrings v1.2.0 // indirect
 	github.com/imdario/mergo v0.3.7 // indirect
 	github.com/jszwedko/go-circleci v0.2.0
+	github.com/jtolds/gls v4.2.1+incompatible // indirect
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/echo-contrib v0.0.0-20180916154247-4aaa9fadfb82
 	github.com/labstack/gommon v0.2.7 // indirect
@@ -23,6 +26,8 @@ require (
 	github.com/oxtoacart/bpool v0.0.0-20150712133111-4e1c5567d7c2
 	github.com/parnurzeal/gorequest v0.2.15 // indirect
 	github.com/pkg/errors v0.8.1
+	github.com/smartystreets/assertions v0.0.0-20190116191733-b6c0e53d7304 // indirect
+	github.com/smartystreets/goconvey v0.0.0-20181108003508-044398e4856c // indirect
 	github.com/spf13/cobra v0.0.3
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v0.0.0-20170224212429-dcecefd839c4 // indirect
