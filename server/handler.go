@@ -93,7 +93,7 @@ func (s *Server) getVersion(arts []*circleci.Artifact, kind string) (string, err
 	return "", fmt.Errorf("no version found")
 }
 
-func (s *Server) sendUserActionToSlack(c echo.Context, action string, color string) {
+func (s *Server) sendUserActionToSlack(c echo.Context, action string, color string, channel string) {
 	if s.NoSlack {
 		return
 	}
@@ -130,7 +130,7 @@ func (s *Server) sendUserActionToSlack(c echo.Context, action string, color stri
 		Text: fmt.Sprintf("%s (%s)", action, c.Path()),
 		//Username: "yolo",
 		Username:  username,
-		Channel:   "#yolologs",
+		Channel:   channel,
 		IconEmoji: ":yolo:",
 		//IconUrl:     profile["picture"].(string),
 		Attachments: []slack.Attachment{attachment},
@@ -143,11 +143,11 @@ func (s *Server) sendUserActionToSlack(c echo.Context, action string, color stri
 }
 
 func (s *Server) sendUserErrorToSlack(c echo.Context, err error) {
-	s.sendUserActionToSlack(c, fmt.Sprintf("error: %v", err), "#ff0000")
+	s.sendUserActionToSlack(c, fmt.Sprintf("error: %v", err), "#ff0000", "#yolodebug")
 }
 
 func (s *Server) GetIPA(c echo.Context) error {
-	s.sendUserActionToSlack(c, "IPA download", "#0000ff")
+	s.sendUserActionToSlack(c, "IPA download", "#0000ff", "#yolologs")
 	id := c.Param("*")
 	arts, err := s.client.GetArtifacts(id, true)
 	if err != nil {
@@ -172,7 +172,7 @@ func (s *Server) GetIPA(c echo.Context) error {
 }
 
 func (s *Server) GetAPK(c echo.Context) error {
-	s.sendUserActionToSlack(c, "Android download", "#00ff00")
+	s.sendUserActionToSlack(c, "Android download", "#00ff00", "#yolologs")
 	id := c.Param("*")
 	arts, err := s.client.GetArtifacts(id, true)
 	if err != nil {
@@ -343,7 +343,7 @@ type ReleasesDay struct {
 }
 
 func (s *Server) ListRelease(c echo.Context, job string) error {
-	s.sendUserActionToSlack(c, fmt.Sprintf("List Releases (%s)", job), "#00ffff")
+	s.sendUserActionToSlack(c, fmt.Sprintf("List Releases (%s)", job), "#00ffff", "#yolodebug")
 
 	data := map[string]interface{}{}
 
@@ -518,7 +518,7 @@ func (s *Server) ReleaseIOS(c echo.Context) error {
 }
 
 func (s *Server) Itms(c echo.Context) error {
-	s.sendUserActionToSlack(c, "ITMS download", "#0000ff")
+	s.sendUserActionToSlack(c, "ITMS download", "#0000ff", "#yolologs")
 
 	pull := c.Param("*")
 
