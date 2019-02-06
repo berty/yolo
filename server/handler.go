@@ -147,7 +147,9 @@ func (s *Server) sendUserActionToSlack(c echo.Context, action, color, channel, f
 		defer slackFloodMutex.Unlock()
 		key := fmt.Sprintf("%s:%s:%s:%s", username, action, auth, ua)
 		last, found := slackFloodMap[key]
-		if found && -time.Until(last) < 30*time.Second {
+
+		floodDuration := 300 * time.Second
+		if found && -time.Until(last) < floodDuration {
 			channel = floodChannel
 		}
 		slackFloodMap[key] = time.Now()
