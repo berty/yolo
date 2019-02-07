@@ -6,6 +6,7 @@ import (
 	"io"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/Masterminds/sprig"
 	"github.com/gobuffalo/packd"
@@ -39,6 +40,7 @@ func (s *Server) Render(w io.Writer, name string, data interface{}, c echo.Conte
 func (s *Server) getFuncmap() *ctxFuncmap {
 	f := &ctxFuncmap{}
 	f.fm = sprig.FuncMap()
+	f.fm["assetSuffix"] = func() string { return time.Now().String() }
 	f.fm["yolo"] = func() string { return "yolo" } // custom func example
 	f.fm["jobToPlatform"] = func(job string) string {
 		switch job {
