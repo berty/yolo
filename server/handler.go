@@ -394,7 +394,7 @@ func (s *Server) ga(c echo.Context, event interface{}) {
 		return
 	}
 	go func() {
-		analytics, err := ga.NewClient("UA-133664781-3")
+		analytics, err := ga.NewClient("UA-124224137-3")
 		if err != nil {
 			c.Logger().Warn("failed to initialize GA client: ", fmt.Sprintf("%v", err))
 			return
