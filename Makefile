@@ -7,7 +7,7 @@ PASSWORD       ?= 'xor+=cool'
 
 .PHONY: run
 run: install
-	yolo -t $(CIRCLE_TOKEN) serve --debug --no-slack
+	yolo -t $(CIRCLE_TOKEN) serve --debug --no-slack --no-ga
 
 .PHONY: install
 install:

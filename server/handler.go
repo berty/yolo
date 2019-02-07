@@ -16,6 +16,7 @@ import (
 
 	slack "github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/hako/durafmt"
+	ga "github.com/jpillora/go-ogle-analytics"
 	circleci "github.com/jszwedko/go-circleci"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo-contrib/session"
@@ -109,16 +110,29 @@ func userProfileFromContext(c echo.Context) (map[string]interface{}, error) {
 	return nil, nil
 }
 
+func clientIDFromContext(c echo.Context) string {
+	username := "anonymous"
+	profile, err := userProfileFromContext(c)
+	if err != nil {
+		username = err.Error()
+	}
+	if profile != nil {
+		username = profile["name"].(string)
+	}
+	username += ":" + c.RealIP()
+	return username
+}
+
 func (s *Server) sendUserActionToSlack(c echo.Context, action, color, channel, floodChannel string) {
 	if s.NoSlack {
 		return
 	}
 
-	profile, err := userProfileFromContext(c)
 	attachment := slack.Attachment{}
 	auth := c.RealIP()
 
 	username := "anonymous"
+	profile, err := userProfileFromContext(c)
 	if err != nil {
 		username = err.Error()
 	}
@@ -172,10 +186,12 @@ func (s *Server) sendUserActionToSlack(c echo.Context, action, color, channel, f
 }
 
 func (s *Server) sendUserErrorToSlack(c echo.Context, err error) {
+	s.ga(c, ga.NewException().Description(err.Error()))
 	s.sendUserActionToSlack(c, fmt.Sprintf("error: %v", err), "#ff0000", "#yolodebug", "#yolodebug")
 }
 
 func (s *Server) GetIPA(c echo.Context) error {
+	s.ga(c, ga.NewPageview())
 	s.sendUserActionToSlack(c, "IPA download", "#0000ff", "#yolologs", "#yolologs")
 	id := c.Param("*")
 	arts, err := s.client.GetArtifacts(id, true)
@@ -201,6 +217,7 @@ func (s *Server) GetIPA(c echo.Context) error {
 }
 
 func (s *Server) GetAPK(c echo.Context) error {
+	s.ga(c, ga.NewPageview())
 	s.sendUserActionToSlack(c, "Android download", "#00ff00", "#yolologs", "#yolologs")
 	id := c.Param("*")
 	arts, err := s.client.GetArtifacts(id, true)
@@ -244,6 +261,7 @@ func (s *Server) ListReleaseAndroidBetaJson(c echo.Context) error {
 }
 
 func (s *Server) ListReleaseJson(c echo.Context, job string) error {
+	s.ga(c, ga.NewPageview())
 	// FIXME: reuse code from ListRelease
 	type release struct {
 		Branch      string    `json:"branch"`
@@ -371,7 +389,47 @@ type ReleasesDay struct {
 	Releases []ReleaseEntry
 }
 
+func (s *Server) ga(c echo.Context, event interface{}) {
+	if s.NoGa {
+		return
+	}
+	go func() {
+		analytics, err := ga.NewClient("UA-133664781-3")
+		if err != nil {
+			c.Logger().Warn("failed to initialize GA client: ", fmt.Sprintf("%v", err))
+			return
+		}
+
+		analytics.ClientID(clientIDFromContext(c))
+		analytics.UserAgentOverride(c.Request().Header.Get("User-Agent"))
+		analytics.DocumentLocationURL(c.Request().URL.String())
+		ref := c.Request().Header.Get("Referrer")
+		if ref == "" {
+			ref = c.Request().Header.Get("Origin")
+		}
+		analytics.DocumentReferrer(ref)
+		analytics.IPOverride(c.RealIP())
+		switch e := event.(type) {
+		case *ga.Pageview:
+			if err := analytics.Send(e); err != nil {
+				c.Logger().Warn("failed to send analytics: ", fmt.Sprintf("%v", err))
+			}
+		case *ga.Exception:
+			if err := analytics.Send(e); err != nil {
+				c.Logger().Warn("failed to send analytics: ", fmt.Sprintf("%v", err))
+			}
+		case *ga.Event:
+			if err := analytics.Send(e); err != nil {
+				c.Logger().Warn("failed to send analytics: ", fmt.Sprintf("%v", err))
+			}
+		default:
+			c.Logger().Warn("unknown event type %T", e)
+		}
+	}()
+}
+
 func (s *Server) ListRelease(c echo.Context, job string) error {
+	s.ga(c, ga.NewPageview())
 	s.sendUserActionToSlack(c, fmt.Sprintf("List Releases (%s)", job), "#00ffff", "#yolologs", "#yolodebug")
 
 	data := map[string]interface{}{}
@@ -386,6 +444,7 @@ func (s *Server) ListRelease(c echo.Context, job string) error {
 }
 
 func (s *Server) GetReleasesByDate(c echo.Context, job string) (*ReleasesByDate, error) {
+	s.ga(c, ga.NewPageview())
 	releasesByDateMap := map[string][]ReleaseEntry{}
 
 	oncePerBranch := map[string]bool{}
@@ -547,6 +606,7 @@ func (s *Server) ReleaseIOS(c echo.Context) error {
 }
 
 func (s *Server) Itms(c echo.Context) error {
+	s.ga(c, ga.NewPageview())
 	s.sendUserActionToSlack(c, "ITMS download", "#0000ff", "#yolologs", "#yolologs")
 
 	pull := c.Param("*")

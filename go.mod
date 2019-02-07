@@ -15,6 +15,7 @@ require (
 	github.com/hako/durafmt v0.0.0-20180520121703-7b7ae1e72ead
 	github.com/huandu/xstrings v1.2.0 // indirect
 	github.com/imdario/mergo v0.3.7 // indirect
+	github.com/jpillora/go-ogle-analytics v0.0.0-20161213085824-14b04e0594ef
 	github.com/jszwedko/go-circleci v0.2.0
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
 	github.com/labstack/echo v3.3.10+incompatible

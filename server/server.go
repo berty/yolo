@@ -22,8 +22,10 @@ import (
 	"github.com/oxtoacart/bpool"
 )
 
-var reAndroidAgent = regexp.MustCompile("(?i)android")
-var reIOSAgent = regexp.MustCompile("(?i)iPad|iPhone|iPod")
+var (
+	reAndroidAgent = regexp.MustCompile("(?i)android")
+	reIOSAgent     = regexp.MustCompile("(?i)iPad|iPhone|iPod")
+)
 
 type httperror struct {
 	message string `json:message`
@@ -40,6 +42,7 @@ type ServerConfig struct {
 
 	Debug   bool
 	NoSlack bool
+	NoGa    bool
 }
 
 type buildMap map[int]*circleci.Build
@@ -79,6 +82,7 @@ type Server struct {
 	cache    Cache
 	Debug    bool
 	NoSlack  bool
+	NoGa     bool
 
 	// templates/static
 	funcmap        *ctxFuncmap
@@ -124,6 +128,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 		TemplatesBox: &templatesBox,
 		Debug:        cfg.Debug,
 		NoSlack:      cfg.NoSlack,
+		NoGa:         cfg.NoGa,
 	}
 	e.HTTPErrorHandler = func(err error, c echo.Context) {
 		s.sendUserErrorToSlack(c, err)

@@ -236,6 +236,8 @@ github.com/jmoiron/sqlx v0.0.0-20180614180643-0dae4fefe7c0/go.mod h1:IiEW3SEiiEr
 github.com/joho/godotenv v1.2.0/go.mod h1:7hK45KPybAkOC6peb+G5yklZfMxEjkZhHbwpqxOKXbg=
 github.com/joho/godotenv v1.3.0 h1:Zjp+RcGpHhGlrMbJzXTrZZPrWj+1vfm90La1wgB6Bhc=
 github.com/joho/godotenv v1.3.0/go.mod h1:7hK45KPybAkOC6peb+G5yklZfMxEjkZhHbwpqxOKXbg=
+github.com/jpillora/go-ogle-analytics v0.0.0-20161213085824-14b04e0594ef h1:jLpa0vamfyIGeIJ/CfUJEWoKriw4ODeOgF1XxDvgMZ4=
+github.com/jpillora/go-ogle-analytics v0.0.0-20161213085824-14b04e0594ef/go.mod h1:PlwhC7q1VSK73InDzdDatVetQrTsQHIbOvcJAZzitY0=
 github.com/jszwedko/go-circleci v0.2.0 h1:ytpLKtpjQn2wq+/IArlBvqfb1CgbwA2UiBGXCwWqNw4=
 github.com/jszwedko/go-circleci v0.2.0/go.mod h1:z1630OiB7oGxZwE90het04Ld7rIu0AKvY9JCRnaBdoE=
 github.com/jtolds/gls v4.2.1+incompatible h1:fSuqC+Gmlu6l/ZYAoZzx2pyucC8Xza35fpRVWLVmUEE=

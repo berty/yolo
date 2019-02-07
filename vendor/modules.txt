@@ -36,6 +36,8 @@ github.com/imdario/mergo
 github.com/inconshreveable/mousetrap
 # github.com/joho/godotenv v1.3.0
 github.com/joho/godotenv
+# github.com/jpillora/go-ogle-analytics v0.0.0-20161213085824-14b04e0594ef
+github.com/jpillora/go-ogle-analytics
 # github.com/jszwedko/go-circleci v0.2.0
 github.com/jszwedko/go-circleci
 # github.com/labstack/echo v3.3.10+incompatible
