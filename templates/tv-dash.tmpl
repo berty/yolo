@@ -7,21 +7,28 @@
 <div class="page-container tv">
 	<div class="tv-container">
 		<div class="tv-col">
-			{{block "tv-head-partial" (dict "platform" "android" "version" "staff") }}{{end}}
-
-			{{block "release-list-partial" (dict "dates" .android_staff "job" .android_staff_job) }}{{end}}
+			<div class="tv-col-inner">
+				{{block "tv-head-partial" (dict "platform" "android" "version" "staff") }}{{end}}
+				{{block "release-list-partial" (dict "dates" .android_staff "job" .android_staff_job) }}{{end}}
+			</div>
 		</div><!-- /.tv-col -->
 	    <div class="tv-col">
-	    	{{block "tv-head-partial" (dict "platform" "android" "version" "yolo") }}{{end}}
-	    	{{block "release-list-partial" (dict "dates" .android_yolo "job" .android_yolo_job) }}{{end}}
+	    	<div class="tv-col-inner">
+	    		{{block "tv-head-partial" (dict "platform" "android" "version" "yolo") }}{{end}}
+	    		{{block "release-list-partial" (dict "dates" .android_yolo "job" .android_yolo_job) }}{{end}}
+	    	</div>
 	    </div><!-- /.tv-col -->
 	    <div class="tv-col">
-	    	{{block "tv-head-partial" (dict "platform" "ios" "version" "staff") }}{{end}}
-	    	{{block "release-list-partial" (dict "dates" .ios_staff "job" .ios_staff_job) }}{{end}}
+	    	<div class="tv-col-inner">
+	    		{{block "tv-head-partial" (dict "platform" "ios" "version" "staff") }}{{end}}
+	    		{{block "release-list-partial" (dict "dates" .ios_staff "job" .ios_staff_job) }}{{end}}
+	    	</div>
 	    </div><!-- /.tv-col -->
 	    <div class="tv-col">
-	    	{{block "tv-head-partial" (dict "platform" "ios" "version" "yolo") }}{{end}}
-	    	{{block "release-list-partial" (dict "dates" .ios_yolo "job" .ios_yolo_job) }}{{end}}
+	    	<div class="tv-col-inner">
+	    		{{block "tv-head-partial" (dict "platform" "ios" "version" "yolo") }}{{end}}
+	    		{{block "release-list-partial" (dict "dates" .ios_yolo "job" .ios_yolo_job) }}{{end}}
+	    	</div>
 	    </div><!-- /.tv-col -->
 	</div><!-- /.tv-container -->
 </div><!-- /.page-container -->
