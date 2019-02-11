@@ -16,6 +16,7 @@ import (
 
 	"github.com/berty/staff/tools/release/pkg/circle"
 	"github.com/gobuffalo/packr"
+	"github.com/jinzhu/gorm"
 	circleci "github.com/jszwedko/go-circleci"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -43,6 +44,8 @@ type ServerConfig struct {
 	Debug   bool
 	NoSlack bool
 	NoGa    bool
+
+	SqlConn string
 }
 
 type buildMap map[int]*circleci.Build
@@ -91,6 +94,15 @@ type Server struct {
 	bufpool        *bpool.BufferPool
 	StaticBox      *packr.Box
 	TemplatesBox   *packr.Box
+
+	// sql
+	db *gorm.DB
+}
+
+func (s *Server) Close() {
+	if s.db != nil {
+		s.db.Close()
+	}
 }
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -137,6 +149,10 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	e.Renderer = s // see https://echo.labstack.com/guide/templates for details
 
 	if err := s.loadTemplates(); err != nil {
+		return nil, err
+	}
+
+	if err := s.loadDB(cfg.SqlConn); err != nil {
 		return nil, err
 	}
 
