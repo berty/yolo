@@ -200,7 +200,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	release.GET("/ios-staff.json", s.ListReleaseIOSJson)
 	release.GET("/ios.json", s.ListReleaseIOSBetaJson)
 	release.GET("/android.json", s.ListReleaseAndroidJson)
-	release.GET("/desktop.json", s.ListReleaseZIPJson)
+	release.GET("/mac.json", s.ListReleaseZIPJson)
 
 	staffRelease := e.Group("/release/staff")
 	staffRelease.Use(o.ProtectMiddleware("/oauth/login", func(profile map[string]interface{}) bool {
@@ -218,7 +218,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	}))
 	staffRelease.GET("/ios/*", s.ReleaseIOS)
 	staffRelease.GET("/ios", s.ListReleaseIOS)
-	staffRelease.GET("/desktop", s.ListReleaseZip)
+	staffRelease.GET("/mac", s.ListReleaseZip)
 	staffRelease.GET("/android", s.ListReleaseAndroid)
 	staffRelease.GET("/tv", s.TVDash)
 
