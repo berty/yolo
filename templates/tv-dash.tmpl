@@ -26,8 +26,14 @@
 	    </div><!-- /.tv-col -->
 	    <div class="tv-col">
 	    	<div class="tv-col-inner">
-	    		{{block "tv-head-partial" (dict "platform" "ios" "version" "yolo") }}{{end}}
+	    		{{block "tv-head-partial" (dict "platform" "ios" "version" "staff") }}{{end}}
 	    		{{block "release-list-partial" (dict "dates" .ios_yolo "job" .ios_yolo_job) }}{{end}}
+	    	</div>
+	    </div><!-- /.tv-col -->
+		<div class="tv-col">
+	    	<div class="tv-col-inner">
+	    		{{block "tv-head-partial" (dict "platform" "desktop" "version" "yolo") }}{{end}}
+	    		{{block "release-list-partial" (dict "dates" .desktop_yolo "job" .desktop_yolo_job) }}{{end}}
 	    	</div>
 	    </div><!-- /.tv-col -->
 	</div><!-- /.tv-container -->

@@ -23,20 +23,22 @@ import (
 )
 
 const (
-	BUNDLE_STAFF_ID   = "chat.berty.ios.staff"
-	BUNDLE_YOLO_ID    = "chat.berty.ios.yolo"
-	APP_STAFF_NAME    = "Berty Staff"
-	APP_YOLO_NAME     = "Berty Yolo"
-	IOS_STAFF_JOB     = "client.rn.ios"
-	IOS_YOLO_JOB      = "client.rn.ios-beta"
-	ANDROID_STAFF_JOB = "client.rn.android"
-	ANDROID_YOLO_JOB  = "client.rn.android-beta"
-	SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/T2AJ2MM5Z/BFX8ZASKW/***REMOVED***"
+	BUNDLE_STAFF_ID    = "chat.berty.ios.staff"
+	BUNDLE_YOLO_ID     = "chat.berty.ios.yolo"
+	APP_STAFF_NAME     = "Berty Staff"
+	APP_YOLO_NAME      = "Berty Yolo"
+	IOS_STAFF_JOB      = "client.rn.ios"
+	IOS_YOLO_JOB       = "client.rn.ios-beta"
+	DESKTOP_DARWIN_JOB = "client.rn.desktop"
+	ANDROID_STAFF_JOB  = "client.rn.android"
+	ANDROID_YOLO_JOB   = "client.rn.android-beta"
+	SLACK_WEBHOOK_URL  = "https://hooks.slack.com/services/T2AJ2MM5Z/BFX8ZASKW/***REMOVED***"
 )
 
 var (
 	reIPA           = regexp.MustCompile("/([^/]+).ipa$")
 	reAPK           = regexp.MustCompile("/([^/]+).apk$")
+	reZIP           = regexp.MustCompile("/([^/]+).zip$")
 	reVersion       = regexp.MustCompile("/version$")
 	slackFloodMap   = map[string]time.Time{}
 	slackFloodMutex = sync.Mutex{}
@@ -216,6 +218,32 @@ func (s *Server) GetIPA(c echo.Context) error {
 	return echo.NewHTTPError(http.StatusInternalServerError, "IPA not found")
 }
 
+func (s *Server) GetZIP(c echo.Context) error {
+	s.ga(c, ga.NewPageview())
+	s.sendUserActionToSlack(c, "ZIP download", "#0000ff", "#yolologs", "#yolologs")
+	id := c.Param("*")
+	arts, err := s.client.GetArtifacts(id, true)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	for _, art := range arts {
+		if !reZIP.MatchString(art.PrettyPath) {
+			continue
+		}
+
+		// Download client
+		rc, err := s.client.GetArtifact(art)
+		if err != nil {
+			return err
+		}
+
+		return c.Stream(http.StatusOK, "application/zip", rc)
+	}
+
+	return echo.NewHTTPError(http.StatusInternalServerError, "ZIP not found")
+}
+
 func (s *Server) GetAPK(c echo.Context) error {
 	s.ga(c, ga.NewPageview())
 	s.sendUserActionToSlack(c, "Android download", "#00ff00", "#yolologs", "#yolologs")
@@ -243,6 +271,10 @@ func (s *Server) GetAPK(c echo.Context) error {
 }
 
 var masterMerge = regexp.MustCompile(`^Merge pull request #([0-9]+) from (.*)$`)
+
+func (s *Server) ListReleaseZIPJson(c echo.Context) error {
+	return s.ListReleaseJson(c, DESKTOP_DARWIN_JOB)
+}
 
 func (s *Server) ListReleaseIOSJson(c echo.Context) error {
 	return s.ListReleaseJson(c, IOS_STAFF_JOB)
@@ -288,6 +320,9 @@ func (s *Server) ListReleaseJson(c echo.Context, job string) error {
 			id := strconv.Itoa(build.BuildNum)
 			androidToken := s.getHash(id)
 			href = fmt.Sprintf(`%s/auth/apk/build/%s/%s`, s.hostUrl, androidToken, id)
+		case DESKTOP_DARWIN_JOB:
+			id := strconv.Itoa(build.BuildNum)
+			href = fmt.Sprintf(`%s/auth/zip/build/%s/%s`, s.hostUrl, s.getHash(id), id)
 		default:
 			return nil
 		}
@@ -327,6 +362,10 @@ func (s *Server) ListReleaseJson(c echo.Context, job string) error {
 	return c.JSON(http.StatusOK, ret)
 }
 
+func (s *Server) ListReleaseZip(c echo.Context) error {
+	return s.ListRelease(c, DESKTOP_DARWIN_JOB)
+}
+
 func (s *Server) ListReleaseAndroid(c echo.Context) error {
 	return s.ListRelease(c, ANDROID_STAFF_JOB)
 }
@@ -359,10 +398,14 @@ func (s *Server) TVDash(c echo.Context) error {
 	if data["ios_yolo"], err = s.GetReleasesByDate(c, IOS_YOLO_JOB); err != nil {
 		return err
 	}
+	if data["desktop_yolo"], err = s.GetReleasesByDate(c, DESKTOP_DARWIN_JOB); err != nil {
+		return err
+	}
 	data["android_staff_job"] = ANDROID_STAFF_JOB
 	data["android_yolo_job"] = ANDROID_YOLO_JOB
 	data["ios_staff_job"] = IOS_STAFF_JOB
 	data["ios_yolo_job"] = IOS_YOLO_JOB
+	data["desktop_job"] = DESKTOP_DARWIN_JOB
 
 	return c.Render(http.StatusOK, "tv-dash.tmpl", data)
 }
@@ -546,6 +589,9 @@ func (s *Server) GetReleasesByDate(c echo.Context, job string) (*ReleasesByDate,
 			id := strconv.Itoa(build.BuildNum)
 			androidToken := s.getHash(id)
 			href = fmt.Sprintf(`%s/auth/apk/build/%s/%s`, s.hostUrl, androidToken, id)
+		case DESKTOP_DARWIN_JOB:
+			id := strconv.Itoa(build.BuildNum)
+			href = fmt.Sprintf(`%s/auth/zip/build/%s/%s`, s.hostUrl, s.getHash(id), id)
 		default:
 			return nil, echo.NewHTTPError(http.StatusInternalServerError, "unknow job")
 		}

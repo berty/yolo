@@ -200,6 +200,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	release.GET("/ios-staff.json", s.ListReleaseIOSJson)
 	release.GET("/ios.json", s.ListReleaseIOSBetaJson)
 	release.GET("/android.json", s.ListReleaseAndroidJson)
+	release.GET("/desktop.json", s.ListReleaseZIPJson)
 
 	staffRelease := e.Group("/release/staff")
 	staffRelease.Use(o.ProtectMiddleware("/oauth/login", func(profile map[string]interface{}) bool {
@@ -217,6 +218,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	}))
 	staffRelease.GET("/ios/*", s.ReleaseIOS)
 	staffRelease.GET("/ios", s.ListReleaseIOS)
+	staffRelease.GET("/desktop", s.ListReleaseZip)
 	staffRelease.GET("/android", s.ListReleaseAndroid)
 	staffRelease.GET("/tv", s.TVDash)
 
@@ -229,6 +231,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	auth.GET("/builds/*", s.Builds)
 	auth.GET("/artifacts/:build_id", s.Artifacts)
 	auth.GET("/ipa/build/:token/*", s.GetIPA)
+	auth.GET("/zip/build/:token/*", s.GetZIP)
 	auth.GET("/apk/build/:token/*", s.GetAPK)
 	auth.HEAD("/ipa/build/:token/*", func(c echo.Context) error {
 		return c.String(405, "405")

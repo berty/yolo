@@ -69,7 +69,7 @@ a{font-size:2.1rem;line-height:1.5;font-weight:500;color:#FFF; text-decoration:n
 .page-container.tv {width:100%;display:block;position:relative;padding:0;}
 .tv-container {}
 .tv-col {
-	width:25%;
+	width:20%;
 	display:inline-block;
 	float:left;
 }
