@@ -224,8 +224,8 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 
 	auth := e.Group("/auth")
 	if cfg.Password != "" {
-		excludeToken := regexp.MustCompile("^/auth/ipa/build/.+$|^/auth/apk/build/.+$|^/auth/itms/release/.+$")
-		auth.Use((s.basicAuth(cfg.Username, cfg.Password, excludeToken)))
+		tokenPaths := regexp.MustCompile("^/auth/ipa/build/.+$|^/auth/zip/build/.+$|^/auth/apk/build/.+$|^/auth/itms/release/.+$")
+		auth.Use((s.basicAuth(cfg.Username, cfg.Password, tokenPaths)))
 	}
 	auth.GET("/build/:build_id", s.Build)
 	auth.GET("/builds/*", s.Builds)
@@ -242,14 +242,14 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 }
 
 // Basic auth
-func (s *Server) basicAuth(username, password string, excludeToken *regexp.Regexp) func(next echo.HandlerFunc) echo.HandlerFunc {
+func (s *Server) basicAuth(username, password string, tokenPaths *regexp.Regexp) func(next echo.HandlerFunc) echo.HandlerFunc {
 	auth := middleware.BasicAuth(func(u, p string, c echo.Context) (bool, error) {
 		return username == u && password == p, nil
 	})
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			if excludeToken.MatchString(c.Path()) {
+			if tokenPaths.MatchString(c.Path()) {
 				if token := c.Param("token"); token != "" {
 					h := s.getHash(c.Param("*"))
 					if h == token {
