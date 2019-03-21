@@ -38,7 +38,7 @@ const (
 var (
 	reIPA           = regexp.MustCompile("/([^/]+).ipa$")
 	reAPK           = regexp.MustCompile("/([^/]+).apk$")
-	reZIP           = regexp.MustCompile("/([^/]+).zip$")
+	reDMG           = regexp.MustCompile("/([^/]+).dmg$")
 	reVersion       = regexp.MustCompile("/version$")
 	slackFloodMap   = map[string]time.Time{}
 	slackFloodMutex = sync.Mutex{}
@@ -218,9 +218,9 @@ func (s *Server) GetIPA(c echo.Context) error {
 	return echo.NewHTTPError(http.StatusInternalServerError, "IPA not found")
 }
 
-func (s *Server) GetZIP(c echo.Context) error {
+func (s *Server) GetDMG(c echo.Context) error {
 	s.ga(c, ga.NewPageview())
-	s.sendUserActionToSlack(c, "ZIP download", "#0000ff", "#yolologs", "#yolologs")
+	s.sendUserActionToSlack(c, "DMG download", "#0000ff", "#yolologs", "#yolologs")
 	id := c.Param("*")
 	arts, err := s.client.GetArtifacts(id, true)
 	if err != nil {
@@ -228,7 +228,7 @@ func (s *Server) GetZIP(c echo.Context) error {
 	}
 
 	for _, art := range arts {
-		if !reZIP.MatchString(art.PrettyPath) {
+		if !reDMG.MatchString(art.PrettyPath) {
 			continue
 		}
 
@@ -238,10 +238,11 @@ func (s *Server) GetZIP(c echo.Context) error {
 			return err
 		}
 
-		return c.Stream(http.StatusOK, "application/zip", rc)
+		c.Response().Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=Berty-%s.dmg", id))
+		return c.Stream(http.StatusOK, "application/x-apple-diskimage", rc)
 	}
 
-	return echo.NewHTTPError(http.StatusInternalServerError, "ZIP not found")
+	return echo.NewHTTPError(http.StatusInternalServerError, "DMG not found")
 }
 
 func (s *Server) GetAPK(c echo.Context) error {
@@ -264,6 +265,7 @@ func (s *Server) GetAPK(c echo.Context) error {
 			return err
 		}
 
+		c.Response().Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=Berty-%s.apk", id))
 		return c.Stream(http.StatusOK, "application/vnd.android.package-archive", rc)
 	}
 
@@ -272,7 +274,7 @@ func (s *Server) GetAPK(c echo.Context) error {
 
 var masterMerge = regexp.MustCompile(`^Merge pull request #([0-9]+) from (.*)$`)
 
-func (s *Server) ListReleaseZIPJson(c echo.Context) error {
+func (s *Server) ListReleaseDMGJson(c echo.Context) error {
 	return s.ListReleaseJson(c, MAC_STAFF_JOB)
 }
 
@@ -322,7 +324,7 @@ func (s *Server) ListReleaseJson(c echo.Context, job string) error {
 			href = fmt.Sprintf(`%s/auth/apk/build/%s/%s`, s.hostUrl, androidToken, id)
 		case MAC_STAFF_JOB:
 			id := strconv.Itoa(build.BuildNum)
-			href = fmt.Sprintf(`%s/auth/zip/build/%s/%s`, s.hostUrl, s.getHash(id), id)
+			href = fmt.Sprintf(`%s/auth/dmg/build/%s/%s`, s.hostUrl, s.getHash(id), id)
 		default:
 			return nil
 		}
@@ -362,7 +364,7 @@ func (s *Server) ListReleaseJson(c echo.Context, job string) error {
 	return c.JSON(http.StatusOK, ret)
 }
 
-func (s *Server) ListReleaseZip(c echo.Context) error {
+func (s *Server) ListReleaseDmg(c echo.Context) error {
 	return s.ListRelease(c, MAC_STAFF_JOB)
 }
 
@@ -591,7 +593,7 @@ func (s *Server) GetReleasesByDate(c echo.Context, job string) (*ReleasesByDate,
 			href = fmt.Sprintf(`%s/auth/apk/build/%s/%s`, s.hostUrl, androidToken, id)
 		case MAC_STAFF_JOB:
 			id := strconv.Itoa(build.BuildNum)
-			href = fmt.Sprintf(`%s/auth/zip/build/%s/%s`, s.hostUrl, s.getHash(id), id)
+			href = fmt.Sprintf(`%s/auth/dmg/build/%s/%s`, s.hostUrl, s.getHash(id), id)
 		default:
 			return nil, echo.NewHTTPError(http.StatusInternalServerError, "unknow job")
 		}

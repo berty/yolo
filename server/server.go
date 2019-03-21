@@ -200,7 +200,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	release.GET("/ios-staff.json", s.ListReleaseIOSJson)
 	release.GET("/ios.json", s.ListReleaseIOSBetaJson)
 	release.GET("/android.json", s.ListReleaseAndroidJson)
-	release.GET("/mac.json", s.ListReleaseZIPJson)
+	release.GET("/mac.json", s.ListReleaseDMGJson)
 
 	staffRelease := e.Group("/release/staff")
 	staffRelease.Use(o.ProtectMiddleware("/oauth/login", func(profile map[string]interface{}) bool {
@@ -218,20 +218,20 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	}))
 	staffRelease.GET("/ios/*", s.ReleaseIOS)
 	staffRelease.GET("/ios", s.ListReleaseIOS)
-	staffRelease.GET("/mac", s.ListReleaseZip)
+	staffRelease.GET("/mac", s.ListReleaseDmg)
 	staffRelease.GET("/android", s.ListReleaseAndroid)
 	staffRelease.GET("/tv", s.TVDash)
 
 	auth := e.Group("/auth")
 	if cfg.Password != "" {
-		tokenPaths := regexp.MustCompile("^/auth/ipa/build/.+$|^/auth/zip/build/.+$|^/auth/apk/build/.+$|^/auth/itms/release/.+$")
+		tokenPaths := regexp.MustCompile("^/auth/ipa/build/.+$|^/auth/dmg/build/.+$|^/auth/apk/build/.+$|^/auth/itms/release/.+$")
 		auth.Use((s.basicAuth(cfg.Username, cfg.Password, tokenPaths)))
 	}
 	auth.GET("/build/:build_id", s.Build)
 	auth.GET("/builds/*", s.Builds)
 	auth.GET("/artifacts/:build_id", s.Artifacts)
 	auth.GET("/ipa/build/:token/*", s.GetIPA)
-	auth.GET("/zip/build/:token/*", s.GetZIP)
+	auth.GET("/dmg/build/:token/*", s.GetDMG)
 	auth.GET("/apk/build/:token/*", s.GetAPK)
 	auth.HEAD("/ipa/build/:token/*", func(c echo.Context) error {
 		return c.String(405, "405")
