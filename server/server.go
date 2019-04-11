@@ -129,6 +129,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.Gzip())
+
 	templatesBox := packr.NewBox("../templates")
 	s := &Server{
 		client:       cfg.Client,
@@ -200,8 +201,14 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	release.GET("/ios-staff.json", s.ListReleaseIOSJson)
 	release.GET("/ios.json", s.ListReleaseIOSBetaJson)
 	release.GET("/android.json", s.ListReleaseAndroidJson)
-	release.GET("/mac.json", s.ListReleaseDMGJson)
+	desktop := release.Group("/desktop")
+	// since desktop cli make request from http://localhost:XXXX we're forced to add this
+	desktop.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{http.MethodGet, http.MethodOptions, http.MethodPut, http.MethodPost, http.MethodDelete},
+	}))
 
+	desktop.GET("/mac.json", s.ListReleaseDMGJson)
 	staffRelease := e.Group("/release/staff")
 	staffRelease.Use(o.ProtectMiddleware("/oauth/login", func(profile map[string]interface{}) bool {
 		if v, ok := profile["https://yolo.berty.io/groups"]; ok {
