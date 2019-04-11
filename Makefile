@@ -15,7 +15,7 @@ install:
 
 .PHONY: docker.build
 docker.build:
-	go mod vendor
+	GO111MODULE=on go mod vendor
 	docker build -t "$(IMAGE)" .
 
 .PHONY: docker.push
