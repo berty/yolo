@@ -203,7 +203,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	release.GET("/android.json", s.ListReleaseAndroidJson)
 	desktop := release.Group("/desktop")
 	// since desktop cli make request from http://localhost:XXXX we're forced to add this
-	desktop.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{http.MethodGet, http.MethodOptions, http.MethodPut, http.MethodPost, http.MethodDelete},
 	}))
