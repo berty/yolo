@@ -655,7 +655,7 @@ func (s *Server) GetReleasesByDate(c echo.Context, job string) (*ReleasesByDate,
 			id := strconv.Itoa(build.BuildNum)
 			androidToken := s.getHash(id)
 			href = fmt.Sprintf(`%s/auth/apk/build/%s/%s`, s.hostUrl, androidToken, id)
-		case MAC_STAFF_JOB:
+		case MAC_STAFF_JOB, MAC_YOLO_JOB:
 			id := strconv.Itoa(build.BuildNum)
 			href = fmt.Sprintf(`%s/auth/dmg/build/%s/%s`, s.hostUrl, s.getHash(id), id)
 		default:

@@ -31,7 +31,7 @@ deploy:
 		    --name yolo -d -p 80:3670 \
 		    $(IMAGE) \
 		      -t $(CIRCLE_TOKEN) serve \
-		      --hostname $(HOSTNAME) -p $(PASSWORD)"
+		      --hostname $(HOSTNAME)"
 
 .PHONY: prod-logs
 prod-logs:

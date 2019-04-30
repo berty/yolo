@@ -38,9 +38,6 @@ type ServerConfig struct {
 	Addr     string
 	Hostname string
 
-	Username string
-	Password string
-
 	Debug   bool
 	NoSlack bool
 	NoGa    bool
@@ -163,7 +160,6 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	e.GET("/", func(c echo.Context) error {
 		header := c.Request().Header
 		if agent := header.Get("User-Agent"); agent != "" {
-			fmt.Println(agent)
 			if reAndroidAgent.MatchString(agent) {
 				return c.Redirect(http.StatusTemporaryRedirect, "/release/android")
 			}
@@ -232,7 +228,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 
 	auth := e.Group("/auth")
 	tokenPaths := regexp.MustCompile("^/auth/ipa/build/.+$|^/auth/dmg/build/.+$|^/auth/apk/build/.+$|^/auth/itms/release/.+$")
-	auth.Use((s.basicAuth(cfg.Username, cfg.Password, tokenPaths)))
+	auth.Use(s.tokenMiddleware(tokenPaths))
 
 	auth.GET("/build/:build_id", s.Build)
 	auth.GET("/builds/*", s.Builds)
@@ -249,11 +245,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 }
 
 // Basic auth
-func (s *Server) basicAuth(username, password string, tokenPaths *regexp.Regexp) func(next echo.HandlerFunc) echo.HandlerFunc {
-	auth := middleware.BasicAuth(func(u, p string, c echo.Context) (bool, error) {
-		return username == u && password == p, nil
-	})
-
+func (s *Server) tokenMiddleware(tokenPaths *regexp.Regexp) func(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			if tokenPaths.MatchString(c.Path()) {
@@ -263,9 +255,11 @@ func (s *Server) basicAuth(username, password string, tokenPaths *regexp.Regexp)
 						return next(c)
 					}
 				}
+
+				return echo.NewHTTPError(http.StatusUnauthorized)
 			}
 
-			return auth(next)(c)
+			return next(c)
 		}
 	}
 }
