@@ -48,16 +48,16 @@ func (s *Server) getFuncmap() *ctxFuncmap {
 			return "ios"
 		case ANDROID_STAFF_JOB, ANDROID_YOLO_JOB:
 			return "android"
-		case MAC_STAFF_JOB:
+		case MAC_STAFF_JOB, MAC_YOLO_JOB:
 			return "mac"
 		}
 		return "other"
 	}
 	f.fm["jobToKind"] = func(job string) string {
 		switch job {
-		case IOS_STAFF_JOB, MAC_STAFF_JOB, ANDROID_STAFF_JOB:
+		case IOS_STAFF_JOB, ANDROID_STAFF_JOB, MAC_STAFF_JOB:
 			return "staff"
-		case IOS_YOLO_JOB, ANDROID_YOLO_JOB:
+		case IOS_YOLO_JOB, ANDROID_YOLO_JOB, MAC_YOLO_JOB:
 			return "yolo"
 		}
 		return "other"

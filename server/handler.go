@@ -30,6 +30,7 @@ const (
 	IOS_STAFF_JOB     = "client.rn.ios"
 	IOS_YOLO_JOB      = "client.rn.ios-beta"
 	MAC_STAFF_JOB     = "client.rn.mac"
+	MAC_YOLO_JOB      = "client.rn.mac-beta"
 	ANDROID_STAFF_JOB = "client.rn.android"
 	ANDROID_YOLO_JOB  = "client.rn.android-beta"
 	SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/T2AJ2MM5Z/BFX8ZASKW/***REMOVED***"
@@ -278,6 +279,10 @@ func (s *Server) ListReleaseDMGJson(c echo.Context) error {
 	return s.ListReleaseJson(c, MAC_STAFF_JOB)
 }
 
+func (s *Server) ListReleaseDMGBetaJson(c echo.Context) error {
+	return s.ListReleaseJson(c, MAC_YOLO_JOB)
+}
+
 func (s *Server) ListReleaseIOSJson(c echo.Context) error {
 	return s.ListReleaseJson(c, IOS_STAFF_JOB)
 }
@@ -322,7 +327,7 @@ func (s *Server) ListReleaseJson(c echo.Context, job string) error {
 			id := strconv.Itoa(build.BuildNum)
 			androidToken := s.getHash(id)
 			href = fmt.Sprintf(`%s/auth/apk/build/%s/%s`, s.hostUrl, androidToken, id)
-		case MAC_STAFF_JOB:
+		case MAC_STAFF_JOB, MAC_YOLO_JOB:
 			id := strconv.Itoa(build.BuildNum)
 			href = fmt.Sprintf(`%s/auth/dmg/build/%s/%s`, s.hostUrl, s.getHash(id), id)
 		default:
@@ -339,6 +344,7 @@ func (s *Server) ListReleaseJson(c echo.Context, job string) error {
 			ManifestURL: href,
 		}
 	}
+
 	for _, build := range s.cache.builds.Sorted() {
 		if build.BuildParameters["CIRCLE_JOB"] != job {
 			continue
@@ -352,20 +358,30 @@ func (s *Server) ListReleaseJson(c echo.Context, job string) error {
 		//out, _ := json.MarshalIndent(build, "", "  ")
 		//fmt.Println(string(out))
 		oncePerBranch[build.Branch] = true
+
 		if build.Branch == "master" {
 			ret.Master = releaseFromBuild(build)
-		} else {
-			ret.LatestPRs = append(ret.LatestPRs, releaseFromBuild(build))
-			if len(ret.LatestPRs) > 5 {
-				break
-			}
+			break // we got what we want, exit
 		}
+
+		// skip these until we add some protection on json handler
+
+		// else {
+		//      ret.LatestPRs = append(ret.LatestPRs, releaseFromBuild(build))
+		//      if len(ret.LatestPRs) > 5 {
+		//              break
+		//      }
+		// }
 	}
 	return c.JSON(http.StatusOK, ret)
 }
 
-func (s *Server) ListReleaseDmg(c echo.Context) error {
+func (s *Server) ListReleaseDMG(c echo.Context) error {
 	return s.ListRelease(c, MAC_STAFF_JOB)
+}
+
+func (s *Server) ListReleaseDMGBeta(c echo.Context) error {
+	return s.ListRelease(c, MAC_YOLO_JOB)
 }
 
 func (s *Server) ListReleaseAndroid(c echo.Context) error {
@@ -400,14 +416,19 @@ func (s *Server) TVDash(c echo.Context) error {
 	if data["ios_yolo"], err = s.GetReleasesByDate(c, IOS_YOLO_JOB); err != nil {
 		return err
 	}
-	if data["mac_yolo"], err = s.GetReleasesByDate(c, MAC_STAFF_JOB); err != nil {
+	if data["mac_staff"], err = s.GetReleasesByDate(c, MAC_STAFF_JOB); err != nil {
 		return err
 	}
+	if data["mac_yolo"], err = s.GetReleasesByDate(c, MAC_YOLO_JOB); err != nil {
+		return err
+	}
+
 	data["android_staff_job"] = ANDROID_STAFF_JOB
 	data["android_yolo_job"] = ANDROID_YOLO_JOB
 	data["ios_staff_job"] = IOS_STAFF_JOB
 	data["ios_yolo_job"] = IOS_YOLO_JOB
-	data["mac_job"] = MAC_STAFF_JOB
+	data["mac_staff_job"] = MAC_STAFF_JOB
+	data["mac_yolo_job"] = MAC_YOLO_JOB
 
 	return c.Render(http.StatusOK, "tv-dash.tmpl", data)
 }
@@ -427,11 +448,37 @@ type ReleaseEntry struct {
 	HREF       string
 }
 
-type ReleasesByDate []ReleasesDay
-
 type ReleasesDay struct {
 	Date     string
 	Releases []ReleaseEntry
+}
+
+func (rd *ReleasesDay) FilterByBranch(branch string) *ReleasesDay {
+	filtered := make([]ReleaseEntry, 0)
+	for _, entry := range rd.Releases {
+		if entry.BranchKind == branch {
+			filtered = append(filtered, entry)
+		}
+	}
+
+	return &ReleasesDay{
+		Date:     rd.Date,
+		Releases: filtered,
+	}
+}
+
+type ReleasesByDate []ReleasesDay
+
+func (r *ReleasesByDate) FilterByBranch(branch string) *ReleasesByDate {
+	filtered := make(ReleasesByDate, 0)
+	for _, release := range *r {
+		rf := release.FilterByBranch(branch)
+		if len(rf.Releases) != 0 {
+			filtered = append(filtered, *rf)
+		}
+	}
+
+	return &filtered
 }
 
 func (s *Server) ga(c echo.Context, event interface{}) {
@@ -483,6 +530,23 @@ func (s *Server) ListRelease(c echo.Context, job string) error {
 	if data["ReleasesByDate"], err = s.GetReleasesByDate(c, job); err != nil {
 		return err
 	}
+	data["job"] = job
+
+	return c.Render(http.StatusOK, "release-list.tmpl", data)
+}
+
+func (s *Server) ListReleaseByBranch(c echo.Context, job string, branch string) error {
+	s.ga(c, ga.NewPageview())
+	s.sendUserActionToSlack(c, fmt.Sprintf("List Releases (%s)", job), "#00ffff", "#yolologs", "#yolodebug")
+
+	data := map[string]interface{}{}
+
+	releases, err := s.GetReleasesByDate(c, job)
+	if err != nil {
+		return err
+	}
+
+	data["ReleasesByDate"] = releases.FilterByBranch(branch)
 	data["job"] = job
 
 	return c.Render(http.StatusOK, "release-list.tmpl", data)
