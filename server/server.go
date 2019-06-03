@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
@@ -50,6 +51,8 @@ type ServerConfig struct {
 
 type buildMap map[int]*circleci.Build
 
+type pullMap map[int]*github.PullRequest
+
 func (m buildMap) Sorted() []*circleci.Build {
 	buildMapMutex.Lock()
 	defer buildMapMutex.Unlock()
@@ -67,12 +70,26 @@ func (m buildMap) Sorted() []*circleci.Build {
 
 type Cache struct {
 	builds          buildMap
+	pulls           pullMap
 	mostRecentBuild time.Time
 }
 
 func (c Cache) String() string {
 	out, _ := json.Marshal(c)
 	return string(out)
+}
+
+func (c *Cache) GetGithubPullByID(id int) *github.PullRequest {
+	if c == nil {
+		return nil
+	}
+	if id == 0 {
+		return nil
+	}
+	if pull, found := c.pulls[id]; found {
+		return pull
+	}
+	return nil
 }
 
 type Server struct {
@@ -252,6 +269,11 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	})
 	auth.GET("/itms/release/:token/*", s.Itms)
 
+	if s.Debug {
+		e.GET("/debug-github", s.debugGithub)
+		e.GET("/debug-circle", s.debugCircle)
+	}
+
 	return s, nil
 }
 
@@ -282,7 +304,15 @@ func (s *Server) getHash(id string) string {
 func (s *Server) Start() error {
 	go func() {
 		for {
-			if err := s.refreshCache(); err != nil {
+			if err := s.refreshCircleCache(); err != nil {
+				log.Printf("refresh failed: %+v", err)
+			}
+			time.Sleep(10 * time.Second)
+		}
+	}()
+	go func() {
+		for {
+			if err := s.refreshGithubCache(); err != nil {
 				log.Printf("refresh failed: %+v", err)
 			}
 			time.Sleep(10 * time.Second)
@@ -291,7 +321,26 @@ func (s *Server) Start() error {
 	return s.e.Start(s.addr)
 }
 
-func (s *Server) refreshCache() error {
+func (s *Server) refreshGithubCache() error {
+	opts := &github.PullRequestListOptions{
+		State:     "all",
+		Sort:      "updated",
+		Direction: "desc",
+	}
+	opts.PerPage = 50
+	pulls, _, err := s.githubClient.PullRequests.List(context.Background(), "berty", "berty", opts)
+	if err != nil {
+		return nil
+	}
+	pm := make(pullMap, 0)
+	for _, pull := range pulls {
+		pm[*pull.Number] = pull
+	}
+	s.cache.pulls = pm
+	return nil
+}
+
+func (s *Server) refreshCircleCache() error {
 	var (
 		allBuilds       = make(buildMap, 0)
 		mostRecentBuild = s.cache.mostRecentBuild

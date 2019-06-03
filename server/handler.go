@@ -446,6 +446,8 @@ type ReleaseEntry struct {
 	Duration   string
 	Diff       string
 	HREF       string
+	PRNumber   int
+	Body       string
 }
 
 type ReleasesDay struct {
@@ -593,6 +595,7 @@ func (s *Server) GetReleasesByDate(c echo.Context, job string) (*ReleasesByDate,
 		}
 
 		prBranch := build.Branch
+		prNumber := 0
 		branchName := build.Branch
 		subject := build.Subject
 		if build.Branch == "master" {
@@ -601,6 +604,7 @@ func (s *Server) GetReleasesByDate(c echo.Context, job string) (*ReleasesByDate,
 				subject = matches[0][2]
 				pr := matches[0][1]
 				prBranch = "pull/" + pr
+				prNumber, _ = strconv.Atoi(pr)
 				oncePerBranch[prBranch] = true
 				branchName = fmt.Sprintf("%s (%s)", build.Branch, pr)
 				branchURL = "https://github.com/berty/berty/pull/" + pr
@@ -664,6 +668,7 @@ func (s *Server) GetReleasesByDate(c echo.Context, job string) (*ReleasesByDate,
 		release := ReleaseEntry{
 			Failed:     build.Failed != nil && *build.Failed == true,
 			InProgress: build.StopTime == nil,
+			PRNumber:   prNumber,
 			BranchKind: branchKind,
 			BranchLink: branchLink,
 			Author:     build.User.Login,
@@ -674,6 +679,15 @@ func (s *Server) GetReleasesByDate(c echo.Context, job string) (*ReleasesByDate,
 			Duration:   duration,
 			Diff:       diff,
 			HREF:       href,
+			Body:       "",
+		}
+
+		// if GitHub is available, override subject and body
+		if pull := s.cache.GetGithubPullByID(prNumber); pull != nil {
+			release.Subject = pull.GetTitle()
+			// FIXME: parse conventional commit
+			release.Body = pull.GetBody()
+			// FIXME: remove signed-off-by lines
 		}
 		if _, ok := releasesByDateMap[currentDate]; !ok {
 			releasesByDateMap[currentDate] = []ReleaseEntry{}
@@ -794,4 +808,12 @@ func (s *Server) Itms(c echo.Context) error {
 	// FIXME: put plist in cache
 
 	return c.Blob(http.StatusOK, "application/x-plist", plist)
+}
+
+func (s *Server) debugGithub(c echo.Context) error {
+	return c.JSON(http.StatusOK, s.cache.pulls)
+}
+
+func (s *Server) debugCircle(c echo.Context) error {
+	return c.JSON(http.StatusOK, s.cache.builds)
 }

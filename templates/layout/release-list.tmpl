@@ -18,6 +18,7 @@
                 {{$release.Age}}
                 &nbsp;ago&nbsp;&nbsp;
                 {{$release.Duration}}
+                {{with $release.Body}}<br /><small><pre>{{.}}</pre></small>{{end}}
               </div>
             </div>
             <div class="b-right">
