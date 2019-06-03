@@ -1,6 +1,7 @@
 IMAGE          ?= bertychat/yolo
 HOST           ?= root@167.99.223.55
 HOSTNAME       ?= yolo.berty.io
+GITHUB_TOKEN   ?= ***REMOVED***
 CIRCLE_TOKEN   ?= ***REMOVED***
 PASSWORD       ?= 'xor+=cool'
 RUN_OPTS       ?= --no-slack --no-ga --no-auth
@@ -8,7 +9,7 @@ RUN_OPTS       ?= --no-slack --no-ga --no-auth
 
 .PHONY: run
 run: install
-	yolo -t $(CIRCLE_TOKEN) serve --debug $(RUN_OPTS)
+	yolo --circle-token=$(CIRCLE_TOKEN) --github-token=$(GITHUB_TOKEN) serve --debug $(RUN_OPTS)
 
 .PHONY: install
 install:
@@ -34,7 +35,9 @@ deploy:
 		    -d -p 80:3670 \
 		    -v "/root/artifacts-cache:/cache" \
 		    $(IMAGE) \
-		      -t $(CIRCLE_TOKEN) serve \
+		      --circle-token=$(CIRCLE_TOKEN) \
+		      --github-token=$(GITHUB_TOKEN) \
+		      serve \
 		      --hostname $(HOSTNAME)" \
 		      --cache-dir=/cache
 

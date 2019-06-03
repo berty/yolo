@@ -13,7 +13,7 @@ var projectsCmd = &cobra.Command{
 	Use:   "projects",
 	Short: "list projects",
 	Run: func(cmd *cobra.Command, args []string) {
-		ret, err := cfg.client.Projects()
+		ret, err := cfg.circleClient.Projects()
 		if err != nil {
 			panic(err)
 		}

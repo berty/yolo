@@ -47,7 +47,7 @@ var (
 
 func (s *Server) Build(c echo.Context) error {
 	id := c.Param("build_id")
-	ret, err := s.client.Build(id)
+	ret, err := s.circleClient.Build(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -57,7 +57,7 @@ func (s *Server) Build(c echo.Context) error {
 
 func (s *Server) Builds(c echo.Context) error {
 	pull := c.Param("branch")
-	ret, err := s.client.Builds(pull, "", 30, 0)
+	ret, err := s.circleClient.Builds(pull, "", 30, 0)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -67,7 +67,7 @@ func (s *Server) Builds(c echo.Context) error {
 
 func (s *Server) Artifacts(c echo.Context) error {
 	id := c.Param("build_id")
-	ret, err := s.client.GetArtifacts(id, true)
+	ret, err := s.circleClient.GetArtifacts(id, true)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -81,7 +81,7 @@ func (s *Server) getVersion(arts []*circleci.Artifact, kind string) (string, err
 			continue
 		}
 
-		ret, n, err := s.client.GetRawArtifact(art)
+		ret, n, err := s.circleClient.GetRawArtifact(art)
 		if err != nil {
 			return "", err
 		}
@@ -197,7 +197,7 @@ func (s *Server) GetIPA(c echo.Context) error {
 	s.ga(c, ga.NewPageview())
 	s.sendUserActionToSlack(c, "IPA download", "#0000ff", "#yolologs", "#yolologs")
 	id := c.Param("*")
-	arts, err := s.client.GetArtifacts(id, true)
+	arts, err := s.circleClient.GetArtifacts(id, true)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -208,7 +208,7 @@ func (s *Server) GetIPA(c echo.Context) error {
 		}
 
 		// Download client
-		rc, err := s.client.GetArtifact(art)
+		rc, err := s.circleClient.GetArtifact(art)
 		if err != nil {
 			return err
 		}
@@ -223,7 +223,7 @@ func (s *Server) GetDMG(c echo.Context) error {
 	s.ga(c, ga.NewPageview())
 	s.sendUserActionToSlack(c, "DMG download", "#0000ff", "#yolologs", "#yolologs")
 	id := c.Param("*")
-	arts, err := s.client.GetArtifacts(id, true)
+	arts, err := s.circleClient.GetArtifacts(id, true)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -234,7 +234,7 @@ func (s *Server) GetDMG(c echo.Context) error {
 		}
 
 		// Download client
-		rc, err := s.client.GetArtifact(art)
+		rc, err := s.circleClient.GetArtifact(art)
 		if err != nil {
 			return err
 		}
@@ -250,7 +250,7 @@ func (s *Server) GetAPK(c echo.Context) error {
 	s.ga(c, ga.NewPageview())
 	s.sendUserActionToSlack(c, "Android download", "#00ff00", "#yolologs", "#yolologs")
 	id := c.Param("*")
-	arts, err := s.client.GetArtifacts(id, true)
+	arts, err := s.circleClient.GetArtifacts(id, true)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -261,7 +261,7 @@ func (s *Server) GetAPK(c echo.Context) error {
 		}
 
 		// Download client
-		rc, err := s.client.GetArtifact(art)
+		rc, err := s.circleClient.GetArtifact(art)
 		if err != nil {
 			return err
 		}
@@ -699,7 +699,7 @@ func (s *Server) GetReleasesByDate(c echo.Context, job string) (*ReleasesByDate,
 
 func (s *Server) ReleaseIOS(c echo.Context) error {
 	pull := c.Param("*")
-	builds, err := s.client.Builds(pull, IOS_STAFF_JOB, 100, 0)
+	builds, err := s.circleClient.Builds(pull, IOS_STAFF_JOB, 100, 0)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -742,7 +742,7 @@ func (s *Server) Itms(c echo.Context) error {
 	*/
 
 	if theBuild == nil {
-		builds, err := s.client.Builds(pull, IOS_STAFF_JOB, 100, 0)
+		builds, err := s.circleClient.Builds(pull, IOS_STAFF_JOB, 100, 0)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -754,7 +754,7 @@ func (s *Server) Itms(c echo.Context) error {
 	}
 
 	id := strconv.Itoa(theBuild.BuildNum)
-	arts, err := s.client.GetArtifacts(id, true)
+	arts, err := s.circleClient.GetArtifacts(id, true)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/berty/staff/tools/release/server"
+	"github.com/google/go-github/github"
 	"github.com/spf13/cobra"
+	"golang.org/x/oauth2"
 )
 
 var serverCfg server.ServerConfig
@@ -13,7 +16,17 @@ var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Server release tool",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		serverCfg.Client = cfg.client
+		serverCfg.CircleClient = cfg.circleClient
+		if cfg.githubToken != "" {
+			ctx := context.Background()
+			ts := oauth2.StaticTokenSource(
+				&oauth2.Token{AccessToken: cfg.githubToken},
+			)
+			tc := oauth2.NewClient(ctx, ts)
+			serverCfg.GithubClient = github.NewClient(tc)
+		} else {
+			serverCfg.GithubClient = github.NewClient(nil)
+		}
 
 		log.Printf("Starting server on %s", serverCfg.Addr)
 		s, err := server.NewServer(&serverCfg)

@@ -16,6 +16,7 @@ import (
 
 	"github.com/berty/staff/tools/release/pkg/circle"
 	"github.com/gobuffalo/packr"
+	"github.com/google/go-github/github"
 	"github.com/jinzhu/gorm"
 	circleci "github.com/jszwedko/go-circleci"
 	"github.com/labstack/echo"
@@ -33,7 +34,8 @@ type httperror struct {
 }
 
 type ServerConfig struct {
-	Client *circle.Client
+	CircleClient *circle.Client
+	GithubClient *github.Client
 
 	Addr     string
 	Hostname string
@@ -74,17 +76,18 @@ func (c Cache) String() string {
 }
 
 type Server struct {
-	client   *circle.Client
-	addr     string
-	hostname string
-	hostUrl  string
-	salt     string
-	e        *echo.Echo
-	cache    Cache
-	Debug    bool
-	NoSlack  bool
-	NoGa     bool
-	NoAuth   bool
+	circleClient *circle.Client
+	githubClient *github.Client
+	addr         string
+	hostname     string
+	hostUrl      string
+	salt         string
+	e            *echo.Echo
+	cache        Cache
+	Debug        bool
+	NoSlack      bool
+	NoGa         bool
+	NoAuth       bool
 
 	// templates/static
 	funcmap        *ctxFuncmap
@@ -131,7 +134,8 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 
 	templatesBox := packr.NewBox("../templates")
 	s := &Server{
-		client:       cfg.Client,
+		circleClient: cfg.CircleClient,
+		githubClient: cfg.GithubClient,
 		addr:         cfg.Addr,
 		hostname:     cfg.Hostname,
 		hostUrl:      hostUrl,
@@ -296,7 +300,7 @@ func (s *Server) refreshCache() error {
 	if s.cache.mostRecentBuild.IsZero() { // first fill
 		log.Print("initial builds fetch")
 		for page := 0; page < 20; page++ {
-			builds, err := s.client.Builds("", "", 100, page*100)
+			builds, err := s.circleClient.Builds("", "", 100, page*100)
 			if err != nil {
 				return err
 			}
@@ -319,7 +323,7 @@ func (s *Server) refreshCache() error {
 	} else { // just the difference
 		allBuilds = s.cache.builds
 		previousMostRecentBuild := mostRecentBuild
-		builds, err := s.client.Builds("", "", 100, 0)
+		builds, err := s.circleClient.Builds("", "", 100, 0)
 		if err != nil {
 			return err
 		}

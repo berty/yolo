@@ -23,7 +23,7 @@ var buildListCmd = &cobra.Command{
 
 		}
 
-		bs, err := cfg.client.Builds(pull, "", 30, 0)
+		bs, err := cfg.circleClient.Builds(pull, "", 30, 0)
 		if err != nil {
 			fmt.Println("client error: ", err)
 			return
@@ -41,7 +41,7 @@ var buildGetCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	Short: "get build info",
 	Run: func(cmd *cobra.Command, args []string) {
-		bs, err := cfg.client.Build(args[0])
+		bs, err := cfg.circleClient.Build(args[0])
 		if err != nil {
 			fmt.Println("client error: ", err)
 			return
@@ -59,7 +59,7 @@ var buildGetArtifactsCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	Short: "get build artifacts",
 	Run: func(cmd *cobra.Command, args []string) {
-		arts, err := cfg.client.GetArtifacts(args[0], true)
+		arts, err := cfg.circleClient.GetArtifacts(args[0], true)
 		if err != nil {
 			fmt.Println("client error: ", err)
 			return
