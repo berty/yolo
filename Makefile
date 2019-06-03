@@ -27,12 +27,16 @@ docker.push: docker.build
 deploy:
 	ssh $(HOST) "docker pull $(IMAGE) \
 		&& (docker rm -f yolo || true) \
+		&& mkdir -p /root/artifacts-cache \
 		&& docker run \
 		    --restart unless-stopped \
-		    --name yolo -d -p 80:3670 \
+		    --name yolo \
+		    -d -p 80:3670 \
+		    -v "/root/artifacts-cache:/cache" \
 		    $(IMAGE) \
 		      -t $(CIRCLE_TOKEN) serve \
-		      --hostname $(HOSTNAME)"
+		      --hostname $(HOSTNAME)" \
+		      --cache-dir=/cache
 
 .PHONY: prod-logs
 prod-logs:

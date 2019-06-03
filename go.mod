@@ -11,10 +11,12 @@ require (
 	github.com/go-sql-driver/mysql v1.4.1 // indirect
 	github.com/gobuffalo/packd v0.0.0-20181212173646-eca3b8fd6687
 	github.com/gobuffalo/packr v1.22.0
+	github.com/google/btree v1.0.0 // indirect
 	github.com/google/go-cmp v0.2.0 // indirect
 	github.com/google/uuid v1.1.0 // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e // indirect
 	github.com/gorilla/sessions v1.1.3
+	github.com/gregjones/httpcache v0.0.0-20190212212710-3befbb6ad0cc
 	github.com/hako/durafmt v0.0.0-20180520121703-7b7ae1e72ead
 	github.com/huandu/xstrings v1.2.0 // indirect
 	github.com/imdario/mergo v0.3.7 // indirect
@@ -34,6 +36,7 @@ require (
 	github.com/moul/http2curl v1.0.0 // indirect
 	github.com/oxtoacart/bpool v0.0.0-20150712133111-4e1c5567d7c2
 	github.com/parnurzeal/gorequest v0.2.15 // indirect
+	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/smartystreets/assertions v0.0.0-20190116191733-b6c0e53d7304 // indirect
 	github.com/smartystreets/goconvey v0.0.0-20181108003508-044398e4856c // indirect

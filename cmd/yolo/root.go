@@ -12,6 +12,7 @@ type config struct {
 	token    string
 	repo     string
 	username string
+	cacheDir string
 
 	client *circle.Client
 }
@@ -24,7 +25,7 @@ var rootCmd = &cobra.Command{
 	Short: "Manage berty build",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if cfg.token != "" {
-			cfg.client = circle.New(cfg.token, cfg.username, cfg.repo)
+			cfg.client = circle.New(cfg.token, cfg.username, cfg.cacheDir, cfg.repo)
 		} else {
 			panic("no token provided")
 		}
@@ -45,6 +46,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&cfg.token, "token", "t", "", "Set token")
 	rootCmd.PersistentFlags().StringVarP(&cfg.repo, "repo", "r", "berty", "Set repo")
 	rootCmd.PersistentFlags().StringVarP(&cfg.username, "username", "u", "berty", "Set username")
+	rootCmd.PersistentFlags().StringVarP(&cfg.cacheDir, "cache-dir", "", "./cache/", "artifacts caching directory")
 }
 
 func main() {

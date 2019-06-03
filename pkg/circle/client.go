@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gregjones/httpcache"
+	"github.com/gregjones/httpcache/diskcache"
 	circleci "github.com/jszwedko/go-circleci"
 )
 
@@ -18,9 +20,13 @@ type Client struct {
 	http *http.Client
 }
 
-func New(token, username, repo string) *Client {
+func New(token, username, cacheDir, repo string) *Client {
 	httpclient := &http.Client{
 		Timeout: time.Second * 1800,
+	}
+
+	if cacheDir != "" {
+		httpclient = httpcache.NewTransport(diskcache.New(cacheDir)).Client()
 	}
 
 	ci := &circleci.Client{Token: token, HTTPClient: httpclient}
