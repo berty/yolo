@@ -34,6 +34,7 @@ func init() {
 	serveCmd.PersistentFlags().BoolVarP(&serverCfg.Debug, "debug", "", false, "debug mode")
 	serveCmd.PersistentFlags().BoolVarP(&serverCfg.NoSlack, "no-slack", "", false, "disable slack")
 	serveCmd.PersistentFlags().BoolVarP(&serverCfg.NoGa, "no-ga", "", false, "disable google analytics")
+	serveCmd.PersistentFlags().BoolVarP(&serverCfg.NoAuth, "no-auth", "", false, "disable auth")
 	serveCmd.PersistentFlags().StringVarP(&serverCfg.SqlConn, "sql-conn", "", "./yolo.sqlite", "sql connection url")
 
 	rootCmd.AddCommand(serveCmd)

@@ -3,11 +3,12 @@ HOST           ?= root@167.99.223.55
 HOSTNAME       ?= yolo.berty.io
 CIRCLE_TOKEN   ?= ***REMOVED***
 PASSWORD       ?= 'xor+=cool'
+RUN_OPTS       ?= --no-slack --no-ga --no-auth
 
 
 .PHONY: run
 run: install
-	yolo -t $(CIRCLE_TOKEN) serve --debug --no-slack --no-ga
+	yolo -t $(CIRCLE_TOKEN) serve --debug $(RUN_OPTS)
 
 .PHONY: install
 install:

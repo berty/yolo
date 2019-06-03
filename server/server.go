@@ -41,6 +41,7 @@ type ServerConfig struct {
 	Debug   bool
 	NoSlack bool
 	NoGa    bool
+	NoAuth  bool
 
 	SqlConn string
 }
@@ -83,6 +84,7 @@ type Server struct {
 	Debug    bool
 	NoSlack  bool
 	NoGa     bool
+	NoAuth   bool
 
 	// templates/static
 	funcmap        *ctxFuncmap
@@ -139,6 +141,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 		Debug:        cfg.Debug,
 		NoSlack:      cfg.NoSlack,
 		NoGa:         cfg.NoGa,
+		NoAuth:       cfg.NoAuth,
 	}
 	e.HTTPErrorHandler = func(err error, c echo.Context) {
 		s.sendUserErrorToSlack(c, err)
@@ -177,19 +180,21 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	oauth.GET("/logout", o.LogoutHandler(s.hostUrl))
 
 	release := e.Group("release")
-	release.Use(o.ProtectMiddleware("/oauth/login", func(profile map[string]interface{}) bool {
-		if v, ok := profile["https://yolo.berty.io/groups"]; ok {
-			if groups, ok := v.([]interface{}); ok {
-				for _, group := range groups {
-					if g, ok := group.(string); ok && g == "yolo" {
-						return true
+	if !cfg.NoAuth {
+		release.Use(o.ProtectMiddleware("/oauth/login", func(profile map[string]interface{}) bool {
+			if v, ok := profile["https://yolo.berty.io/groups"]; ok {
+				if groups, ok := v.([]interface{}); ok {
+					for _, group := range groups {
+						if g, ok := group.(string); ok && g == "yolo" {
+							return true
+						}
 					}
 				}
 			}
-		}
 
-		return false
-	}))
+			return false
+		}))
+	}
 
 	release.GET("/ios", s.ListReleaseIOSBeta)
 	release.GET("/android", s.ListReleaseAndroidBeta)
@@ -207,19 +212,21 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 
 	desktop.GET("/mac.json", s.ListReleaseDMGJson)
 	staffRelease := e.Group("/release/staff")
-	staffRelease.Use(o.ProtectMiddleware("/oauth/login", func(profile map[string]interface{}) bool {
-		if v, ok := profile["https://yolo.berty.io/groups"]; ok {
-			if groups, ok := v.([]interface{}); ok {
-				for _, group := range groups {
-					if g, ok := group.(string); ok && g == "staff" {
-						return true
+	if !cfg.NoAuth {
+		staffRelease.Use(o.ProtectMiddleware("/oauth/login", func(profile map[string]interface{}) bool {
+			if v, ok := profile["https://yolo.berty.io/groups"]; ok {
+				if groups, ok := v.([]interface{}); ok {
+					for _, group := range groups {
+						if g, ok := group.(string); ok && g == "staff" {
+							return true
+						}
 					}
 				}
 			}
-		}
 
-		return false
-	}))
+			return false
+		}))
+	}
 	staffRelease.GET("/ios/*", s.ReleaseIOS)
 	staffRelease.GET("/ios", s.ListReleaseIOS)
 	staffRelease.GET("/mac", s.ListReleaseDMG)
