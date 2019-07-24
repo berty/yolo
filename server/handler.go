@@ -28,12 +28,12 @@ const (
 	BUNDLE_YOLO_ID    = "chat.berty.ios.yolo"
 	APP_STAFF_NAME    = "Berty Staff"
 	APP_YOLO_NAME     = "Berty Yolo"
-	IOS_STAFF_JOB     = "client.rn.ios"
-	IOS_YOLO_JOB      = "client.rn.ios-beta"
-	MAC_STAFF_JOB     = "client.rn.mac"
-	MAC_YOLO_JOB      = "client.rn.mac-beta"
-	ANDROID_STAFF_JOB = "client.rn.android"
-	ANDROID_YOLO_JOB  = "client.rn.android-beta"
+	IOS_STAFF_JOB     = "ios_staff"
+	IOS_YOLO_JOB      = "ios_yolo"
+	MAC_STAFF_JOB     = "mac_staff"
+	MAC_YOLO_JOB      = "mac_yolo"
+	ANDROID_STAFF_JOB = "android_staff"
+	ANDROID_YOLO_JOB  = "android_yolo"
 	SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/T2AJ2MM5Z/BFX8ZASKW/***REMOVED***"
 )
 
@@ -859,7 +859,7 @@ func (s *Server) Itms(c echo.Context) error {
 	previewText := previewTexts[rand.Intn(len(previewTexts))]
 	var bundleID string
 	switch theBuild.BuildParameters["CIRCLE_JOB"] {
-	case "client.rn.ios":
+	case "ios_staff":
 		bundleID = BUNDLE_STAFF_ID
 	case IOS_YOLO_JOB:
 		bundleID = BUNDLE_YOLO_ID
