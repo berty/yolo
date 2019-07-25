@@ -258,6 +258,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	tokenPaths := regexp.MustCompile("^/auth/ipa/build/.+$|^/auth/dmg/build/.+$|^/auth/apk/build/.+$|^/auth/itms/release/.+$")
 	auth.Use(s.tokenMiddleware(tokenPaths))
 
+	auth.GET("/artifact/:sha/:provider/:jobname/:filename", s.downloadSpecificArtifact)
 	auth.GET("/build/:build_id", s.Build)
 	auth.GET("/builds/*", s.Builds)
 	auth.GET("/artifacts/:build_id", s.Artifacts)

@@ -7,6 +7,7 @@ import (
 	"math"
 	"math/rand"
 	"net/http"
+	"path"
 	"regexp"
 	"sort"
 	"strconv"
@@ -44,6 +45,71 @@ var (
 	slackFloodMap   = map[string]time.Time{}
 	slackFloodMutex = sync.Mutex{}
 )
+
+func (s *Server) downloadSpecificArtifact(c echo.Context) error {
+	if provider := c.Param("provider"); provider != "circleci" {
+		return fmt.Errorf("unsupported provider %q", provider)
+	}
+	jobName := c.Param("jobname")
+	filename := c.Param("filename")
+	sha := c.Param("sha")
+
+	shaFound := false
+	jobFound := false
+	availableFilenames := []string{}
+	for buildID, build := range s.cache.builds {
+		if build.VcsRevision != sha {
+			continue
+		}
+		shaFound = true
+		if build.BuildParameters["CIRCLE_JOB"] != jobName {
+			continue
+		}
+		jobFound = true
+		artifacts, err := s.circleClient.GetArtifacts(fmt.Sprintf("%d", buildID), true)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+		for _, artifact := range artifacts {
+			base := path.Base(artifact.Path)
+			availableFilenames = append(availableFilenames, base)
+			if artifact.Path == filename || base == filename {
+				rc, err := s.circleClient.GetArtifact(artifact)
+				if err != nil {
+					return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+				}
+				contentType := "application/octet-stream"
+				switch path.Ext(base) {
+				case ".dmg":
+					contentType = "application/x-apple-diskimage"
+				case ".ipa":
+					contentType = "application/octet-stream"
+				case ".apk":
+					contentType = "application/vnd.android.package-archive"
+				case ".jar":
+					contentType = "application/java-archive"
+				case ".txt":
+					contentType = "text/plain"
+				case ".json":
+					contentType = "application/json"
+				case ".zip":
+					contentType = "application/zip"
+				}
+				// proxy
+				c.Response().Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=%s", base))
+				// FIXME: set Content-Length
+				return c.Stream(http.StatusOK, contentType, rc)
+			}
+		}
+	}
+	if !shaFound {
+		return echo.NewHTTPError(http.StatusNotFound, "no such sha")
+	}
+	if !jobFound {
+		return echo.NewHTTPError(http.StatusNotFound, "no such job")
+	}
+	return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("no such artifact filename (available options: %s)", strings.Join(availableFilenames, ", ")))
+}
 
 func (s *Server) Build(c echo.Context) error {
 	id := c.Param("build_id")
