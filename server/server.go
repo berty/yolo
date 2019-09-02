@@ -223,7 +223,8 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 
 	release.GET("/ios-staff.json", s.ListReleaseIOSJson)
 	release.GET("/ios.json", s.ListReleaseIOSBetaJson)
-	release.GET("/android.json", s.ListReleaseAndroidJson)
+	release.GET("/android-staff.json", s.ListReleaseAndroidJson)
+	release.GET("/android.json", s.ListReleaseAndroidBetaJson)
 	desktop := release.Group("/desktop")
 	// since desktop cli make request from http://localhost:XXXX we're forced to add this
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
