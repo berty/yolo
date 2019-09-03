@@ -232,7 +232,9 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 		AllowMethods: []string{http.MethodGet, http.MethodOptions, http.MethodPut, http.MethodPost, http.MethodDelete},
 	}))
 
-	desktop.GET("/mac.json", s.ListReleaseDMGJson)
+	desktop.GET("/mac-staff.json", s.ListReleaseDMGJson)
+	desktop.GET("/mac.json", s.ListReleaseDMGBetaJson)
+
 	staffRelease := e.Group("/release/staff")
 	if !cfg.NoAuth {
 		staffRelease.Use(o.ProtectMiddleware("/oauth/login", func(profile map[string]interface{}) bool {
