@@ -1,5 +1,5 @@
-IMAGE          ?= bertychat/yolo
-HOST           ?= root@167.99.223.55
+IMAGE          ?= bertytech/yolo
+HOST           ?= ***REMOVED***
 HOSTNAME       ?= yolo.berty.io
 GITHUB_TOKEN   ?= ***REMOVED***
 CIRCLE_TOKEN   ?= ***REMOVED***
