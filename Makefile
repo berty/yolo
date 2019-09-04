@@ -1,9 +1,7 @@
 IMAGE          ?= bertytech/yolo
-HOST           ?= ***REMOVED***
-HOSTNAME       ?= yolo.berty.io
+HOST	       ?= ***REMOVED***
 GITHUB_TOKEN   ?= ***REMOVED***
 CIRCLE_TOKEN   ?= ***REMOVED***
-PASSWORD       ?= 'xor+=cool'
 RUN_OPTS       ?= --no-slack --no-ga --no-auth
 
 
@@ -24,26 +22,6 @@ docker.build:
 docker.push: docker.build
 	docker push "$(IMAGE)"
 
-.PHONY: deploy
-deploy:
-	ssh $(HOST) "docker pull $(IMAGE) \
-		&& (docker rm -f yolo || true) \
-		&& mkdir -p /root/artifacts-cache \
-		&& docker run \
-		    --restart unless-stopped \
-		    --name yolo \
-		    -d -p 80:3670 \
-		    -v "/root/artifacts-cache:/cache" \
-		    $(IMAGE) \
-		      --circle-token=$(CIRCLE_TOKEN) \
-		      --github-token=$(GITHUB_TOKEN) \
-		      serve \
-		      --hostname $(HOSTNAME)" \
-		      --cache-dir=/cache
-
 .PHONY: prod-logs
 prod-logs:
-	ssh $(HOST) docker logs -f yolo
-
-.PHONY: release
-release: docker.build docker.push deploy
+	ssh $(HOST) docker-compose logs -f yolo watchtower
