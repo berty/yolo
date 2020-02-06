@@ -1,4 +1,4 @@
-module berty.tech/yolo
+module berty.tech/yolo/v2
 
 go 1.13
 
