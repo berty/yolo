@@ -8,7 +8,7 @@ import (
 	"sort"
 	"time"
 
-	"berty.tech/yolo/pkg/plistgen"
+	plistgen "berty.tech/yolo/v2/pkg/plistgen"
 	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/cayleygraph/cayley"
 	cayleypath "github.com/cayleygraph/cayley/graph/path"

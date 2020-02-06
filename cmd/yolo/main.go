@@ -1,4 +1,4 @@
-package main
+package main // import "berty.tech/yolo/cmd/yolo"
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	"berty.tech/yolo"
+	yolo "berty.tech/yolo/v2"
 	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/cayleygraph/cayley"
 	"github.com/cayleygraph/cayley/graph"
