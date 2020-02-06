@@ -61,7 +61,7 @@ func lastBuildkiteBuildCreatedTime(ctx context.Context, db *cayley.Handle) (time
 		Both().
 		Has(quad.IRI("rdf:type"), quad.IRI("yolo:Build")).
 		// FIXME: driver = buildkite
-		Out(quad.IRI("schema:createdAt")).
+		Out(quad.IRI("schema:finishedAt")).
 		Iterate(ctx)
 	since := time.Time{}
 
@@ -85,7 +85,7 @@ func fetchBuildkite(bkc *buildkite.Client, since time.Time, maxPages int, logger
 	batches := []Batch{}
 	total := 0
 	callOpts := &buildkite.BuildsListOptions{
-		CreatedFrom: since,
+		FinishedFrom: since,
 	}
 	for i := 0; i < maxPages; i++ {
 		builds, resp, err := bkc.Builds.List(callOpts)

@@ -34,6 +34,7 @@
                   <option id="1">iOS</option>
                   <option id="2">Android</option>
                 </select>
+		<input id="refresh" type="button" value="F5" />
               </form>
             </div>
           </div>
@@ -97,6 +98,7 @@
       }
       fetch()
       $('#kind').change(fetch)
+      $('#refresh').click(fetch)
     </script>
   </body>
 </html>
