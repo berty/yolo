@@ -60,10 +60,12 @@
       <div class="col-md-4">
         <div class="card mb-4 box-shadow">
           <div class="card-body">
-            <p class="card-text">{{has_build}}</a>
-            <p class="card-text"><small class="text-muted">{{local_path}}</small></p>
-            <p class="card-text"><small class="text-muted">{{created_at}}</small></p>
-            <p class="card-text"><small class="text-muted">{{state}}</small></p>
+            <p class="card-text">{{has_build.id}}</a>
+            <p class="card-text"><small class="text-muted">branch: {{has_build.branch}}</small></p>
+            <p class="card-text"><small class="text-muted">message: {{has_build.message}}</small></p>
+            <p class="card-text"><small class="text-muted">path: {{local_path}}</small></p>
+            <p class="card-text"><small class="text-muted">date: {{created_at}}</small></p>
+            <p class="card-text"><small class="text-muted">state: {{state}}</small></p>
             <div class="d-flex justify-content-between align-items-center">
               <div class="btn-group">
                 <a type="button" class="btn btn-sm btn-outline-secondary" href="/api/artifact-dl?id={{id}}">DL</a>
