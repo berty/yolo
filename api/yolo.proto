@@ -92,7 +92,7 @@ message Artifact {
   State state = 8 [(gogoproto.moretags) = "quad:\"schema:state,optional\""];
   Kind kind = 9 [(gogoproto.moretags) = "quad:\"schema:kind,optional\""];
 
-  string has_build = 101 [(gogoproto.moretags) = "quad:\"hasBuild,optional\"", (gogoproto.casttype) = "github.com/cayleygraph/quad.IRI"];
+  Build has_build = 101 [(gogoproto.moretags) = "quad:\"hasBuild,optional\""];
 
   enum State {
     UnknownState = 0;

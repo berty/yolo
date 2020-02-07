@@ -178,8 +178,8 @@ func buildkiteArtifactsToBatch(artifacts []buildkite.Artifact, build buildkite.B
 			LocalPath:   *artifact.Path,
 			DownloadUrl: *artifact.DownloadURL,
 			MimeType:    *artifact.MimeType,
+			HasBuild:    &Build{ID: quad.IRI(*build.WebURL)},
 			// FIXME: Sha1Sum:     *artifact.Sha1Sum,
-			HasBuild: quad.IRI(*build.WebURL),
 		}
 		switch filepath.Ext(newArtifact.LocalPath) {
 		case ".ipa":

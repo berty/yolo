@@ -24,5 +24,4 @@ require (
 	google.golang.org/grpc v1.27.0
 	howett.net/plist v0.0.0-20181124034731-591f970eefbb
 	moul.io/depviz v1.1.1-0.20200205124305-ba4612b0396d
-	moul.io/godev v1.4.0
 )
