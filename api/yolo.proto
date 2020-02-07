@@ -15,7 +15,6 @@ service YoloService {
   rpc Ping(Ping.Request)                 returns (Ping.Response)         { option (google.api.http) = {get: "/ping"}; };
   rpc Status(Status.Request)             returns (Status.Response)       { option (google.api.http) = {get: "/status"}; };
   rpc BuildList(BuildList.Request)       returns (BuildList.Response)    { option (google.api.http) = {get: "/build-list"}; }
-  rpc ArtifactList(ArtifactList.Request) returns (ArtifactList.Response) { option (google.api.http) = {get: "/artifact-list"}; }
 }
 
 //
@@ -38,18 +37,11 @@ message Status {
 }
 
 message BuildList {
-  message Request {}
+  message Request {
+    Artifact.Kind artifact_kind = 1;
+  }
   message Response {
     repeated Build builds = 1;
-  }
-}
-
-message ArtifactList {
-  message Request {
-    Artifact.Kind kind = 1;
-  }
-  message Response {
-    repeated Artifact artifacts = 1;
   }
 }
 
@@ -68,6 +60,8 @@ message Build {
   google.protobuf.Timestamp finished_at = 8 [(gogoproto.moretags) = "quad:\"schema:finishedAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
   string commit = 9 [(gogoproto.moretags) = "quad:\"schema:commit,optional\""];
   string branch = 10 [(gogoproto.moretags) = "quad:\"schema:branch,optional\""];
+
+  repeated Artifact has_artifacts = 101 [(gogoproto.moretags) = "quad:\"schema:hasBuild < *,optional\""];
 
   enum State {
     UnknownState = 0;
@@ -92,7 +86,7 @@ message Artifact {
   State state = 8 [(gogoproto.moretags) = "quad:\"schema:state,optional\""];
   Kind kind = 9 [(gogoproto.moretags) = "quad:\"schema:kind,optional\""];
 
-  Build has_build = 101 [(gogoproto.moretags) = "quad:\"hasBuild,optional\""];
+  Build has_build = 101 [(gogoproto.moretags) = "quad:\"schema:hasBuild,optional\""];
 
   enum State {
     UnknownState = 0;

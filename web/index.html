@@ -56,36 +56,48 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/3.1.0/mustache.min.js" integrity="sha256-MPgtcamIpCPKRRm1ppJHkvtNBAuE71xcOM+MmQytXi8=" crossorigin="anonymous"></script>
 
     <script id="releasesTpl" type="text/template">
-      {{#artifacts}}
-      <div class="col-md-4">
-        <div class="card mb-4 box-shadow">
+      {{#builds}}
+      <div class="col-md-12 my-2">
+        <div class="card mb-12 box-shadow">
           <div class="card-body">
-            <p class="card-text">{{has_build.id}}</a>
-            <p class="card-text"><small class="text-muted">branch: {{has_build.branch}}</small></p>
-            <p class="card-text"><small class="text-muted">message: {{has_build.message}}</small></p>
-            <p class="card-text"><small class="text-muted">path: {{local_path}}</small></p>
+            <p class="card-text">{{id}}</a>
+            <p class="card-text"><small class="text-muted">branch: {{branch}}</small></p>
             <p class="card-text"><small class="text-muted">date: {{created_at}}</small></p>
+            <p class="card-text"><small class="text-muted">message: {{message}}</small></p>
+            <p class="card-text"><small class="text-muted">commit: {{commit}}</small></p>
             <p class="card-text"><small class="text-muted">state: {{state}}</small></p>
-            <div class="d-flex justify-content-between align-items-center">
-              <div class="btn-group">
-                <a type="button" class="btn btn-sm btn-outline-secondary" href="/api/artifact-dl?id={{id}}">DL</a>
-                <a type="button" class="btn btn-sm btn-outline-secondary" href="itms-services://?action=download-manifest&url={{baseURL}}/api/plist-gen/{{id}}.plist">Plist</a>
-                <a type="button" class="btn btn-sm btn-outline-secondary" href="{{has_build}}">Logs</a>
+            <a type="button" class="btn btn-sm btn-outline-secondary" href="{{has_build}}">Logs</a>
+            <div class="container">
+              <div class="row">
+                {{#has_artifacts}}
+                  <div class="col-md-4 my-3">
+                    <div class="card bg-warning mb-4 box-shadow p-2">
+                      <p class="card-text"><small class="text-muted">path: {{local_path}}</small></p>
+                      <p class="card-text"><small class="text-muted">state: {{state}}</small></p>
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div class="btn-group">
+                          <a type="button" class="btn btn-sm btn-outline-secondary" href="/api/artifact-dl?id={{id}}">DL</a>
+                          <a type="button" class="btn btn-sm btn-outline-secondary" href="itms-services://?action=download-manifest&url={{baseURL}}/api/plist-gen/{{id}}.plist">Plist</a>
+                        </div>
+                        <small class="text-muted">{{file_size}}b</small>
+                      </div>
+                    </div>
+                  </div>
+                {{/has_artifacts}}
               </div>
-              <small class="text-muted">{{file_size}}b</small>
             </div>
           </div>
         </div>
       </div>
-      {{/artifacts}}
+      {{/builds}}
     </script>
 
     <script type="text/javascript">
       function fetch() {
-        var url = "/api/artifact-list?";
+        var url = "/api/build-list?";
         var kind = $('#kind option:selected').attr('id');
         if (kind !== undefined && kind != "") {
-          url += "kind=" + kind + "&";
+          url += "artifact_kind=" + kind + "&";
         }
         $.ajax({
           url: url,

@@ -17,7 +17,7 @@ func SchemaConfig() *schema.Config {
 	return config
 }
 
-func saveBatches(ctx context.Context, db *cayley.Handle, batches []Batch) error {
+func saveBatches(ctx context.Context, db *cayley.Handle, batches []Batch, schema *schema.Config) error {
 	tx := cayley.NewTransaction()
 	dw := graph.NewTxWriter(tx, graph.Delete)
 	iw := graph.NewTxWriter(tx, graph.Add)

@@ -21,7 +21,7 @@ import (
 	chilogger "github.com/treastech/logger"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"moul.io/depviz/pkg/chiutil"
+	"moul.io/depviz/v3/pkg/chiutil"
 )
 
 type Server struct {
@@ -101,8 +101,8 @@ func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, erro
 		r.Use(cors.Handler)
 	}
 	r.Use(chilogger.Logger(srv.logger))
-	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(opts.RequestTimeout))
+	r.Use(middleware.Recoverer)
 	gwmux := runtime.NewServeMux(
 		runtime.WithMarshalerOption(runtime.MIMEWildcard, &gateway.JSONPb{EmitDefaults: false, Indent: "  ", OrigName: true}),
 		runtime.WithProtoErrorHandler(runtime.DefaultHTTPProtoErrorHandler),

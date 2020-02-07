@@ -9,7 +9,8 @@ import (
 
 	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/cayleygraph/cayley"
-	"github.com/cayleygraph/cayley/graph/path"
+	"github.com/cayleygraph/cayley/query/path"
+	"github.com/cayleygraph/cayley/schema"
 	"github.com/cayleygraph/quad"
 	"go.uber.org/zap"
 )
@@ -20,7 +21,7 @@ type BuildkiteWorkerOpts struct {
 }
 
 // BuildkiteWorker goals is to manage the buildkite update routine, it should try to support as much errors as possible by itself
-func BuildkiteWorker(ctx context.Context, db *cayley.Handle, bkc *buildkite.Client, opts BuildkiteWorkerOpts) error {
+func BuildkiteWorker(ctx context.Context, db *cayley.Handle, bkc *buildkite.Client, schema *schema.Config, opts BuildkiteWorkerOpts) error {
 	if opts.Logger == nil {
 		opts.Logger = zap.NewNop()
 	}
@@ -40,7 +41,7 @@ func BuildkiteWorker(ctx context.Context, db *cayley.Handle, bkc *buildkite.Clie
 		if err != nil {
 			logger.Warn("fetch buildkite", zap.Error(err))
 		} else {
-			if err := saveBatches(ctx, db, batches); err != nil {
+			if err := saveBatches(ctx, db, batches, schema); err != nil {
 				logger.Warn("save batches", zap.Error(err))
 			}
 		}
@@ -186,6 +187,8 @@ func buildkiteArtifactsToBatch(artifacts []buildkite.Artifact, build buildkite.B
 			newArtifact.Kind = Artifact_IPA
 		case ".apk":
 			newArtifact.Kind = Artifact_APK
+		default:
+			newArtifact.Kind = Artifact_UnknownKind
 		}
 		switch *artifact.State {
 		case "finished":
@@ -197,6 +200,7 @@ func buildkiteArtifactsToBatch(artifacts []buildkite.Artifact, build buildkite.B
 		case "deleted":
 			newArtifact.State = Artifact_Deleted
 		default:
+			newArtifact.State = Artifact_UnknownState
 			fmt.Println("unknown state: ", *artifact.State)
 		}
 		batch.Artifacts = append(batch.Artifacts, &newArtifact)
