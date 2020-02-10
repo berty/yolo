@@ -23,5 +23,7 @@ require (
 	google.golang.org/genproto v0.0.0-20200204235621-fb4a7afc5178
 	google.golang.org/grpc v1.27.0
 	howett.net/plist v0.0.0-20181124034731-591f970eefbb
-	moul.io/depviz v1.1.1-0.20200205124305-ba4612b0396d
+	moul.io/depviz/v3 v3.5.0
 )
+
+replace github.com/cayleygraph/cayley v0.7.7 => github.com/cayleygraph/cayley v0.7.7-0.20200130230943-9fb4d58e0e07

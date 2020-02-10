@@ -79,7 +79,7 @@ func main() {
 				return err
 			}
 			opts := yolo.BuildkiteWorkerOpts{Logger: logger, MaxPages: maxPages}
-			gr.Add(func() error { return yolo.BuildkiteWorker(ctx, db, bkc, opts) }, func(_ error) { cancel() })
+			gr.Add(func() error { return yolo.BuildkiteWorker(ctx, db, bkc, dbSchema, opts) }, func(_ error) { cancel() })
 
 			// server
 			svc := yolo.NewService(db, dbSchema, yolo.ServiceOpts{

@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"net/http"
 	"path"
+	"reflect"
 	"sort"
 	"time"
 
 	plistgen "berty.tech/yolo/v2/pkg/plistgen"
 	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/cayleygraph/cayley"
-	cayleypath "github.com/cayleygraph/cayley/graph/path"
+	cayleypath "github.com/cayleygraph/cayley/query/path"
 	"github.com/cayleygraph/cayley/schema"
 	"github.com/cayleygraph/quad"
 	"github.com/go-chi/chi"
@@ -62,8 +63,8 @@ func (svc service) Status(ctx context.Context, req *Status_Request) (*Status_Res
 	// db
 	stats, err := svc.db.Stats(ctx, false)
 	if err == nil {
-		resp.DbNodes = stats.Nodes.Size
-		resp.DbQuads = stats.Quads.Size
+		resp.DbNodes = stats.Nodes.Value
+		resp.DbQuads = stats.Quads.Value
 	} else {
 		resp.DbErr = err.Error()
 	}
@@ -75,13 +76,40 @@ func (svc service) BuildList(ctx context.Context, req *BuildList_Request) (*Buil
 	resp := BuildList_Response{}
 
 	p := cayleypath.StartPath(svc.db).
-		Both().
-		Has(quad.IRI("rdf:type"), quad.IRI("yolo:Build")).
-		Limit(300)
+		Has(quad.IRI("rdf:type"), quad.IRI("yolo:Build"))
+	if req.ArtifactKind > 0 {
+		// this will filter builds with at least one artifact of the good kind
+		// but I don't know how to filter them during loading, so I will cleanup
+		// the result later, feel free to help me make things in a better way
+		p = p.HasPath(
+			cayleypath.StartMorphism().
+				In(quad.IRI("schema:hasBuild")).
+				Has(quad.IRI("schema:kind"), quad.Int(req.ArtifactKind)),
+		)
+	}
+	p = p.Limit(300)
 
 	builds := []Build{}
-	if err := svc.schema.LoadPathTo(ctx, svc.db, &builds, p); err != nil {
+	if err := svc.schema.LoadIteratorToDepth(ctx, svc.db, reflect.ValueOf(&builds), 1, p.BuildIterator(ctx)); err != nil {
 		return nil, fmt.Errorf("load builds: %w", err)
+	}
+	// clean up the result
+	for idx, build := range builds {
+		// avoid infinite loop by removing already existing pointers
+		for _, artifact := range build.HasArtifacts {
+			artifact.HasBuild = nil
+		}
+		// cleanup artifact with invalid requested type (see comment above)
+		if req.ArtifactKind > 0 {
+			n := 0
+			for _, artifact := range build.HasArtifacts {
+				if artifact.Kind == req.ArtifactKind {
+					build.HasArtifacts[n] = artifact
+					n++
+				}
+			}
+			builds[idx].HasArtifacts = build.HasArtifacts[:n]
+		}
 	}
 
 	resp.Builds = make([]*Build, len(builds))
@@ -91,33 +119,6 @@ func (svc service) BuildList(ctx context.Context, req *BuildList_Request) (*Buil
 
 	sort.Slice(resp.Builds[:], func(i, j int) bool {
 		return resp.Builds[i].CreatedAt.After(*resp.Builds[j].CreatedAt)
-	})
-
-	return &resp, nil
-}
-
-func (svc service) ArtifactList(ctx context.Context, req *ArtifactList_Request) (*ArtifactList_Response, error) {
-	resp := ArtifactList_Response{}
-
-	p := cayleypath.StartPath(svc.db).
-		Has(quad.IRI("rdf:type"), quad.IRI("yolo:Artifact"))
-	if req.Kind != 0 {
-		p = p.Has(quad.IRI("schema:kind"), quad.Int(req.Kind))
-	}
-	p = p.Limit(300)
-
-	artifacts := []Artifact{}
-	if err := svc.schema.LoadPathTo(ctx, svc.db, &artifacts, p); err != nil {
-		return nil, fmt.Errorf("load artifacts: %w", err)
-	}
-
-	resp.Artifacts = make([]*Artifact, len(artifacts))
-	for i := range artifacts {
-		resp.Artifacts[i] = &artifacts[i]
-	}
-
-	sort.Slice(resp.Artifacts[:], func(i, j int) bool {
-		return resp.Artifacts[i].CreatedAt.After(*resp.Artifacts[j].CreatedAt)
 	})
 
 	return &resp, nil
