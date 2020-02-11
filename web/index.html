@@ -93,7 +93,9 @@
     </script>
 
     <script type="text/javascript">
+      var t;
       function fetch() {
+        clearTimeout(t);
         var url = "/api/build-list?";
         var kind = $('#kind option:selected').attr('id');
         if (kind !== undefined && kind != "") {
@@ -107,6 +109,7 @@
             var template = $('#releasesTpl').html();
             var html = Mustache.to_html(template, data);
             $('#releases').html(html);
+            t = setTimeout(fetch, 10*1000);
           }
         });
       }
