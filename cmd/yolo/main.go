@@ -35,6 +35,8 @@ func main() {
 		corsAllowedOrigins string
 		requestTimeout     time.Duration
 		shutdownTimeout    time.Duration
+		basicAuth          string
+		realm              string
 	)
 	var (
 		rootFlagSet   = flag.NewFlagSet("yolo", flag.ExitOnError)
@@ -51,6 +53,8 @@ func main() {
 	serverFlagSet.StringVar(&corsAllowedOrigins, "cors-allowed-origins", "", "CORS allowed origins (*.domain.tld)")
 	serverFlagSet.DurationVar(&requestTimeout, "request-timeout", 5*time.Second, "request timeout")
 	serverFlagSet.DurationVar(&shutdownTimeout, "shutdown-timeout", 6*time.Second, "server shutdown timeout")
+	serverFlagSet.StringVar(&basicAuth, "basic-auth-password", "", "if set, enables basic authentication")
+	serverFlagSet.StringVar(&realm, "realm", "Yolo", "authentication Realm")
 
 	server := &ffcli.Command{
 		Name:      `server`,
@@ -93,6 +97,8 @@ func main() {
 				RequestTimeout:     requestTimeout,
 				ShutdownTimeout:    shutdownTimeout,
 				CORSAllowedOrigins: corsAllowedOrigins,
+				BasicAuth:          basicAuth,
+				Realm:              realm,
 			})
 			if err != nil {
 				return err

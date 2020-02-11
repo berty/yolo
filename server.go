@@ -2,6 +2,8 @@ package yolo
 
 import (
 	"context"
+	"crypto/subtle"
+	fmt "fmt"
 	"net"
 	"net/http"
 	"strings"
@@ -39,6 +41,8 @@ type ServerOpts struct {
 	CORSAllowedOrigins string
 	RequestTimeout     time.Duration
 	ShutdownTimeout    time.Duration
+	BasicAuth          string
+	Realm              string
 }
 
 func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, error) {
@@ -50,6 +54,9 @@ func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, erro
 	}
 	if opts.GRPCBind == "" {
 		opts.GRPCBind = ":0"
+	}
+	if opts.Realm == "" {
+		opts.Realm = "Yolo"
 	}
 
 	// gRPC internal server
@@ -103,6 +110,11 @@ func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, erro
 	r.Use(chilogger.Logger(srv.logger))
 	r.Use(middleware.Timeout(opts.RequestTimeout))
 	r.Use(middleware.Recoverer)
+
+	if opts.BasicAuth != "" {
+		r.Use(basicAuth(opts.BasicAuth, opts.Realm))
+	}
+
 	gwmux := runtime.NewServeMux(
 		runtime.WithMarshalerOption(runtime.MIMEWildcard, &gateway.JSONPb{EmitDefaults: false, Indent: "  ", OrigName: true}),
 		runtime.WithProtoErrorHandler(runtime.DefaultHTTPProtoErrorHandler),
@@ -152,4 +164,19 @@ func (srv *Server) Start() error {
 
 func (srv *Server) Stop() {
 	srv.grpcServer.GracefulStop()
+}
+
+func basicAuth(basicAuth string, realm string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			_, password, ok := r.BasicAuth()
+			if !ok || subtle.ConstantTimeCompare([]byte(password), []byte(basicAuth)) != 1 {
+				w.Header().Add("WWW-Authenticate", fmt.Sprintf(`Basic realm="%s"`, realm))
+				w.WriteHeader(http.StatusUnauthorized)
+				fmt.Fprintf(w, "invalid credentials\n")
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
 }
