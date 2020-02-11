@@ -6,6 +6,10 @@ test: generate
 install: generate
 	go install ./cmd/yolo
 
+.PHONY: lint
+lint: generate
+	golangci-lint run
+
 ##
 ## generate
 ##
