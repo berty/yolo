@@ -154,7 +154,7 @@ func (svc service) PlistGenerator(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Add("Content-Type", "application/x-plist")
-	w.Write(b)
+	_, _ = w.Write(b)
 }
 
 func (svc service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {

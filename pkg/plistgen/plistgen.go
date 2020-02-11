@@ -7,9 +7,9 @@ import (
 func Release(bundleID, version, title, url string) ([]byte, error) {
 	release := &ApplePlistRelease{
 		Items: []*ApplePlistItem{
-			&ApplePlistItem{
+			{
 				Assets: []*ApplePlistAsset{
-					&ApplePlistAsset{
+					{
 						Kind: "software-package",
 						URL:  url,
 					},
