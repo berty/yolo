@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Yolo</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  </head>
+  <body>
+    <header>
+      <div class="navbar navbar-dark bg-dark box-shadow">
+        <div class="container d-flex justify-content-between">
+          <a href="#" class="navbar-brand d-flex align-items-center">
+            <strong>Yolo</strong>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main role="main">
+      <section class="jumbotron text-center">
+        <div class="container">
+          <h1 class="jumbotron-heading">Yolo World!</h1>
+        </div>
+      </section>
+
+      <div class="py-3 bg-light">
+        <div class="container">
+          <div class="row">
+            <div class="col-12 py-2">
+              <form>
+                <select id="kind">
+                  <option>-- Kind --</option>
+                  <option id="1">iOS</option>
+                  <option id="2">Android</option>
+                </select>
+		<input id="refresh" type="button" value="F5" />
+              </form>
+            </div>
+          </div>
+          <div class="row" id="releases">
+            <!-- here will go the releases -->
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="text-muted">
+      <div class="container">
+        <p>Yolo Footer</p>
+      </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/3.1.0/mustache.min.js" integrity="sha256-MPgtcamIpCPKRRm1ppJHkvtNBAuE71xcOM+MmQytXi8=" crossorigin="anonymous"></script>
+
+    <script id="releasesTpl" type="text/template">
+      {{#builds}}
+      <div class="col-md-12 my-2">
+        <div class="card mb-12 box-shadow">
+          <div class="card-body">
+            <p class="card-text">{{id}}</a>
+            <p class="card-text"><small class="text-muted">branch: {{branch}}</small></p>
+            <p class="card-text"><small class="text-muted">date: {{created_at}}</small></p>
+            <p class="card-text"><small class="text-muted">message: {{message}}</small></p>
+            <p class="card-text"><small class="text-muted">commit: {{commit}}</small></p>
+            <p class="card-text"><small class="text-muted">state: {{state}}</small></p>
+            <a type="button" class="btn btn-sm btn-outline-secondary" href="{{has_build}}">Logs</a>
+            <div class="container">
+              <div class="row">
+                {{#has_artifacts}}
+                  <div class="col-md-4 my-3">
+                    <div class="card bg-warning mb-4 box-shadow p-2">
+                      <p class="card-text"><small class="text-muted">path: {{local_path}}</small></p>
+                      <p class="card-text"><small class="text-muted">state: {{state}}</small></p>
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div class="btn-group">
+                          <a type="button" class="btn btn-sm btn-outline-secondary" href="/api/artifact-dl?id={{id}}">DL</a>
+                          <a type="button" class="btn btn-sm btn-outline-secondary" href="itms-services://?action=download-manifest&url={{baseURL}}/api/plist-gen/{{id}}.plist">Plist</a>
+                        </div>
+                        <small class="text-muted">{{file_size}}b</small>
+                      </div>
+                    </div>
+                  </div>
+                {{/has_artifacts}}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{/builds}}
+    </script>
+
+    <script type="text/javascript">
+      var t;
+      function fetch() {
+        clearTimeout(t);
+        var url = "/api/build-list?";
+        var kind = $('#kind option:selected').attr('id');
+        if (kind !== undefined && kind != "") {
+          url += "artifact_kind=" + kind + "&";
+        }
+        $.ajax({
+          url: url,
+          success: function(data) {
+            data.baseURL = document.location.protocol + "//" + document.location.host
+            console.log(data);
+            var template = $('#releasesTpl').html();
+            var html = Mustache.to_html(template, data);
+            $('#releases').html(html);
+            t = setTimeout(fetch, 10*1000);
+          }
+        });
+      }
+      fetch()
+      $('#kind').change(fetch)
+      $('#refresh').click(fetch)
+    </script>
+  </body>
+</html>

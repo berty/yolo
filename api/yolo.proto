@@ -1,0 +1,120 @@
+syntax = "proto3";
+
+package yolo;
+
+import "google/api/annotations.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "github.com/golang/protobuf/ptypes/timestamp/timestamp.proto";
+
+option go_package = "berty.tech/yolo;yolo";
+option (gogoproto.sizer_all) = true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.unmarshaler_all) = true;
+
+service YoloService {
+  rpc Ping(Ping.Request)                 returns (Ping.Response)         { option (google.api.http) = {get: "/ping"}; };
+  rpc Status(Status.Request)             returns (Status.Response)       { option (google.api.http) = {get: "/status"}; };
+  rpc BuildList(BuildList.Request)       returns (BuildList.Response)    { option (google.api.http) = {get: "/build-list"}; }
+}
+
+//
+// RPC Requests & Responses
+//
+
+message Ping {
+  message Request  {}
+  message Response {}
+}
+
+message Status {
+  message Request  {}
+  message Response {
+    int32 uptime = 1;
+    string db_err = 2;
+    int64 db_nodes = 3;
+    int64 db_quads = 4;
+  }
+}
+
+message BuildList {
+  message Request {
+    Artifact.Kind artifact_kind = 1;
+  }
+  message Response {
+    repeated Build builds = 1;
+  }
+}
+
+//
+// DB Models
+//
+
+message Build {
+  string id = 1 [(gogoproto.casttype) = "github.com/cayleygraph/quad.IRI", (gogoproto.moretags) = "quad:\"@id\"", (gogoproto.customname) = "ID"]; // canonical URI
+  google.protobuf.Timestamp created_at = 2 [(gogoproto.moretags) = "quad:\"schema:createdAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp updated_at = 3 [(gogoproto.moretags) = "quad:\"schema:updatedAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  State state = 4 [(gogoproto.moretags) = "quad:\"schema:state,optional\""];
+  google.protobuf.Timestamp completed_at = 5 [(gogoproto.moretags) = "quad:\"schema:completedAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  string message = 6 [(gogoproto.moretags) = "quad:\"schema:message,optional\""];
+  google.protobuf.Timestamp started_at = 7 [(gogoproto.moretags) = "quad:\"schema:startedAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp finished_at = 8 [(gogoproto.moretags) = "quad:\"schema:finishedAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  string commit = 9 [(gogoproto.moretags) = "quad:\"schema:commit,optional\""];
+  string branch = 10 [(gogoproto.moretags) = "quad:\"schema:branch,optional\""];
+
+  repeated Artifact has_artifacts = 101 [(gogoproto.moretags) = "quad:\"schema:hasBuild < *,optional\""];
+
+  enum State {
+    UnknownState = 0;
+    Running = 1;
+    Failed = 2;
+    Passed = 3;
+    Canceled = 4;
+    Scheduled = 5;
+    Skipped = 6;
+    NotRun = 7;
+  }
+}
+
+message Artifact {
+  string id = 1 [(gogoproto.casttype) = "github.com/cayleygraph/quad.IRI", (gogoproto.moretags) = "quad:\"@id\"", (gogoproto.customname) = "ID"]; // canonical URI
+  google.protobuf.Timestamp created_at = 2 [(gogoproto.moretags) = "quad:\"schema:createdAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  int64 file_size = 3 [(gogoproto.moretags) = "quad:\"schema:file_size,optional\""];
+  string local_path = 4 [(gogoproto.moretags) = "quad:\"schema:local_path,optional\""];
+  string download_url = 5 [(gogoproto.moretags) = "quad:\"schema:download_url,optional\""];
+  string mime_type= 6 [(gogoproto.moretags) = "quad:\"schema:mime_type,optional\""];
+  string sha1_sum= 7 [(gogoproto.moretags) = "quad:\"schema:sha1_sum,optional\""];
+  State state = 8 [(gogoproto.moretags) = "quad:\"schema:state,optional\""];
+  Kind kind = 9 [(gogoproto.moretags) = "quad:\"schema:kind,optional\""];
+
+  Build has_build = 101 [(gogoproto.moretags) = "quad:\"schema:hasBuild,optional\""];
+
+  enum State {
+    UnknownState = 0;
+    Finished = 1;
+    New = 2;
+    Error = 3;
+    Deleted = 4;
+  }
+  enum Kind {
+    UnknownKind = 0;
+    IPA = 1;
+    APK = 2;
+  }
+}
+
+//
+// Constants & Internal
+//
+
+enum Driver {
+  UnknownDriver = 0;
+  GitHub = 1;
+  Buildkite = 2;
+  // ...
+}
+
+message Batch {
+  repeated Build builds = 1;
+  repeated Artifact artifacts = 2;
+  // ...
+}
