@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"math/rand"
+	"net/http"
 	"os"
 	"path"
 	"syscall"
@@ -17,7 +18,9 @@ import (
 	"github.com/cayleygraph/cayley/graph"
 	_ "github.com/cayleygraph/cayley/graph/kv/bolt"                       // required by cayley
 	_ "github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger/options" // required by protoc
+	circleci "github.com/jszwedko/go-circleci"
 	"github.com/oklog/run"
+	ff "github.com/peterbourgon/ff/v2"
 	"github.com/peterbourgon/ff/v2/ffcli"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -27,8 +30,9 @@ func main() {
 	log.SetFlags(0)
 	var (
 		verbose            bool
-		maxPages           int
+		maxBuilds          int
 		buildkiteToken     string
+		circleciToken      string
 		dbStorePath        string
 		grpcBind           string
 		httpBind           string
@@ -46,8 +50,9 @@ func main() {
 	rootFlagSet.SetOutput(os.Stderr)
 	rootFlagSet.BoolVar(&verbose, "v", false, "increase log verbosity")
 	serverFlagSet.StringVar(&buildkiteToken, "buildkite-token", "", "BuildKite API Token")
+	serverFlagSet.StringVar(&circleciToken, "circleci-token", "", "CircleCI API Token")
 	serverFlagSet.StringVar(&dbStorePath, "db-path", ":temp:", "DB Store path")
-	serverFlagSet.IntVar(&maxPages, "max-pages", 3, "maximum pagination when fetching external services")
+	serverFlagSet.IntVar(&maxBuilds, "max-builds", 100, "maximum builds to fetch from external services (pagination)")
 	serverFlagSet.StringVar(&httpBind, "http-bind", ":8000", "HTTP bind address")
 	serverFlagSet.StringVar(&grpcBind, "grpc-bind", ":9000", "gRPC bind address")
 	serverFlagSet.StringVar(&corsAllowedOrigins, "cors-allowed-origins", "", "CORS allowed origins (*.domain.tld)")
@@ -60,6 +65,7 @@ func main() {
 		Name:      `server`,
 		ShortHelp: `Start a Yolo Server`,
 		FlagSet:   serverFlagSet,
+		Options:   []ff.Option{ff.WithEnvVarNoPrefix()},
 		Exec: func(ctx context.Context, _ []string) error {
 			logger, err := loggerFromArgs(verbose)
 			if err != nil {
@@ -77,18 +83,31 @@ func main() {
 			ctx, cancel := context.WithCancel(ctx)
 			defer cancel()
 
-			// buildkite worker
-			bkc, err := buildkiteClientFromArgs(buildkiteToken)
-			if err != nil {
-				return err
+			// service workers
+			var bkc *buildkite.Client
+			if buildkiteToken != "" {
+				bkc, err = buildkiteClientFromArgs(buildkiteToken)
+				if err != nil {
+					return err
+				}
+				opts := yolo.BuildkiteWorkerOpts{Logger: logger, MaxBuilds: maxBuilds}
+				gr.Add(func() error { return yolo.BuildkiteWorker(ctx, db, bkc, dbSchema, opts) }, func(_ error) { cancel() })
 			}
-			opts := yolo.BuildkiteWorkerOpts{Logger: logger, MaxPages: maxPages}
-			gr.Add(func() error { return yolo.BuildkiteWorker(ctx, db, bkc, dbSchema, opts) }, func(_ error) { cancel() })
+			var ccc *circleci.Client
+			if circleciToken != "" {
+				ccc, err = circleciClientFromArgs(circleciToken)
+				if err != nil {
+					return err
+				}
+				opts := yolo.CircleciWorkerOpts{Logger: logger, MaxBuilds: maxBuilds}
+				gr.Add(func() error { return yolo.CircleciWorker(ctx, db, ccc, dbSchema, opts) }, func(_ error) { cancel() })
+			}
 
 			// server
 			svc := yolo.NewService(db, dbSchema, yolo.ServiceOpts{
 				Logger:          logger,
 				BuildkiteClient: bkc,
+				CircleciClient:  ccc,
 			})
 			server, err := yolo.NewServer(ctx, svc, yolo.ServerOpts{
 				Logger:             logger,
@@ -113,6 +132,7 @@ func main() {
 		ShortUsage:  `server [flags] <subcommand>`,
 		FlagSet:     rootFlagSet,
 		Subcommands: []*ffcli.Command{server},
+		Options:     []ff.Option{ff.WithEnvVarNoPrefix()},
 		Exec: func(_ context.Context, _ []string) error {
 			return flag.ErrHelp
 		},
@@ -121,6 +141,14 @@ func main() {
 	if err := root.ParseAndRun(context.Background(), os.Args[1:]); err != nil {
 		log.Fatalf("err: %+v", err)
 	}
+}
+
+func circleciClientFromArgs(token string) (*circleci.Client, error) {
+	httpclient := &http.Client{
+		Timeout: time.Second * 1800,
+	}
+	ci := &circleci.Client{Token: token, HTTPClient: httpclient}
+	return ci, nil
 }
 
 func buildkiteClientFromArgs(token string) (*buildkite.Client, error) {

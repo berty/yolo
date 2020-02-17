@@ -3,21 +3,21 @@ package yolo
 import (
 	"context"
 	"fmt"
+	"math"
 	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/cayleygraph/cayley"
-	"github.com/cayleygraph/cayley/query/path"
 	"github.com/cayleygraph/cayley/schema"
 	"github.com/cayleygraph/quad"
 	"go.uber.org/zap"
 )
 
 type BuildkiteWorkerOpts struct {
-	Logger   *zap.Logger
-	MaxPages int
+	Logger    *zap.Logger
+	MaxBuilds int
 }
 
 // BuildkiteWorker goals is to manage the buildkite update routine, it should try to support as much errors as possible by itself
@@ -25,19 +25,21 @@ func BuildkiteWorker(ctx context.Context, db *cayley.Handle, bkc *buildkite.Clie
 	if opts.Logger == nil {
 		opts.Logger = zap.NewNop()
 	}
-	if opts.MaxPages == 0 {
-		opts.MaxPages = 3
+	if opts.MaxBuilds == 0 {
+		opts.MaxBuilds = 100
 	}
 	logger := opts.Logger
+	maxPages := int(math.Ceil(float64(opts.MaxBuilds) / 30))
+
 	for {
-		since, err := lastBuildkiteBuildCreatedTime(ctx, db)
+		since, err := lastBuildCreatedTime(ctx, db, Driver_Buildkite)
 		if err != nil {
 			logger.Warn("get last buildkite build created time", zap.Error(err))
 			since = time.Time{}
 		}
 		logger.Debug("buildkite: refresh", zap.Time("since", since))
 		// FIXME: only fetch builds since most recent known
-		batches, err := fetchBuildkite(bkc, since, opts.MaxPages, logger)
+		batches, err := fetchBuildkite(bkc, since, maxPages, logger)
 		if err != nil {
 			logger.Warn("fetch buildkite", zap.Error(err))
 		} else {
@@ -56,32 +58,6 @@ func BuildkiteWorker(ctx context.Context, db *cayley.Handle, bkc *buildkite.Clie
 	return nil
 }
 
-func lastBuildkiteBuildCreatedTime(ctx context.Context, db *cayley.Handle) (time.Time, error) {
-	// FIXME: find a better approach
-	chain := path.StartPath(db).
-		Both().
-		Has(quad.IRI("rdf:type"), quad.IRI("yolo:Build")).
-		// FIXME: driver = buildkite
-		Out(quad.IRI("schema:finishedAt")).
-		Iterate(ctx)
-	since := time.Time{}
-
-	values, err := chain.Paths(false).AllValues(db)
-	if err != nil {
-		return time.Time{}, err
-	}
-
-	for _, value := range values {
-		typed := quad.NativeOf(value).(time.Time)
-		if since.Before(typed) {
-			since = typed
-		}
-	}
-
-	since = since.Add(time.Second) // in order to skip the last one
-	return since, nil
-}
-
 func fetchBuildkite(bkc *buildkite.Client, since time.Time, maxPages int, logger *zap.Logger) ([]Batch, error) {
 	batches := []Batch{}
 	total := 0
@@ -89,12 +65,13 @@ func fetchBuildkite(bkc *buildkite.Client, since time.Time, maxPages int, logger
 		FinishedFrom: since,
 	}
 	for i := 0; i < maxPages; i++ {
+		before := time.Now()
 		builds, resp, err := bkc.Builds.List(callOpts)
 		if err != nil {
 			return nil, err
 		}
 		total += len(builds)
-		logger.Debug("buildkite.Builds.List", zap.Int("total", total))
+		logger.Debug("buildkite.Builds.List", zap.Int("total", total), zap.Duration("duration", time.Since(before)))
 		for _, build := range builds {
 			hasArtifacts := false
 			for _, job := range build.Jobs {
@@ -138,6 +115,7 @@ func buildkiteBuildsToBatch(builds []buildkite.Build) Batch {
 			Message:   *build.Message,
 			Commit:    *build.Commit,
 			Branch:    *build.Branch,
+			Driver:    Driver_Buildkite,
 			// FIXME: Creator: build.Creator...
 		}
 		if build.FinishedAt != nil {

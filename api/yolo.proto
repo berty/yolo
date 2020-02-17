@@ -60,6 +60,7 @@ message Build {
   google.protobuf.Timestamp finished_at = 8 [(gogoproto.moretags) = "quad:\"schema:finishedAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
   string commit = 9 [(gogoproto.moretags) = "quad:\"schema:commit,optional\""];
   string branch = 10 [(gogoproto.moretags) = "quad:\"schema:branch,optional\""];
+  Driver driver = 11 [(gogoproto.moretags) = "quad:\"schema:driver,optional\""];
 
   repeated Artifact has_artifacts = 101 [(gogoproto.moretags) = "quad:\"schema:hasBuild < *,optional\""];
 
@@ -72,6 +73,7 @@ message Build {
     Scheduled = 5;
     Skipped = 6;
     NotRun = 7;
+    Timedout = 8;
   }
 }
 
@@ -85,6 +87,7 @@ message Artifact {
   string sha1_sum= 7 [(gogoproto.moretags) = "quad:\"schema:sha1_sum,optional\""];
   State state = 8 [(gogoproto.moretags) = "quad:\"schema:state,optional\""];
   Kind kind = 9 [(gogoproto.moretags) = "quad:\"schema:kind,optional\""];
+  Driver driver = 10 [(gogoproto.moretags) = "quad:\"schema:driver,optional\""];
 
   Build has_build = 101 [(gogoproto.moretags) = "quad:\"schema:hasBuild,optional\""];
 
@@ -110,6 +113,7 @@ enum Driver {
   UnknownDriver = 0;
   GitHub = 1;
   Buildkite = 2;
+  CircleCI = 3;
   // ...
 }
 
