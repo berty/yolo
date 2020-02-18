@@ -2,11 +2,14 @@ package yolo
 
 import (
 	"context"
-	fmt "fmt"
+	"fmt"
+	"time"
 
 	"github.com/cayleygraph/cayley"
 	"github.com/cayleygraph/cayley/graph"
+	cayleypath "github.com/cayleygraph/cayley/query/path"
 	"github.com/cayleygraph/cayley/schema"
+	"github.com/cayleygraph/quad"
 )
 
 func SchemaConfig() *schema.Config {
@@ -54,4 +57,33 @@ func saveBatches(ctx context.Context, db *cayley.Handle, batches []Batch, schema
 	}
 
 	return nil
+}
+
+func lastBuildCreatedTime(ctx context.Context, db *cayley.Handle, driver Driver) (time.Time, error) {
+	// FIXME: find a better approach
+	chain := cayleypath.StartPath(db).
+		Both().
+		Has(quad.IRI("rdf:type"), quad.IRI("yolo:Build"))
+	if driver != Driver_UnknownDriver {
+		chain = chain.Has(quad.IRI("schema:driver"), quad.Int(driver))
+	}
+	chain = chain.Out(quad.IRI("schema:finishedAt"))
+
+	values, err := chain.Iterate(ctx).Paths(false).AllValues(db)
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	since := time.Time{}
+	for _, value := range values {
+		typed := quad.NativeOf(value).(time.Time)
+		if since.Before(typed) {
+			since = typed
+		}
+	}
+
+	if !since.IsZero() {
+		since = since.Add(time.Second) // in order to skip the last one
+	}
+	return since, nil
 }

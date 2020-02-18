@@ -16,6 +16,7 @@ import (
 	"github.com/cayleygraph/cayley/schema"
 	"github.com/cayleygraph/quad"
 	"github.com/go-chi/chi"
+	circleci "github.com/jszwedko/go-circleci"
 	"go.uber.org/zap"
 )
 
@@ -35,6 +36,7 @@ type service struct {
 
 type ServiceOpts struct {
 	BuildkiteClient *buildkite.Client
+	CircleciClient  *circleci.Client
 	Logger          *zap.Logger
 }
 

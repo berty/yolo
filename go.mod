@@ -15,6 +15,7 @@ require (
 	github.com/golang/protobuf v1.3.3
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway v1.12.2
+	github.com/jszwedko/go-circleci v0.3.0
 	github.com/oklog/run v1.1.0
 	github.com/peterbourgon/ff/v2 v2.0.0
 	github.com/rs/cors v1.7.0
