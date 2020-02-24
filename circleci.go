@@ -89,7 +89,7 @@ func fetchCircleci(ccc *circleci.Client, since time.Time, maxBuilds int, logger 
 			newBuilds := make([]*circleci.Build, len(builds))
 			i := 0
 			for _, build := range builds {
-				if build.AuthorDate.After(since) {
+				if build.AuthorDate != nil && build.AuthorDate.After(since) {
 					newBuilds[i] = build
 					i++
 				}
@@ -115,6 +115,9 @@ func fetchCircleci(ccc *circleci.Client, since time.Time, maxBuilds int, logger 
 func handleCircleciBuilds(ccc *circleci.Client, builds []*circleci.Build, logger *zap.Logger) (Batch, error) {
 	batch := Batch{Builds: []*Build{}}
 	for _, build := range builds {
+		if build == nil {
+			continue
+		}
 		b := circleciBuildToBatch(build)
 		batch.Builds = append(batch.Builds, &b)
 

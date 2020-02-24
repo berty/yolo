@@ -13,6 +13,7 @@ import (
 	"time"
 
 	yolo "berty.tech/yolo/v2"
+	bearer "github.com/Bearer/bearer-go"
 	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/cayleygraph/cayley"
 	"github.com/cayleygraph/cayley/graph"
@@ -31,6 +32,7 @@ func main() {
 	var (
 		verbose            bool
 		maxBuilds          int
+		bearerSecretKey    string
 		buildkiteToken     string
 		circleciToken      string
 		dbStorePath        string
@@ -60,6 +62,7 @@ func main() {
 	serverFlagSet.DurationVar(&shutdownTimeout, "shutdown-timeout", 6*time.Second, "server shutdown timeout")
 	serverFlagSet.StringVar(&basicAuth, "basic-auth-password", "", "if set, enables basic authentication")
 	serverFlagSet.StringVar(&realm, "realm", "Yolo", "authentication Realm")
+	serverFlagSet.StringVar(&bearerSecretKey, "bearer-secretkey", "", "optional Bearer.sh Secret Key")
 
 	server := &ffcli.Command{
 		Name:      `server`,
@@ -70,6 +73,9 @@ func main() {
 			logger, err := loggerFromArgs(verbose)
 			if err != nil {
 				return err
+			}
+			if bearerSecretKey != "" {
+				bearer.ReplaceGlobals(bearer.Init(bearerSecretKey))
 			}
 			db, dbCleanup, err := dbFromArgs(dbStorePath, logger)
 			if err != nil {
