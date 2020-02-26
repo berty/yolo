@@ -9,6 +9,7 @@ import (
 	"sort"
 	"time"
 
+	"berty.tech/yolo/v2/pkg/bintray"
 	plistgen "berty.tech/yolo/v2/pkg/plistgen"
 	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/cayleygraph/cayley"
@@ -32,11 +33,14 @@ type service struct {
 	logger    *zap.Logger
 	schema    *schema.Config
 	bkc       *buildkite.Client
+	btc       *bintray.Client
+	ccc       *circleci.Client
 }
 
 type ServiceOpts struct {
 	BuildkiteClient *buildkite.Client
 	CircleciClient  *circleci.Client
+	BintrayClient   *bintray.Client
 	Logger          *zap.Logger
 }
 
@@ -50,6 +54,8 @@ func NewService(db *cayley.Handle, schema *schema.Config, opts ServiceOpts) Serv
 		logger:    opts.Logger,
 		schema:    schema,
 		bkc:       opts.BuildkiteClient,
+		btc:       opts.BintrayClient,
+		ccc:       opts.CircleciClient,
 	}
 }
 
@@ -97,10 +103,7 @@ func (svc service) BuildList(ctx context.Context, req *BuildList_Request) (*Buil
 	}
 	// clean up the result
 	for idx, build := range builds {
-		// avoid infinite loop by removing already existing pointers
-		for _, artifact := range build.HasArtifacts {
-			artifact.HasBuild = nil
-		}
+		build.cleanup()
 		// cleanup artifact with invalid requested type (see comment above)
 		if req.ArtifactKind > 0 {
 			n := 0
@@ -120,6 +123,12 @@ func (svc service) BuildList(ctx context.Context, req *BuildList_Request) (*Buil
 	}
 
 	sort.Slice(resp.Builds[:], func(i, j int) bool {
+		if resp.Builds[j] == nil || resp.Builds[j].CreatedAt == nil {
+			return true
+		}
+		if resp.Builds[i] == nil || resp.Builds[i].CreatedAt == nil {
+			return false
+		}
 		return resp.Builds[i].CreatedAt.After(*resp.Builds[j].CreatedAt)
 	})
 
@@ -170,15 +179,32 @@ func (svc service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("err: %v", err), http.StatusInternalServerError)
 		return
 	}
+	artifact.cleanup()
 
 	base := path.Base(artifact.LocalPath)
-	// FIXME: support multiple drivers
-	// FIXME: add content-type
-	// FIXME: add file size
 	w.Header().Add("Content-Disposition", fmt.Sprintf("inline; filename=%s", base))
-	_, err := svc.bkc.Artifacts.DownloadArtifactByURL(artifact.DownloadUrl, w)
+	if artifact.FileSize > 0 {
+		w.Header().Add("Content-Length", fmt.Sprintf("%d", artifact.FileSize))
+	}
+	if artifact.MimeType != "" {
+		w.Header().Add("Content-Type", artifact.MimeType)
+	}
+
+	var err error
+	switch artifact.Driver {
+	case Driver_Buildkite:
+		if svc.bkc == nil {
+			err = fmt.Errorf("buildkite token required")
+		} else {
+			_, err = svc.bkc.Artifacts.DownloadArtifactByURL(artifact.DownloadURL, w)
+		}
+	case Driver_Bintray:
+		err = bintray.DownloadContent(artifact.DownloadURL, w)
+	// case Driver_CircleCI:
+	default:
+		err = fmt.Errorf("download not supported for this driver")
+	}
 	if err != nil {
 		http.Error(w, fmt.Sprintf("err: %v", err), http.StatusInternalServerError)
-		return
 	}
 }

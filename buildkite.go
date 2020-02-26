@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -150,23 +149,18 @@ func buildkiteBuildsToBatch(builds []buildkite.Build) Batch {
 func buildkiteArtifactsToBatch(artifacts []buildkite.Artifact, build buildkite.Build) Batch {
 	batch := Batch{}
 	for _, artifact := range artifacts {
+		id := "buildkite_" + md5Sum(*artifact.DownloadURL)
 		newArtifact := Artifact{
-			ID:          quad.IRI("buildkite_" + *artifact.ID),
+			ID:          quad.IRI(id),
 			CreatedAt:   &build.CreatedAt.Time,
 			FileSize:    *artifact.FileSize,
 			LocalPath:   *artifact.Path,
-			DownloadUrl: *artifact.DownloadURL,
-			MimeType:    *artifact.MimeType,
+			DownloadURL: *artifact.DownloadURL,
 			HasBuild:    &Build{ID: quad.IRI(*build.WebURL)},
+			Driver:      Driver_Buildkite,
+			Kind:        artifactKindByPath(*artifact.Path),
+			MimeType:    mimetypeByPath(*artifact.Path), // *artifact.MimeType,
 			// FIXME: Sha1Sum:     *artifact.Sha1Sum,
-		}
-		switch filepath.Ext(newArtifact.LocalPath) {
-		case ".ipa":
-			newArtifact.Kind = Artifact_IPA
-		case ".apk":
-			newArtifact.Kind = Artifact_APK
-		default:
-			newArtifact.Kind = Artifact_UnknownKind
 		}
 		switch *artifact.State {
 		case "finished":

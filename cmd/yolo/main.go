@@ -13,6 +13,7 @@ import (
 	"time"
 
 	yolo "berty.tech/yolo/v2"
+	"berty.tech/yolo/v2/pkg/bintray"
 	bearer "github.com/Bearer/bearer-go"
 	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/cayleygraph/cayley"
@@ -34,6 +35,8 @@ func main() {
 		maxBuilds          int
 		bearerSecretKey    string
 		buildkiteToken     string
+		bintrayUsername    string
+		bintrayToken       string
 		circleciToken      string
 		dbStorePath        string
 		grpcBind           string
@@ -52,6 +55,8 @@ func main() {
 	rootFlagSet.SetOutput(os.Stderr)
 	rootFlagSet.BoolVar(&verbose, "v", false, "increase log verbosity")
 	serverFlagSet.StringVar(&buildkiteToken, "buildkite-token", "", "BuildKite API Token")
+	serverFlagSet.StringVar(&bintrayUsername, "bintray-username", "", "Bintray username")
+	serverFlagSet.StringVar(&bintrayToken, "bintray-token", "", "Bintray API Token")
 	serverFlagSet.StringVar(&circleciToken, "circleci-token", "", "CircleCI API Token")
 	serverFlagSet.StringVar(&dbStorePath, "db-path", ":temp:", "DB Store path")
 	serverFlagSet.IntVar(&maxBuilds, "max-builds", 100, "maximum builds to fetch from external services (pagination)")
@@ -108,12 +113,22 @@ func main() {
 				opts := yolo.CircleciWorkerOpts{Logger: logger, MaxBuilds: maxBuilds}
 				gr.Add(func() error { return yolo.CircleciWorker(ctx, db, ccc, dbSchema, opts) }, func(_ error) { cancel() })
 			}
+			var btc *bintray.Client
+			if bintrayToken != "" {
+				btc, err = bintrayClientFromArgs(bintrayUsername, bintrayToken)
+				if err != nil {
+					return err
+				}
+				opts := yolo.BintrayWorkerOpts{Logger: logger, MaxBuilds: maxBuilds}
+				gr.Add(func() error { return yolo.BintrayWorker(ctx, db, btc, dbSchema, opts) }, func(_ error) { cancel() })
+			}
 
 			// server
 			svc := yolo.NewService(db, dbSchema, yolo.ServiceOpts{
 				Logger:          logger,
 				BuildkiteClient: bkc,
 				CircleciClient:  ccc,
+				BintrayClient:   btc,
 			})
 			server, err := yolo.NewServer(ctx, svc, yolo.ServerOpts{
 				Logger:             logger,
@@ -147,6 +162,11 @@ func main() {
 	if err := root.ParseAndRun(context.Background(), os.Args[1:]); err != nil {
 		log.Fatalf("err: %+v", err)
 	}
+}
+
+func bintrayClientFromArgs(username, token string) (*bintray.Client, error) {
+	btc := bintray.New(username, token)
+	return btc, nil
 }
 
 func circleciClientFromArgs(token string) (*circleci.Client, error) {
