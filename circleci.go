@@ -52,7 +52,7 @@ func CircleciWorker(ctx context.Context, db *cayley.Handle, ccc *circleci.Client
 		select {
 		case <-ctx.Done():
 			return nil
-		case <-time.After(5 * time.Second):
+		case <-time.After(1 * time.Second):
 		}
 	}
 	return nil
