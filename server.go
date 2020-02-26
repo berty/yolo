@@ -82,7 +82,7 @@ func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, erro
 	// gRPC exposed server
 	grpcListener, err := net.Listen("tcp", opts.GRPCBind)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("net.Listen: %w", err)
 	}
 	srv.grpcListenerAddr = grpcListener.Addr().String()
 	srv.workers.Add(func() error {

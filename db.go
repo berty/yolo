@@ -71,7 +71,7 @@ func lastBuildCreatedTime(ctx context.Context, db *cayley.Handle, driver Driver)
 
 	values, err := chain.Iterate(ctx).Paths(false).AllValues(db)
 	if err != nil {
-		return time.Time{}, err
+		return time.Time{}, fmt.Errorf("chain.Iterate: %w", err)
 	}
 
 	since := time.Time{}
