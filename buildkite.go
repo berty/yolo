@@ -68,7 +68,7 @@ func fetchBuildkite(bkc *buildkite.Client, since time.Time, maxPages int, logger
 		before := time.Now()
 		builds, resp, err := bkc.Builds.List(callOpts)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("buildkite.Builds.List: %w", err)
 		}
 		total += len(builds)
 		logger.Debug("buildkite.Builds.List", zap.Int("total", total), zap.Duration("duration", time.Since(before)))
@@ -89,7 +89,7 @@ func fetchBuildkite(bkc *buildkite.Client, since time.Time, maxPages int, logger
 					&buildkite.ArtifactListOptions{},
 				)
 				if err != nil {
-					return nil, err
+					return nil, fmt.Errorf("buildkite.Artifacts.ListByBuild: %w", err)
 				}
 				logger.Debug("buildkite.Artifacts.List", zap.Int("len", len(artifacts)))
 				batches = append(batches, buildkiteArtifactsToBatch(artifacts, build))

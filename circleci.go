@@ -65,12 +65,12 @@ func fetchCircleci(ccc *circleci.Client, since time.Time, maxBuilds int, logger 
 		before := time.Now()
 		builds, err := ccc.ListRecentBuilds(maxBuilds, 0)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("list recent builds: %w", err)
 		}
 		logger.Debug("circleci.ListRecentBuilds", zap.Int("builds", len(builds)), zap.Duration("duration", time.Since(before)))
 		batch, err := handleCircleciBuilds(ccc, builds, logger)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("handle circle builds: %w", err)
 		}
 		batches = append(batches, batch)
 	} else { // only recents
@@ -84,7 +84,7 @@ func fetchCircleci(ccc *circleci.Client, since time.Time, maxBuilds int, logger 
 			before := time.Now()
 			builds, err := ccc.ListRecentBuilds(perPage, offset)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("list recent builds: %w", err)
 			}
 			newBuilds := make([]*circleci.Build, len(builds))
 			i := 0
@@ -98,7 +98,7 @@ func fetchCircleci(ccc *circleci.Client, since time.Time, maxBuilds int, logger 
 			if i > 0 {
 				batch, err := handleCircleciBuilds(ccc, newBuilds, logger)
 				if err != nil {
-					return nil, err
+					return nil, fmt.Errorf("handle circle builds: %w", err)
 				}
 				batches = append(batches, batch)
 			}
@@ -123,7 +123,7 @@ func handleCircleciBuilds(ccc *circleci.Client, builds []*circleci.Build, logger
 
 		artifacts, err := ccc.ListBuildArtifacts(build.Username, build.Reponame, build.BuildNum)
 		if err != nil {
-			return batch, err
+			return batch, fmt.Errorf("list build artifacts: %w", err)
 		}
 		logger.Debug("circleci.ListBuildArtifacts", zap.Int("len", len(artifacts)))
 		if len(artifacts) > 0 {
