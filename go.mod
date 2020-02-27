@@ -29,5 +29,3 @@ require (
 )
 
 replace github.com/cayleygraph/cayley v0.7.7 => github.com/cayleygraph/cayley v0.7.7-0.20200130230943-9fb4d58e0e07
-
-replace github.com/Bearer/bearer-go => ../../github.com/Bearer/bearer-go
