@@ -3,7 +3,7 @@ module berty.tech/yolo/v2
 go 1.13
 
 require (
-	github.com/Bearer/bearer-go v1.1.1
+	github.com/Bearer/bearer-go v1.2.1
 	github.com/buildkite/go-buildkite v2.2.0+incompatible
 	github.com/cayleygraph/cayley v0.7.7
 	github.com/cayleygraph/quad v1.2.1

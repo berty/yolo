@@ -5,8 +5,8 @@ github.com/AndreasBriese/bbloom v0.0.0-20190306092124-e2d15f34fcf9/go.mod h1:bOv
 github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78/go.mod h1:LmzpDX56iTiv29bbRTIsUNlaFfuhWRQBWjQdVyAevI8=
 github.com/Bearer/bearer-go v1.1.0 h1:Rlz1zj3Hf+6obdfAplqBi1jYAIYZDXbDgjAXjoYE4TE=
 github.com/Bearer/bearer-go v1.1.0/go.mod h1:rtEWryqHRa+Xxd40+ytYqn7LOP35oFMQ5dCFvkreIGI=
-github.com/Bearer/bearer-go v1.1.1 h1:5fMqRu5Pasehf+rp2uCXIsV3l5ZDD5i8wmRzSzbh1fc=
-github.com/Bearer/bearer-go v1.1.1/go.mod h1:rtEWryqHRa+Xxd40+ytYqn7LOP35oFMQ5dCFvkreIGI=
+github.com/Bearer/bearer-go v1.2.1 h1:BFrhoEGMpA1IwiZuXDRtXq8kitgmPSMI1fh+Tt3iYPs=
+github.com/Bearer/bearer-go v1.2.1/go.mod h1:rtEWryqHRa+Xxd40+ytYqn7LOP35oFMQ5dCFvkreIGI=
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/Microsoft/go-winio v0.4.12/go.mod h1:VhR8bwka0BXejwEJY73c50VrPtXAaKcyvVC4A4RozmA=

@@ -2,10 +2,7 @@ package yolo
 
 import (
 	"context"
-	"crypto/md5"
-	"encoding/hex"
 	fmt "fmt"
-	"path/filepath"
 	"time"
 
 	"github.com/cayleygraph/cayley"
@@ -182,29 +179,20 @@ func circleciBuildToBatch(build *circleci.Build) Build {
 func circleciArtifactsToBatch(artifacts []*circleci.Artifact, build *circleci.Build) Batch {
 	batch := Batch{}
 	for _, artifact := range artifacts {
-		hasher := md5.New()
-		_, _ = hasher.Write([]byte(artifact.URL))
-		id := hex.EncodeToString(hasher.Sum(nil))
+		id := "circleci_" + md5Sum(artifact.URL)
 		newArtifact := Artifact{
-			ID:        quad.IRI("circleci_" + id),
-			CreatedAt: build.AuthorDate,
-			//FileSize:
+			ID:          quad.IRI(id),
+			CreatedAt:   build.AuthorDate,
 			LocalPath:   artifact.PrettyPath,
-			DownloadUrl: artifact.URL,
-			//MimeType:
-			HasBuild: &Build{ID: quad.IRI(build.BuildURL)},
-			Driver:   Driver_CircleCI,
-			// FIXME: Sha1Sum:
+			DownloadURL: artifact.URL,
+			HasBuild:    &Build{ID: quad.IRI(build.BuildURL)},
+			Driver:      Driver_CircleCI,
+			Kind:        artifactKindByPath(artifact.PrettyPath),
+			State:       Artifact_Finished,
+			MimeType:    mimetypeByPath(artifact.PrettyPath),
+			// FIXME: Sha1Sum
+			// FIXME: FileSize
 		}
-		switch filepath.Ext(newArtifact.LocalPath) {
-		case ".ipa":
-			newArtifact.Kind = Artifact_IPA
-		case ".apk":
-			newArtifact.Kind = Artifact_APK
-		default:
-			newArtifact.Kind = Artifact_UnknownKind
-		}
-		newArtifact.State = Artifact_Finished
 		batch.Artifacts = append(batch.Artifacts, &newArtifact)
 	}
 	return batch

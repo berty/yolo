@@ -23,6 +23,8 @@ import (
 	chilogger "github.com/treastech/logger"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"moul.io/depviz/v3/pkg/chiutil"
 )
 
@@ -60,18 +62,21 @@ func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, erro
 	}
 
 	// gRPC internal server
-	srv := Server{
-		logger: opts.Logger,
+	srv := Server{logger: opts.Logger}
+
+	recoveryHandler := func(p interface{}) (err error) {
+		return status.Errorf(codes.Unknown, "panic triggered: %v", p)
 	}
+	recoveryOpts := []grpc_recovery.Option{grpc_recovery.WithRecoveryHandler(recoveryHandler)}
 	serverStreamOpts := []grpc.StreamServerInterceptor{
-		grpc_recovery.StreamServerInterceptor(),
+		grpc_recovery.StreamServerInterceptor(recoveryOpts...),
 		grpc_zap.StreamServerInterceptor(srv.logger),
-		grpc_recovery.StreamServerInterceptor(),
+		grpc_recovery.StreamServerInterceptor(recoveryOpts...),
 	}
 	serverUnaryOpts := []grpc.UnaryServerInterceptor{
-		grpc_recovery.UnaryServerInterceptor(),
+		grpc_recovery.UnaryServerInterceptor(recoveryOpts...),
 		grpc_zap.UnaryServerInterceptor(srv.logger),
-		grpc_recovery.UnaryServerInterceptor(),
+		grpc_recovery.UnaryServerInterceptor(recoveryOpts...),
 	}
 	srv.grpcServer = grpc.NewServer(
 		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(serverStreamOpts...)),
