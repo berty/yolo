@@ -1,4 +1,4 @@
-package yolo
+package yolosvc
 
 import (
 	"context"
@@ -10,7 +10,8 @@ import (
 	"time"
 
 	"berty.tech/yolo/v2/pkg/bintray"
-	plistgen "berty.tech/yolo/v2/pkg/plistgen"
+	"berty.tech/yolo/v2/pkg/plistgen"
+	"berty.tech/yolo/v2/pkg/yolopb"
 	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/cayleygraph/cayley"
 	cayleypath "github.com/cayleygraph/cayley/query/path"
@@ -22,7 +23,7 @@ import (
 )
 
 type Service interface {
-	YoloServiceServer
+	yolopb.YoloServiceServer
 	PlistGenerator(w http.ResponseWriter, r *http.Request)
 	ArtifactDownloader(w http.ResponseWriter, r *http.Request)
 }
@@ -59,12 +60,12 @@ func NewService(db *cayley.Handle, schema *schema.Config, opts ServiceOpts) Serv
 	}
 }
 
-func (svc service) Ping(ctx context.Context, req *Ping_Request) (*Ping_Response, error) {
-	return &Ping_Response{}, nil
+func (svc service) Ping(ctx context.Context, req *yolopb.Ping_Request) (*yolopb.Ping_Response, error) {
+	return &yolopb.Ping_Response{}, nil
 }
 
-func (svc service) Status(ctx context.Context, req *Status_Request) (*Status_Response, error) {
-	resp := Status_Response{
+func (svc service) Status(ctx context.Context, req *yolopb.Status_Request) (*yolopb.Status_Response, error) {
+	resp := yolopb.Status_Response{
 		Uptime: int32(time.Since(svc.startTime).Seconds()),
 	}
 
@@ -80,8 +81,8 @@ func (svc service) Status(ctx context.Context, req *Status_Request) (*Status_Res
 	return &resp, nil
 }
 
-func (svc service) BuildList(ctx context.Context, req *BuildList_Request) (*BuildList_Response, error) {
-	resp := BuildList_Response{}
+func (svc service) BuildList(ctx context.Context, req *yolopb.BuildList_Request) (*yolopb.BuildList_Response, error) {
+	resp := yolopb.BuildList_Response{}
 
 	p := cayleypath.StartPath(svc.db).
 		Has(quad.IRI("rdf:type"), quad.IRI("yolo:Build"))
@@ -97,13 +98,13 @@ func (svc service) BuildList(ctx context.Context, req *BuildList_Request) (*Buil
 	}
 	p = p.Limit(300)
 
-	builds := []Build{}
+	builds := []yolopb.Build{}
 	if err := svc.schema.LoadIteratorToDepth(ctx, svc.db, reflect.ValueOf(&builds), 1, p.BuildIterator(ctx)); err != nil {
 		return nil, fmt.Errorf("load builds: %w", err)
 	}
 	// clean up the result
 	for idx, build := range builds {
-		build.cleanup()
+		build.Cleanup()
 		// cleanup artifact with invalid requested type (see comment above)
 		if req.ArtifactKind > 0 {
 			n := 0
@@ -117,7 +118,7 @@ func (svc service) BuildList(ctx context.Context, req *BuildList_Request) (*Buil
 		}
 	}
 
-	resp.Builds = make([]*Build, len(builds))
+	resp.Builds = make([]*yolopb.Build, len(builds))
 	for i := range builds {
 		resp.Builds[i] = &builds[i]
 	}
@@ -141,7 +142,7 @@ func (svc service) PlistGenerator(w http.ResponseWriter, r *http.Request) {
 	p := cayleypath.
 		StartPath(svc.db, quad.IRI(id)).
 		Has(quad.IRI("rdf:type"), quad.IRI("yolo:Artifact"))
-	var artifact Artifact
+	var artifact yolopb.Artifact
 	if err := svc.schema.LoadPathTo(r.Context(), svc.db, &artifact, p); err != nil {
 		http.Error(w, fmt.Sprintf("err: %v", err), http.StatusInternalServerError)
 		return
@@ -174,12 +175,12 @@ func (svc service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
 	p := cayleypath.
 		StartPath(svc.db, quad.IRI(id)).
 		Has(quad.IRI("rdf:type"), quad.IRI("yolo:Artifact"))
-	var artifact Artifact
+	var artifact yolopb.Artifact
 	if err := svc.schema.LoadPathTo(r.Context(), svc.db, &artifact, p); err != nil {
 		http.Error(w, fmt.Sprintf("err: %v", err), http.StatusInternalServerError)
 		return
 	}
-	artifact.cleanup()
+	artifact.Cleanup()
 
 	base := path.Base(artifact.LocalPath)
 	w.Header().Add("Content-Disposition", fmt.Sprintf("inline; filename=%s", base))
@@ -192,13 +193,13 @@ func (svc service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	switch artifact.Driver {
-	case Driver_Buildkite:
+	case yolopb.Driver_Buildkite:
 		if svc.bkc == nil {
 			err = fmt.Errorf("buildkite token required")
 		} else {
 			_, err = svc.bkc.Artifacts.DownloadArtifactByURL(artifact.DownloadURL, w)
 		}
-	case Driver_Bintray:
+	case yolopb.Driver_Bintray:
 		err = bintray.DownloadContent(artifact.DownloadURL, w)
 	// case Driver_CircleCI:
 	default:

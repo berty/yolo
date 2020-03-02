@@ -1,4 +1,4 @@
-package yolo
+package yolosvc
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"berty.tech/yolo/v2/pkg/yolopb"
 	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/cayleygraph/cayley"
 	"github.com/cayleygraph/cayley/schema"
@@ -31,7 +32,7 @@ func BuildkiteWorker(ctx context.Context, db *cayley.Handle, bkc *buildkite.Clie
 	maxPages := int(math.Ceil(float64(opts.MaxBuilds) / 30))
 
 	for {
-		since, err := lastBuildCreatedTime(ctx, db, Driver_Buildkite)
+		since, err := lastBuildCreatedTime(ctx, db, yolopb.Driver_Buildkite)
 		if err != nil {
 			logger.Warn("get last buildkite build created time", zap.Error(err))
 			since = time.Time{}
@@ -57,8 +58,8 @@ func BuildkiteWorker(ctx context.Context, db *cayley.Handle, bkc *buildkite.Clie
 	return nil
 }
 
-func fetchBuildkite(bkc *buildkite.Client, since time.Time, maxPages int, logger *zap.Logger) ([]Batch, error) {
-	batches := []Batch{}
+func fetchBuildkite(bkc *buildkite.Client, since time.Time, maxPages int, logger *zap.Logger) ([]yolopb.Batch, error) {
+	batches := []yolopb.Batch{}
 	total := 0
 	callOpts := &buildkite.BuildsListOptions{
 		FinishedFrom: since,
@@ -105,16 +106,16 @@ func fetchBuildkite(bkc *buildkite.Client, since time.Time, maxPages int, logger
 	return batches, nil
 }
 
-func buildkiteBuildsToBatch(builds []buildkite.Build) Batch {
-	batch := Batch{}
+func buildkiteBuildsToBatch(builds []buildkite.Build) yolopb.Batch {
+	batch := yolopb.Batch{}
 	for _, build := range builds {
-		newBuild := Build{
+		newBuild := yolopb.Build{
 			ID:        quad.IRI(*build.WebURL),
 			CreatedAt: &build.CreatedAt.Time,
 			Message:   *build.Message,
 			Commit:    *build.Commit,
 			Branch:    *build.Branch,
-			Driver:    Driver_Buildkite,
+			Driver:    yolopb.Driver_Buildkite,
 			// FIXME: Creator: build.Creator...
 		}
 		if build.FinishedAt != nil {
@@ -125,19 +126,19 @@ func buildkiteBuildsToBatch(builds []buildkite.Build) Batch {
 		}
 		switch *build.State {
 		case "running":
-			newBuild.State = Build_Running
+			newBuild.State = yolopb.Build_Running
 		case "failed":
-			newBuild.State = Build_Failed
+			newBuild.State = yolopb.Build_Failed
 		case "passed":
-			newBuild.State = Build_Passed
+			newBuild.State = yolopb.Build_Passed
 		case "not_run":
-			newBuild.State = Build_NotRun
+			newBuild.State = yolopb.Build_NotRun
 		case "skipped":
-			newBuild.State = Build_Skipped
+			newBuild.State = yolopb.Build_Skipped
 		case "canceled":
-			newBuild.State = Build_Canceled
+			newBuild.State = yolopb.Build_Canceled
 		case "scheduled":
-			newBuild.State = Build_Scheduled
+			newBuild.State = yolopb.Build_Scheduled
 		default:
 			fmt.Println("unknown state: ", *build.State)
 		}
@@ -146,33 +147,33 @@ func buildkiteBuildsToBatch(builds []buildkite.Build) Batch {
 	return batch
 }
 
-func buildkiteArtifactsToBatch(artifacts []buildkite.Artifact, build buildkite.Build) Batch {
-	batch := Batch{}
+func buildkiteArtifactsToBatch(artifacts []buildkite.Artifact, build buildkite.Build) yolopb.Batch {
+	batch := yolopb.Batch{}
 	for _, artifact := range artifacts {
 		id := "buildkite_" + md5Sum(*artifact.DownloadURL)
-		newArtifact := Artifact{
+		newArtifact := yolopb.Artifact{
 			ID:          quad.IRI(id),
 			CreatedAt:   &build.CreatedAt.Time,
 			FileSize:    *artifact.FileSize,
 			LocalPath:   *artifact.Path,
 			DownloadURL: *artifact.DownloadURL,
-			HasBuild:    &Build{ID: quad.IRI(*build.WebURL)},
-			Driver:      Driver_Buildkite,
+			HasBuild:    &yolopb.Build{ID: quad.IRI(*build.WebURL)},
+			Driver:      yolopb.Driver_Buildkite,
 			Kind:        artifactKindByPath(*artifact.Path),
 			MimeType:    mimetypeByPath(*artifact.Path), // *artifact.MimeType,
 			// FIXME: Sha1Sum:     *artifact.Sha1Sum,
 		}
 		switch *artifact.State {
 		case "finished":
-			newArtifact.State = Artifact_Finished
+			newArtifact.State = yolopb.Artifact_Finished
 		case "new":
-			newArtifact.State = Artifact_New
+			newArtifact.State = yolopb.Artifact_New
 		case "error":
-			newArtifact.State = Artifact_Error
+			newArtifact.State = yolopb.Artifact_Error
 		case "deleted":
-			newArtifact.State = Artifact_Deleted
+			newArtifact.State = yolopb.Artifact_Deleted
 		default:
-			newArtifact.State = Artifact_UnknownState
+			newArtifact.State = yolopb.Artifact_UnknownState
 			fmt.Println("unknown state: ", *artifact.State)
 		}
 		batch.Artifacts = append(batch.Artifacts, &newArtifact)

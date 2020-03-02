@@ -1,14 +1,15 @@
-package yolo
+package yolosvc
 
 import (
 	"context"
 	"crypto/subtle"
-	fmt "fmt"
+	"fmt"
 	"net"
 	"net/http"
 	"strings"
 	"time"
 
+	"berty.tech/yolo/v2/pkg/yolopb"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/jsonp"
@@ -82,7 +83,7 @@ func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, erro
 		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(serverStreamOpts...)),
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(serverUnaryOpts...)),
 	)
-	RegisterYoloServiceServer(srv.grpcServer, svc)
+	yolopb.RegisterYoloServiceServer(srv.grpcServer, svc)
 
 	// gRPC exposed server
 	grpcListener, err := net.Listen("tcp", opts.GRPCBind)
@@ -125,7 +126,7 @@ func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, erro
 		runtime.WithProtoErrorHandler(runtime.DefaultHTTPProtoErrorHandler),
 	)
 	grpcDialOpts := []grpc.DialOption{grpc.WithInsecure()}
-	if err := RegisterYoloServiceHandlerFromEndpoint(ctx, gwmux, srv.grpcListenerAddr, grpcDialOpts); err != nil {
+	if err := yolopb.RegisterYoloServiceHandlerFromEndpoint(ctx, gwmux, srv.grpcListenerAddr, grpcDialOpts); err != nil {
 		return nil, err
 	}
 

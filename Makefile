@@ -14,7 +14,7 @@ lint: generate
 ## generate
 ##
 
-PROTOS_SRC := ./api/yolo.proto
+PROTOS_SRC := $(wildcard ./api/*.proto)
 GEN_DEPS := $(PROTOS_SRC) Makefile
 .PHONY: generate
 generate: gen.sum
@@ -43,13 +43,13 @@ generate_local:
 	  --grpc-gateway_out=logtostderr=true:"$(GOPATH)/src" \
 	  "$$proto" \
 	); done
-	goimports -w *.pb.go
+	goimports -w ./pkg/yolopb/*.pb.go
 	shasum $(GEN_DEPS) | sort > gen.sum.tmp
 	mv gen.sum.tmp gen.sum
 
 .PHONY: clean
 clean:
-	rm -f gen.sum $(wildcard *.pb.go) $(wildcard *.pb.gw.go)
+	rm -f gen.sum $(wildcard pkg/*/*.pb.go) $(wildcard pkg/*/*.pb.gw.go)
 
 .PHONY: tidy
 tidy:
