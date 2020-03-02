@@ -40,7 +40,7 @@ func BintrayWorker(ctx context.Context, db *cayley.Handle, btc *bintray.Client, 
 		select {
 		case <-ctx.Done():
 			return nil
-		case <-time.After(300 * time.Second):
+		case <-time.After(1200 * time.Second):
 		}
 	}
 	return nil
