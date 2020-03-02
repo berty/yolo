@@ -51,6 +51,61 @@ func saveBatches(ctx context.Context, db *cayley.Handle, batches []yolopb.Batch,
 				return fmt.Errorf("write as quads: %w", err)
 			}
 		}
+		for _, entity := range batch.Entities {
+			var working yolopb.Entity
+			if err := schema.LoadTo(ctx, db, &working, entity.ID); err == nil {
+				_, _ = schema.WriteAsQuads(dw, working)
+			}
+
+			working = *entity
+			if _, err := schema.WriteAsQuads(iw, working); err != nil {
+				return fmt.Errorf("write as quads: %w", err)
+			}
+		}
+		for _, project := range batch.Projects {
+			var working yolopb.Project
+			if err := schema.LoadTo(ctx, db, &working, project.ID); err == nil {
+				_, _ = schema.WriteAsQuads(dw, working)
+			}
+
+			working = *project
+			if _, err := schema.WriteAsQuads(iw, working); err != nil {
+				return fmt.Errorf("write as quads: %w", err)
+			}
+		}
+		for _, release := range batch.Releases {
+			var working yolopb.Release
+			if err := schema.LoadTo(ctx, db, &working, release.ID); err == nil {
+				_, _ = schema.WriteAsQuads(dw, working)
+			}
+
+			working = *release
+			if _, err := schema.WriteAsQuads(iw, working); err != nil {
+				return fmt.Errorf("write as quads: %w", err)
+			}
+		}
+		for _, commit := range batch.Commits {
+			var working yolopb.Commit
+			if err := schema.LoadTo(ctx, db, &working, commit.ID); err == nil {
+				_, _ = schema.WriteAsQuads(dw, working)
+			}
+
+			working = *commit
+			if _, err := schema.WriteAsQuads(iw, working); err != nil {
+				return fmt.Errorf("write as quads: %w", err)
+			}
+		}
+		for _, mergeRequest := range batch.MergeRequests {
+			var working yolopb.MergeRequest
+			if err := schema.LoadTo(ctx, db, &working, mergeRequest.ID); err == nil {
+				_, _ = schema.WriteAsQuads(dw, working)
+			}
+
+			working = *mergeRequest
+			if _, err := schema.WriteAsQuads(iw, working); err != nil {
+				return fmt.Errorf("write as quads: %w", err)
+			}
+		}
 	}
 
 	if err := db.ApplyTransaction(tx); err != nil {

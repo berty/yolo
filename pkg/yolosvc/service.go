@@ -18,6 +18,7 @@ import (
 	"github.com/cayleygraph/cayley/schema"
 	"github.com/cayleygraph/quad"
 	"github.com/go-chi/chi"
+	"github.com/google/go-github/v31/github"
 	circleci "github.com/jszwedko/go-circleci"
 	"github.com/stretchr/signature"
 	"go.uber.org/zap"
@@ -37,6 +38,7 @@ type service struct {
 	bkc       *buildkite.Client
 	btc       *bintray.Client
 	ccc       *circleci.Client
+	ghc       *github.Client
 	authSalt  string
 }
 
@@ -44,6 +46,7 @@ type ServiceOpts struct {
 	BuildkiteClient *buildkite.Client
 	CircleciClient  *circleci.Client
 	BintrayClient   *bintray.Client
+	GithubClient    *github.Client
 	Logger          *zap.Logger
 	AuthSalt        string
 }
