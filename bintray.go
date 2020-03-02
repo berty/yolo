@@ -121,7 +121,7 @@ func bintrayFilesToBatch(files bintray.GetPackageFilesResponse) Batch {
 
 	for _, file := range files {
 		buildID := fmt.Sprintf("https://bintray.com/%s/%s/%s/%s", file.Owner, file.Repo, file.Package, file.Version)
-		downloadURL := fmt.Sprintf("https://dl.bintray.com/%s/%s/%s/%s/%s", file.Owner, file.Repo, file.Package, file.Version, file.Name)
+		downloadURL := fmt.Sprintf("https://dl.bintray.com/%s/%s/%s", file.Owner, file.Repo, file.Path)
 		id := fmt.Sprintf("bintray_%s", md5Sum(downloadURL))
 		newArtifact := Artifact{
 			ID:          quad.IRI(id),
