@@ -1,5 +1,7 @@
 vendor/
 coverage.txt
+packrd/
+*-packr.go
 
 # Junk files
 *~

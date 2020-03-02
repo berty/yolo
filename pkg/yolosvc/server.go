@@ -138,7 +138,7 @@ func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, erro
 		r.Get("/artifact-dl", svc.ArtifactDownloader)
 	})
 
-	box := packr.New("web", "./web")
+	box := packr.New("web", "../../web")
 	chiutil.FileServer(r, "/", box)
 
 	httpListener, err := net.Listen("tcp", opts.HTTPBind)
