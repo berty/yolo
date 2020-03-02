@@ -1,0 +1,54 @@
+'3.7'
+
+services:
+  watchtower:
+    image: containrrr/watchtower
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    restart: on-failure
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    command: --interval 60 --label-enable
+
+  yolo:
+    image: bertytech/yolo:latest
+    restart: unless-stopped
+    volumes:
+      - ./store:/store
+      - ./cache:/cache
+    ports:
+      - 80:8000
+    environment:
+      - BUILDKITE_TOKEN=${YOLO_BUILDKITE_TOKEN}
+      - CIRCLE_TOKEN=${YOLO_CIRCLE_TOKEN}
+      - GITHUB_TOKEN=${YOLO_GITHUB_TOKEN}
+      - BINTRAY_TOKEN=${YOLO_BINTRAY_TOKEN}
+      - BINTRAY_USERNAME=${YOLO_BINTRAY_USERNAME}
+      - BEARER_SECRETKEY=${YOLO_BEARER_SECRETKEY}
+    command: -v server --cors-allowed-origins="*" --max-builds=100 --db-path=/store --basic-auth-password="${YOLO_BASIC_AUTH_PASSWORD}"
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+
+  slackbot:
+    image: bertytech/slackbot
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    environment:
+      - GITHUB_TOKEN=${SLACKBOT_GITHUB_TOKEN}
+      - INVITE_SLACK_TOKEN=${SLACKBOT_INVITE_SLACK_TOKEN}
+      - SLACK_TOKEN=${SLACKBOT_SLACK_TOKEN}
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+
+## This docker-compose.yml file requires setting multiple environment variables or having a `.env` file in the following way:
+#
+# SLACKBOT_GITHUB_TOKEN=xxx
+# SLACKBOT_SLACK_TOKEN=xoxb-xxx
+# SLACKBOT_INVITE_SLACK_TOKEN=xoxb-xxx
+# YOLO_GITHUB_TOKEN=xxx
+# YOLO_CIRCLE_TOKEN=xxx
+# YOLO_HOSTNAME=yolo.berty.io
+# ...
