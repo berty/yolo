@@ -1,10 +1,11 @@
-package yolo
+package yolosvc
 
 import (
 	"context"
 	fmt "fmt"
 	"time"
 
+	"berty.tech/yolo/v2/pkg/yolopb"
 	"github.com/cayleygraph/cayley"
 	"github.com/cayleygraph/cayley/schema"
 	"github.com/cayleygraph/quad"
@@ -29,7 +30,7 @@ func CircleciWorker(ctx context.Context, db *cayley.Handle, ccc *circleci.Client
 	}
 	logger := opts.Logger
 	for {
-		since, err := lastBuildCreatedTime(ctx, db, Driver_CircleCI)
+		since, err := lastBuildCreatedTime(ctx, db, yolopb.Driver_CircleCI)
 		if err != nil {
 			logger.Warn("get last circleci build created time", zap.Error(err))
 			since = time.Time{}
@@ -55,8 +56,8 @@ func CircleciWorker(ctx context.Context, db *cayley.Handle, ccc *circleci.Client
 	return nil
 }
 
-func fetchCircleci(ccc *circleci.Client, since time.Time, maxBuilds int, logger *zap.Logger) ([]Batch, error) {
-	batches := []Batch{}
+func fetchCircleci(ccc *circleci.Client, since time.Time, maxBuilds int, logger *zap.Logger) ([]yolopb.Batch, error) {
+	batches := []yolopb.Batch{}
 	if since.IsZero() { // initial fetch
 		// FIXME: handle circleciMaxPerPage
 		before := time.Now()
@@ -109,8 +110,8 @@ func fetchCircleci(ccc *circleci.Client, since time.Time, maxBuilds int, logger 
 	return batches, nil
 }
 
-func handleCircleciBuilds(ccc *circleci.Client, builds []*circleci.Build, logger *zap.Logger) (Batch, error) {
-	batch := Batch{Builds: []*Build{}}
+func handleCircleciBuilds(ccc *circleci.Client, builds []*circleci.Build, logger *zap.Logger) (yolopb.Batch, error) {
+	batch := yolopb.Batch{Builds: []*yolopb.Build{}}
 	for _, build := range builds {
 		if build == nil {
 			continue
@@ -131,10 +132,10 @@ func handleCircleciBuilds(ccc *circleci.Client, builds []*circleci.Build, logger
 	return batch, nil
 }
 
-func circleciBuildToBatch(build *circleci.Build) Build {
-	newBuild := Build{
+func circleciBuildToBatch(build *circleci.Build) yolopb.Build {
+	newBuild := yolopb.Build{
 		ID:         quad.IRI(build.BuildURL),
-		Driver:     Driver_CircleCI,
+		Driver:     yolopb.Driver_CircleCI,
 		CreatedAt:  build.AuthorDate,
 		FinishedAt: build.StopTime,
 		StartedAt:  build.StartTime,
@@ -146,49 +147,49 @@ func circleciBuildToBatch(build *circleci.Build) Build {
 	// FIXME: Creator: build.Creator...
 	switch build.Status {
 	case "failed":
-		newBuild.State = Build_Failed
+		newBuild.State = yolopb.Build_Failed
 	case "success":
-		newBuild.State = Build_Passed
+		newBuild.State = yolopb.Build_Passed
 	// case "retried":
 	case "canceled":
-		newBuild.State = Build_Canceled
+		newBuild.State = yolopb.Build_Canceled
 	case "infrastructure_fail":
-		newBuild.State = Build_Failed
+		newBuild.State = yolopb.Build_Failed
 	case "timedout":
-		newBuild.State = Build_Timedout
+		newBuild.State = yolopb.Build_Timedout
 	case "not_run":
-		newBuild.State = Build_NotRun
+		newBuild.State = yolopb.Build_NotRun
 	case "running":
-		newBuild.State = Build_Running
+		newBuild.State = yolopb.Build_Running
 	case "queued":
-		newBuild.State = Build_Scheduled
+		newBuild.State = yolopb.Build_Scheduled
 	case "scheduled":
-		newBuild.State = Build_Scheduled
+		newBuild.State = yolopb.Build_Scheduled
 	case "not_running":
-		newBuild.State = Build_NotRun
+		newBuild.State = yolopb.Build_NotRun
 	case "no_tests":
-		newBuild.State = Build_Skipped
+		newBuild.State = yolopb.Build_Skipped
 	case "fixed":
-		newBuild.State = Build_Passed
+		newBuild.State = yolopb.Build_Passed
 	default:
 		fmt.Println("unknown state: ", build.Status)
 	}
 	return newBuild
 }
 
-func circleciArtifactsToBatch(artifacts []*circleci.Artifact, build *circleci.Build) Batch {
-	batch := Batch{}
+func circleciArtifactsToBatch(artifacts []*circleci.Artifact, build *circleci.Build) yolopb.Batch {
+	batch := yolopb.Batch{}
 	for _, artifact := range artifacts {
 		id := "circleci_" + md5Sum(artifact.URL)
-		newArtifact := Artifact{
+		newArtifact := yolopb.Artifact{
 			ID:          quad.IRI(id),
 			CreatedAt:   build.AuthorDate,
 			LocalPath:   artifact.PrettyPath,
 			DownloadURL: artifact.URL,
-			HasBuild:    &Build{ID: quad.IRI(build.BuildURL)},
-			Driver:      Driver_CircleCI,
+			HasBuild:    &yolopb.Build{ID: quad.IRI(build.BuildURL)},
+			Driver:      yolopb.Driver_CircleCI,
 			Kind:        artifactKindByPath(artifact.PrettyPath),
-			State:       Artifact_Finished,
+			State:       yolopb.Artifact_Finished,
 			MimeType:    mimetypeByPath(artifact.PrettyPath),
 			// FIXME: Sha1Sum
 			// FIXME: FileSize

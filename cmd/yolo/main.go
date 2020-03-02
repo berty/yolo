@@ -12,8 +12,8 @@ import (
 	"syscall"
 	"time"
 
-	yolo "berty.tech/yolo/v2"
 	"berty.tech/yolo/v2/pkg/bintray"
+	"berty.tech/yolo/v2/pkg/yolosvc"
 	bearer "github.com/Bearer/bearer-go"
 	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/cayleygraph/cayley"
@@ -87,7 +87,7 @@ func main() {
 				return err
 			}
 			defer dbCleanup()
-			dbSchema := yolo.SchemaConfig()
+			dbSchema := yolosvc.SchemaConfig()
 
 			gr := run.Group{}
 			gr.Add(run.SignalHandler(ctx, syscall.SIGKILL, syscall.SIGTERM))
@@ -101,8 +101,8 @@ func main() {
 				if err != nil {
 					return err
 				}
-				opts := yolo.BuildkiteWorkerOpts{Logger: logger, MaxBuilds: maxBuilds}
-				gr.Add(func() error { return yolo.BuildkiteWorker(ctx, db, bkc, dbSchema, opts) }, func(_ error) { cancel() })
+				opts := yolosvc.BuildkiteWorkerOpts{Logger: logger, MaxBuilds: maxBuilds}
+				gr.Add(func() error { return yolosvc.BuildkiteWorker(ctx, db, bkc, dbSchema, opts) }, func(_ error) { cancel() })
 			}
 			var ccc *circleci.Client
 			if circleciToken != "" {
@@ -110,8 +110,8 @@ func main() {
 				if err != nil {
 					return err
 				}
-				opts := yolo.CircleciWorkerOpts{Logger: logger, MaxBuilds: maxBuilds}
-				gr.Add(func() error { return yolo.CircleciWorker(ctx, db, ccc, dbSchema, opts) }, func(_ error) { cancel() })
+				opts := yolosvc.CircleciWorkerOpts{Logger: logger, MaxBuilds: maxBuilds}
+				gr.Add(func() error { return yolosvc.CircleciWorker(ctx, db, ccc, dbSchema, opts) }, func(_ error) { cancel() })
 			}
 			var btc *bintray.Client
 			if bintrayToken != "" {
@@ -119,18 +119,18 @@ func main() {
 				if err != nil {
 					return err
 				}
-				opts := yolo.BintrayWorkerOpts{Logger: logger, MaxBuilds: maxBuilds}
-				gr.Add(func() error { return yolo.BintrayWorker(ctx, db, btc, dbSchema, opts) }, func(_ error) { cancel() })
+				opts := yolosvc.BintrayWorkerOpts{Logger: logger, MaxBuilds: maxBuilds}
+				gr.Add(func() error { return yolosvc.BintrayWorker(ctx, db, btc, dbSchema, opts) }, func(_ error) { cancel() })
 			}
 
 			// server
-			svc := yolo.NewService(db, dbSchema, yolo.ServiceOpts{
+			svc := yolosvc.NewService(db, dbSchema, yolosvc.ServiceOpts{
 				Logger:          logger,
 				BuildkiteClient: bkc,
 				CircleciClient:  ccc,
 				BintrayClient:   btc,
 			})
-			server, err := yolo.NewServer(ctx, svc, yolo.ServerOpts{
+			server, err := yolosvc.NewServer(ctx, svc, yolosvc.ServerOpts{
 				Logger:             logger,
 				GRPCBind:           grpcBind,
 				HTTPBind:           httpBind,

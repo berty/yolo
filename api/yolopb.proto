@@ -6,7 +6,7 @@ import "google/api/annotations.proto";
 import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 import "github.com/golang/protobuf/ptypes/timestamp/timestamp.proto";
 
-option go_package = "berty.tech/yolo;yolo";
+option go_package = "berty.tech/yolo/pkg/yolopb";
 option (gogoproto.sizer_all) = true;
 option (gogoproto.marshaler_all) = true;
 option (gogoproto.unmarshaler_all) = true;

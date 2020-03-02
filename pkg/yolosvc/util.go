@@ -1,21 +1,23 @@
-package yolo
+package yolosvc
 
 import (
 	"crypto/md5"
 	"encoding/hex"
 	"path/filepath"
+
+	"berty.tech/yolo/v2/pkg/yolopb"
 )
 
-func artifactKindByPath(path string) Artifact_Kind {
+func artifactKindByPath(path string) yolopb.Artifact_Kind {
 	switch filepath.Ext(path) {
 	case ".ipa":
-		return Artifact_IPA
+		return yolopb.Artifact_IPA
 	case ".dmg":
-		return Artifact_DMG
+		return yolopb.Artifact_DMG
 	case ".apk":
-		return Artifact_APK
+		return yolopb.Artifact_APK
 	}
-	return Artifact_UnknownKind
+	return yolopb.Artifact_UnknownKind
 }
 
 func mimetypeByPath(path string) string {

@@ -1,10 +1,11 @@
-package yolo
+package yolosvc
 
 import (
 	"context"
 	"fmt"
 	"time"
 
+	"berty.tech/yolo/v2/pkg/yolopb"
 	"github.com/cayleygraph/cayley"
 	"github.com/cayleygraph/cayley/graph"
 	cayleypath "github.com/cayleygraph/cayley/query/path"
@@ -15,12 +16,12 @@ import (
 func SchemaConfig() *schema.Config {
 	// FIXME: temporarily forced to register it only once
 	config := schema.NewConfig()
-	schema.RegisterType("yolo:Build", Build{})
-	schema.RegisterType("yolo:Artifact", Artifact{})
+	schema.RegisterType("yolo:Build", yolopb.Build{})
+	schema.RegisterType("yolo:Artifact", yolopb.Artifact{})
 	return config
 }
 
-func saveBatches(ctx context.Context, db *cayley.Handle, batches []Batch, schema *schema.Config) error {
+func saveBatches(ctx context.Context, db *cayley.Handle, batches []yolopb.Batch, schema *schema.Config) error {
 	tx := cayley.NewTransaction()
 	dw := graph.NewTxWriter(tx, graph.Delete)
 	iw := graph.NewTxWriter(tx, graph.Add)
@@ -29,7 +30,7 @@ func saveBatches(ctx context.Context, db *cayley.Handle, batches []Batch, schema
 
 	for _, batch := range batches {
 		for _, build := range batch.Builds {
-			var working Build
+			var working yolopb.Build
 			if err := schema.LoadTo(ctx, db, &working, build.ID); err == nil {
 				_, _ = schema.WriteAsQuads(dw, working)
 			}
@@ -40,7 +41,7 @@ func saveBatches(ctx context.Context, db *cayley.Handle, batches []Batch, schema
 			}
 		}
 		for _, artifact := range batch.Artifacts {
-			var working Artifact
+			var working yolopb.Artifact
 			if err := schema.LoadTo(ctx, db, &working, artifact.ID); err == nil {
 				_, _ = schema.WriteAsQuads(dw, working)
 			}
@@ -59,12 +60,12 @@ func saveBatches(ctx context.Context, db *cayley.Handle, batches []Batch, schema
 	return nil
 }
 
-func lastBuildCreatedTime(ctx context.Context, db *cayley.Handle, driver Driver) (time.Time, error) {
+func lastBuildCreatedTime(ctx context.Context, db *cayley.Handle, driver yolopb.Driver) (time.Time, error) {
 	// FIXME: find a better approach
 	chain := cayleypath.StartPath(db).
 		Both().
 		Has(quad.IRI("rdf:type"), quad.IRI("yolo:Build"))
-	if driver != Driver_UnknownDriver {
+	if driver != yolopb.Driver_UnknownDriver {
 		chain = chain.Has(quad.IRI("schema:driver"), quad.Int(driver))
 	}
 	chain = chain.Out(quad.IRI("schema:finishedAt"))

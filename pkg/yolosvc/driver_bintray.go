@@ -1,4 +1,4 @@
-package yolo
+package yolosvc
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"berty.tech/yolo/v2/pkg/bintray"
+	"berty.tech/yolo/v2/pkg/yolopb"
 	"github.com/cayleygraph/cayley"
 	"github.com/cayleygraph/cayley/schema"
 	"github.com/cayleygraph/quad"
@@ -46,8 +47,8 @@ func BintrayWorker(ctx context.Context, db *cayley.Handle, btc *bintray.Client, 
 	return nil
 }
 
-func fetchBintray(btc *bintray.Client, logger *zap.Logger) ([]Batch, error) {
-	batches := []Batch{}
+func fetchBintray(btc *bintray.Client, logger *zap.Logger) ([]yolopb.Batch, error) {
+	batches := []yolopb.Batch{}
 
 	// FIXME: support pagination
 	user, err := btc.GetUser(btc.Subject())
@@ -91,24 +92,24 @@ func fetchBintray(btc *bintray.Client, logger *zap.Logger) ([]Batch, error) {
 	return batches, nil
 }
 
-func bintrayVersionToBatch(version bintray.GetVersionResponse) Batch {
-	batch := Batch{}
+func bintrayVersionToBatch(version bintray.GetVersionResponse) yolopb.Batch {
+	batch := yolopb.Batch{}
 
 	if version.Owner == "" {
 		return batch
 	}
 
 	id := fmt.Sprintf("https://bintray.com/%s/%s/%s/%s", version.Owner, version.Repo, version.Package, version.Name)
-	newBuild := Build{
+	newBuild := yolopb.Build{
 		ID:        quad.IRI(id),
 		CreatedAt: &version.Created,
 		UpdatedAt: &version.Updated,
 		Message:   version.GithubReleaseNotesFile,
-		Driver:    Driver_Bintray,
+		Driver:    yolopb.Driver_Bintray,
 	}
 	switch {
 	case version.Published:
-		newBuild.State = Build_Passed
+		newBuild.State = yolopb.Build_Passed
 	default:
 		fmt.Println("unknown state")
 	}
@@ -116,24 +117,24 @@ func bintrayVersionToBatch(version bintray.GetVersionResponse) Batch {
 	return batch
 }
 
-func bintrayFilesToBatch(files bintray.GetPackageFilesResponse) Batch {
-	batch := Batch{}
+func bintrayFilesToBatch(files bintray.GetPackageFilesResponse) yolopb.Batch {
+	batch := yolopb.Batch{}
 
 	for _, file := range files {
 		buildID := fmt.Sprintf("https://bintray.com/%s/%s/%s/%s", file.Owner, file.Repo, file.Package, file.Version)
 		downloadURL := fmt.Sprintf("https://dl.bintray.com/%s/%s/%s", file.Owner, file.Repo, file.Path)
 		id := fmt.Sprintf("bintray_%s", md5Sum(downloadURL))
-		newArtifact := Artifact{
+		newArtifact := yolopb.Artifact{
 			ID:          quad.IRI(id),
 			CreatedAt:   &file.Created,
 			FileSize:    int64(file.Size),
 			LocalPath:   file.Path,
 			DownloadURL: downloadURL,
-			HasBuild:    &Build{ID: quad.IRI(buildID)},
+			HasBuild:    &yolopb.Build{ID: quad.IRI(buildID)},
 			Sha1Sum:     file.Sha1,
 			Sha256Sum:   file.Sha256,
-			State:       Artifact_Finished,
-			Driver:      Driver_Bintray,
+			State:       yolopb.Artifact_Finished,
+			Driver:      yolopb.Driver_Bintray,
 			Kind:        artifactKindByPath(file.Path),
 			MimeType:    mimetypeByPath(file.Path),
 		}
