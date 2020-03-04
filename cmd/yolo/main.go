@@ -29,6 +29,14 @@ import (
 )
 
 func main() {
+	err := yolo(os.Args)
+	if err != nil {
+		log.Fatalf("err: %+v", err)
+		os.Exit(1)
+	}
+}
+
+func yolo(args []string) error {
 	log.SetFlags(0)
 	var (
 		verbose            bool
@@ -159,9 +167,7 @@ func main() {
 		},
 	}
 
-	if err := root.ParseAndRun(context.Background(), os.Args[1:]); err != nil {
-		log.Fatalf("err: %+v", err)
-	}
+	return root.ParseAndRun(context.Background(), os.Args[1:])
 }
 
 func bintrayClientFromArgs(username, token string) (*bintray.Client, error) {
