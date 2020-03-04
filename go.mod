@@ -20,6 +20,9 @@ require (
 	github.com/oklog/run v1.1.0
 	github.com/peterbourgon/ff/v2 v2.0.0
 	github.com/rs/cors v1.7.0
+	github.com/stretchr/signature v0.0.0-20160104132143-168b2a1e1b56
+	github.com/stretchr/stew v0.0.0-20130812190256-80ef0842b48b // indirect
+	github.com/stretchr/tracer v0.0.0-20140124184152-66d3696bba97 // indirect
 	github.com/treastech/logger v0.0.0-20180705232552-e381e9ecf2e3
 	go.uber.org/multierr v1.5.0 // indirect
 	go.uber.org/zap v1.14.0

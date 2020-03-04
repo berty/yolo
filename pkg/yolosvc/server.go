@@ -21,6 +21,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/oklog/run"
 	"github.com/rs/cors"
+	"github.com/stretchr/signature"
 	chilogger "github.com/treastech/logger"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -46,6 +47,7 @@ type ServerOpts struct {
 	ShutdownTimeout    time.Duration
 	BasicAuth          string
 	Realm              string
+	AuthSalt           string
 }
 
 func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, error) {
@@ -116,10 +118,7 @@ func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, erro
 	r.Use(chilogger.Logger(srv.logger))
 	r.Use(middleware.Timeout(opts.RequestTimeout))
 	r.Use(middleware.Recoverer)
-
-	if opts.BasicAuth != "" {
-		r.Use(basicAuth(opts.BasicAuth, opts.Realm))
-	}
+	r.Use(auth(opts.BasicAuth, opts.Realm, opts.AuthSalt))
 
 	gwmux := runtime.NewServeMux(
 		runtime.WithMarshalerOption(runtime.MIMEWildcard, &gateway.JSONPb{EmitDefaults: false, Indent: "  ", OrigName: true}),
@@ -135,7 +134,7 @@ func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, erro
 		r.Use(jsonp.Handler)
 		r.Mount("/", http.StripPrefix("/api", handler))
 		r.Get("/plist-gen/{artifactID}.plist", svc.PlistGenerator)
-		r.Get("/artifact-dl", svc.ArtifactDownloader)
+		r.Get("/artifact-dl/{artifactID}", svc.ArtifactDownloader)
 	})
 
 	box := packr.New("web", "../../web")
@@ -172,15 +171,23 @@ func (srv *Server) Stop() {
 	srv.grpcServer.GracefulStop()
 }
 
-func basicAuth(basicAuth string, realm string) func(http.Handler) http.Handler {
+func auth(basicAuth, realm, salt string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			_, password, ok := r.BasicAuth()
-			if !ok || subtle.ConstantTimeCompare([]byte(password), []byte(basicAuth)) != 1 {
-				w.Header().Add("WWW-Authenticate", fmt.Sprintf(`Basic realm="%s"`, realm))
-				w.WriteHeader(http.StatusUnauthorized)
-				fmt.Fprintf(w, "invalid credentials\n")
+			ret, _ := signature.ValidateSignature(r.Method, r.URL.String(), "", salt)
+			if ret == true {
+				next.ServeHTTP(w, r)
 				return
+			}
+			if basicAuth != "" {
+				_, password, ok := r.BasicAuth()
+				if !ok || subtle.ConstantTimeCompare([]byte(password), []byte(basicAuth)) != 1 {
+					w.Header().Add("WWW-Authenticate", fmt.Sprintf(`Basic realm="%s"`, realm))
+					w.WriteHeader(http.StatusUnauthorized)
+					fmt.Fprintf(w, "invalid credentials\n")
+					return
+				}
+				// FIXME: setup cookies
 			}
 			next.ServeHTTP(w, r)
 		})

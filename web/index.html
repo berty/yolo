@@ -76,8 +76,10 @@
                       <p class="card-text"><small class="text-muted">state: {{state}}</small></p>
                       <div class="d-flex justify-content-between align-items-center">
                         <div class="btn-group">
-                          <a type="button" class="btn btn-sm btn-outline-secondary" href="/api/artifact-dl?id={{id}}">DL</a>
-                          <a type="button" class="btn btn-sm btn-outline-secondary" href="itms-services://?action=download-manifest&url={{baseURL}}/api/plist-gen/{{id}}.plist">Plist</a>
+                          <a type="button" class="btn btn-sm btn-outline-secondary" href="{{dl_artifact_signed_url}}">DL</a>
+                          {{#plist_signed_url}}
+                            <a type="button" class="btn btn-sm btn-outline-secondary" href="itms-services://?action=download-manifest&url={{baseURL}}{{plist_signed_url}}">Plist</a>
+                          {{/plist_signed_url}}
                         </div>
                         <small class="text-muted">{{file_size}}b</small>
                       </div>
