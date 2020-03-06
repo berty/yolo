@@ -19,6 +19,7 @@ import (
 	"github.com/cayleygraph/quad"
 	"github.com/go-chi/chi"
 	circleci "github.com/jszwedko/go-circleci"
+	"github.com/stretchr/signature"
 	"go.uber.org/zap"
 )
 
@@ -36,6 +37,7 @@ type service struct {
 	bkc       *buildkite.Client
 	btc       *bintray.Client
 	ccc       *circleci.Client
+	authSalt  string
 }
 
 type ServiceOpts struct {
@@ -43,6 +45,7 @@ type ServiceOpts struct {
 	CircleciClient  *circleci.Client
 	BintrayClient   *bintray.Client
 	Logger          *zap.Logger
+	AuthSalt        string
 }
 
 func NewService(db *cayley.Handle, schema *schema.Config, opts ServiceOpts) Service {
@@ -57,6 +60,7 @@ func NewService(db *cayley.Handle, schema *schema.Config, opts ServiceOpts) Serv
 		bkc:       opts.BuildkiteClient,
 		btc:       opts.BintrayClient,
 		ccc:       opts.CircleciClient,
+		authSalt:  opts.AuthSalt,
 	}
 }
 
@@ -102,7 +106,7 @@ func (svc service) BuildList(ctx context.Context, req *yolopb.BuildList_Request)
 	if err := svc.schema.LoadIteratorToDepth(ctx, svc.db, reflect.ValueOf(&builds), 1, p.BuildIterator(ctx)); err != nil {
 		return nil, fmt.Errorf("load builds: %w", err)
 	}
-	// clean up the result
+	// clean up the result and add signed URLs
 	for idx, build := range builds {
 		build.Cleanup()
 		// cleanup artifact with invalid requested type (see comment above)
@@ -115,6 +119,9 @@ func (svc service) BuildList(ctx context.Context, req *yolopb.BuildList_Request)
 				}
 			}
 			builds[idx].HasArtifacts = build.HasArtifacts[:n]
+		}
+		if err := build.AddSignedURLs(svc.authSalt); err != nil {
+			return nil, fmt.Errorf("sign URLs")
 		}
 	}
 
@@ -157,8 +164,17 @@ func (svc service) PlistGenerator(w http.ResponseWriter, r *http.Request) {
 		bundleID = "tech.berty.ios" // FIXME: change me
 		title    = "YOLO"           // FIXME: use random emojis :)
 		version  = "v0.0.1"         // FIXME: change me
-		url      = baseURL + "/api/artifact-dl?id=" + id
+		url      = "/api/artifact-dl/" + id
 	)
+
+	var err error
+	url, err = signature.GetSignedURL("GET", url, "", svc.authSalt)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("err: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	url = baseURL + url // prepend baseURL _after_ computing the signature
 
 	b, err := plistgen.Release(bundleID, version, title, url)
 	if err != nil {
@@ -170,7 +186,7 @@ func (svc service) PlistGenerator(w http.ResponseWriter, r *http.Request) {
 }
 
 func (svc service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
-	id := r.FormValue("id")
+	id := chi.URLParam(r, "artifactID")
 
 	p := cayleypath.
 		StartPath(svc.db, quad.IRI(id)).

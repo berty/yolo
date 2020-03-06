@@ -49,7 +49,7 @@ generate_local:
 
 .PHONY: clean
 clean:
-	rm -f gen.sum $(wildcard pkg/*/*.pb.go) $(wildcard pkg/*/*.pb.gw.go)
+	rm -f gen.sum $(wildcard pkg/*/*.pb.go) $(wildcard pkg/*/*.pb.gw.go) $(wildcard pkg/*/*-packr.go) $(wildcard packrd/*)
 
 .PHONY: tidy
 tidy:

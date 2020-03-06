@@ -50,6 +50,8 @@ message BuildList {
 //
 
 message Build {
+  /// fields
+
   string id = 1 [(gogoproto.casttype) = "github.com/cayleygraph/quad.IRI", (gogoproto.moretags) = "quad:\"@id\"", (gogoproto.customname) = "ID"]; // canonical URI
   google.protobuf.Timestamp created_at = 2 [(gogoproto.moretags) = "quad:\"schema:createdAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
   google.protobuf.Timestamp updated_at = 3 [(gogoproto.moretags) = "quad:\"schema:updatedAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
@@ -62,7 +64,13 @@ message Build {
   string branch = 10 [(gogoproto.moretags) = "quad:\"schema:branch,optional\""];
   Driver driver = 11 [(gogoproto.moretags) = "quad:\"schema:driver,optional\""];
 
+  /// relationships
+
   repeated Artifact has_artifacts = 101 [(gogoproto.moretags) = "quad:\"schema:hasBuild < *,optional\""];
+
+  /// non-stored fields
+
+  /// enums
 
   enum State {
     UnknownState = 0;
@@ -78,6 +86,8 @@ message Build {
 }
 
 message Artifact {
+  /// fields
+
   string id = 1 [(gogoproto.casttype) = "github.com/cayleygraph/quad.IRI", (gogoproto.moretags) = "quad:\"@id\"", (gogoproto.customname) = "ID"]; // canonical URI
   google.protobuf.Timestamp created_at = 2 [(gogoproto.moretags) = "quad:\"schema:createdAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
   int64 file_size = 3 [(gogoproto.moretags) = "quad:\"schema:file_size,optional\""];
@@ -90,7 +100,16 @@ message Artifact {
   Kind kind = 10 [(gogoproto.moretags) = "quad:\"schema:kind,optional\""];
   Driver driver = 11 [(gogoproto.moretags) = "quad:\"schema:driver,optional\""];
 
+  /// relationships
+
   Build has_build = 101 [(gogoproto.moretags) = "quad:\"schema:hasBuild,optional\""];
+
+  /// non-stored fields
+
+  string dl_artifact_signed_url = 201 [(gogoproto.moretags) = "quad:\"-\"",(gogoproto.customname) = "DLArtifactSignedURL"];
+  string plist_signed_url = 202 [(gogoproto.moretags) = "quad:\"-\"",(gogoproto.customname) = "PListSignedURL"];
+
+  /// enums
 
   enum State {
     UnknownState = 0;

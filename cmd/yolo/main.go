@@ -53,6 +53,7 @@ func yolo(args []string) error {
 		requestTimeout     time.Duration
 		shutdownTimeout    time.Duration
 		basicAuth          string
+		authSalt           string
 		realm              string
 	)
 	var (
@@ -76,6 +77,7 @@ func yolo(args []string) error {
 	serverFlagSet.StringVar(&basicAuth, "basic-auth-password", "", "if set, enables basic authentication")
 	serverFlagSet.StringVar(&realm, "realm", "Yolo", "authentication Realm")
 	serverFlagSet.StringVar(&bearerSecretKey, "bearer-secretkey", "", "optional Bearer.sh Secret Key")
+	serverFlagSet.StringVar(&authSalt, "auth-salt", "", "salt used to generate authentication tokens at the end of the URLs")
 
 	server := &ffcli.Command{
 		Name:      `server`,
@@ -137,6 +139,7 @@ func yolo(args []string) error {
 				BuildkiteClient: bkc,
 				CircleciClient:  ccc,
 				BintrayClient:   btc,
+				AuthSalt:        authSalt,
 			})
 			server, err := yolosvc.NewServer(ctx, svc, yolosvc.ServerOpts{
 				Logger:             logger,
@@ -147,6 +150,7 @@ func yolo(args []string) error {
 				CORSAllowedOrigins: corsAllowedOrigins,
 				BasicAuth:          basicAuth,
 				Realm:              realm,
+				AuthSalt:           authSalt,
 			})
 			if err != nil {
 				return err
