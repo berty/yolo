@@ -1,1 +1,8 @@
 @import './assets/main';
+
+body {
+  font: 100% $font-stack;
+  @include themify($themes) {
+    background-color: themed('item-bg-page');
+  }
+}

@@ -1,1 +1,171 @@
-@import "variables"
+@import 'variables';
+@import 'themes';
+
+// Implements design spec for Yolo v2 as of 9 Apr 2020
+
+// May need some refactor :)
+
+/* ------------------------------ Items ------------------------------ */
+
+.block {
+  @include themify($themes) {
+    color: themed('item-section-text');
+    background-color: themed('item-bg-block');
+  }
+  .title,
+  h1.title,
+  h2.title,
+  h3.title {
+    @include themify($themes) {
+      color: themed('item-block-title');
+    }
+  }
+}
+
+.section {
+  @include themify($themes) {
+    color: themed('item-section-text');
+  }
+  .title,
+  h1.title,
+  h2.title,
+  h3.title {
+    @include themify($themes) {
+      color: themed('item-section-title');
+    }
+  }
+
+  svg,
+  .feather-icon {
+    @include themify($themes) {
+      color: themed('item-section-title');
+    }
+  }
+}
+
+.author {
+  @include themify($themes) {
+    color: themed('item-author');
+  }
+}
+
+.border {
+  @include themify($themes) {
+    color: themed('item-border');
+  }
+}
+
+.icon-external {
+  @include themify($themes) {
+    color: themed('item-button-logs');
+  }
+}
+
+/* ------------------------------ Tags ------------------------------ */
+
+.tag-green {
+  @include themify($themes) {
+    color: themed('tag-green-text');
+    background-color: themed('tag-green-bg');
+  }
+}
+
+.tag-pink {
+  @include themify($themes) {
+    color: themed('tag-pink-text');
+    background-color: themed('tag-pink-bg');
+  }
+}
+
+.tag-orange {
+  @include themify($themes) {
+    color: themed('tag-orange-text');
+    background-color: themed('tag-orange-bg');
+  }
+}
+
+/* ------------------------------ Buttons ------------------------------ */
+
+.btn.btn-primary:not([class^='btn-outline']):not([class*=' btn-outline']):not([class^='btn-ghost']):not([class*=' btn-ghost']):not(:focus):not(.focus),
+.btn.btn-primary:not([class^='btn-outline']):not([class*=' btn-outline']):not([class^='btn-ghost']):not([class*=' btn-ghost']):not(.btn-secondary) {
+  @include themify($themes) {
+    color: themed('button-text-liz');
+    background-color: themed('button-primary-bg');
+    border-color: themed('button-primary-bg');
+    box-shadow: 0px 2px 0px themed('button-primary-shadow');
+  }
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 10px;
+}
+
+.btn-download-master {
+  @include themify($themes) {
+    color: themed('button-text-liz');
+    background-color: themed('button-download-master-bg');
+    box-shadow: 0px 2px 0px themed('button-download-master-shadow');
+  }
+}
+
+.btn-download-master {
+  @include themify($themes) {
+    color: themed('button-text-liz');
+    background-color: themed('button-download-pull-bg');
+    box-shadow: 0px 2px 0px themed('button-download-pull-shadow');
+  }
+}
+
+/* ------------------------------ Icons ------------------------------ */
+
+.icon-master {
+  @include themify($themes) {
+    color: themed('icon-master-green');
+  }
+}
+
+.icon-branch {
+  @include themify($themes) {
+    color: themed('icon-branch-purple');
+  }
+}
+
+.icon-dashboard {
+  @include themify($themes) {
+    color: themed('icon-dashboard-blue');
+  }
+}
+
+/* ------------------------------ Filters ------------------------------ */
+
+.filter {
+  .unselected {
+    @include themify($themes) {
+      border: themed('filter-unselected-border');
+    }
+    .icon {
+      @include themify($themes) {
+        border: themed('filter-unselected-icon');
+      }
+    }
+    .title {
+      @include themify($themes) {
+        border: themed('filter-unselected-title');
+      }
+    }
+  }
+  .selected {
+    @include themify($themes) {
+      border: themed('filter-selected-border');
+    }
+    .icon {
+      @include themify($themes) {
+        border: themed('filter-selected-icon');
+      }
+    }
+    .title {
+      @include themify($themes) {
+        border: themed('filter-selected-title');
+      }
+    }
+  }
+}

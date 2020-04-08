@@ -11,6 +11,7 @@
     "start-message": "babel-node tools/startMessage.js",
     "prestart": "npm run start-message",
     "start": "env YOLO_APP_PW=${YOLO_APP_PW} npm run open:src",
+    "start-ui-test": "env YOLO_UI_TEST=true npm run open:src",
     "open:src": "babel-node tools/srcServer.js",
     "open:dist": "babel-node tools/distServer.js",
     "lint": "esw webpack.config.* src tools --color",
@@ -28,6 +29,10 @@
     "analyze-bundle": "babel-node ./tools/analyzeBundle.js"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.28",
+    "@fortawesome/free-brands-svg-icons": "^5.13.0",
+    "@fortawesome/free-solid-svg-icons": "^5.13.0",
+    "@fortawesome/react-fontawesome": "^0.1.9",
     "@hot-loader/react-dom": "16.13.0",
     "bootstrap": "twbs/bootstrap#master",
     "core-js": "3.6.4",
