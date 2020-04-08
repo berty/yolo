@@ -8,8 +8,6 @@ const BuildList = ({platformName, platformId}) => {
   const [items, setItems] = useState([]);
   const [baseURL, setBaseURL] = useState('');
 
-  console.log(`isLoaded:`, isLoaded);
-
   // TODO: Move these controllers out of component code
   useEffect(() => {
     const getBuilds = () =>
