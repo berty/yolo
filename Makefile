@@ -10,6 +10,10 @@ install: generate
 lint: generate
 	golangci-lint run
 
+.PHONY: packr
+packr:
+	cd pkg/yolosvc && packr2 && ls -la *-packr.go packrd/packed-packr.go
+
 ##
 ## generate
 ##
