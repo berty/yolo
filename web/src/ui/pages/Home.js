@@ -17,7 +17,6 @@ const Home = () => {
         className="mb-4"
         id="kind"
         onChange={(e) => {
-          setPlatformId(PLATFORMS.none);
           const {
             target: {value: platform},
           } = e;
@@ -30,18 +29,11 @@ const Home = () => {
         <option value={PLATFORMS.iOS}>iOS</option>
         <option value={PLATFORMS.android}>Android</option>
       </select>
-      {/* TODO: No magic strings */}
-      {platformId !== PLATFORMS.none && (
-        <BuildList
-          platformName={
-            platformId === PLATFORMS.iOS
-              ? 'iOS'
-              : platformId === PLATFORMS.android
-              ? 'Android'
-              : 'No platform selected.'
-          }
-          platformId={platformId}
-        />
+      {platformId === PLATFORMS.android && (
+        <BuildList platformName="Android" platformId={PLATFORMS.android} />
+      )}
+      {platformId === PLATFORMS.iOS && (
+        <BuildList platformName="iOS" platformId={PLATFORMS.iOS} />
       )}
       <footer className="text-muted">
         <div className="container">
