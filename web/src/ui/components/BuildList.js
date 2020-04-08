@@ -1,5 +1,6 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect} from 'react';
 import Card from './Card';
+import axios from 'axios';
 
 const BuildList = ({platformName, platformId}) => {
   const [error, setError] = useState(null);
@@ -10,25 +11,24 @@ const BuildList = ({platformName, platformId}) => {
   // TODO: Move these controllers out of component code
   useEffect(() => {
     const getBuilds = () =>
-      fetch(`${process.env.API_URL}/build-list?artifact_kind=${platformId}&`, {
-        method: 'GET',
-        headers: !process.env.YOLO_APP_PW
-          ? new Headers({
-              Authorization: 'Basic ' + btoa(`${process.env.YOLO_APP_PW}`),
-            })
-          : null,
-      })
-        .then((res) => {
-          // TODO: Consume as stream (load incrementally)
-          return res.json();
+      axios
+        .get(`${process.env.API_URL}/build-list?artifact_kind=${platformId}&`, {
+          headers: process.env.YOLO_APP_PW
+            ? {
+                Authorization: 'Basic ' + btoa(`${process.env.YOLO_APP_PW}`),
+              }
+            : {},
         })
         .then(
           (result) => {
+            const {
+              data: {builds},
+            } = result;
             setIsLoaded(true);
             setBaseURL(
               `${document.location.protocol}//${document.location.host}`
             );
-            setItems(result.builds);
+            setItems(builds);
           },
           (error) => {
             setIsLoaded(true);
