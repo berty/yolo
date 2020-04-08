@@ -43,8 +43,8 @@ const Home = () => {
           platformId={platformId}
         />
       )}
-      <footer class="text-muted">
-        <div class="container">
+      <footer className="text-muted">
+        <div className="container">
           <p>Yolo Footer</p>
         </div>
       </footer>

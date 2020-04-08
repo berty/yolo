@@ -12,9 +12,11 @@ const BuildList = ({platformName, platformId}) => {
     const getBuilds = () =>
       fetch(`${process.env.API_URL}/build-list?artifact_kind=${platformId}&`, {
         method: 'GET',
-        headers: new Headers({
-          Authorization: 'Basic ' + btoa(`${process.env.YOLO_APP_PW}`),
-        }),
+        headers: !process.env.YOLO_APP_PW
+          ? new Headers({
+              Authorization: 'Basic ' + btoa(`${process.env.YOLO_APP_PW}`),
+            })
+          : null,
       })
         .then((res) => {
           // TODO: Consume as stream (load incrementally)
