@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="35px" height="27px" viewBox="0 0 35 27" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 64 (93537) - https://sketch.com -->
+    <title>icon terminal copy</title>
+    <desc>Created with Sketch.</desc>
+    <g id="icon-terminal-copy" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="icon-terminal" transform="translate(2.000000, 2.000000)" stroke="#000000" stroke-width="2">
+            <rect id="Rectangle" x="-1" y="-1" width="33" height="25" rx="3"></rect>
+            <path d="M4,16 C7.33333333,14 9,13 9,13 C9,13 7.33333333,12 4,10" id="Path" stroke-linecap="round" stroke-linejoin="round"></path>
+            <line x1="28" y1="3.5" x2="27" y2="3.5" id="Path-3" stroke-linecap="round" stroke-linejoin="round"></line>
+            <line x1="24" y1="3.5" x2="23" y2="3.5" id="Path-3" stroke-linecap="round" stroke-linejoin="round"></line>
+            <line x1="20" y1="3.5" x2="19" y2="3.5" id="Path-3" stroke-linecap="round" stroke-linejoin="round"></line>
+            <line x1="12" y1="15.5" x2="16" y2="15.5" id="Path-2" stroke-linecap="round" stroke-linejoin="round"></line>
+        </g>
+    </g>
+</svg>

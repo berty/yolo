@@ -1,0 +1,103 @@
+$themes: (
+  light: (
+    item-bg-page: #fcfcff,
+    item-bg-block: #fff,
+    item-author: #383b62,
+    item-block-title: #383b62,
+    item-border: #edf1f7,
+    item-section-title: #606281,
+    item-section-text: #96a2b8,
+    item-branch-bg: #edf1f7,
+    item-button-logs: #dfe0eb,
+    tag-green-bg: #d3f8f2,
+    tag-green-text: #20d6b5,
+    tag-pink-bg: #fee4e9,
+    tag-pink-text: #fe497f,
+    tag-orange-bg: #fff0d4,
+    tag-orange-text: #ffae3a,
+    button-primary-bg: #3f49ea,
+    button-primary-shadow: #232cbd,
+    button-text-liz: #fff,
+    button-download-master-bg: #36d1ae,
+    button-download-master-shadow: #23ae8e,
+    button-download-pull-bg: #8877d8,
+    button-download-pull-shadow: #6452bf,
+    icon-master-green: #36d1ae,
+    icon-branch-purple: #8877d8,
+    icon-dashboard-blue: #444de7,
+    filter-unselected-border: #f3f6fc,
+    filter-unselected-icon: #d7d8e0,
+    filter-unselected-title: #888aa1,
+    filter-selected-border: #3f49ea,
+    filter-selected-icon: #3f49ea,
+    filter-selected-title: #3f49ea,
+    filter-bg: #f0f1ff,
+  ),
+  dark: (
+    item-bg-page: #2b2e4d,
+    item-bg-block: #393c63,
+    item-author: #cdcfed,
+    item-block-title: #cdcfed,
+    item-border: #44486f,
+    item-section-title: #afb2d1,
+    item-section-text: #8082a5,
+    item-branch-bg: #4f5277,
+    item-button-logs: #4f5277,
+    tag-green-bg: #71f0d4,
+    tag-green-text: #23928e,
+    tag-pink-bg: #ff84b4,
+    tag-pink-text: #d23064,
+    tag-orange-bg: #ffdf95,
+    tag-orange-text: #ff9a0b,
+    button-primary-bg: #5353dc,
+    button-primary-shadow: #3e3ea6,
+    button-text-liz: #fff,
+    button-download-master-bg: #36d1ae,
+    button-download-master-shadow: #23ae8e,
+    button-download-pull-bg: #8877d8,
+    button-download-pull-shadow: #6452bf,
+    icon-master-green: #69ffde,
+    icon-branch-purple: #a693ff,
+    icon-dashboard-blue: #7373f6,
+    filter-unselected-border: #4f5277,
+    filter-unselected-icon: #4f5277,
+    filter-unselected-title: #7c7ea1,
+    filter-selected-border: #7373f6,
+    filter-selected-icon: #7373f6,
+    filter-selected-title: #7373f6,
+    filter-bg: transparent,
+  ),
+);
+
+/*
+ * Any child of .theme-light or theme-dark will apply themed values
+ * e.g.
+ * .theme-[light|dark] div {
+    @include themify($themes) {
+        color: themed('pink-text');
+        background-color: themed('pink-bg');
+  } --------------->
+
+ */
+@mixin themify($themes) {
+  @each $theme, $map in $themes {
+    .theme-#{$theme} & {
+      $theme-map: () !global;
+      @each $key, $submap in $map {
+        $value: map-get(map-get($themes, $theme), '#{$key}');
+        $theme-map: map-merge(
+          $theme-map,
+          (
+            $key: $value,
+          )
+        ) !global;
+      }
+      @content;
+      $theme-map: null !global;
+    }
+  }
+}
+
+@function themed($key) {
+  @return map-get($theme-map, $key);
+}
