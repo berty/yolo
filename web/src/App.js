@@ -34,8 +34,7 @@ const App = () => {
     <div className={'page ' + themeName()}>
       <Home />
       <div className="footer p-4">
-        <p>Yolo Footer</p>
-        <div className="btn btn-primary" onClick={toggleTheme}>
+        <div className="btn btn-primary btn-sm" onClick={toggleTheme}>
           Toggle Theme
         </div>
       </div>

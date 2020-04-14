@@ -8,7 +8,8 @@ const ApiKeyPrompt = ({failedKey, setApiKey: submitNewApiKey}) => {
   return (
     <section>
       <div className="form-group">
-        <div className="input mt-3 mb-3">
+        <label className="mt-3 form-label">Enter an API key</label>
+        <div className="input mb-3">
           <input
             ref={inputEl}
             type="text"

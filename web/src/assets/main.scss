@@ -35,6 +35,10 @@
     }
   }
 
+  .subtitle {
+    font-size: small;
+  }
+
   svg,
   .feather-icon {
     @include themify($themes) {
@@ -84,7 +88,7 @@
   }
 }
 
-/* ------------------------------ Buttons ------------------------------ */
+/* ------------------------------ Forms ------------------------------ */
 
 .btn,
 .btn.btn-primary:not([class^='btn-outline']):not([class*=' btn-outline']):not([class^='btn-ghost']):not([class*=' btn-ghost']):not(:focus):not(.focus),
@@ -114,6 +118,10 @@
     background-color: themed('button-download-pull-bg');
     box-shadow: 0px 2px 0px themed('button-download-pull-shadow');
   }
+}
+
+label.form-label {
+  font-size: x-small;
 }
 
 /* ------------------------------ Icons ------------------------------ */
