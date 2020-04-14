@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import BuildList from '../components/BuildList';
 
 import './Home.scss';
@@ -11,6 +11,10 @@ const PLATFORMS = {
 
 const Home = () => {
   const [platformId, setPlatformId] = useState(PLATFORMS.none);
+  const [apiKey, setApiKey] = useState(`${process.env.YOLO_APP_PW || ''}`);
+  const updateApiKey = (key) => {
+    return setApiKey(key);
+  };
 
   return (
     <div className="container mt-3">
@@ -33,11 +37,22 @@ const Home = () => {
           <option value={PLATFORMS.android}>Android</option>
         </select>
       </div>
+      {/* TODO: Factor */}
       {platformId === PLATFORMS.android && (
-        <BuildList platformName="Android" platformId={PLATFORMS.android} />
+        <BuildList
+          platformName="Android"
+          platformId={PLATFORMS.android}
+          apiKey={apiKey}
+          setApiKey={updateApiKey}
+        />
       )}
       {platformId === PLATFORMS.iOS && (
-        <BuildList platformName="iOS" platformId={PLATFORMS.iOS} />
+        <BuildList
+          platformName="iOS"
+          platformId={PLATFORMS.iOS}
+          apiKey={apiKey}
+          setApiKey={updateApiKey}
+        />
       )}
     </div>
   );

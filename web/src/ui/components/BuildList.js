@@ -2,26 +2,29 @@ import React, {useState, useEffect} from 'react';
 import Card from './Card';
 import axios from 'axios';
 import {results} from '../../assets/sample-build-response';
+import ApiKeyPrompt from './ApiKeyPrompt';
+import {has} from 'lodash';
 
-const BuildList = ({platformName, platformId}) => {
+const BuildList = ({platformName, platformId, apiKey, setApiKey}) => {
   const [error, setError] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [items, setItems] = useState([]);
   const [baseURL, setBaseURL] = useState('');
+  const [hasValidAPIKey, setApiKeyValidity] = useState(true);
 
   // TODO: Move these controllers out of component code
   useEffect(() => {
-    console.log(`process.env.YOLO_UI_TEST:`, process.env.YOLO_UI_TEST);
+    setError(null);
+    setIsLoaded(false);
     const source = () =>
       process.env.YOLO_UI_TEST === 'true'
         ? Promise.resolve(results)
         : axios.get(
             `${process.env.API_URL}/build-list?artifact_kind=${platformId}&`,
             {
-              headers: process.env.YOLO_APP_PW
+              headers: apiKey
                 ? {
-                    Authorization:
-                      'Basic ' + btoa(`${process.env.YOLO_APP_PW}`),
+                    Authorization: 'Basic ' + btoa(`${apiKey}`),
                   }
                 : {},
             }
@@ -32,7 +35,9 @@ const BuildList = ({platformName, platformId}) => {
           const {
             data: {builds},
           } = result;
+          setError(null);
           setIsLoaded(true);
+          setApiKeyValidity(true);
           setBaseURL(
             `${document.location.protocol}//${document.location.host}`
           );
@@ -40,20 +45,40 @@ const BuildList = ({platformName, platformId}) => {
         },
         (error) => {
           setIsLoaded(true);
-          setError(error);
+          const status = has(error, 'response.status')
+            ? error.response.status
+            : 0;
+          const message = has(error, 'response.statusText')
+            ? error.response.statusText
+            : error.message || 'Unknown error';
+
+          setError({message, status});
+          if (status === 401) setApiKeyValidity(false);
         }
       );
-    if (!isLoaded) {
-      getBuilds(source);
-    }
-  });
+    getBuilds(source);
+  }, [apiKey, platformId]);
+
+  const errorDisplay = () => (
+    <h3 className="title">
+      Error {error.status || ''}: {error.message}
+    </h3>
+  );
 
   // TODO: Factor out HOC
-  if (error) {
+  if (!hasValidAPIKey && error && error.status && error.status === 401) {
     return (
       <div>
-        <h3 className="m-3">Builds for{' ' + platformName}</h3>Error:{' '}
-        {error.message}
+        {errorDisplay()}
+        <small>No valid API token detected.</small>
+        <ApiKeyPrompt failedKey={apiKey} setApiKey={setApiKey} />
+      </div>
+    );
+  } else if (error) {
+    return (
+      <div>
+        <h3 className="m-3">Builds for{' ' + platformName}</h3>
+        {errorDisplay()}
       </div>
     );
   } else if (!isLoaded) {
