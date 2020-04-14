@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import Card from './Card';
 import axios from 'axios';
-import {results} from '../../assets/sample-build-response';
+import {response} from '../../assets/faker.js';
 import ApiKeyPrompt from './ApiKeyPrompt';
 import {has} from 'lodash';
 
@@ -18,7 +18,7 @@ const BuildList = ({platformName, platformId, apiKey, setApiKey}) => {
     setIsLoaded(false);
     const source = () =>
       process.env.YOLO_UI_TEST === 'true'
-        ? Promise.resolve(results)
+        ? Promise.resolve(response)
         : axios.get(
             `${process.env.API_URL}/build-list?artifact_kind=${platformId}&`,
             {
@@ -45,13 +45,9 @@ const BuildList = ({platformName, platformId, apiKey, setApiKey}) => {
         },
         (error) => {
           setIsLoaded(true);
-          const status = has(error, 'response.status')
-            ? error.response.status
-            : 0;
-          const message = has(error, 'response.statusText')
-            ? error.response.statusText
-            : error.message || 'Unknown error';
-
+          const {
+            response: {statusText: message, status},
+          } = error;
           setError({message, status});
           if (status === 401) setApiKeyValidity(false);
         }
