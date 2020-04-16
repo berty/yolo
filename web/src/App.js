@@ -4,7 +4,7 @@ import {hot} from 'react-hot-loader';
 import Home from './ui/pages/Home';
 
 // Import Tabler styles
-import 'tabler/scss/tabler.scss';
+import 'tabler-react/dist/Tabler.css';
 import './App.scss';
 
 const detectBrowserTheme = () => {
