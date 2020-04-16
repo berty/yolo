@@ -6,9 +6,9 @@ orbs:
   tools: gotest/tools@0.0.13
 
 jobs:
-  build:
+  go-build:
     docker:
-      - image: circleci/golang:1.13
+      - image: circleci/golang:1.14
     working_directory: /go/src/berty.tech/yolo
     environment:
       GO111MODULE: "on"
@@ -23,8 +23,18 @@ jobs:
       - run: make lint
       - codecov/upload:
           file: coverage.txt
+  docker-build:
+    docker:
+      - image: circleci/golang:1.14 # we just need an image with the `docker` binary, I prefer to reuse the same image as above to increase caching probability
+    working_directory: /go/src/berty.tech/yolo
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run: docker build -t bertytech/yolo .
 
 workflows:
   main:
     jobs:
-      - build
+      - go-build
+      - docker-build

@@ -5,6 +5,7 @@ COPY            ./web/package*.json ./web/yarn.* ./
 RUN             npm install
 COPY            ./web ./
 RUN             npm run build
+#RUN             cat dist/index.html # checking successful build
 
 # go build
 FROM            golang:1.14-alpine as go-build
