@@ -5,7 +5,8 @@ COPY            ./web/package*.json ./web/yarn.* ./
 RUN             npm install
 COPY            ./web ./
 RUN             npm run build
-#RUN             cat dist/index.html # checking successful build
+# checking successful build, until there is a better way
+RUN             cat dist/index.html
 
 # go build
 FROM            golang:1.14-alpine as go-build
@@ -13,7 +14,7 @@ RUN             apk add --update --no-cache git gcc musl-dev make perl-utils
 RUN             GO111MODULE=off go get github.com/gobuffalo/packr/v2/packr2
 WORKDIR         /go/src/berty.tech/yolo
 ENV             GO111MODULE=on \
-                GOPROXY=proxy.golang.org
+    GOPROXY=proxy.golang.org
 COPY            go.* ./
 RUN             go mod download
 COPY            . ./
