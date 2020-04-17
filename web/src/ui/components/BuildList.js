@@ -1,10 +1,14 @@
-import React, {useState, useEffect} from 'react';
-import Card from './Card';
+import React, {useContext} from 'react';
+import Card from './BuildCard/Card';
+import {ThemeContext} from '../../store/ThemeStore';
 
-const BuildList = ({builds, baseURL}) => {
-  return (
+const BuildList = ({loaded, builds, baseURL}) => {
+  const {theme} = useContext(ThemeContext);
+  const loading = <div style={{color: theme.text.sectionText}}>Loading...</div>;
+  return !loaded ? (
+    loading
+  ) : (
     <div className="container">
-      <h3 className="m-3 title">Builds found: {parseInt(builds.length)}</h3>
       {builds.map((item) => (
         <Card key={item.id} item={item} baseURL={baseURL} />
       ))}
