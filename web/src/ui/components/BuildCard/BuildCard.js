@@ -1,6 +1,5 @@
 import React, {useContext, useState} from 'react';
 import {ThemeContext} from '../../../store/ThemeStore';
-
 import {sharedThemes} from '../../../styleTools/themes';
 import {
   GitCommit,

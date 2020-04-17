@@ -1,0 +1,32 @@
+.filter-wrapper--yl {
+  margin-left: 10px;
+  display: flex;
+}
+
+.filter--yl {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 10px 15px;
+  border-width: 2px;
+  border-style: solid;
+  border-radius: 15px;
+  margin-right: 0.75em;
+  svg {
+    margin-left: 10px;
+  }
+  svg:first-child {
+    margin-left: 0px;
+  }
+}
+
+p.filter-text--yl {
+  font-size: 0.8em;
+  padding: 0px;
+  margin: 0px;
+  margin-left: 1em;
+}
+
+.filter-select--yl {
+  padding: 10px 15px;
+}

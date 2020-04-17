@@ -2,11 +2,27 @@
 
 // Overriding Tabler styles
 
-.header {
+.header--yl {
   width: 100%;
   display: flex;
   align-items: center;
   display: flex;
   width: 100%;
   align-items: center;
+}
+
+// .appNav {
+//   display: flex;
+//   height: 100%;
+//   border-bottom-width: 2px;
+//   border-bottom-style: solid;
+//   align-items: center;
+// }
+
+.yoloLogo {
+  margin-right: 36px;
+}
+
+.headerUser {
+  margin-left: auto;
 }
