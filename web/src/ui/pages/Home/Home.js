@@ -22,11 +22,7 @@ const Home = () => {
           <ApiKeyPrompt failedKey={state.apiKey} setApiKey={updateState} />
         )}
         {!state.error && state.platformId !== PLATFORMS.none && (
-          <BuildList
-            builds={cloneDeep(state.items)}
-            baseURL={state.baseURL}
-            loaded={state.isLoaded}
-          />
+          <BuildList builds={cloneDeep(state.items)} loaded={state.isLoaded} />
         )}
         <div
           className="footer p-4"

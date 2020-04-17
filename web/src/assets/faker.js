@@ -2,7 +2,7 @@ var faker = require('faker');
 
 let builds = [];
 
-const artifactStates = ['Finished'];
+const artifactStates = ['Finished', 'Building', 'Failed'];
 const artifactKinds = ['IPA', 'APK', 'DMG'];
 const artifactDrivers = ['Buildkite'];
 const artifactMimeTypes = ['application/octet-stream'];

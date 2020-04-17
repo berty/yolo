@@ -1,8 +1,8 @@
 import React, {useContext} from 'react';
-import Card from './BuildCard/Card';
+import BuildCard from './BuildCard/BuildCard';
 import {ThemeContext} from '../../store/ThemeStore';
 
-const BuildList = ({loaded, builds, baseURL}) => {
+const BuildList = ({loaded, builds}) => {
   const {theme} = useContext(ThemeContext);
   const loading = <div style={{color: theme.text.sectionText}}>Loading...</div>;
   return !loaded ? (
@@ -10,7 +10,7 @@ const BuildList = ({loaded, builds, baseURL}) => {
   ) : (
     <div className="container">
       {builds.map((item) => (
-        <Card key={item.id} item={item} baseURL={baseURL} />
+        <BuildCard key={item.id} item={item} />
       ))}
     </div>
   );

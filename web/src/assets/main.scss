@@ -1,1 +1,14 @@
 @import 'variables';
+
+// global tabler css overrides
+
+.btn,
+.card .btn,
+.btn.btn-primary:not([class^='btn-outline']):not([class*=' btn-outline']):not([class^='btn-ghost']):not([class*=' btn-ghost']):not(:focus):not(.focus),
+.btn.btn-primary:not([class^='btn-outline']):not([class*=' btn-outline']):not([class^='btn-ghost']):not([class*=' btn-ghost']):not(.btn-secondary) {
+  border: none;
+  padding: 3px 8px 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 15px;
+}
