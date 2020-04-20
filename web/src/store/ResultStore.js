@@ -16,7 +16,7 @@ const INITIAL_STATE = {
   error: null,
   isLoaded: true,
   items: [],
-  baseUrl: `${document.location.protocol}//${document.location.host}`,
+  baseURL: `${document.location.protocol}//${document.location.host}`,
 };
 
 export const ResultStore = ({children}) => {
