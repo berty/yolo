@@ -16,7 +16,6 @@ const INITIAL_STATE = {
   error: null,
   isLoaded: true,
   items: [],
-  // baseURL: `${document.location.protocol}//${document.location.host}`,
   baseURL: `${process.env.SERVER_URL}`,
 };
 
