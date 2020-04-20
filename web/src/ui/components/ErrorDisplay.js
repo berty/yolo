@@ -9,7 +9,11 @@ const ErrorDisplay = ({error}) => {
         Error {error.status || ''}: {error.message}
       </h3>
       {error.data && (
-        <small style={{color: theme.text.sectionText}}>{error.data}</small>
+        <small style={{color: theme.text.sectionText}}>
+          {typeof error.data === 'object'
+            ? JSON.stringify(error.data)
+            : error.data}
+        </small>
       )}
     </section>
   );
