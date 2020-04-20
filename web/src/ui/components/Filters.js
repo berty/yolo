@@ -11,7 +11,7 @@ const getData = ({platformId, apiKey}) =>
         return await response;
       })
     : axios.get(
-        `${process.env.API_URL}/build-list?artifact_kind=${platformId}&`,
+        `${process.env.API_SERVER}/api/build-list?artifact_kind=${platformId}&`,
         {
           headers: apiKey
             ? {
