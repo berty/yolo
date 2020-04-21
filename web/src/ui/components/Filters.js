@@ -196,9 +196,6 @@ const Filters = () => {
 
   return (
     <div className="filter-wrapper--yl">
-      {FiltersAppWidget()}
-      {FiltersPlatformWidget()}
-      {FiltersBranchWidget()}
       <div className="filter-select--yl">
         <select
           disabled={!state.isLoaded}
@@ -222,6 +219,9 @@ const Filters = () => {
           <option value={PLATFORMS.android}>Android</option>
         </select>
       </div>
+      {FiltersAppWidget()}
+      {FiltersPlatformWidget()}
+      {FiltersBranchWidget()}
     </div>
   );
 };
