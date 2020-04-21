@@ -8,7 +8,7 @@ export const themes = {
       tagGreen: '#d3f8f2',
       tagPink: '#fee4e9',
       tagOrange: '#fff0d4',
-      btnPrimary: '3f49ea',
+      btnPrimary: '#3f49ea',
       btnDlMaster: '#36D1AE',
       btnDlPull: '#8877d8',
       filter: '#f0f1ff',

@@ -18,9 +18,18 @@ const ThemeToggler = () => {
     if (isDark) changeTheme('dark');
   }, []);
 
+  const buttonStyle = {
+    display: 'flex',
+    flex: '1 0 auto',
+    justifyContent: 'flex-end',
+    marginRight: '80px',
+    fontSize: '2rem',
+    cursor: 'pointer',
+  };
+
   return (
     <div
-      className="btn btn-primary btn-sm"
+      style={buttonStyle}
       onClick={() => {
         return changeTheme(theme.name === 'light' ? 'dark' : 'light');
       }}

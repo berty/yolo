@@ -32,6 +32,49 @@ const getData = ({platformId, apiKey}) =>
 const Filters = () => {
   const {state, updateState} = useContext(ResultContext);
   const {theme} = useContext(ThemeContext);
+
+  useEffect(() => {
+    const makeRequest = () => {
+      updateState({
+        error: null,
+        isLoaded: false,
+        items: [],
+      });
+      getData({platformId: state.platformId, apiKey: state.apiKey}).then(
+        (result) => {
+          const {
+            data: {builds},
+          } = result;
+          updateState({
+            isLoaded: true,
+            items: cloneDeep(builds),
+            error: null,
+          });
+        },
+        (error) => {
+          updateState({
+            isLoaded: true,
+          });
+          if (!error.response)
+            return updateState(
+              cloneDeep({
+                error: {message: 'Network Error', status: 500, data: ''},
+              })
+            );
+          const {
+            response: {statusText: message, status, data},
+          } = error;
+          updateState({
+            error: {message, status, data},
+          });
+        }
+      );
+    };
+    if (state.platformId !== PLATFORMS.none && state.isLoaded === false) {
+      makeRequest();
+    }
+  }, [state.apiKey, state.platformId, state.appFilter, state.isLoaded]);
+
   const filterAccentColor = theme.icon.filterSelected;
 
   const headerWidgetWrapperColors = {
@@ -152,73 +195,9 @@ const Filters = () => {
     return <HeaderWidgetWrapper children={branchWidget} />;
   };
 
-  useEffect(() => {
-    const makeRequest = () => {
-      updateState({
-        error: null,
-        isLoaded: false,
-        items: [],
-      });
-      getData({platformId: state.platformId, apiKey: state.apiKey}).then(
-        (result) => {
-          const {
-            data: {builds},
-          } = result;
-          updateState({
-            isLoaded: true,
-            items: cloneDeep(builds),
-            error: null,
-          });
-        },
-        (error) => {
-          updateState({
-            isLoaded: true,
-          });
-          if (!error.response)
-            return updateState(
-              cloneDeep({
-                error: {message: 'Network Error', status: 500, data: ''},
-              })
-            );
-          const {
-            response: {statusText: message, status, data},
-          } = error;
-          updateState({
-            error: {message, status, data},
-          });
-        }
-      );
-    };
-    if (state.platformId !== PLATFORMS.none) {
-      makeRequest();
-    }
-  }, [state.apiKey, state.platformId, state.appFilter]);
-
   return (
     <div className="filter-wrapper--yl">
-      <div className="filter-select--yl">
-        <select
-          disabled={!state.isLoaded}
-          onChange={(e) => {
-            const {
-              target: {value: platform},
-            } = e;
-            return updateState({
-              platformId: platform,
-              filtersPlatform: {
-                iOS: platform === PLATFORMS.iOS,
-                android: platform === PLATFORMS.android,
-              },
-            });
-          }}
-        >
-          <option defaultValue value={PLATFORMS.none}>
-            Platform
-          </option>
-          <option value={PLATFORMS.iOS}>iOS</option>
-          <option value={PLATFORMS.android}>Android</option>
-        </select>
-      </div>
+      <div className="filter-select--yl"></div>
       {FiltersAppWidget()}
       {FiltersPlatformWidget()}
       {FiltersBranchWidget()}

@@ -2,7 +2,7 @@
 
 // global tabler css overrides
 
-.btn,
+.btn:not([class^='btn-outline']):not([class*=' btn-outline']),
 .card .btn,
 .btn.btn-primary:not([class^='btn-outline']):not([class*=' btn-outline']):not([class^='btn-ghost']):not([class*=' btn-ghost']):not(:focus):not(.focus),
 .btn.btn-primary:not([class^='btn-outline']):not([class*=' btn-outline']):not([class^='btn-ghost']):not([class*=' btn-ghost']):not(.btn-secondary) {
