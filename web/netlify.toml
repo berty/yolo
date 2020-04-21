@@ -6,9 +6,7 @@
 
 [build.environment]
     YARN_FLAGS = "--no-ignore-optional"
-    API_URL = "https://yolo.berty.io/api"
-    SERVER_URL = "https://yolo.berty.io"
+    API_SERVER = "https://yolo.berty.io"
 
 [context.production.environment]
-    API_URL = "https://yolo.berty.io/api"
-    SERVER_URL = "https://yolo.berty.io"
+    API_SERVER = "https://yolo.berty.io"

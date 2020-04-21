@@ -46,7 +46,7 @@ const Card = ({item, baseURL}) => {
         </div>
         <p>state: {item.state}</p>
         <div>
-          <a className="btn btn-secondary" href={item.has_build}>
+          <a className="btn btn-secondary" href={item.id}>
             Logs
           </a>
         </div>

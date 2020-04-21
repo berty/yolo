@@ -16,7 +16,7 @@ const INITIAL_STATE = {
   error: null,
   isLoaded: true,
   items: [],
-  baseURL: `${process.env.SERVER_URL}`,
+  baseURL: `${process.env.API_SERVER}`,
 };
 
 export const ResultStore = ({children}) => {
