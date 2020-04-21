@@ -1,12 +1,16 @@
-// @import '../../assets/main';
-
-// Overriding Tabler styles
-
-.header {
+.header--yl {
   width: 100%;
   display: flex;
   align-items: center;
   display: flex;
   width: 100%;
   align-items: center;
+}
+
+.yoloLogo {
+  margin-right: 36px;
+}
+
+.headerUser {
+  margin-left: auto;
 }

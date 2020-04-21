@@ -17,11 +17,24 @@ const INITIAL_STATE = {
   isLoaded: true,
   items: [],
   baseURL: `${process.env.API_SERVER}`,
+  filtersPlatform: {
+    iOS: false,
+    android: false,
+  },
+  filtersBranch: {
+    master: true,
+    develop: true,
+    all: true,
+  },
+  filtersApp: {
+    chat: true,
+    mini: false,
+    maxi: false,
+  },
 };
 
 export const ResultStore = ({children}) => {
   const [state, setState] = useState({...INITIAL_STATE});
-
   const updateState = (newState) => {
     const combinedState = cloneDeep({...state, ...newState});
     return setState(combinedState);
