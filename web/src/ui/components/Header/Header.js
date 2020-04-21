@@ -18,9 +18,6 @@ const Header = () => {
       <div>
         <img src={YoloLogo}></img>
       </div>
-      {/* <h2 className={'mb-0 py-0'} style={{color: theme.text.sectionTitle}}>
-        Yolo-logo!
-      </h2> */}
       <ActionWidgets>
         <Filters />
       </ActionWidgets>
