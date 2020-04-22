@@ -1,5 +1,5 @@
 /* eslint-disable import/no-named-as-default */
-import React, {useContext, useState} from 'react';
+import React, {useContext, useState, useEffect} from 'react';
 import {ThemeContext} from '../../../store/ThemeStore';
 import './Home.scss';
 import Header from '../../components/Header/Header';
@@ -15,6 +15,10 @@ const Home = () => {
   const {theme} = useContext(ThemeContext);
   const {state, updateState} = useContext(ResultContext);
   const [showingFiltersModal, toggleShowFilters] = useState(false);
+
+  useEffect(() => {
+    document.body.style.backgroundColor = theme.bg.page;
+  }, [theme.name]);
 
   return (
     <div className={'app--app-container'}>

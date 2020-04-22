@@ -1,3 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@600&display=swap');
 
 $font-stack: 'Open Sans', sans-serif;
+
+// Small tablets and large smartphones (landscape view)
+$screen-sm-min: 576px;
+
+// Small tablets (portrait view)
+$screen-md-min: 768px;
+
+// Tablets and small desktops
+$screen-lg-min: 992px;
+
+// Large tablets and desktops
+$screen-xl-min: 1200px;
+
+$body-bg-dark: #2b2e4d;
+
+$body-bg-light: #fcfcff;
+
+$body-color-light: #96a2b8;
+
+$body-color-dark: #8082a5;

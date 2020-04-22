@@ -13,15 +13,9 @@ const Header = () => {
   const {theme} = useContext(ThemeContext);
   const {state, updateState} = useContext(ResultContext);
 
-  // TODO: Dynamic, based on device etc
-  const yoloLogo = 'yoloLogo';
-
   return (
-    <div
-      className={'header--yl pt-2 mb-5 px-md-4 pb-0 mt-2'}
-      style={{backgroundColor: theme.bg.page}}
-    >
-      <div className={yoloLogo}>
+    <div className={'header--yl'} style={{backgroundColor: theme.bg.page}}>
+      <div className="header-logo--yl">
         <img src={YoloLogo}></img>
       </div>
       <ActionWidgets>
@@ -40,9 +34,6 @@ const Header = () => {
         </div>
       </ActionWidgets>
       <ThemeToggler />
-      <div className="headerUser">
-        <User />
-      </div>
     </div>
   );
 };

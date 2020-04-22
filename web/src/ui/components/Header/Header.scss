@@ -1,16 +1,35 @@
+@import '../../../assets/main.scss';
+
 .header--yl {
+  box-sizing: border-box;
+  margin: 0;
+  margin-bottom: 0.5rem;
+  padding-top: 0.75rem;
+  padding-bottom: 10px;
+  padding-left: 12px;
+  padding-right: 75px;
+  overflow-x: hidden;
+  flex-shrink: 0;
   width: 100%;
   display: flex;
   align-items: center;
-  display: flex;
-  width: 100%;
-  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+  @include sm {
+    padding-right: 75px;
+  }
 }
 
-.yoloLogo {
-  margin-right: 36px;
-}
-
-.headerUser {
-  margin-left: auto;
+.header-logo--yl {
+  display: none;
+  @include sm {
+    margin-left: 1rem;
+    margin-right: 36px;
+    display: block;
+  }
+  img {
+    @include sm {
+      height: 2.75rem;
+    }
+  }
 }

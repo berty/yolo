@@ -5,23 +5,31 @@ div,
   padding: 0px;
 }
 
+div.card {
+  max-width: 100vw;
+}
+
 .card div.card-row--yl {
   display: flex;
   margin: 0px;
   padding: 15px;
   width: 100%;
-  border: none;
   align-items: center;
   height: 100%;
   margin-bottom: 16px;
   &.expanded {
     border-bottom: 1px solid gray;
   }
+  a {
+    cursor: pointer;
+  }
 }
 
 .card div.card-row--yl .card-left-icon--yl {
   height: 100%;
   margin-right: 0.8em;
+  flex-shrink: 0;
+  margin-top: 0.2rem;
   &.rotate-merge--yl {
     transform: rotate(90deg);
   }
@@ -34,17 +42,19 @@ div,
   height: 100%;
   padding: 0px;
   margin: 0px;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
   margin-right: auto;
 }
 
 .card div.card-row--yl .card-author--yl {
   font-size: smaller;
   margin-right: 8px;
+  flex-shrink: 0;
 }
 
 .card div.card-row--yl .card-avatar--yl {
   margin-right: 16px;
+  flex-shrink: 0;
 }
 
 // Build body
@@ -52,29 +62,41 @@ div,
 .card div.card-row--yl .card-details--yl {
   display: flex;
   flex-flow: row wrap;
-  margin-right: auto;
-  width: 100%;
+  margin-right: 8px;
+  flex-basis: 100%;
   .card-details-row--yl {
     display: flex;
-    width: 100%;
-    flex-basis: 0 0 100%;
+    flex: 1 0 100%;
+    flex-wrap: wrap;
     margin-bottom: 16px;
     div {
-      margin-right: 16px;
+      margin-right: 8px;
+    }
+    div.btn {
+      cursor: default;
+      &.btn-branch-name--yl {
+        word-wrap: unset;
+        white-space: unset;
+        text-align: left;
+      }
     }
   }
+}
+
+.vertical-center--yl {
+  display: flex;
+  align-items: center;
 }
 
 .card div.card-row--yl .card-build-actions--yl {
   height: 100%;
   align-self: flex-start;
   display: flex;
+  flex-shrink: 0;
+  flex-grow: 0;
   flex-direction: column;
   div,
   a {
     margin-bottom: 8px;
-  }
-  a {
-    cursor: pointer;
   }
 }
