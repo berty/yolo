@@ -1,3 +1,5 @@
+// notes: https://hackmd.io/@moul/BkWL_pmS8
+
 syntax = "proto3";
 
 package yolo;
@@ -46,7 +48,7 @@ message BuildList {
 }
 
 //
-// DB Models
+// DB Schemas
 //
 
 message Build {
@@ -67,8 +69,9 @@ message Build {
   /// relationships
 
   repeated Artifact has_artifacts = 101 [(gogoproto.moretags) = "quad:\"schema:hasBuild < *,optional\""];
-
-  /// non-stored fields
+  Commit has_commit = 102 [(gogoproto.moretags) = "quad:\"schema:hasCommit,optional\""];
+  Project has_project = 103 [(gogoproto.moretags) = "quad:\"schema:hasProject,optional\""];
+  MergeRequest has_mergerequest = 104 [(gogoproto.moretags) = "quad:\"schema:hasMergeRequest,optional\""];
 
   /// enums
 
@@ -83,6 +86,102 @@ message Build {
     NotRun = 7;
     Timedout = 8;
   }
+}
+
+message Release {
+  /// fields
+
+  string id = 1 [(gogoproto.casttype) = "github.com/cayleygraph/quad.IRI", (gogoproto.moretags) = "quad:\"@id\"", (gogoproto.customname) = "ID"]; // canonical URI
+  google.protobuf.Timestamp created_at = 2 [(gogoproto.moretags) = "quad:\"schema:createdAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp updated_at = 3 [(gogoproto.moretags) = "quad:\"schema:updatedAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  string message = 4 [(gogoproto.moretags) = "quad:\"schema:message,optional\""];
+  string commit = 5 [(gogoproto.moretags) = "quad:\"schema:commit,optional\""];
+  Driver driver = 6 [(gogoproto.moretags) = "quad:\"schema:driver,optional\""];
+
+  /// relationships
+
+  repeated Artifact has_artifacts = 101 [(gogoproto.moretags) = "quad:\"schema:hasRelease < *,optional\""];
+  Commit has_commit = 102 [(gogoproto.moretags) = "quad:\"schema:hasCommit,optional\""];
+  Project has_project = 103 [(gogoproto.moretags) = "quad:\"schema:hasProject,optional\""];
+  MergeRequest has_mergerequest = 104 [(gogoproto.moretags) = "quad:\"schema:hasMergeRequest,optional\""];
+}
+
+message Commit {
+  /// fields
+
+  string id = 1 [(gogoproto.casttype) = "github.com/cayleygraph/quad.IRI", (gogoproto.moretags) = "quad:\"@id\"", (gogoproto.customname) = "ID"]; // canonical URI
+  google.protobuf.Timestamp created_at = 2 [(gogoproto.moretags) = "quad:\"schema:createdAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  string message = 3 [(gogoproto.moretags) = "quad:\"schema:message,optional\""];
+  Driver driver = 4 [(gogoproto.moretags) = "quad:\"schema:driver,optional\""];
+  string branch = 5 [(gogoproto.moretags) = "quad:\"schema:branch,optional\""];
+
+  /// relationships
+
+  repeated Release has_releases = 101 [(gogoproto.moretags) = "quad:\"schema:hasCommit < *,optional\""];
+  repeated Build has_builds = 102 [(gogoproto.moretags) = "quad:\"schema:hasCommit < *,optional\""];
+  Project has_project = 103 [(gogoproto.moretags) = "quad:\"schema:hasProject,optional\""];
+  Entity has_author = 104 [(gogoproto.moretags) = "quad:\"schema:hasAuthor,optional\""];
+  MergeRequest has_mergerequest = 105 [(gogoproto.moretags) = "quad:\"schema:hasMergeRequest,optional\""];
+}
+
+message MergeRequest {
+  /// fields
+
+  string id = 1 [(gogoproto.casttype) = "github.com/cayleygraph/quad.IRI", (gogoproto.moretags) = "quad:\"@id\"", (gogoproto.customname) = "ID"]; // canonical URI
+  google.protobuf.Timestamp created_at = 2 [(gogoproto.moretags) = "quad:\"schema:createdAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  string message = 3 [(gogoproto.moretags) = "quad:\"schema:message,optional\""];
+  Driver driver = 4 [(gogoproto.moretags) = "quad:\"schema:driver,optional\""];
+  string branch = 5 [(gogoproto.moretags) = "quad:\"schema:branch,optional\""];
+  string merge_request = 6 [(gogoproto.moretags) = "quad:\"schema:mergeRequest,optional\""];
+  State state = 7 [(gogoproto.moretags) = "quad:\"schema:state,optional\""];
+  // bool is_wip
+
+  /// relationships
+
+  repeated Release has_releases = 101 [(gogoproto.moretags) = "quad:\"schema:hasMergeRequest < *,optional\""];
+  repeated Build has_builds = 102 [(gogoproto.moretags) = "quad:\"schema:hasMergeRequest < *,optional\""];
+  Project has_project = 103 [(gogoproto.moretags) = "quad:\"schema:hasProject,optional\""];
+  Entity has_author = 104 [(gogoproto.moretags) = "quad:\"schema:hasAuthor,optional\""];
+
+  /// enums
+
+  enum State {
+    UnknownState = 0;
+    Opened = 1;
+    Closed = 2;
+  }
+}
+
+message Project {
+  /// fields
+
+  string id = 1 [(gogoproto.casttype) = "github.com/cayleygraph/quad.IRI", (gogoproto.moretags) = "quad:\"@id\"", (gogoproto.customname) = "ID"]; // canonical URI
+  google.protobuf.Timestamp created_at = 2 [(gogoproto.moretags) = "quad:\"schema:createdAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp updated_at = 3 [(gogoproto.moretags) = "quad:\"schema:updatedAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  string commit = 4 [(gogoproto.moretags) = "quad:\"schema:commit,optional\""];
+  Driver driver = 5 [(gogoproto.moretags) = "quad:\"schema:driver,optional\""];
+
+  /// relationships
+
+  repeated Artifact has_artifacts = 101 [(gogoproto.moretags) = "quad:\"schema:hasProject < *,optional\""];
+  repeated Build has_builds = 102 [(gogoproto.moretags) = "quad:\"schema:hasProject < *,optional\""];
+  repeated Commit has_commits = 103 [(gogoproto.moretags) = "quad:\"schema:hasProject < *,optional\""];
+  repeated Release has_releases = 104 [(gogoproto.moretags) = "quad:\"schema:hasProject < *,optional\""];
+  repeated MergeRequest has_mergerequests = 105 [(gogoproto.moretags) = "quad:\"schema:hasProject < *,optional\""];
+  Entity owner = 106 [(gogoproto.moretags) = "quad:\"schema:owner\""];
+}
+
+message Entity {
+  string id = 1 [(gogoproto.casttype) = "github.com/cayleygraph/quad.IRI", (gogoproto.moretags) = "quad:\"@id\"", (gogoproto.customname) = "ID"]; // canonical URI
+  google.protobuf.Timestamp created_at = 2 [(gogoproto.moretags) = "quad:\"schema:createdAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp updated_at = 3 [(gogoproto.moretags) = "quad:\"schema:updatedAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  Driver driver = 4 [(gogoproto.moretags) = "quad:\"schema:driver,optional\""];
+
+  /// relationships
+
+  repeated Project has_projects = 101 [(gogoproto.moretags) = "quad:\"schema:hasOwner < *,optional\""];
+  repeated Commit has_commits = 102 [(gogoproto.moretags) = "quad:\"schema:hasAuthor < *,optional\""];
+  repeated MergeRequest has_mergerequests = 103 [(gogoproto.moretags) = "quad:\"schema:hasAuthor < *,optional\""];
 }
 
 message Artifact {
@@ -103,6 +202,7 @@ message Artifact {
   /// relationships
 
   Build has_build = 101 [(gogoproto.moretags) = "quad:\"schema:hasBuild,optional\""];
+  Release has_release = 102 [(gogoproto.moretags) = "quad:\"schema:hasRelease,optional\""];
 
   /// non-stored fields
 
@@ -135,7 +235,7 @@ enum Driver {
   Buildkite = 1;
   CircleCI = 2;
   Bintray = 3;
-  // GitHub;
+  // GitHub
   // ...
 }
 

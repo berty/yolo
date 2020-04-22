@@ -111,6 +111,34 @@ func (Build_State) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_a62788fcb176084a, []int{3, 0}
 }
 
+type MergeRequest_State int32
+
+const (
+	MergeRequest_UnknownState MergeRequest_State = 0
+	MergeRequest_Opened       MergeRequest_State = 1
+	MergeRequest_Closed       MergeRequest_State = 2
+)
+
+var MergeRequest_State_name = map[int32]string{
+	0: "UnknownState",
+	1: "Opened",
+	2: "Closed",
+}
+
+var MergeRequest_State_value = map[string]int32{
+	"UnknownState": 0,
+	"Opened":       1,
+	"Closed":       2,
+}
+
+func (x MergeRequest_State) String() string {
+	return proto.EnumName(MergeRequest_State_name, int32(x))
+}
+
+func (MergeRequest_State) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_a62788fcb176084a, []int{6, 0}
+}
+
 type Artifact_State int32
 
 const (
@@ -142,7 +170,7 @@ func (x Artifact_State) String() string {
 }
 
 func (Artifact_State) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_a62788fcb176084a, []int{4, 0}
+	return fileDescriptor_a62788fcb176084a, []int{9, 0}
 }
 
 type Artifact_Kind int32
@@ -173,7 +201,7 @@ func (x Artifact_Kind) String() string {
 }
 
 func (Artifact_Kind) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_a62788fcb176084a, []int{4, 1}
+	return fileDescriptor_a62788fcb176084a, []int{9, 1}
 }
 
 type Ping struct {
@@ -549,18 +577,21 @@ func (m *BuildList_Response) GetBuilds() []*Build {
 }
 
 type Build struct {
-	ID           github_com_cayleygraph_quad.IRI `protobuf:"bytes,1,opt,name=id,proto3,casttype=github.com/cayleygraph/quad.IRI" json:"id,omitempty" quad:"@id"`
-	CreatedAt    *time.Time                      `protobuf:"bytes,2,opt,name=created_at,json=createdAt,proto3,stdtime" json:"created_at,omitempty" quad:"schema:createdAt,optional"`
-	UpdatedAt    *time.Time                      `protobuf:"bytes,3,opt,name=updated_at,json=updatedAt,proto3,stdtime" json:"updated_at,omitempty" quad:"schema:updatedAt,optional"`
-	State        Build_State                     `protobuf:"varint,4,opt,name=state,proto3,enum=yolo.Build_State" json:"state,omitempty" quad:"schema:state,optional"`
-	CompletedAt  *time.Time                      `protobuf:"bytes,5,opt,name=completed_at,json=completedAt,proto3,stdtime" json:"completed_at,omitempty" quad:"schema:completedAt,optional"`
-	Message      string                          `protobuf:"bytes,6,opt,name=message,proto3" json:"message,omitempty" quad:"schema:message,optional"`
-	StartedAt    *time.Time                      `protobuf:"bytes,7,opt,name=started_at,json=startedAt,proto3,stdtime" json:"started_at,omitempty" quad:"schema:startedAt,optional"`
-	FinishedAt   *time.Time                      `protobuf:"bytes,8,opt,name=finished_at,json=finishedAt,proto3,stdtime" json:"finished_at,omitempty" quad:"schema:finishedAt,optional"`
-	Commit       string                          `protobuf:"bytes,9,opt,name=commit,proto3" json:"commit,omitempty" quad:"schema:commit,optional"`
-	Branch       string                          `protobuf:"bytes,10,opt,name=branch,proto3" json:"branch,omitempty" quad:"schema:branch,optional"`
-	Driver       Driver                          `protobuf:"varint,11,opt,name=driver,proto3,enum=yolo.Driver" json:"driver,omitempty" quad:"schema:driver,optional"`
-	HasArtifacts []*Artifact                     `protobuf:"bytes,101,rep,name=has_artifacts,json=hasArtifacts,proto3" json:"has_artifacts,omitempty" quad:"schema:hasBuild < *,optional"`
+	ID              github_com_cayleygraph_quad.IRI `protobuf:"bytes,1,opt,name=id,proto3,casttype=github.com/cayleygraph/quad.IRI" json:"id,omitempty" quad:"@id"`
+	CreatedAt       *time.Time                      `protobuf:"bytes,2,opt,name=created_at,json=createdAt,proto3,stdtime" json:"created_at,omitempty" quad:"schema:createdAt,optional"`
+	UpdatedAt       *time.Time                      `protobuf:"bytes,3,opt,name=updated_at,json=updatedAt,proto3,stdtime" json:"updated_at,omitempty" quad:"schema:updatedAt,optional"`
+	State           Build_State                     `protobuf:"varint,4,opt,name=state,proto3,enum=yolo.Build_State" json:"state,omitempty" quad:"schema:state,optional"`
+	CompletedAt     *time.Time                      `protobuf:"bytes,5,opt,name=completed_at,json=completedAt,proto3,stdtime" json:"completed_at,omitempty" quad:"schema:completedAt,optional"`
+	Message         string                          `protobuf:"bytes,6,opt,name=message,proto3" json:"message,omitempty" quad:"schema:message,optional"`
+	StartedAt       *time.Time                      `protobuf:"bytes,7,opt,name=started_at,json=startedAt,proto3,stdtime" json:"started_at,omitempty" quad:"schema:startedAt,optional"`
+	FinishedAt      *time.Time                      `protobuf:"bytes,8,opt,name=finished_at,json=finishedAt,proto3,stdtime" json:"finished_at,omitempty" quad:"schema:finishedAt,optional"`
+	Commit          string                          `protobuf:"bytes,9,opt,name=commit,proto3" json:"commit,omitempty" quad:"schema:commit,optional"`
+	Branch          string                          `protobuf:"bytes,10,opt,name=branch,proto3" json:"branch,omitempty" quad:"schema:branch,optional"`
+	Driver          Driver                          `protobuf:"varint,11,opt,name=driver,proto3,enum=yolo.Driver" json:"driver,omitempty" quad:"schema:driver,optional"`
+	HasArtifacts    []*Artifact                     `protobuf:"bytes,101,rep,name=has_artifacts,json=hasArtifacts,proto3" json:"has_artifacts,omitempty" quad:"schema:hasBuild < *,optional"`
+	HasCommit       *Commit                         `protobuf:"bytes,102,opt,name=has_commit,json=hasCommit,proto3" json:"has_commit,omitempty" quad:"schema:hasCommit,optional"`
+	HasProject      *Project                        `protobuf:"bytes,103,opt,name=has_project,json=hasProject,proto3" json:"has_project,omitempty" quad:"schema:hasProject,optional"`
+	HasMergerequest *MergeRequest                   `protobuf:"bytes,104,opt,name=has_mergerequest,json=hasMergerequest,proto3" json:"has_mergerequest,omitempty" quad:"schema:hasMergeRequest,optional"`
 }
 
 func (m *Build) Reset()         { *m = Build{} }
@@ -680,6 +711,599 @@ func (m *Build) GetHasArtifacts() []*Artifact {
 	return nil
 }
 
+func (m *Build) GetHasCommit() *Commit {
+	if m != nil {
+		return m.HasCommit
+	}
+	return nil
+}
+
+func (m *Build) GetHasProject() *Project {
+	if m != nil {
+		return m.HasProject
+	}
+	return nil
+}
+
+func (m *Build) GetHasMergerequest() *MergeRequest {
+	if m != nil {
+		return m.HasMergerequest
+	}
+	return nil
+}
+
+type Release struct {
+	ID              github_com_cayleygraph_quad.IRI `protobuf:"bytes,1,opt,name=id,proto3,casttype=github.com/cayleygraph/quad.IRI" json:"id,omitempty" quad:"@id"`
+	CreatedAt       *time.Time                      `protobuf:"bytes,2,opt,name=created_at,json=createdAt,proto3,stdtime" json:"created_at,omitempty" quad:"schema:createdAt,optional"`
+	UpdatedAt       *time.Time                      `protobuf:"bytes,3,opt,name=updated_at,json=updatedAt,proto3,stdtime" json:"updated_at,omitempty" quad:"schema:updatedAt,optional"`
+	Message         string                          `protobuf:"bytes,4,opt,name=message,proto3" json:"message,omitempty" quad:"schema:message,optional"`
+	Commit          string                          `protobuf:"bytes,5,opt,name=commit,proto3" json:"commit,omitempty" quad:"schema:commit,optional"`
+	Driver          Driver                          `protobuf:"varint,6,opt,name=driver,proto3,enum=yolo.Driver" json:"driver,omitempty" quad:"schema:driver,optional"`
+	HasArtifacts    []*Artifact                     `protobuf:"bytes,101,rep,name=has_artifacts,json=hasArtifacts,proto3" json:"has_artifacts,omitempty" quad:"schema:hasRelease < *,optional"`
+	HasCommit       *Commit                         `protobuf:"bytes,102,opt,name=has_commit,json=hasCommit,proto3" json:"has_commit,omitempty" quad:"schema:hasCommit,optional"`
+	HasProject      *Project                        `protobuf:"bytes,103,opt,name=has_project,json=hasProject,proto3" json:"has_project,omitempty" quad:"schema:hasProject,optional"`
+	HasMergerequest *MergeRequest                   `protobuf:"bytes,104,opt,name=has_mergerequest,json=hasMergerequest,proto3" json:"has_mergerequest,omitempty" quad:"schema:hasMergeRequest,optional"`
+}
+
+func (m *Release) Reset()         { *m = Release{} }
+func (m *Release) String() string { return proto.CompactTextString(m) }
+func (*Release) ProtoMessage()    {}
+func (*Release) Descriptor() ([]byte, []int) {
+	return fileDescriptor_a62788fcb176084a, []int{4}
+}
+func (m *Release) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Release) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Release.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Release) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Release.Merge(m, src)
+}
+func (m *Release) XXX_Size() int {
+	return m.Size()
+}
+func (m *Release) XXX_DiscardUnknown() {
+	xxx_messageInfo_Release.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Release proto.InternalMessageInfo
+
+func (m *Release) GetID() github_com_cayleygraph_quad.IRI {
+	if m != nil {
+		return m.ID
+	}
+	return ""
+}
+
+func (m *Release) GetCreatedAt() *time.Time {
+	if m != nil {
+		return m.CreatedAt
+	}
+	return nil
+}
+
+func (m *Release) GetUpdatedAt() *time.Time {
+	if m != nil {
+		return m.UpdatedAt
+	}
+	return nil
+}
+
+func (m *Release) GetMessage() string {
+	if m != nil {
+		return m.Message
+	}
+	return ""
+}
+
+func (m *Release) GetCommit() string {
+	if m != nil {
+		return m.Commit
+	}
+	return ""
+}
+
+func (m *Release) GetDriver() Driver {
+	if m != nil {
+		return m.Driver
+	}
+	return Driver_UnknownDriver
+}
+
+func (m *Release) GetHasArtifacts() []*Artifact {
+	if m != nil {
+		return m.HasArtifacts
+	}
+	return nil
+}
+
+func (m *Release) GetHasCommit() *Commit {
+	if m != nil {
+		return m.HasCommit
+	}
+	return nil
+}
+
+func (m *Release) GetHasProject() *Project {
+	if m != nil {
+		return m.HasProject
+	}
+	return nil
+}
+
+func (m *Release) GetHasMergerequest() *MergeRequest {
+	if m != nil {
+		return m.HasMergerequest
+	}
+	return nil
+}
+
+type Commit struct {
+	ID              github_com_cayleygraph_quad.IRI `protobuf:"bytes,1,opt,name=id,proto3,casttype=github.com/cayleygraph/quad.IRI" json:"id,omitempty" quad:"@id"`
+	CreatedAt       *time.Time                      `protobuf:"bytes,2,opt,name=created_at,json=createdAt,proto3,stdtime" json:"created_at,omitempty" quad:"schema:createdAt,optional"`
+	Message         string                          `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty" quad:"schema:message,optional"`
+	Driver          Driver                          `protobuf:"varint,4,opt,name=driver,proto3,enum=yolo.Driver" json:"driver,omitempty" quad:"schema:driver,optional"`
+	Branch          string                          `protobuf:"bytes,5,opt,name=branch,proto3" json:"branch,omitempty" quad:"schema:branch,optional"`
+	HasReleases     []*Release                      `protobuf:"bytes,101,rep,name=has_releases,json=hasReleases,proto3" json:"has_releases,omitempty" quad:"schema:hasCommit < *,optional"`
+	HasBuilds       []*Build                        `protobuf:"bytes,102,rep,name=has_builds,json=hasBuilds,proto3" json:"has_builds,omitempty" quad:"schema:hasCommit < *,optional"`
+	HasProject      *Project                        `protobuf:"bytes,103,opt,name=has_project,json=hasProject,proto3" json:"has_project,omitempty" quad:"schema:hasProject,optional"`
+	HasAuthor       *Entity                         `protobuf:"bytes,104,opt,name=has_author,json=hasAuthor,proto3" json:"has_author,omitempty" quad:"schema:hasAuthor,optional"`
+	HasMergerequest *MergeRequest                   `protobuf:"bytes,105,opt,name=has_mergerequest,json=hasMergerequest,proto3" json:"has_mergerequest,omitempty" quad:"schema:hasMergeRequest,optional"`
+}
+
+func (m *Commit) Reset()         { *m = Commit{} }
+func (m *Commit) String() string { return proto.CompactTextString(m) }
+func (*Commit) ProtoMessage()    {}
+func (*Commit) Descriptor() ([]byte, []int) {
+	return fileDescriptor_a62788fcb176084a, []int{5}
+}
+func (m *Commit) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Commit) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Commit.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Commit) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Commit.Merge(m, src)
+}
+func (m *Commit) XXX_Size() int {
+	return m.Size()
+}
+func (m *Commit) XXX_DiscardUnknown() {
+	xxx_messageInfo_Commit.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Commit proto.InternalMessageInfo
+
+func (m *Commit) GetID() github_com_cayleygraph_quad.IRI {
+	if m != nil {
+		return m.ID
+	}
+	return ""
+}
+
+func (m *Commit) GetCreatedAt() *time.Time {
+	if m != nil {
+		return m.CreatedAt
+	}
+	return nil
+}
+
+func (m *Commit) GetMessage() string {
+	if m != nil {
+		return m.Message
+	}
+	return ""
+}
+
+func (m *Commit) GetDriver() Driver {
+	if m != nil {
+		return m.Driver
+	}
+	return Driver_UnknownDriver
+}
+
+func (m *Commit) GetBranch() string {
+	if m != nil {
+		return m.Branch
+	}
+	return ""
+}
+
+func (m *Commit) GetHasReleases() []*Release {
+	if m != nil {
+		return m.HasReleases
+	}
+	return nil
+}
+
+func (m *Commit) GetHasBuilds() []*Build {
+	if m != nil {
+		return m.HasBuilds
+	}
+	return nil
+}
+
+func (m *Commit) GetHasProject() *Project {
+	if m != nil {
+		return m.HasProject
+	}
+	return nil
+}
+
+func (m *Commit) GetHasAuthor() *Entity {
+	if m != nil {
+		return m.HasAuthor
+	}
+	return nil
+}
+
+func (m *Commit) GetHasMergerequest() *MergeRequest {
+	if m != nil {
+		return m.HasMergerequest
+	}
+	return nil
+}
+
+type MergeRequest struct {
+	ID           github_com_cayleygraph_quad.IRI `protobuf:"bytes,1,opt,name=id,proto3,casttype=github.com/cayleygraph/quad.IRI" json:"id,omitempty" quad:"@id"`
+	CreatedAt    *time.Time                      `protobuf:"bytes,2,opt,name=created_at,json=createdAt,proto3,stdtime" json:"created_at,omitempty" quad:"schema:createdAt,optional"`
+	Message      string                          `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty" quad:"schema:message,optional"`
+	Driver       Driver                          `protobuf:"varint,4,opt,name=driver,proto3,enum=yolo.Driver" json:"driver,omitempty" quad:"schema:driver,optional"`
+	Branch       string                          `protobuf:"bytes,5,opt,name=branch,proto3" json:"branch,omitempty" quad:"schema:branch,optional"`
+	MergeRequest string                          `protobuf:"bytes,6,opt,name=merge_request,json=mergeRequest,proto3" json:"merge_request,omitempty" quad:"schema:mergeRequest,optional"`
+	State        MergeRequest_State              `protobuf:"varint,7,opt,name=state,proto3,enum=yolo.MergeRequest_State" json:"state,omitempty" quad:"schema:state,optional"`
+	HasReleases  []*Release                      `protobuf:"bytes,101,rep,name=has_releases,json=hasReleases,proto3" json:"has_releases,omitempty" quad:"schema:hasMergeRequest < *,optional"`
+	HasBuilds    []*Build                        `protobuf:"bytes,102,rep,name=has_builds,json=hasBuilds,proto3" json:"has_builds,omitempty" quad:"schema:hasMergeRequest < *,optional"`
+	HasProject   *Project                        `protobuf:"bytes,103,opt,name=has_project,json=hasProject,proto3" json:"has_project,omitempty" quad:"schema:hasProject,optional"`
+	HasAuthor    *Entity                         `protobuf:"bytes,104,opt,name=has_author,json=hasAuthor,proto3" json:"has_author,omitempty" quad:"schema:hasAuthor,optional"`
+}
+
+func (m *MergeRequest) Reset()         { *m = MergeRequest{} }
+func (m *MergeRequest) String() string { return proto.CompactTextString(m) }
+func (*MergeRequest) ProtoMessage()    {}
+func (*MergeRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_a62788fcb176084a, []int{6}
+}
+func (m *MergeRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MergeRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MergeRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MergeRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MergeRequest.Merge(m, src)
+}
+func (m *MergeRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *MergeRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_MergeRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MergeRequest proto.InternalMessageInfo
+
+func (m *MergeRequest) GetID() github_com_cayleygraph_quad.IRI {
+	if m != nil {
+		return m.ID
+	}
+	return ""
+}
+
+func (m *MergeRequest) GetCreatedAt() *time.Time {
+	if m != nil {
+		return m.CreatedAt
+	}
+	return nil
+}
+
+func (m *MergeRequest) GetMessage() string {
+	if m != nil {
+		return m.Message
+	}
+	return ""
+}
+
+func (m *MergeRequest) GetDriver() Driver {
+	if m != nil {
+		return m.Driver
+	}
+	return Driver_UnknownDriver
+}
+
+func (m *MergeRequest) GetBranch() string {
+	if m != nil {
+		return m.Branch
+	}
+	return ""
+}
+
+func (m *MergeRequest) GetMergeRequest() string {
+	if m != nil {
+		return m.MergeRequest
+	}
+	return ""
+}
+
+func (m *MergeRequest) GetState() MergeRequest_State {
+	if m != nil {
+		return m.State
+	}
+	return MergeRequest_UnknownState
+}
+
+func (m *MergeRequest) GetHasReleases() []*Release {
+	if m != nil {
+		return m.HasReleases
+	}
+	return nil
+}
+
+func (m *MergeRequest) GetHasBuilds() []*Build {
+	if m != nil {
+		return m.HasBuilds
+	}
+	return nil
+}
+
+func (m *MergeRequest) GetHasProject() *Project {
+	if m != nil {
+		return m.HasProject
+	}
+	return nil
+}
+
+func (m *MergeRequest) GetHasAuthor() *Entity {
+	if m != nil {
+		return m.HasAuthor
+	}
+	return nil
+}
+
+type Project struct {
+	ID               github_com_cayleygraph_quad.IRI `protobuf:"bytes,1,opt,name=id,proto3,casttype=github.com/cayleygraph/quad.IRI" json:"id,omitempty" quad:"@id"`
+	CreatedAt        *time.Time                      `protobuf:"bytes,2,opt,name=created_at,json=createdAt,proto3,stdtime" json:"created_at,omitempty" quad:"schema:createdAt,optional"`
+	UpdatedAt        *time.Time                      `protobuf:"bytes,3,opt,name=updated_at,json=updatedAt,proto3,stdtime" json:"updated_at,omitempty" quad:"schema:updatedAt,optional"`
+	Commit           string                          `protobuf:"bytes,4,opt,name=commit,proto3" json:"commit,omitempty" quad:"schema:commit,optional"`
+	Driver           Driver                          `protobuf:"varint,5,opt,name=driver,proto3,enum=yolo.Driver" json:"driver,omitempty" quad:"schema:driver,optional"`
+	HasArtifacts     []*Artifact                     `protobuf:"bytes,101,rep,name=has_artifacts,json=hasArtifacts,proto3" json:"has_artifacts,omitempty" quad:"schema:hasProject < *,optional"`
+	HasBuilds        []*Build                        `protobuf:"bytes,102,rep,name=has_builds,json=hasBuilds,proto3" json:"has_builds,omitempty" quad:"schema:hasProject < *,optional"`
+	HasCommits       []*Commit                       `protobuf:"bytes,103,rep,name=has_commits,json=hasCommits,proto3" json:"has_commits,omitempty" quad:"schema:hasProject < *,optional"`
+	HasReleases      []*Release                      `protobuf:"bytes,104,rep,name=has_releases,json=hasReleases,proto3" json:"has_releases,omitempty" quad:"schema:hasProject < *,optional"`
+	HasMergerequests []*MergeRequest                 `protobuf:"bytes,105,rep,name=has_mergerequests,json=hasMergerequests,proto3" json:"has_mergerequests,omitempty" quad:"schema:hasProject < *,optional"`
+	Owner            *Entity                         `protobuf:"bytes,106,opt,name=owner,proto3" json:"owner,omitempty" quad:"schema:owner"`
+}
+
+func (m *Project) Reset()         { *m = Project{} }
+func (m *Project) String() string { return proto.CompactTextString(m) }
+func (*Project) ProtoMessage()    {}
+func (*Project) Descriptor() ([]byte, []int) {
+	return fileDescriptor_a62788fcb176084a, []int{7}
+}
+func (m *Project) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Project) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Project.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Project) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Project.Merge(m, src)
+}
+func (m *Project) XXX_Size() int {
+	return m.Size()
+}
+func (m *Project) XXX_DiscardUnknown() {
+	xxx_messageInfo_Project.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Project proto.InternalMessageInfo
+
+func (m *Project) GetID() github_com_cayleygraph_quad.IRI {
+	if m != nil {
+		return m.ID
+	}
+	return ""
+}
+
+func (m *Project) GetCreatedAt() *time.Time {
+	if m != nil {
+		return m.CreatedAt
+	}
+	return nil
+}
+
+func (m *Project) GetUpdatedAt() *time.Time {
+	if m != nil {
+		return m.UpdatedAt
+	}
+	return nil
+}
+
+func (m *Project) GetCommit() string {
+	if m != nil {
+		return m.Commit
+	}
+	return ""
+}
+
+func (m *Project) GetDriver() Driver {
+	if m != nil {
+		return m.Driver
+	}
+	return Driver_UnknownDriver
+}
+
+func (m *Project) GetHasArtifacts() []*Artifact {
+	if m != nil {
+		return m.HasArtifacts
+	}
+	return nil
+}
+
+func (m *Project) GetHasBuilds() []*Build {
+	if m != nil {
+		return m.HasBuilds
+	}
+	return nil
+}
+
+func (m *Project) GetHasCommits() []*Commit {
+	if m != nil {
+		return m.HasCommits
+	}
+	return nil
+}
+
+func (m *Project) GetHasReleases() []*Release {
+	if m != nil {
+		return m.HasReleases
+	}
+	return nil
+}
+
+func (m *Project) GetHasMergerequests() []*MergeRequest {
+	if m != nil {
+		return m.HasMergerequests
+	}
+	return nil
+}
+
+func (m *Project) GetOwner() *Entity {
+	if m != nil {
+		return m.Owner
+	}
+	return nil
+}
+
+type Entity struct {
+	ID               github_com_cayleygraph_quad.IRI `protobuf:"bytes,1,opt,name=id,proto3,casttype=github.com/cayleygraph/quad.IRI" json:"id,omitempty" quad:"@id"`
+	CreatedAt        *time.Time                      `protobuf:"bytes,2,opt,name=created_at,json=createdAt,proto3,stdtime" json:"created_at,omitempty" quad:"schema:createdAt,optional"`
+	UpdatedAt        *time.Time                      `protobuf:"bytes,3,opt,name=updated_at,json=updatedAt,proto3,stdtime" json:"updated_at,omitempty" quad:"schema:updatedAt,optional"`
+	Driver           Driver                          `protobuf:"varint,4,opt,name=driver,proto3,enum=yolo.Driver" json:"driver,omitempty" quad:"schema:driver,optional"`
+	HasProjects      []*Project                      `protobuf:"bytes,101,rep,name=has_projects,json=hasProjects,proto3" json:"has_projects,omitempty" quad:"schema:hasOwner < *,optional"`
+	HasCommits       []*Commit                       `protobuf:"bytes,102,rep,name=has_commits,json=hasCommits,proto3" json:"has_commits,omitempty" quad:"schema:hasAuthor < *,optional"`
+	HasMergerequests []*MergeRequest                 `protobuf:"bytes,103,rep,name=has_mergerequests,json=hasMergerequests,proto3" json:"has_mergerequests,omitempty" quad:"schema:hasAuthor < *,optional"`
+}
+
+func (m *Entity) Reset()         { *m = Entity{} }
+func (m *Entity) String() string { return proto.CompactTextString(m) }
+func (*Entity) ProtoMessage()    {}
+func (*Entity) Descriptor() ([]byte, []int) {
+	return fileDescriptor_a62788fcb176084a, []int{8}
+}
+func (m *Entity) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Entity) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Entity.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Entity) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Entity.Merge(m, src)
+}
+func (m *Entity) XXX_Size() int {
+	return m.Size()
+}
+func (m *Entity) XXX_DiscardUnknown() {
+	xxx_messageInfo_Entity.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Entity proto.InternalMessageInfo
+
+func (m *Entity) GetID() github_com_cayleygraph_quad.IRI {
+	if m != nil {
+		return m.ID
+	}
+	return ""
+}
+
+func (m *Entity) GetCreatedAt() *time.Time {
+	if m != nil {
+		return m.CreatedAt
+	}
+	return nil
+}
+
+func (m *Entity) GetUpdatedAt() *time.Time {
+	if m != nil {
+		return m.UpdatedAt
+	}
+	return nil
+}
+
+func (m *Entity) GetDriver() Driver {
+	if m != nil {
+		return m.Driver
+	}
+	return Driver_UnknownDriver
+}
+
+func (m *Entity) GetHasProjects() []*Project {
+	if m != nil {
+		return m.HasProjects
+	}
+	return nil
+}
+
+func (m *Entity) GetHasCommits() []*Commit {
+	if m != nil {
+		return m.HasCommits
+	}
+	return nil
+}
+
+func (m *Entity) GetHasMergerequests() []*MergeRequest {
+	if m != nil {
+		return m.HasMergerequests
+	}
+	return nil
+}
+
 type Artifact struct {
 	ID                  github_com_cayleygraph_quad.IRI `protobuf:"bytes,1,opt,name=id,proto3,casttype=github.com/cayleygraph/quad.IRI" json:"id,omitempty" quad:"@id"`
 	CreatedAt           *time.Time                      `protobuf:"bytes,2,opt,name=created_at,json=createdAt,proto3,stdtime" json:"created_at,omitempty" quad:"schema:createdAt,optional"`
@@ -693,6 +1317,7 @@ type Artifact struct {
 	Kind                Artifact_Kind                   `protobuf:"varint,10,opt,name=kind,proto3,enum=yolo.Artifact_Kind" json:"kind,omitempty" quad:"schema:kind,optional"`
 	Driver              Driver                          `protobuf:"varint,11,opt,name=driver,proto3,enum=yolo.Driver" json:"driver,omitempty" quad:"schema:driver,optional"`
 	HasBuild            *Build                          `protobuf:"bytes,101,opt,name=has_build,json=hasBuild,proto3" json:"has_build,omitempty" quad:"schema:hasBuild,optional"`
+	HasRelease          *Release                        `protobuf:"bytes,102,opt,name=has_release,json=hasRelease,proto3" json:"has_release,omitempty" quad:"schema:hasRelease,optional"`
 	DLArtifactSignedURL string                          `protobuf:"bytes,201,opt,name=dl_artifact_signed_url,json=dlArtifactSignedUrl,proto3" json:"dl_artifact_signed_url,omitempty" quad:"-"`
 	PListSignedURL      string                          `protobuf:"bytes,202,opt,name=plist_signed_url,json=plistSignedUrl,proto3" json:"plist_signed_url,omitempty" quad:"-"`
 }
@@ -701,7 +1326,7 @@ func (m *Artifact) Reset()         { *m = Artifact{} }
 func (m *Artifact) String() string { return proto.CompactTextString(m) }
 func (*Artifact) ProtoMessage()    {}
 func (*Artifact) Descriptor() ([]byte, []int) {
-	return fileDescriptor_a62788fcb176084a, []int{4}
+	return fileDescriptor_a62788fcb176084a, []int{9}
 }
 func (m *Artifact) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -814,6 +1439,13 @@ func (m *Artifact) GetHasBuild() *Build {
 	return nil
 }
 
+func (m *Artifact) GetHasRelease() *Release {
+	if m != nil {
+		return m.HasRelease
+	}
+	return nil
+}
+
 func (m *Artifact) GetDLArtifactSignedURL() string {
 	if m != nil {
 		return m.DLArtifactSignedURL
@@ -837,7 +1469,7 @@ func (m *Batch) Reset()         { *m = Batch{} }
 func (m *Batch) String() string { return proto.CompactTextString(m) }
 func (*Batch) ProtoMessage()    {}
 func (*Batch) Descriptor() ([]byte, []int) {
-	return fileDescriptor_a62788fcb176084a, []int{5}
+	return fileDescriptor_a62788fcb176084a, []int{10}
 }
 func (m *Batch) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -883,6 +1515,7 @@ func (m *Batch) GetArtifacts() []*Artifact {
 func init() {
 	proto.RegisterEnum("yolo.Driver", Driver_name, Driver_value)
 	proto.RegisterEnum("yolo.Build_State", Build_State_name, Build_State_value)
+	proto.RegisterEnum("yolo.MergeRequest_State", MergeRequest_State_name, MergeRequest_State_value)
 	proto.RegisterEnum("yolo.Artifact_State", Artifact_State_name, Artifact_State_value)
 	proto.RegisterEnum("yolo.Artifact_Kind", Artifact_Kind_name, Artifact_Kind_value)
 	proto.RegisterType((*Ping)(nil), "yolo.Ping")
@@ -895,6 +1528,11 @@ func init() {
 	proto.RegisterType((*BuildList_Request)(nil), "yolo.BuildList.Request")
 	proto.RegisterType((*BuildList_Response)(nil), "yolo.BuildList.Response")
 	proto.RegisterType((*Build)(nil), "yolo.Build")
+	proto.RegisterType((*Release)(nil), "yolo.Release")
+	proto.RegisterType((*Commit)(nil), "yolo.Commit")
+	proto.RegisterType((*MergeRequest)(nil), "yolo.MergeRequest")
+	proto.RegisterType((*Project)(nil), "yolo.Project")
+	proto.RegisterType((*Entity)(nil), "yolo.Entity")
 	proto.RegisterType((*Artifact)(nil), "yolo.Artifact")
 	proto.RegisterType((*Batch)(nil), "yolo.Batch")
 }
@@ -902,94 +1540,129 @@ func init() {
 func init() { proto.RegisterFile("yolopb.proto", fileDescriptor_a62788fcb176084a) }
 
 var fileDescriptor_a62788fcb176084a = []byte{
-	// 1379 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xd4, 0x57, 0x4d, 0x8f, 0xdb, 0xc4,
-	0x1b, 0x5f, 0x27, 0x9b, 0x17, 0x4f, 0xb2, 0x5b, 0x77, 0xf6, 0xdf, 0xfe, 0x43, 0x68, 0xe3, 0xd4,
-	0x0b, 0x62, 0x55, 0x75, 0x13, 0xb1, 0x40, 0x81, 0x52, 0x21, 0x36, 0x4d, 0x5f, 0xa2, 0x6e, 0xab,
-	0xc5, 0x69, 0x0f, 0xad, 0x90, 0xa2, 0x89, 0x3d, 0x1b, 0x0f, 0xeb, 0xb7, 0x7a, 0xc6, 0xad, 0xd2,
-	0x1b, 0x15, 0x1f, 0xa0, 0x88, 0xcf, 0xc3, 0xbd, 0x70, 0xaa, 0xc4, 0x85, 0x93, 0x41, 0x29, 0x27,
-	0x8e, 0x39, 0x72, 0x42, 0x33, 0xb6, 0x13, 0x67, 0xb3, 0xab, 0x42, 0xc5, 0x85, 0x9b, 0x9f, 0xb7,
-	0xdf, 0xf3, 0xcc, 0x33, 0xcf, 0xfc, 0x66, 0x0c, 0xaa, 0x63, 0xcf, 0xf6, 0xfc, 0x61, 0xcb, 0x0f,
-	0x3c, 0xe6, 0xc1, 0x55, 0x2e, 0xd5, 0xcf, 0x8d, 0x3c, 0x6f, 0x64, 0xe3, 0x36, 0xf2, 0x49, 0x1b,
-	0xb9, 0xae, 0xc7, 0x10, 0x23, 0x9e, 0x4b, 0x63, 0x9f, 0xfa, 0xf6, 0x88, 0x30, 0x2b, 0x1c, 0xb6,
-	0x0c, 0xcf, 0x69, 0x8f, 0xbc, 0x91, 0xd7, 0x16, 0xea, 0x61, 0x78, 0x20, 0x24, 0x21, 0x88, 0xaf,
-	0xc4, 0xfd, 0xb3, 0x05, 0x77, 0x1b, 0xb9, 0xa3, 0x79, 0x80, 0xcf, 0xc6, 0x3e, 0xa6, 0x6d, 0x46,
-	0x1c, 0x4c, 0x19, 0x72, 0xfc, 0xf9, 0x57, 0x1c, 0xac, 0x9d, 0x07, 0xab, 0xfb, 0xc4, 0x1d, 0xd5,
-	0x65, 0x50, 0xd2, 0xf1, 0xa3, 0x10, 0x53, 0x56, 0x07, 0xa0, 0xac, 0x63, 0xea, 0x7b, 0x2e, 0xc5,
-	0xda, 0xb7, 0x12, 0x28, 0xf6, 0x19, 0x62, 0x21, 0xcd, 0x7a, 0x78, 0x73, 0x0f, 0x78, 0x16, 0x14,
-	0x43, 0x9f, 0xa3, 0xd6, 0xa4, 0xa6, 0xb4, 0x55, 0xd0, 0x13, 0x09, 0x9e, 0x01, 0x45, 0x73, 0x38,
-	0xc0, 0x41, 0x50, 0xcb, 0x35, 0xa5, 0x2d, 0x59, 0x2f, 0x98, 0xc3, 0xeb, 0x41, 0x00, 0xdf, 0x02,
-	0x65, 0x73, 0x38, 0x70, 0x3d, 0x13, 0xd3, 0x5a, 0xbe, 0x29, 0x6d, 0xe5, 0xf5, 0x92, 0x39, 0xbc,
-	0xcb, 0xc5, 0xc4, 0xf4, 0x28, 0x44, 0x26, 0xad, 0xad, 0xa6, 0xa6, 0x2f, 0xb9, 0xa8, 0x7d, 0x23,
-	0x01, 0xb9, 0x13, 0x12, 0xdb, 0xdc, 0x23, 0x94, 0xd5, 0xaf, 0xcd, 0x2a, 0x81, 0x9f, 0x80, 0x35,
-	0x14, 0x30, 0x72, 0x80, 0x0c, 0x36, 0x38, 0x24, 0xae, 0x29, 0x8a, 0x58, 0xdf, 0xd9, 0x68, 0xf1,
-	0x36, 0xb7, 0x76, 0x13, 0x53, 0xeb, 0x36, 0x71, 0x4d, 0xbd, 0x9a, 0x7a, 0x72, 0xa9, 0xde, 0xce,
-	0xac, 0x61, 0x13, 0x14, 0x87, 0x1c, 0x9d, 0xd6, 0xa4, 0x66, 0x7e, 0xab, 0xb2, 0x53, 0x89, 0xc3,
-	0x45, 0x46, 0x3d, 0x31, 0x69, 0xdf, 0xc9, 0xa0, 0x20, 0x34, 0xf0, 0x26, 0xc8, 0x91, 0x38, 0x93,
-	0xdc, 0xf9, 0x78, 0x12, 0xa9, 0xb9, 0x5e, 0x77, 0x1a, 0xa9, 0x80, 0x57, 0x7e, 0x45, 0xfb, 0x82,
-	0x98, 0xda, 0x9f, 0x91, 0xaa, 0x66, 0x36, 0xc5, 0x40, 0x63, 0x1b, 0x8f, 0x47, 0x01, 0xf2, 0xad,
-	0x36, 0x77, 0x6a, 0xf5, 0xf4, 0x9e, 0x9e, 0x23, 0x26, 0x1c, 0x01, 0x60, 0x04, 0x18, 0x31, 0x6c,
-	0x0e, 0x10, 0x13, 0x7d, 0xaa, 0xec, 0xd4, 0x5b, 0xf1, 0x6c, 0xb4, 0xd2, 0x3d, 0x6c, 0xdd, 0x4b,
-	0xb7, 0xac, 0x73, 0xe9, 0x45, 0xa4, 0x4a, 0xd3, 0x48, 0x6d, 0xc6, 0xa9, 0xa8, 0x61, 0x61, 0x07,
-	0x5d, 0x49, 0x20, 0x76, 0xd9, 0x25, 0xcf, 0xe7, 0x63, 0x84, 0x6c, 0xed, 0xf9, 0xaf, 0xaa, 0xa4,
-	0xcb, 0x33, 0x03, 0x4f, 0x14, 0xfa, 0x66, 0x9a, 0x28, 0xff, 0x86, 0x89, 0x12, 0x88, 0xe5, 0x44,
-	0x33, 0x03, 0xec, 0x81, 0x02, 0x65, 0x88, 0x61, 0xb1, 0x81, 0xeb, 0x3b, 0xa7, 0x33, 0x8d, 0x6c,
-	0xf1, 0x39, 0xc2, 0x9d, 0xe6, 0x34, 0x52, 0xcf, 0x2d, 0xc0, 0x8a, 0x80, 0x39, 0xa4, 0x1e, 0x23,
-	0x40, 0x07, 0x54, 0x0d, 0xcf, 0xf1, 0x6d, 0x9c, 0x54, 0x5d, 0x78, 0x6d, 0xd5, 0xad, 0xa4, 0x6a,
-	0x6d, 0xb1, 0x3d, 0x29, 0xc8, 0x52, 0xdd, 0x95, 0x8c, 0x09, 0x5e, 0x05, 0x25, 0x07, 0x53, 0x8a,
-	0x46, 0xb8, 0x56, 0x14, 0x3b, 0xab, 0x4d, 0x23, 0xb5, 0xb1, 0x80, 0x94, 0xd8, 0x33, 0xa5, 0xa6,
-	0x21, 0xbc, 0xc1, 0x94, 0xa1, 0x20, 0x29, 0xb5, 0xf4, 0x86, 0x0d, 0x4e, 0x20, 0x96, 0x1b, 0x3c,
-	0x33, 0xc0, 0xaf, 0x41, 0xe5, 0x80, 0xb8, 0x84, 0x5a, 0x71, 0xa6, 0xf2, 0x6b, 0x33, 0x6d, 0x27,
-	0x99, 0x2e, 0x2c, 0x64, 0x4a, 0x31, 0x96, 0x52, 0x81, 0xb9, 0x05, 0x7e, 0x0a, 0x8a, 0x86, 0xe7,
-	0x38, 0x84, 0xd5, 0x64, 0xd1, 0x91, 0x0b, 0xd3, 0x48, 0x3d, 0x7f, 0xb4, 0xb7, 0x0e, 0xc9, 0x40,
-	0xe8, 0x49, 0x00, 0x0f, 0x1d, 0x06, 0xc8, 0x35, 0xac, 0x1a, 0x38, 0x21, 0x34, 0x36, 0x67, 0x43,
-	0x63, 0x0d, 0xbc, 0x09, 0x8a, 0x66, 0x40, 0x1e, 0xe3, 0xa0, 0x56, 0x11, 0x33, 0x54, 0x8d, 0x67,
-	0xa8, 0x2b, 0x74, 0xc7, 0x00, 0xc5, 0xce, 0x59, 0xa0, 0x58, 0x03, 0xbf, 0x02, 0x6b, 0x16, 0xa2,
-	0x83, 0xf4, 0xd4, 0xd3, 0x1a, 0x16, 0x87, 0x7b, 0x7d, 0x91, 0x1b, 0x3a, 0xef, 0x4d, 0x23, 0x75,
-	0x73, 0x01, 0xd1, 0x42, 0x54, 0x4c, 0x6c, 0xf3, 0x6a, 0xf3, 0x62, 0x06, 0xb7, 0x6a, 0x21, 0x9a,
-	0x46, 0x51, 0xed, 0x99, 0x04, 0x0a, 0x62, 0xa2, 0xa1, 0x02, 0xaa, 0xf7, 0xdd, 0x43, 0xd7, 0x7b,
-	0xe2, 0x0a, 0x59, 0x59, 0x81, 0x15, 0x50, 0xd2, 0x43, 0xd7, 0x25, 0xee, 0x48, 0x91, 0x20, 0x00,
-	0xc5, 0x1b, 0x88, 0xd8, 0xd8, 0x54, 0x72, 0xfc, 0x7b, 0x1f, 0x51, 0x8a, 0x4d, 0x25, 0x0f, 0xab,
-	0xa0, 0x7c, 0x0d, 0xb9, 0x06, 0xe6, 0x96, 0x55, 0xb8, 0x06, 0xe4, 0xbe, 0x61, 0x61, 0x33, 0xe4,
-	0x62, 0x81, 0x23, 0xf4, 0x0f, 0x89, 0xef, 0x63, 0x53, 0x29, 0xf2, 0xa8, 0xbb, 0x1e, 0xd3, 0x43,
-	0x57, 0x29, 0xf1, 0x28, 0xbe, 0xb7, 0xa6, 0x17, 0x32, 0xa5, 0xac, 0xfd, 0x20, 0x83, 0x72, 0x5a,
-	0xd2, 0x7f, 0x90, 0x96, 0x76, 0x81, 0x7c, 0x40, 0x6c, 0x3c, 0xa0, 0xe4, 0x29, 0x8e, 0x6f, 0x83,
-	0xce, 0x3b, 0x4b, 0x38, 0x33, 0x8f, 0xcc, 0x56, 0x94, 0xb9, 0xb2, 0x4f, 0x9e, 0x62, 0xd8, 0x05,
-	0xc0, 0xf6, 0x0c, 0x64, 0x0f, 0x7c, 0xc4, 0x2c, 0xc1, 0x3a, 0x72, 0xe7, 0xdd, 0xa5, 0x71, 0x9f,
-	0xbb, 0x64, 0x40, 0x64, 0xa1, 0xdd, 0x47, 0xcc, 0x82, 0x0f, 0x40, 0xd5, 0xf4, 0x9e, 0xb8, 0xb6,
-	0x87, 0xcc, 0x41, 0x18, 0xd8, 0x82, 0x6b, 0xe4, 0xce, 0xe5, 0x49, 0xa4, 0x56, 0xba, 0x89, 0xfe,
-	0xbe, 0xbe, 0xb7, 0x34, 0x28, 0xd9, 0x98, 0x0c, 0x70, 0x25, 0xd5, 0xdf, 0x0f, 0x6c, 0xbe, 0x46,
-	0x87, 0x38, 0x78, 0xc0, 0x2f, 0xe2, 0x84, 0x59, 0x96, 0xd7, 0x38, 0xf3, 0xc8, 0xae, 0x91, 0x2b,
-	0xef, 0x8d, 0x7d, 0x0c, 0x3f, 0x07, 0x65, 0x6a, 0xa1, 0xf7, 0x07, 0x34, 0x74, 0x04, 0xb5, 0xc8,
-	0x9d, 0xcd, 0x69, 0xa4, 0xaa, 0x8b, 0xd4, 0x91, 0x38, 0x64, 0xc9, 0x89, 0xeb, 0xfa, 0xa1, 0xc3,
-	0x7b, 0x44, 0x2d, 0xb4, 0xf3, 0xd1, 0x65, 0x81, 0x50, 0x3e, 0xa1, 0x47, 0x73, 0x97, 0x6c, 0x8f,
-	0x62, 0x2d, 0x47, 0xd9, 0x4b, 0xa9, 0x5d, 0x16, 0xc7, 0xf2, 0x7f, 0x47, 0xae, 0xd8, 0x7f, 0xc8,
-	0xee, 0xb7, 0xc0, 0xaa, 0xb8, 0xaf, 0xc1, 0x89, 0xf7, 0x75, 0x47, 0x9d, 0x46, 0xea, 0xdb, 0x0b,
-	0x58, 0x3c, 0x22, 0x03, 0x25, 0x10, 0xfe, 0x3d, 0xbe, 0xb8, 0x03, 0x64, 0xce, 0x17, 0xe2, 0xba,
-	0xaf, 0x61, 0x31, 0xf5, 0xd9, 0x87, 0xc0, 0x31, 0x4d, 0x4f, 0x89, 0x22, 0xbb, 0x6b, 0xa9, 0x0e,
-	0x3e, 0x00, 0x67, 0x4d, 0x7b, 0xc6, 0x3e, 0x03, 0x4a, 0x46, 0x2e, 0x8e, 0xa7, 0xeb, 0xc7, 0xf8,
-	0x8c, 0x6e, 0x4e, 0x22, 0x75, 0xa3, 0xbb, 0x97, 0x2e, 0xba, 0x2f, 0x1c, 0xe2, 0x31, 0x2b, 0xc7,
-	0x69, 0xb6, 0x35, 0x7d, 0xc3, 0xb4, 0x8f, 0x38, 0x04, 0x36, 0xec, 0x01, 0xc5, 0xb7, 0x09, 0x5d,
-	0x00, 0xfd, 0x29, 0x06, 0x6d, 0x4c, 0x22, 0x75, 0x7d, 0x9f, 0x3f, 0x93, 0x8e, 0xc7, 0x5b, 0x17,
-	0x81, 0x33, 0x28, 0xed, 0xd6, 0xc9, 0x2c, 0x56, 0x05, 0xe5, 0x1b, 0xc9, 0x65, 0xa0, 0x48, 0xb0,
-	0x04, 0xf2, 0x77, 0xf1, 0x13, 0x25, 0x07, 0x65, 0x50, 0xb8, 0x1e, 0x04, 0x5e, 0xa0, 0xe4, 0x39,
-	0x4b, 0x75, 0xb1, 0xb8, 0x40, 0x95, 0x55, 0x6d, 0x07, 0xac, 0xf2, 0x6d, 0x83, 0xa7, 0x40, 0x25,
-	0x01, 0xe2, 0xa2, 0xb2, 0xc2, 0x23, 0x7b, 0xfb, 0xbb, 0x31, 0xc4, 0xee, 0xfe, 0x6d, 0x25, 0xc7,
-	0x3f, 0xba, 0x77, 0x6e, 0x2a, 0x79, 0xed, 0x21, 0x28, 0x74, 0x10, 0x33, 0xac, 0xbf, 0xf5, 0x02,
-	0x83, 0x97, 0x80, 0x3c, 0x27, 0xf3, 0xdc, 0x71, 0x64, 0xae, 0xcf, 0x1d, 0x2e, 0x5e, 0x07, 0xc5,
-	0x78, 0x06, 0xe0, 0x69, 0xb0, 0x96, 0x54, 0x14, 0x2b, 0x94, 0x15, 0x4e, 0xb7, 0x02, 0xfb, 0x90,
-	0x30, 0xac, 0x48, 0x82, 0x8b, 0x49, 0x60, 0xd8, 0xf8, 0x5a, 0x4f, 0xc9, 0xf1, 0x65, 0x75, 0x88,
-	0xcb, 0x02, 0x34, 0x56, 0xf2, 0x3b, 0x7f, 0x48, 0xa0, 0xf2, 0xc0, 0xb3, 0xbd, 0x3e, 0x0e, 0x1e,
-	0x13, 0x83, 0x1f, 0x46, 0xf1, 0x60, 0x86, 0x30, 0xce, 0xcc, 0xbf, 0x5b, 0xe9, 0xbb, 0x78, 0x63,
-	0x41, 0x97, 0x3c, 0xa1, 0xd7, 0x9e, 0xfd, 0xfc, 0xfb, 0xf7, 0xb9, 0x12, 0x2c, 0xb4, 0x7d, 0x1e,
-	0x77, 0x23, 0x7d, 0x50, 0xc3, 0xe4, 0x04, 0xc5, 0xd2, 0x0c, 0xe3, 0xcc, 0x11, 0x6d, 0x82, 0x72,
-	0x4a, 0xa0, 0xc8, 0xb0, 0xd4, 0xa6, 0x71, 0x74, 0x3f, 0xf3, 0x22, 0x86, 0xff, 0xcf, 0xb4, 0x8b,
-	0x2b, 0x66, 0x68, 0xb5, 0x65, 0x43, 0x02, 0xb8, 0x21, 0x00, 0xd7, 0x60, 0xa5, 0x2d, 0xba, 0xbb,
-	0xcd, 0xc7, 0xa2, 0xf3, 0xe1, 0x8b, 0x49, 0x43, 0x7a, 0x39, 0x69, 0x48, 0xbf, 0x4d, 0x1a, 0xd2,
-	0xf3, 0x57, 0x8d, 0x95, 0x97, 0xaf, 0x1a, 0x2b, 0xbf, 0xbc, 0x6a, 0xac, 0x3c, 0xac, 0x0f, 0x71,
-	0xc0, 0xc6, 0x2d, 0x86, 0x0d, 0xab, 0xcd, 0x21, 0xdb, 0xfe, 0xe1, 0xa8, 0x1d, 0xff, 0xd9, 0x0c,
-	0x8b, 0xe2, 0x4e, 0xf8, 0xe0, 0xaf, 0x00, 0x00, 0x00, 0xff, 0xff, 0xfb, 0x46, 0xbf, 0x2b, 0xea,
-	0x0c, 0x00, 0x00,
+	// 1937 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x59, 0xcd, 0x6f, 0x1b, 0xc7,
+	0x15, 0x17, 0xbf, 0xc9, 0x47, 0x4a, 0x5e, 0x8f, 0x9a, 0x64, 0xab, 0x26, 0x5a, 0x65, 0x9d, 0xb4,
+	0xaa, 0x61, 0x93, 0x88, 0xda, 0xa6, 0x6d, 0x12, 0x14, 0x15, 0x25, 0xdb, 0x11, 0x22, 0x3b, 0xca,
+	0xca, 0x42, 0x6b, 0xb7, 0x28, 0x3b, 0xe4, 0x8e, 0xb8, 0x63, 0x2d, 0x77, 0x37, 0x3b, 0xcb, 0x18,
+	0xcc, 0xad, 0x41, 0x6f, 0xbd, 0x04, 0x68, 0xff, 0x86, 0xfe, 0x17, 0x45, 0x0f, 0xbd, 0xa4, 0x3d,
+	0x05, 0xe8, 0xa5, 0x40, 0x81, 0x6d, 0x21, 0xf7, 0xd4, 0x23, 0x8f, 0x3d, 0x15, 0xf3, 0xb1, 0xe4,
+	0xf2, 0xcb, 0x36, 0x9d, 0x04, 0x81, 0x01, 0xdd, 0x76, 0xde, 0xbc, 0xf7, 0x7b, 0xb3, 0x6f, 0x7e,
+	0x6f, 0xde, 0xdb, 0x1d, 0xa8, 0x0d, 0x7c, 0xd7, 0x0f, 0xda, 0xf5, 0x20, 0xf4, 0x23, 0x1f, 0xe5,
+	0xf9, 0x68, 0xe3, 0xe5, 0xae, 0xef, 0x77, 0x5d, 0xd2, 0xc0, 0x01, 0x6d, 0x60, 0xcf, 0xf3, 0x23,
+	0x1c, 0x51, 0xdf, 0x63, 0x52, 0x67, 0xe3, 0x7a, 0x97, 0x46, 0x4e, 0xbf, 0x5d, 0xef, 0xf8, 0xbd,
+	0x46, 0xd7, 0xef, 0xfa, 0x0d, 0x21, 0x6e, 0xf7, 0x4f, 0xc5, 0x48, 0x0c, 0xc4, 0x93, 0x52, 0x7f,
+	0x7b, 0x42, 0xdd, 0xc5, 0x5e, 0x77, 0x6c, 0x10, 0x44, 0x83, 0x80, 0xb0, 0x46, 0x44, 0x7b, 0x84,
+	0x45, 0xb8, 0x17, 0x8c, 0x9f, 0xa4, 0xb1, 0xf9, 0x0a, 0xe4, 0x8f, 0xa8, 0xd7, 0xdd, 0xa8, 0x40,
+	0xc9, 0x22, 0x1f, 0xf6, 0x09, 0x8b, 0x36, 0x00, 0xca, 0x16, 0x61, 0x81, 0xef, 0x31, 0x62, 0xfe,
+	0x36, 0x03, 0xc5, 0xe3, 0x08, 0x47, 0x7d, 0x96, 0xd6, 0xf0, 0xc7, 0x1a, 0xe8, 0x45, 0x28, 0xf6,
+	0x03, 0x8e, 0xaa, 0x67, 0xb6, 0x32, 0xdb, 0x05, 0x4b, 0x8d, 0xd0, 0x0b, 0x50, 0xb4, 0xdb, 0x2d,
+	0x12, 0x86, 0x7a, 0x76, 0x2b, 0xb3, 0x5d, 0xb1, 0x0a, 0x76, 0xfb, 0x46, 0x18, 0xa2, 0x6f, 0x42,
+	0xd9, 0x6e, 0xb7, 0x3c, 0xdf, 0x26, 0x4c, 0xcf, 0x6d, 0x65, 0xb6, 0x73, 0x56, 0xc9, 0x6e, 0xdf,
+	0xe1, 0x43, 0x35, 0xf5, 0x61, 0x1f, 0xdb, 0x4c, 0xcf, 0x27, 0x53, 0x1f, 0xf0, 0xa1, 0xf9, 0x9b,
+	0x0c, 0x54, 0x9a, 0x7d, 0xea, 0xda, 0x87, 0x94, 0x45, 0x1b, 0x7b, 0xa3, 0x95, 0xa0, 0x1f, 0xc1,
+	0x2a, 0x0e, 0x23, 0x7a, 0x8a, 0x3b, 0x51, 0xeb, 0x8c, 0x7a, 0xb6, 0x58, 0xc4, 0xda, 0xce, 0x7a,
+	0x9d, 0x87, 0xb9, 0xbe, 0xab, 0xa6, 0xea, 0xef, 0x51, 0xcf, 0xb6, 0x6a, 0x89, 0x26, 0x1f, 0x6d,
+	0x34, 0x52, 0xef, 0x70, 0x05, 0x8a, 0x6d, 0x8e, 0xce, 0xf4, 0xcc, 0x56, 0x6e, 0xbb, 0xba, 0x53,
+	0x95, 0xe6, 0xc2, 0xa3, 0xa5, 0xa6, 0xcc, 0x3f, 0x56, 0xa1, 0x20, 0x24, 0xe8, 0x16, 0x64, 0xa9,
+	0xf4, 0x54, 0x69, 0xfe, 0xf0, 0x3c, 0x36, 0xb2, 0x07, 0xfb, 0xc3, 0xd8, 0x00, 0xbe, 0xf2, 0xb7,
+	0xcc, 0x9f, 0x52, 0xdb, 0xfc, 0x5f, 0x6c, 0x18, 0xa9, 0x4d, 0xe9, 0xe0, 0x81, 0x4b, 0x06, 0xdd,
+	0x10, 0x07, 0x4e, 0x83, 0x2b, 0xd5, 0x0f, 0xac, 0x03, 0x2b, 0x4b, 0x6d, 0xd4, 0x05, 0xe8, 0x84,
+	0x04, 0x47, 0xc4, 0x6e, 0xe1, 0x48, 0xc4, 0xa9, 0xba, 0xb3, 0x51, 0x97, 0xdc, 0xa8, 0x27, 0x7b,
+	0x58, 0xbf, 0x9b, 0x6c, 0x59, 0xf3, 0xda, 0x67, 0xb1, 0x91, 0x19, 0xc6, 0xc6, 0x96, 0x74, 0xc5,
+	0x3a, 0x0e, 0xe9, 0xe1, 0xb7, 0x14, 0xc4, 0x6e, 0x74, 0xcd, 0x0f, 0x38, 0x8d, 0xb0, 0x6b, 0x7e,
+	0xfa, 0x2f, 0x23, 0x63, 0x55, 0x46, 0x13, 0xdc, 0x51, 0x3f, 0xb0, 0x13, 0x47, 0xb9, 0x67, 0x74,
+	0xa4, 0x20, 0x66, 0x1d, 0x8d, 0x26, 0xd0, 0x01, 0x14, 0x58, 0x84, 0x23, 0x22, 0x36, 0x70, 0x6d,
+	0xe7, 0x72, 0x2a, 0x90, 0x75, 0xce, 0x23, 0xd2, 0xdc, 0x1a, 0xc6, 0xc6, 0xcb, 0x13, 0xb0, 0xc2,
+	0x60, 0x0c, 0x69, 0x49, 0x04, 0xd4, 0x83, 0x5a, 0xc7, 0xef, 0x05, 0x2e, 0x51, 0xab, 0x2e, 0x3c,
+	0x71, 0xd5, 0x75, 0xb5, 0x6a, 0x73, 0x32, 0x3c, 0x09, 0xc8, 0xcc, 0xba, 0xab, 0xa9, 0x29, 0xf4,
+	0x0e, 0x94, 0x7a, 0x84, 0x31, 0xdc, 0x25, 0x7a, 0x51, 0xec, 0xac, 0x39, 0x8c, 0x8d, 0xcd, 0x09,
+	0x24, 0x35, 0x9f, 0x5a, 0x6a, 0x62, 0xc2, 0x03, 0xcc, 0x22, 0x1c, 0xaa, 0xa5, 0x96, 0x9e, 0x31,
+	0xc0, 0x0a, 0x62, 0x36, 0xc0, 0xa3, 0x09, 0xf4, 0x00, 0xaa, 0xa7, 0xd4, 0xa3, 0xcc, 0x91, 0x9e,
+	0xca, 0x4f, 0xf4, 0x74, 0x5d, 0x79, 0x7a, 0x75, 0xc2, 0x53, 0x82, 0x31, 0xe3, 0x0a, 0xc6, 0x33,
+	0xe8, 0xc7, 0x50, 0xec, 0xf8, 0xbd, 0x1e, 0x8d, 0xf4, 0x8a, 0x88, 0xc8, 0xab, 0xc3, 0xd8, 0x78,
+	0x65, 0x3a, 0xb6, 0x3d, 0x9a, 0x82, 0xb0, 0x94, 0x01, 0x37, 0x6d, 0x87, 0xd8, 0xeb, 0x38, 0x3a,
+	0x2c, 0x30, 0x95, 0xd3, 0x69, 0x53, 0x29, 0x41, 0xb7, 0xa0, 0x68, 0x87, 0xf4, 0x23, 0x12, 0xea,
+	0x55, 0xc1, 0xa1, 0x9a, 0xe4, 0xd0, 0xbe, 0x90, 0xcd, 0x01, 0x92, 0xca, 0x69, 0x20, 0x29, 0x41,
+	0xbf, 0x84, 0x55, 0x07, 0xb3, 0x56, 0x92, 0xf5, 0x4c, 0x27, 0x22, 0xb9, 0xd7, 0x26, 0xcf, 0x86,
+	0xe6, 0x77, 0x86, 0xb1, 0x71, 0x65, 0x02, 0xd1, 0xc1, 0x4c, 0x30, 0x76, 0xeb, 0x9d, 0xad, 0xab,
+	0x29, 0xdc, 0x9a, 0x83, 0x59, 0x62, 0xc5, 0xd0, 0x07, 0x00, 0x1c, 0x5d, 0x05, 0xe8, 0x54, 0xec,
+	0x83, 0x5a, 0xea, 0x9e, 0x90, 0x35, 0x5f, 0x9b, 0xd9, 0x5f, 0x07, 0xb3, 0xbd, 0xe9, 0x88, 0x55,
+	0x46, 0x42, 0x74, 0x02, 0x55, 0x0e, 0x19, 0x84, 0xfe, 0x03, 0xd2, 0x89, 0xf4, 0xae, 0xc0, 0x5c,
+	0x95, 0x98, 0x47, 0x52, 0xd8, 0x7c, 0x7d, 0x66, 0x2b, 0x1d, 0xcc, 0xd4, 0x64, 0x0a, 0x15, 0xc6,
+	0x52, 0x44, 0x41, 0xe3, 0xb0, 0x3d, 0x12, 0x76, 0x49, 0x28, 0xcf, 0x4d, 0xdd, 0x11, 0xd8, 0x48,
+	0x62, 0xdf, 0xe6, 0x33, 0xea, 0x44, 0x6d, 0x5e, 0x1d, 0xc6, 0xc6, 0xb7, 0xa7, 0x1d, 0xa4, 0x35,
+	0x52, 0x5e, 0x2e, 0x25, 0x53, 0x0a, 0xd6, 0xfc, 0x24, 0x03, 0x05, 0x91, 0xe6, 0x48, 0x83, 0xda,
+	0x89, 0x77, 0xe6, 0xf9, 0x0f, 0x3d, 0x31, 0xd6, 0x56, 0x50, 0x15, 0x4a, 0x56, 0xdf, 0xf3, 0xa8,
+	0xd7, 0xd5, 0x32, 0x08, 0xa0, 0x78, 0x13, 0x53, 0x97, 0xd8, 0x5a, 0x96, 0x3f, 0x1f, 0x61, 0xc6,
+	0x88, 0xad, 0xe5, 0x50, 0x0d, 0xca, 0x7b, 0xd8, 0xeb, 0x10, 0x3e, 0x93, 0x47, 0xab, 0x50, 0x39,
+	0xee, 0x38, 0xc4, 0xee, 0xf3, 0x61, 0x81, 0x23, 0x1c, 0x9f, 0xd1, 0x20, 0x20, 0xb6, 0x56, 0xe4,
+	0x56, 0x77, 0xfc, 0xc8, 0xea, 0x7b, 0x5a, 0x89, 0x5b, 0x71, 0xc2, 0xdb, 0x7e, 0x3f, 0xd2, 0xca,
+	0xe6, 0x3f, 0x8b, 0xbc, 0x3e, 0xb8, 0x04, 0x33, 0x72, 0x71, 0x54, 0x2f, 0x3e, 0xaa, 0x53, 0x07,
+	0x5e, 0x7e, 0xf9, 0x03, 0x6f, 0x7c, 0x36, 0x14, 0x96, 0x3d, 0x1b, 0xc6, 0x09, 0x5e, 0xfc, 0x62,
+	0x09, 0xfe, 0xab, 0xa7, 0x4b, 0xf0, 0xef, 0x0e, 0x63, 0xe3, 0xf5, 0x69, 0x46, 0x2b, 0x82, 0x5c,
+	0xa4, 0xf8, 0xb2, 0x29, 0xfe, 0x97, 0x22, 0x14, 0xf7, 0x92, 0x8d, 0x7c, 0xde, 0x92, 0x2b, 0xc5,
+	0xf9, 0xdc, 0xf2, 0x9c, 0x1f, 0x13, 0x37, 0xff, 0xc5, 0x88, 0x3b, 0xae, 0x8e, 0x85, 0x65, 0xab,
+	0xe3, 0x7d, 0xe0, 0x1c, 0x6d, 0x85, 0x92, 0xbe, 0x09, 0xe5, 0x15, 0x83, 0x14, 0xa9, 0x9b, 0xdb,
+	0xc3, 0xd8, 0x78, 0x6d, 0x3e, 0x2d, 0xa7, 0x08, 0x5f, 0x1d, 0xa7, 0x02, 0x43, 0x77, 0x25, 0xdf,
+	0x55, 0x2b, 0x7c, 0x3a, 0xd3, 0x0a, 0x2f, 0x81, 0x5b, 0x49, 0x6a, 0x28, 0xfb, 0xaa, 0x28, 0xaf,
+	0x92, 0x13, 0xf7, 0x23, 0xc7, 0x0f, 0x15, 0xd9, 0xd5, 0x86, 0xdc, 0xf0, 0x22, 0x1a, 0x0d, 0xe6,
+	0x27, 0xe7, 0xae, 0xd0, 0x9f, 0x5a, 0xa9, 0x14, 0xce, 0xcd, 0x22, 0xfa, 0xd5, 0x64, 0xd1, 0x9f,
+	0x4a, 0x50, 0x4b, 0xeb, 0x5e, 0xe4, 0xd2, 0xd7, 0x90, 0x4b, 0x87, 0xb0, 0x2a, 0xf6, 0xba, 0x95,
+	0x6c, 0xb6, 0x6c, 0xfc, 0x67, 0x1b, 0xc2, 0xde, 0xfc, 0x5d, 0xad, 0xa5, 0xe5, 0xe8, 0x28, 0xf9,
+	0xf4, 0x29, 0x89, 0x17, 0xd2, 0x67, 0x29, 0xb3, 0xec, 0x17, 0xd0, 0xaf, 0x9f, 0x26, 0xd7, 0xeb,
+	0xc3, 0xd8, 0xb8, 0xfa, 0x38, 0x1a, 0x3e, 0x2e, 0xe3, 0xef, 0x3f, 0x29, 0xe3, 0x97, 0x45, 0x7f,
+	0x1e, 0xf3, 0xde, 0x7c, 0x63, 0x71, 0xd3, 0x0a, 0x50, 0x7c, 0x3f, 0x20, 0x1e, 0xb1, 0x65, 0xcf,
+	0xba, 0xe7, 0xfa, 0xbc, 0x4f, 0xcd, 0x9a, 0x7f, 0x2e, 0x41, 0x29, 0x59, 0xd1, 0x45, 0x8f, 0xb9,
+	0xb0, 0xc7, 0x1c, 0x77, 0x89, 0xf9, 0x67, 0xef, 0x12, 0x0b, 0x5f, 0x5f, 0x97, 0xa8, 0xb6, 0xf8,
+	0xb1, 0x5d, 0xe2, 0xc9, 0x93, 0x72, 0x68, 0x09, 0xe4, 0x54, 0xfa, 0xfc, 0x5c, 0xa6, 0x8f, 0x8c,
+	0x06, 0xd3, 0xbb, 0x02, 0x77, 0xb2, 0xfb, 0x5c, 0x02, 0x18, 0x46, 0x85, 0x9a, 0xa1, 0x5f, 0x4c,
+	0x1d, 0x2b, 0xce, 0xbc, 0x63, 0x65, 0x09, 0xec, 0x89, 0x13, 0xe5, 0x01, 0x5c, 0x9e, 0xae, 0xa1,
+	0x4c, 0xa7, 0xc2, 0xc3, 0xbc, 0x22, 0xba, 0x84, 0x1b, 0x6d, 0xaa, 0x86, 0x32, 0xf4, 0x36, 0x14,
+	0xfc, 0x87, 0x1e, 0x09, 0xf5, 0x07, 0x73, 0x4e, 0x81, 0x97, 0x86, 0xb1, 0xb1, 0x3e, 0x81, 0x2c,
+	0x74, 0x4d, 0x4b, 0xda, 0x98, 0xbf, 0x2b, 0x40, 0x51, 0xaa, 0x5e, 0x24, 0xf0, 0xe2, 0x04, 0xfe,
+	0xd2, 0xca, 0xf4, 0x3d, 0x49, 0x3a, 0x55, 0x0d, 0xa6, 0x6a, 0x59, 0x52, 0x0e, 0xe6, 0xfe, 0x8a,
+	0x79, 0x9f, 0x6f, 0xd7, 0x1c, 0xca, 0x29, 0x23, 0x86, 0x7e, 0x36, 0x99, 0x29, 0xa7, 0x73, 0x32,
+	0x65, 0x6e, 0xe3, 0x2a, 0x4f, 0xff, 0xc7, 0x24, 0x0a, 0x9d, 0xc7, 0xe5, 0xee, 0x42, 0x2e, 0x3f,
+	0xbd, 0x93, 0x19, 0x2a, 0x9b, 0x7f, 0x00, 0x28, 0x27, 0x47, 0xca, 0x73, 0xc8, 0xc7, 0x5d, 0xa8,
+	0x9c, 0x52, 0x97, 0xb4, 0x18, 0xfd, 0x58, 0x76, 0x83, 0xb9, 0x39, 0x55, 0x78, 0xa4, 0x91, 0x8a,
+	0x44, 0x99, 0x0b, 0x8f, 0xe9, 0xc7, 0x04, 0xed, 0x03, 0xb8, 0x7e, 0x07, 0xbb, 0xad, 0x00, 0x47,
+	0x8e, 0x2a, 0x17, 0xb3, 0xed, 0xc1, 0x58, 0x25, 0x7d, 0x6a, 0x0a, 0xe9, 0x11, 0x8e, 0x1c, 0x4e,
+	0x33, 0xdb, 0x7f, 0xe8, 0xb9, 0x3e, 0xb6, 0x5b, 0xfd, 0xd0, 0x55, 0x3d, 0xe1, 0x9b, 0xe7, 0xb1,
+	0x51, 0xdd, 0x57, 0xf2, 0x13, 0xeb, 0x70, 0x86, 0x66, 0x69, 0x9b, 0x34, 0xcd, 0x12, 0xf9, 0x49,
+	0xe8, 0xf2, 0x77, 0xec, 0xd1, 0x1e, 0x69, 0x45, 0x83, 0x20, 0xf9, 0x45, 0x3c, 0xfb, 0x8e, 0x23,
+	0x8d, 0xf4, 0x3b, 0x72, 0xe1, 0xdd, 0x41, 0x40, 0xd0, 0x4f, 0xa0, 0xcc, 0x1c, 0xfc, 0x46, 0x8b,
+	0xf5, 0x7b, 0xa2, 0x4b, 0xac, 0x34, 0xaf, 0x0c, 0x63, 0xc3, 0x98, 0xec, 0x05, 0x95, 0x42, 0xba,
+	0x69, 0xe6, 0xb2, 0xe3, 0x7e, 0x8f, 0xc7, 0x88, 0x39, 0x78, 0xe7, 0x07, 0x6f, 0x0a, 0x84, 0xf2,
+	0x82, 0x18, 0x8d, 0x55, 0xd2, 0x31, 0x92, 0x52, 0x8e, 0x72, 0x98, 0x34, 0xaa, 0x15, 0x91, 0xd2,
+	0xdf, 0x98, 0xba, 0x2b, 0x59, 0xb2, 0x49, 0x7d, 0x17, 0xf2, 0xe2, 0xe2, 0x05, 0x16, 0x5e, 0xbc,
+	0x34, 0x8d, 0x61, 0x6c, 0x7c, 0x6b, 0x02, 0x8b, 0x5b, 0xa4, 0xa0, 0x04, 0xc2, 0x97, 0xf7, 0xe3,
+	0xf7, 0x36, 0x54, 0x46, 0x15, 0x59, 0x27, 0x82, 0xf5, 0x13, 0x05, 0x79, 0x36, 0xe8, 0x49, 0xd9,
+	0x4d, 0xef, 0x5a, 0x22, 0x4b, 0x1a, 0x59, 0x55, 0x2f, 0xd5, 0x7f, 0xa0, 0xa9, 0x72, 0x39, 0xb7,
+	0x91, 0x55, 0x93, 0x53, 0xa7, 0x4b, 0xf2, 0x6b, 0xf2, 0x1e, 0xbc, 0x68, 0xbb, 0xa3, 0xb6, 0xa4,
+	0xc5, 0x68, 0xd7, 0x23, 0x92, 0xb4, 0x7f, 0x95, 0xa9, 0x7f, 0xe5, 0x3c, 0x36, 0xd6, 0xf7, 0x0f,
+	0x93, 0x58, 0x1e, 0x0b, 0x05, 0xc9, 0xde, 0xb2, 0x74, 0x75, 0xdd, 0xb4, 0xd6, 0x6d, 0x77, 0x4a,
+	0x21, 0x74, 0xd1, 0x01, 0x68, 0x81, 0x4b, 0xd9, 0x04, 0xe8, 0xdf, 0x24, 0xe8, 0xe6, 0x79, 0x6c,
+	0xac, 0x1d, 0x1d, 0x52, 0xb6, 0x00, 0x6f, 0x4d, 0x18, 0x8e, 0xa0, 0xcc, 0x77, 0x17, 0xf7, 0xc6,
+	0x35, 0x28, 0xdf, 0x54, 0x97, 0x05, 0x5a, 0x06, 0x95, 0x20, 0x77, 0x87, 0x3c, 0xd4, 0xb2, 0xa8,
+	0x02, 0x85, 0x1b, 0x61, 0xe8, 0x87, 0x5a, 0x0e, 0x55, 0xa1, 0xb4, 0x4f, 0xc4, 0x05, 0x8b, 0x96,
+	0x37, 0x77, 0x20, 0xcf, 0xd9, 0x80, 0x2e, 0x41, 0x55, 0x01, 0xf1, 0xa1, 0xb6, 0xc2, 0x2d, 0x0f,
+	0x8e, 0x76, 0x25, 0xc4, 0xee, 0xd1, 0x7b, 0x5a, 0x96, 0x3f, 0xec, 0xdf, 0xbe, 0xa5, 0xe5, 0xcc,
+	0xfb, 0x50, 0x68, 0xe2, 0xa8, 0xe3, 0x3c, 0xd5, 0x0d, 0x1d, 0xba, 0x06, 0x95, 0x71, 0x97, 0x97,
+	0x9d, 0xd7, 0xe5, 0x59, 0x63, 0x85, 0xab, 0x37, 0xa0, 0x28, 0xa9, 0x85, 0x2e, 0xc3, 0xaa, 0x5a,
+	0x91, 0x14, 0x68, 0x2b, 0x68, 0x55, 0xdd, 0x37, 0x9e, 0xd1, 0x88, 0x68, 0x19, 0xf1, 0x5b, 0x9a,
+	0x86, 0x1d, 0x97, 0xec, 0x1d, 0x68, 0x59, 0xfe, 0x5a, 0x4d, 0xea, 0x45, 0x21, 0x1e, 0x68, 0xb9,
+	0x9d, 0xff, 0x66, 0xa0, 0x7a, 0xcf, 0x77, 0xfd, 0x63, 0x12, 0x7e, 0x44, 0x3b, 0x3c, 0xc7, 0xc5,
+	0x85, 0x2a, 0x52, 0x15, 0x82, 0x3f, 0xd7, 0x93, 0x7b, 0xd3, 0xf5, 0x09, 0x99, 0xba, 0x62, 0x5d,
+	0xfd, 0xe4, 0xef, 0xff, 0xf9, 0x7d, 0xb6, 0x84, 0x0a, 0x8d, 0x80, 0xdb, 0xdd, 0x4c, 0x2e, 0x5c,
+	0x91, 0x4a, 0x4c, 0x39, 0x1a, 0x61, 0xbc, 0x30, 0x25, 0x55, 0x28, 0x97, 0x04, 0x4a, 0x05, 0x95,
+	0x1a, 0x4c, 0x5a, 0x1f, 0xa7, 0x6e, 0x4c, 0xd1, 0x4b, 0xa9, 0x70, 0x71, 0xc1, 0x08, 0x4d, 0x9f,
+	0x9d, 0x50, 0x80, 0xeb, 0x02, 0x70, 0x15, 0x55, 0x1b, 0x22, 0xba, 0xd7, 0x39, 0x2d, 0x9a, 0xdf,
+	0xff, 0xec, 0x7c, 0x33, 0xf3, 0xf9, 0xf9, 0x66, 0xe6, 0xdf, 0xe7, 0x9b, 0x99, 0x4f, 0x1f, 0x6d,
+	0xae, 0x7c, 0xfe, 0x68, 0x73, 0xe5, 0x1f, 0x8f, 0x36, 0x57, 0xee, 0x6f, 0xb4, 0x49, 0x18, 0x0d,
+	0xea, 0x11, 0xe9, 0x38, 0x0d, 0x0e, 0xd9, 0x08, 0xce, 0xba, 0x0d, 0x79, 0xf3, 0xdd, 0x2e, 0x8a,
+	0x52, 0xf3, 0xbd, 0xff, 0x07, 0x00, 0x00, 0xff, 0xff, 0x27, 0x08, 0x2b, 0xb7, 0x0a, 0x1f, 0x00,
+	0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1412,6 +2085,48 @@ func (m *Build) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.HasMergerequest != nil {
+		{
+			size, err := m.HasMergerequest.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintYolopb(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x6
+		i--
+		dAtA[i] = 0xc2
+	}
+	if m.HasProject != nil {
+		{
+			size, err := m.HasProject.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintYolopb(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x6
+		i--
+		dAtA[i] = 0xba
+	}
+	if m.HasCommit != nil {
+		{
+			size, err := m.HasCommit.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintYolopb(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x6
+		i--
+		dAtA[i] = 0xb2
+	}
 	if len(m.HasArtifacts) > 0 {
 		for iNdEx := len(m.HasArtifacts) - 1; iNdEx >= 0; iNdEx-- {
 			{
@@ -1448,22 +2163,22 @@ func (m *Build) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		dAtA[i] = 0x4a
 	}
 	if m.FinishedAt != nil {
-		n1, err1 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.FinishedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.FinishedAt):])
-		if err1 != nil {
-			return 0, err1
+		n4, err4 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.FinishedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.FinishedAt):])
+		if err4 != nil {
+			return 0, err4
 		}
-		i -= n1
-		i = encodeVarintYolopb(dAtA, i, uint64(n1))
+		i -= n4
+		i = encodeVarintYolopb(dAtA, i, uint64(n4))
 		i--
 		dAtA[i] = 0x42
 	}
 	if m.StartedAt != nil {
-		n2, err2 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.StartedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.StartedAt):])
-		if err2 != nil {
-			return 0, err2
+		n5, err5 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.StartedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.StartedAt):])
+		if err5 != nil {
+			return 0, err5
 		}
-		i -= n2
-		i = encodeVarintYolopb(dAtA, i, uint64(n2))
+		i -= n5
+		i = encodeVarintYolopb(dAtA, i, uint64(n5))
 		i--
 		dAtA[i] = 0x3a
 	}
@@ -1475,12 +2190,12 @@ func (m *Build) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		dAtA[i] = 0x32
 	}
 	if m.CompletedAt != nil {
-		n3, err3 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.CompletedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.CompletedAt):])
-		if err3 != nil {
-			return 0, err3
+		n6, err6 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.CompletedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.CompletedAt):])
+		if err6 != nil {
+			return 0, err6
 		}
-		i -= n3
-		i = encodeVarintYolopb(dAtA, i, uint64(n3))
+		i -= n6
+		i = encodeVarintYolopb(dAtA, i, uint64(n6))
 		i--
 		dAtA[i] = 0x2a
 	}
@@ -1490,22 +2205,672 @@ func (m *Build) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		dAtA[i] = 0x20
 	}
 	if m.UpdatedAt != nil {
-		n4, err4 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.UpdatedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.UpdatedAt):])
-		if err4 != nil {
-			return 0, err4
+		n7, err7 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.UpdatedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.UpdatedAt):])
+		if err7 != nil {
+			return 0, err7
 		}
-		i -= n4
-		i = encodeVarintYolopb(dAtA, i, uint64(n4))
+		i -= n7
+		i = encodeVarintYolopb(dAtA, i, uint64(n7))
 		i--
 		dAtA[i] = 0x1a
 	}
 	if m.CreatedAt != nil {
-		n5, err5 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.CreatedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.CreatedAt):])
-		if err5 != nil {
-			return 0, err5
+		n8, err8 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.CreatedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.CreatedAt):])
+		if err8 != nil {
+			return 0, err8
 		}
-		i -= n5
-		i = encodeVarintYolopb(dAtA, i, uint64(n5))
+		i -= n8
+		i = encodeVarintYolopb(dAtA, i, uint64(n8))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.ID) > 0 {
+		i -= len(m.ID)
+		copy(dAtA[i:], m.ID)
+		i = encodeVarintYolopb(dAtA, i, uint64(len(m.ID)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *Release) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Release) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Release) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.HasMergerequest != nil {
+		{
+			size, err := m.HasMergerequest.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintYolopb(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x6
+		i--
+		dAtA[i] = 0xc2
+	}
+	if m.HasProject != nil {
+		{
+			size, err := m.HasProject.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintYolopb(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x6
+		i--
+		dAtA[i] = 0xba
+	}
+	if m.HasCommit != nil {
+		{
+			size, err := m.HasCommit.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintYolopb(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x6
+		i--
+		dAtA[i] = 0xb2
+	}
+	if len(m.HasArtifacts) > 0 {
+		for iNdEx := len(m.HasArtifacts) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.HasArtifacts[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintYolopb(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x6
+			i--
+			dAtA[i] = 0xaa
+		}
+	}
+	if m.Driver != 0 {
+		i = encodeVarintYolopb(dAtA, i, uint64(m.Driver))
+		i--
+		dAtA[i] = 0x30
+	}
+	if len(m.Commit) > 0 {
+		i -= len(m.Commit)
+		copy(dAtA[i:], m.Commit)
+		i = encodeVarintYolopb(dAtA, i, uint64(len(m.Commit)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if len(m.Message) > 0 {
+		i -= len(m.Message)
+		copy(dAtA[i:], m.Message)
+		i = encodeVarintYolopb(dAtA, i, uint64(len(m.Message)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.UpdatedAt != nil {
+		n12, err12 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.UpdatedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.UpdatedAt):])
+		if err12 != nil {
+			return 0, err12
+		}
+		i -= n12
+		i = encodeVarintYolopb(dAtA, i, uint64(n12))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.CreatedAt != nil {
+		n13, err13 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.CreatedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.CreatedAt):])
+		if err13 != nil {
+			return 0, err13
+		}
+		i -= n13
+		i = encodeVarintYolopb(dAtA, i, uint64(n13))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.ID) > 0 {
+		i -= len(m.ID)
+		copy(dAtA[i:], m.ID)
+		i = encodeVarintYolopb(dAtA, i, uint64(len(m.ID)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *Commit) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Commit) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Commit) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.HasMergerequest != nil {
+		{
+			size, err := m.HasMergerequest.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintYolopb(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x6
+		i--
+		dAtA[i] = 0xca
+	}
+	if m.HasAuthor != nil {
+		{
+			size, err := m.HasAuthor.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintYolopb(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x6
+		i--
+		dAtA[i] = 0xc2
+	}
+	if m.HasProject != nil {
+		{
+			size, err := m.HasProject.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintYolopb(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x6
+		i--
+		dAtA[i] = 0xba
+	}
+	if len(m.HasBuilds) > 0 {
+		for iNdEx := len(m.HasBuilds) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.HasBuilds[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintYolopb(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x6
+			i--
+			dAtA[i] = 0xb2
+		}
+	}
+	if len(m.HasReleases) > 0 {
+		for iNdEx := len(m.HasReleases) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.HasReleases[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintYolopb(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x6
+			i--
+			dAtA[i] = 0xaa
+		}
+	}
+	if len(m.Branch) > 0 {
+		i -= len(m.Branch)
+		copy(dAtA[i:], m.Branch)
+		i = encodeVarintYolopb(dAtA, i, uint64(len(m.Branch)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if m.Driver != 0 {
+		i = encodeVarintYolopb(dAtA, i, uint64(m.Driver))
+		i--
+		dAtA[i] = 0x20
+	}
+	if len(m.Message) > 0 {
+		i -= len(m.Message)
+		copy(dAtA[i:], m.Message)
+		i = encodeVarintYolopb(dAtA, i, uint64(len(m.Message)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.CreatedAt != nil {
+		n17, err17 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.CreatedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.CreatedAt):])
+		if err17 != nil {
+			return 0, err17
+		}
+		i -= n17
+		i = encodeVarintYolopb(dAtA, i, uint64(n17))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.ID) > 0 {
+		i -= len(m.ID)
+		copy(dAtA[i:], m.ID)
+		i = encodeVarintYolopb(dAtA, i, uint64(len(m.ID)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MergeRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MergeRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MergeRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.HasAuthor != nil {
+		{
+			size, err := m.HasAuthor.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintYolopb(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x6
+		i--
+		dAtA[i] = 0xc2
+	}
+	if m.HasProject != nil {
+		{
+			size, err := m.HasProject.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintYolopb(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x6
+		i--
+		dAtA[i] = 0xba
+	}
+	if len(m.HasBuilds) > 0 {
+		for iNdEx := len(m.HasBuilds) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.HasBuilds[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintYolopb(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x6
+			i--
+			dAtA[i] = 0xb2
+		}
+	}
+	if len(m.HasReleases) > 0 {
+		for iNdEx := len(m.HasReleases) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.HasReleases[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintYolopb(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x6
+			i--
+			dAtA[i] = 0xaa
+		}
+	}
+	if m.State != 0 {
+		i = encodeVarintYolopb(dAtA, i, uint64(m.State))
+		i--
+		dAtA[i] = 0x38
+	}
+	if len(m.MergeRequest) > 0 {
+		i -= len(m.MergeRequest)
+		copy(dAtA[i:], m.MergeRequest)
+		i = encodeVarintYolopb(dAtA, i, uint64(len(m.MergeRequest)))
+		i--
+		dAtA[i] = 0x32
+	}
+	if len(m.Branch) > 0 {
+		i -= len(m.Branch)
+		copy(dAtA[i:], m.Branch)
+		i = encodeVarintYolopb(dAtA, i, uint64(len(m.Branch)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if m.Driver != 0 {
+		i = encodeVarintYolopb(dAtA, i, uint64(m.Driver))
+		i--
+		dAtA[i] = 0x20
+	}
+	if len(m.Message) > 0 {
+		i -= len(m.Message)
+		copy(dAtA[i:], m.Message)
+		i = encodeVarintYolopb(dAtA, i, uint64(len(m.Message)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.CreatedAt != nil {
+		n20, err20 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.CreatedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.CreatedAt):])
+		if err20 != nil {
+			return 0, err20
+		}
+		i -= n20
+		i = encodeVarintYolopb(dAtA, i, uint64(n20))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.ID) > 0 {
+		i -= len(m.ID)
+		copy(dAtA[i:], m.ID)
+		i = encodeVarintYolopb(dAtA, i, uint64(len(m.ID)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *Project) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Project) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Project) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Owner != nil {
+		{
+			size, err := m.Owner.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintYolopb(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x6
+		i--
+		dAtA[i] = 0xd2
+	}
+	if len(m.HasMergerequests) > 0 {
+		for iNdEx := len(m.HasMergerequests) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.HasMergerequests[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintYolopb(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x6
+			i--
+			dAtA[i] = 0xca
+		}
+	}
+	if len(m.HasReleases) > 0 {
+		for iNdEx := len(m.HasReleases) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.HasReleases[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintYolopb(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x6
+			i--
+			dAtA[i] = 0xc2
+		}
+	}
+	if len(m.HasCommits) > 0 {
+		for iNdEx := len(m.HasCommits) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.HasCommits[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintYolopb(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x6
+			i--
+			dAtA[i] = 0xba
+		}
+	}
+	if len(m.HasBuilds) > 0 {
+		for iNdEx := len(m.HasBuilds) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.HasBuilds[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintYolopb(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x6
+			i--
+			dAtA[i] = 0xb2
+		}
+	}
+	if len(m.HasArtifacts) > 0 {
+		for iNdEx := len(m.HasArtifacts) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.HasArtifacts[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintYolopb(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x6
+			i--
+			dAtA[i] = 0xaa
+		}
+	}
+	if m.Driver != 0 {
+		i = encodeVarintYolopb(dAtA, i, uint64(m.Driver))
+		i--
+		dAtA[i] = 0x28
+	}
+	if len(m.Commit) > 0 {
+		i -= len(m.Commit)
+		copy(dAtA[i:], m.Commit)
+		i = encodeVarintYolopb(dAtA, i, uint64(len(m.Commit)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.UpdatedAt != nil {
+		n22, err22 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.UpdatedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.UpdatedAt):])
+		if err22 != nil {
+			return 0, err22
+		}
+		i -= n22
+		i = encodeVarintYolopb(dAtA, i, uint64(n22))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.CreatedAt != nil {
+		n23, err23 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.CreatedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.CreatedAt):])
+		if err23 != nil {
+			return 0, err23
+		}
+		i -= n23
+		i = encodeVarintYolopb(dAtA, i, uint64(n23))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.ID) > 0 {
+		i -= len(m.ID)
+		copy(dAtA[i:], m.ID)
+		i = encodeVarintYolopb(dAtA, i, uint64(len(m.ID)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *Entity) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Entity) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Entity) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.HasMergerequests) > 0 {
+		for iNdEx := len(m.HasMergerequests) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.HasMergerequests[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintYolopb(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x6
+			i--
+			dAtA[i] = 0xba
+		}
+	}
+	if len(m.HasCommits) > 0 {
+		for iNdEx := len(m.HasCommits) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.HasCommits[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintYolopb(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x6
+			i--
+			dAtA[i] = 0xb2
+		}
+	}
+	if len(m.HasProjects) > 0 {
+		for iNdEx := len(m.HasProjects) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.HasProjects[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintYolopb(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x6
+			i--
+			dAtA[i] = 0xaa
+		}
+	}
+	if m.Driver != 0 {
+		i = encodeVarintYolopb(dAtA, i, uint64(m.Driver))
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.UpdatedAt != nil {
+		n24, err24 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.UpdatedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.UpdatedAt):])
+		if err24 != nil {
+			return 0, err24
+		}
+		i -= n24
+		i = encodeVarintYolopb(dAtA, i, uint64(n24))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.CreatedAt != nil {
+		n25, err25 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.CreatedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.CreatedAt):])
+		if err25 != nil {
+			return 0, err25
+		}
+		i -= n25
+		i = encodeVarintYolopb(dAtA, i, uint64(n25))
 		i--
 		dAtA[i] = 0x12
 	}
@@ -1556,6 +2921,20 @@ func (m *Artifact) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		dAtA[i] = 0xc
 		i--
 		dAtA[i] = 0xca
+	}
+	if m.HasRelease != nil {
+		{
+			size, err := m.HasRelease.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintYolopb(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x6
+		i--
+		dAtA[i] = 0xb2
 	}
 	if m.HasBuild != nil {
 		{
@@ -1627,12 +3006,12 @@ func (m *Artifact) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		dAtA[i] = 0x18
 	}
 	if m.CreatedAt != nil {
-		n7, err7 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.CreatedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.CreatedAt):])
-		if err7 != nil {
-			return 0, err7
+		n28, err28 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.CreatedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.CreatedAt):])
+		if err28 != nil {
+			return 0, err28
 		}
-		i -= n7
-		i = encodeVarintYolopb(dAtA, i, uint64(n7))
+		i -= n28
+		i = encodeVarintYolopb(dAtA, i, uint64(n28))
 		i--
 		dAtA[i] = 0x12
 	}
@@ -1865,6 +3244,279 @@ func (m *Build) Size() (n int) {
 			n += 2 + l + sovYolopb(uint64(l))
 		}
 	}
+	if m.HasCommit != nil {
+		l = m.HasCommit.Size()
+		n += 2 + l + sovYolopb(uint64(l))
+	}
+	if m.HasProject != nil {
+		l = m.HasProject.Size()
+		n += 2 + l + sovYolopb(uint64(l))
+	}
+	if m.HasMergerequest != nil {
+		l = m.HasMergerequest.Size()
+		n += 2 + l + sovYolopb(uint64(l))
+	}
+	return n
+}
+
+func (m *Release) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ID)
+	if l > 0 {
+		n += 1 + l + sovYolopb(uint64(l))
+	}
+	if m.CreatedAt != nil {
+		l = github_com_gogo_protobuf_types.SizeOfStdTime(*m.CreatedAt)
+		n += 1 + l + sovYolopb(uint64(l))
+	}
+	if m.UpdatedAt != nil {
+		l = github_com_gogo_protobuf_types.SizeOfStdTime(*m.UpdatedAt)
+		n += 1 + l + sovYolopb(uint64(l))
+	}
+	l = len(m.Message)
+	if l > 0 {
+		n += 1 + l + sovYolopb(uint64(l))
+	}
+	l = len(m.Commit)
+	if l > 0 {
+		n += 1 + l + sovYolopb(uint64(l))
+	}
+	if m.Driver != 0 {
+		n += 1 + sovYolopb(uint64(m.Driver))
+	}
+	if len(m.HasArtifacts) > 0 {
+		for _, e := range m.HasArtifacts {
+			l = e.Size()
+			n += 2 + l + sovYolopb(uint64(l))
+		}
+	}
+	if m.HasCommit != nil {
+		l = m.HasCommit.Size()
+		n += 2 + l + sovYolopb(uint64(l))
+	}
+	if m.HasProject != nil {
+		l = m.HasProject.Size()
+		n += 2 + l + sovYolopb(uint64(l))
+	}
+	if m.HasMergerequest != nil {
+		l = m.HasMergerequest.Size()
+		n += 2 + l + sovYolopb(uint64(l))
+	}
+	return n
+}
+
+func (m *Commit) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ID)
+	if l > 0 {
+		n += 1 + l + sovYolopb(uint64(l))
+	}
+	if m.CreatedAt != nil {
+		l = github_com_gogo_protobuf_types.SizeOfStdTime(*m.CreatedAt)
+		n += 1 + l + sovYolopb(uint64(l))
+	}
+	l = len(m.Message)
+	if l > 0 {
+		n += 1 + l + sovYolopb(uint64(l))
+	}
+	if m.Driver != 0 {
+		n += 1 + sovYolopb(uint64(m.Driver))
+	}
+	l = len(m.Branch)
+	if l > 0 {
+		n += 1 + l + sovYolopb(uint64(l))
+	}
+	if len(m.HasReleases) > 0 {
+		for _, e := range m.HasReleases {
+			l = e.Size()
+			n += 2 + l + sovYolopb(uint64(l))
+		}
+	}
+	if len(m.HasBuilds) > 0 {
+		for _, e := range m.HasBuilds {
+			l = e.Size()
+			n += 2 + l + sovYolopb(uint64(l))
+		}
+	}
+	if m.HasProject != nil {
+		l = m.HasProject.Size()
+		n += 2 + l + sovYolopb(uint64(l))
+	}
+	if m.HasAuthor != nil {
+		l = m.HasAuthor.Size()
+		n += 2 + l + sovYolopb(uint64(l))
+	}
+	if m.HasMergerequest != nil {
+		l = m.HasMergerequest.Size()
+		n += 2 + l + sovYolopb(uint64(l))
+	}
+	return n
+}
+
+func (m *MergeRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ID)
+	if l > 0 {
+		n += 1 + l + sovYolopb(uint64(l))
+	}
+	if m.CreatedAt != nil {
+		l = github_com_gogo_protobuf_types.SizeOfStdTime(*m.CreatedAt)
+		n += 1 + l + sovYolopb(uint64(l))
+	}
+	l = len(m.Message)
+	if l > 0 {
+		n += 1 + l + sovYolopb(uint64(l))
+	}
+	if m.Driver != 0 {
+		n += 1 + sovYolopb(uint64(m.Driver))
+	}
+	l = len(m.Branch)
+	if l > 0 {
+		n += 1 + l + sovYolopb(uint64(l))
+	}
+	l = len(m.MergeRequest)
+	if l > 0 {
+		n += 1 + l + sovYolopb(uint64(l))
+	}
+	if m.State != 0 {
+		n += 1 + sovYolopb(uint64(m.State))
+	}
+	if len(m.HasReleases) > 0 {
+		for _, e := range m.HasReleases {
+			l = e.Size()
+			n += 2 + l + sovYolopb(uint64(l))
+		}
+	}
+	if len(m.HasBuilds) > 0 {
+		for _, e := range m.HasBuilds {
+			l = e.Size()
+			n += 2 + l + sovYolopb(uint64(l))
+		}
+	}
+	if m.HasProject != nil {
+		l = m.HasProject.Size()
+		n += 2 + l + sovYolopb(uint64(l))
+	}
+	if m.HasAuthor != nil {
+		l = m.HasAuthor.Size()
+		n += 2 + l + sovYolopb(uint64(l))
+	}
+	return n
+}
+
+func (m *Project) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ID)
+	if l > 0 {
+		n += 1 + l + sovYolopb(uint64(l))
+	}
+	if m.CreatedAt != nil {
+		l = github_com_gogo_protobuf_types.SizeOfStdTime(*m.CreatedAt)
+		n += 1 + l + sovYolopb(uint64(l))
+	}
+	if m.UpdatedAt != nil {
+		l = github_com_gogo_protobuf_types.SizeOfStdTime(*m.UpdatedAt)
+		n += 1 + l + sovYolopb(uint64(l))
+	}
+	l = len(m.Commit)
+	if l > 0 {
+		n += 1 + l + sovYolopb(uint64(l))
+	}
+	if m.Driver != 0 {
+		n += 1 + sovYolopb(uint64(m.Driver))
+	}
+	if len(m.HasArtifacts) > 0 {
+		for _, e := range m.HasArtifacts {
+			l = e.Size()
+			n += 2 + l + sovYolopb(uint64(l))
+		}
+	}
+	if len(m.HasBuilds) > 0 {
+		for _, e := range m.HasBuilds {
+			l = e.Size()
+			n += 2 + l + sovYolopb(uint64(l))
+		}
+	}
+	if len(m.HasCommits) > 0 {
+		for _, e := range m.HasCommits {
+			l = e.Size()
+			n += 2 + l + sovYolopb(uint64(l))
+		}
+	}
+	if len(m.HasReleases) > 0 {
+		for _, e := range m.HasReleases {
+			l = e.Size()
+			n += 2 + l + sovYolopb(uint64(l))
+		}
+	}
+	if len(m.HasMergerequests) > 0 {
+		for _, e := range m.HasMergerequests {
+			l = e.Size()
+			n += 2 + l + sovYolopb(uint64(l))
+		}
+	}
+	if m.Owner != nil {
+		l = m.Owner.Size()
+		n += 2 + l + sovYolopb(uint64(l))
+	}
+	return n
+}
+
+func (m *Entity) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ID)
+	if l > 0 {
+		n += 1 + l + sovYolopb(uint64(l))
+	}
+	if m.CreatedAt != nil {
+		l = github_com_gogo_protobuf_types.SizeOfStdTime(*m.CreatedAt)
+		n += 1 + l + sovYolopb(uint64(l))
+	}
+	if m.UpdatedAt != nil {
+		l = github_com_gogo_protobuf_types.SizeOfStdTime(*m.UpdatedAt)
+		n += 1 + l + sovYolopb(uint64(l))
+	}
+	if m.Driver != 0 {
+		n += 1 + sovYolopb(uint64(m.Driver))
+	}
+	if len(m.HasProjects) > 0 {
+		for _, e := range m.HasProjects {
+			l = e.Size()
+			n += 2 + l + sovYolopb(uint64(l))
+		}
+	}
+	if len(m.HasCommits) > 0 {
+		for _, e := range m.HasCommits {
+			l = e.Size()
+			n += 2 + l + sovYolopb(uint64(l))
+		}
+	}
+	if len(m.HasMergerequests) > 0 {
+		for _, e := range m.HasMergerequests {
+			l = e.Size()
+			n += 2 + l + sovYolopb(uint64(l))
+		}
+	}
 	return n
 }
 
@@ -1916,6 +3568,10 @@ func (m *Artifact) Size() (n int) {
 	}
 	if m.HasBuild != nil {
 		l = m.HasBuild.Size()
+		n += 2 + l + sovYolopb(uint64(l))
+	}
+	if m.HasRelease != nil {
+		l = m.HasRelease.Size()
 		n += 2 + l + sovYolopb(uint64(l))
 	}
 	l = len(m.DLArtifactSignedURL)
@@ -2984,6 +4640,1963 @@ func (m *Build) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 102:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasCommit", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.HasCommit == nil {
+				m.HasCommit = &Commit{}
+			}
+			if err := m.HasCommit.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 103:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasProject", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.HasProject == nil {
+				m.HasProject = &Project{}
+			}
+			if err := m.HasProject.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 104:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasMergerequest", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.HasMergerequest == nil {
+				m.HasMergerequest = &MergeRequest{}
+			}
+			if err := m.HasMergerequest.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipYolopb(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Release) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowYolopb
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Release: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Release: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ID", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ID = github_com_cayleygraph_quad.IRI(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CreatedAt", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.CreatedAt == nil {
+				m.CreatedAt = new(time.Time)
+			}
+			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(m.CreatedAt, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UpdatedAt", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.UpdatedAt == nil {
+				m.UpdatedAt = new(time.Time)
+			}
+			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(m.UpdatedAt, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Message", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Message = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Commit", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Commit = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 6:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Driver", wireType)
+			}
+			m.Driver = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Driver |= Driver(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 101:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasArtifacts", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.HasArtifacts = append(m.HasArtifacts, &Artifact{})
+			if err := m.HasArtifacts[len(m.HasArtifacts)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 102:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasCommit", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.HasCommit == nil {
+				m.HasCommit = &Commit{}
+			}
+			if err := m.HasCommit.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 103:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasProject", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.HasProject == nil {
+				m.HasProject = &Project{}
+			}
+			if err := m.HasProject.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 104:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasMergerequest", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.HasMergerequest == nil {
+				m.HasMergerequest = &MergeRequest{}
+			}
+			if err := m.HasMergerequest.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipYolopb(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Commit) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowYolopb
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Commit: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Commit: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ID", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ID = github_com_cayleygraph_quad.IRI(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CreatedAt", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.CreatedAt == nil {
+				m.CreatedAt = new(time.Time)
+			}
+			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(m.CreatedAt, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Message", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Message = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Driver", wireType)
+			}
+			m.Driver = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Driver |= Driver(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Branch", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Branch = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 101:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasReleases", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.HasReleases = append(m.HasReleases, &Release{})
+			if err := m.HasReleases[len(m.HasReleases)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 102:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasBuilds", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.HasBuilds = append(m.HasBuilds, &Build{})
+			if err := m.HasBuilds[len(m.HasBuilds)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 103:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasProject", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.HasProject == nil {
+				m.HasProject = &Project{}
+			}
+			if err := m.HasProject.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 104:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasAuthor", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.HasAuthor == nil {
+				m.HasAuthor = &Entity{}
+			}
+			if err := m.HasAuthor.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 105:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasMergerequest", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.HasMergerequest == nil {
+				m.HasMergerequest = &MergeRequest{}
+			}
+			if err := m.HasMergerequest.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipYolopb(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MergeRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowYolopb
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MergeRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MergeRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ID", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ID = github_com_cayleygraph_quad.IRI(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CreatedAt", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.CreatedAt == nil {
+				m.CreatedAt = new(time.Time)
+			}
+			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(m.CreatedAt, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Message", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Message = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Driver", wireType)
+			}
+			m.Driver = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Driver |= Driver(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Branch", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Branch = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MergeRequest", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.MergeRequest = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 7:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+			}
+			m.State = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.State |= MergeRequest_State(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 101:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasReleases", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.HasReleases = append(m.HasReleases, &Release{})
+			if err := m.HasReleases[len(m.HasReleases)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 102:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasBuilds", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.HasBuilds = append(m.HasBuilds, &Build{})
+			if err := m.HasBuilds[len(m.HasBuilds)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 103:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasProject", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.HasProject == nil {
+				m.HasProject = &Project{}
+			}
+			if err := m.HasProject.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 104:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasAuthor", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.HasAuthor == nil {
+				m.HasAuthor = &Entity{}
+			}
+			if err := m.HasAuthor.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipYolopb(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Project) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowYolopb
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Project: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Project: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ID", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ID = github_com_cayleygraph_quad.IRI(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CreatedAt", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.CreatedAt == nil {
+				m.CreatedAt = new(time.Time)
+			}
+			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(m.CreatedAt, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UpdatedAt", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.UpdatedAt == nil {
+				m.UpdatedAt = new(time.Time)
+			}
+			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(m.UpdatedAt, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Commit", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Commit = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Driver", wireType)
+			}
+			m.Driver = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Driver |= Driver(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 101:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasArtifacts", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.HasArtifacts = append(m.HasArtifacts, &Artifact{})
+			if err := m.HasArtifacts[len(m.HasArtifacts)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 102:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasBuilds", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.HasBuilds = append(m.HasBuilds, &Build{})
+			if err := m.HasBuilds[len(m.HasBuilds)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 103:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasCommits", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.HasCommits = append(m.HasCommits, &Commit{})
+			if err := m.HasCommits[len(m.HasCommits)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 104:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasReleases", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.HasReleases = append(m.HasReleases, &Release{})
+			if err := m.HasReleases[len(m.HasReleases)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 105:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasMergerequests", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.HasMergerequests = append(m.HasMergerequests, &MergeRequest{})
+			if err := m.HasMergerequests[len(m.HasMergerequests)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 106:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Owner", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Owner == nil {
+				m.Owner = &Entity{}
+			}
+			if err := m.Owner.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipYolopb(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Entity) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowYolopb
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Entity: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Entity: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ID", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ID = github_com_cayleygraph_quad.IRI(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CreatedAt", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.CreatedAt == nil {
+				m.CreatedAt = new(time.Time)
+			}
+			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(m.CreatedAt, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UpdatedAt", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.UpdatedAt == nil {
+				m.UpdatedAt = new(time.Time)
+			}
+			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(m.UpdatedAt, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Driver", wireType)
+			}
+			m.Driver = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Driver |= Driver(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 101:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasProjects", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.HasProjects = append(m.HasProjects, &Project{})
+			if err := m.HasProjects[len(m.HasProjects)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 102:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasCommits", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.HasCommits = append(m.HasCommits, &Commit{})
+			if err := m.HasCommits[len(m.HasCommits)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 103:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasMergerequests", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.HasMergerequests = append(m.HasMergerequests, &MergeRequest{})
+			if err := m.HasMergerequests[len(m.HasMergerequests)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipYolopb(dAtA[iNdEx:])
@@ -3374,6 +6987,42 @@ func (m *Artifact) Unmarshal(dAtA []byte) error {
 				m.HasBuild = &Build{}
 			}
 			if err := m.HasBuild.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 102:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field HasRelease", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowYolopb
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthYolopb
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.HasRelease == nil {
+				m.HasRelease = &Release{}
+			}
+			if err := m.HasRelease.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
