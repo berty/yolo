@@ -1,5 +1,5 @@
 /* eslint-disable import/no-named-as-default */
-import React, {useContext} from 'react';
+import React, {useContext, useState} from 'react';
 import {ThemeContext} from '../../../store/ThemeStore';
 import './Home.scss';
 import Header from '../../components/Header/Header';
@@ -8,10 +8,13 @@ import ErrorDisplay from '../../components/ErrorDisplay';
 import BuildList from '../../components/BuildList';
 import ApiKeyPrompt from '../../components/ApiKeyPrompt';
 import {cloneDeep} from 'lodash';
+import ShowFiltersButton from '../../components/ShowFiltersButton';
+import FilterModal from '../../components/FilterModal';
 
 const Home = () => {
   const {theme} = useContext(ThemeContext);
   const {state, updateState} = useContext(ResultContext);
+  const [showingFiltersModal, toggleShowFilters] = useState(false);
 
   return (
     <div className={'app--app-container'}>
@@ -29,6 +32,24 @@ const Home = () => {
           style={{backgroundColor: theme.bg.block}}
         ></div>
       </div>
+      {!showingFiltersModal && (
+        <ShowFiltersButton
+          showingFiltersModal={showingFiltersModal}
+          clickAction={() => toggleShowFilters(!showingFiltersModal)}
+        />
+      )}
+      {showingFiltersModal && (
+        <FilterModal
+          clickAction={() => {
+            updateState({
+              isLoaded: false,
+              items: [],
+              platformId: state.platformId,
+            });
+            toggleShowFilters(!showingFiltersModal);
+          }}
+        />
+      )}
     </div>
   );
 };

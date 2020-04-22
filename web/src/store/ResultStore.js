@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useContext, useReducer, createContext} from 'react';
 import {cloneDeep} from 'lodash';
 
 // TODO: Yes, this file needs a new name, and should maybe be split
@@ -11,19 +11,19 @@ export const PLATFORMS = {
 };
 
 const INITIAL_STATE = {
-  platformId: '3',
+  platformId: PLATFORMS.iOS,
   apiKey: `${process.env.YOLO_APP_PW || ''}`,
   error: null,
-  isLoaded: true,
+  isLoaded: false,
   items: [],
   baseURL: `${process.env.API_SERVER}`,
   filtersPlatform: {
-    iOS: false,
+    iOS: true,
     android: false,
   },
   filtersBranch: {
-    master: true,
-    develop: true,
+    master: false,
+    develop: false,
     all: true,
   },
   filtersApp: {
@@ -31,13 +31,26 @@ const INITIAL_STATE = {
     mini: false,
     maxi: false,
   },
+  filtersImplemented: {
+    apps: ['chat'],
+    os: ['iOS'],
+    branch: ['all'],
+  },
 };
 
+function _reducer(state, action) {
+  switch (action.type) {
+    case 'updateState':
+      return {...state, ...action.payload};
+    default:
+      throw new Error(); // TODO: Handle me
+  }
+}
+
 export const ResultStore = ({children}) => {
-  const [state, setState] = useState({...INITIAL_STATE});
+  const [state, dispatch] = useReducer(_reducer, INITIAL_STATE);
   const updateState = (newState) => {
-    const combinedState = cloneDeep({...state, ...newState});
-    return setState(combinedState);
+    return dispatch({type: 'updateState', payload: cloneDeep(newState)});
   };
 
   return (
