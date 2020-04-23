@@ -40,14 +40,15 @@ const Home = () => {
       )}
       {showingFiltersModal && (
         <FilterModal
-          clickAction={() => {
-            updateState({
-              isLoaded: false,
-              items: [],
-              platformId: state.platformId,
-            });
-            toggleShowFilters(!showingFiltersModal);
-          }}
+          closeAction={() => toggleShowFilters(false)}
+          // clickAction={() => {
+          // updateState({
+          //   isLoaded: false,
+          //   items: [],
+          //   platformId: state.platformId,
+          // });
+          //   toggleShowFilters(!showingFiltersModal);
+          // }}
         />
       )}
     </div>

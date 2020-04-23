@@ -7,16 +7,26 @@ import {faQuestionCircle} from '@fortawesome/free-solid-svg-icons';
 import IconChat from '../../assets/svg/IconChat';
 import IconMini from '../../assets/svg/IconMini';
 import classNames from 'classnames';
-import {ResultContext} from '../../store/ResultStore';
+import {ResultContext, PLATFORMS} from '../../store/ResultStore';
 import './FilterModal.scss';
 
-const FilterModal = ({clickAction}) => {
+const FilterModal = ({closeAction, showingFiltersModal}) => {
   const {theme} = useContext(ThemeContext);
-  const {state, updatestate} = useContext(ResultContext);
+  const {state, updateState} = useContext(ResultContext);
   const [selectedProjects] = useState(['chat']);
-  const [selectedOs] = useState(['iOS']);
+  const [selectedOs, setSelectedOs] = useState([
+    ...Object.keys(state.filtersPlatform).filter(
+      (k) => !!state.filtersPlatform[k]
+    ),
+  ]);
+  const [localPlatformId, setLocalPlatformId] = useState(state.platformId);
   const [selectedBranches] = useState(['all']);
   const filterSelectedAccent = theme.icon.filterSelected;
+
+  const updateLocalOs = ({name}) => {
+    setSelectedOs([name]);
+    setLocalPlatformId(PLATFORMS[name]);
+  };
 
   const applyFilterButtonColors = {
     backgroundColor: theme.bg.btnPrimary,
@@ -68,7 +78,7 @@ const FilterModal = ({clickAction}) => {
     const colorIcon = colorsIcon({selected});
     const colorWidget = colorsWidget({selected});
     const widgetClass = classNames('modal-filter-widget--yl', {
-      'filter-not-implemented': !implemented,
+      'modal-filter-not-implemented--yl': !implemented,
     });
     const icon =
       name === 'chat' ? (
@@ -98,7 +108,7 @@ const FilterModal = ({clickAction}) => {
     const colorIcon = colorsIcon({selected});
     const colorWidget = colorsWidget({selected});
     const widgetClass = classNames('modal-filter-widget--yl', {
-      'filter-not-implemented': !implemented,
+      'modal-filter-not-implemented--yl': !implemented,
     });
     const icon =
       name === 'iOS' ? (
@@ -119,7 +129,11 @@ const FilterModal = ({clickAction}) => {
         ? 'Mac OS'
         : '?';
     return (
-      <div className={widgetClass} style={colorWidget}>
+      <div
+        className={widgetClass}
+        style={colorWidget}
+        onClick={implemented ? () => updateLocalOs({name}) : () => {}}
+      >
         {icon}
         <p className="filter-text--yl">{osName}</p>
       </div>
@@ -132,7 +146,7 @@ const FilterModal = ({clickAction}) => {
     const colorIcon = colorsIcon({selected});
     const colorWidget = colorsWidget({selected});
     const widgetClass = classNames('modal-filter-widget--yl', {
-      'filter-not-implemented': !implemented,
+      'modal-filter-not-implemented--yl': !implemented,
     });
     const icon =
       name === 'all' ? (
@@ -183,7 +197,7 @@ const FilterModal = ({clickAction}) => {
                 className="btn-close--yl"
                 data-dismiss="modal"
                 aria-label="Close"
-                onClick={clickAction}
+                onClick={closeAction}
                 style={colorsCloseButton}
               >
                 <X size={14} strokeWidth={3} color={filterSelectedAccent} />
@@ -220,7 +234,26 @@ const FilterModal = ({clickAction}) => {
                 type="button"
                 className="btn-primary--yl"
                 data-dismiss="modal"
-                onClick={clickAction}
+                // TODO: Create action instead of doing this work here
+                onClick={() => {
+                  const emptyFilters = {
+                    iOS: false,
+                    android: false,
+                  };
+                  const [localPlatformName] = selectedOs;
+                  localPlatformId === state.platformId
+                    ? {}
+                    : updateState({
+                        platformId: localPlatformId,
+                        isLoaded: false,
+                        items: [],
+                        filtersPlatform: {
+                          ...emptyFilters,
+                          [localPlatformName]: true,
+                        },
+                      });
+                  closeAction();
+                }}
                 style={applyFilterButtonColors}
               >
                 <Check />

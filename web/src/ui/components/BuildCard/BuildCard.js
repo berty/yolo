@@ -18,11 +18,17 @@ import {tagStyle, actionButtonStyle} from '../../../styleTools/buttonStyler';
 
 const ArtifactCard = ({artifact}) => {
   const {theme} = useContext(ThemeContext);
-  const {id, state} = artifact;
+  const {
+    id: artifactId = '',
+    state: artifactState = '',
+    plist_signed_url: artifactPlistSignedUrl = '',
+    dl_artifact_signed_url: artifactDlArtifactSignedUrl = '',
+    kind: artifactKind = '',
+  } = artifact;
   const normedStates = ['FINISHED', 'BUILDING', 'FAILED', 'DEFAULT'];
   const stateNormed =
-    state && normedStates.includes(state.toUpperCase())
-      ? state.toUpperCase()
+    artifactState && normedStates.includes(artifactState.toUpperCase())
+      ? artifactState.toUpperCase()
       : 'DEFAULT';
 
   const artifactTagStyle = tagStyle({name: theme.name, stateNormed});
@@ -32,15 +38,14 @@ const ArtifactCard = ({artifact}) => {
   });
 
   const getArtifactActionButton = () => {
-    // TODO: Handle DL button if not iOS/no plist
     switch (stateNormed) {
       case 'FINISHED':
         return (
           <a
             href={
-              'itms-services://?action=download-manifest&url=' +
-              process.env.API_SERVER +
-              artifact.plist_signed_url
+              artifactPlistSignedUrl
+                ? `itms-services://?action=download-manifest&url=${process.env.API_SERVER}${artifactPlistSignedUrl}`
+                : `${process.env.API_SERVER}${artifactDlArtifactSignedUrl}`
             }
             className="btn"
             style={artifactActionButtonStyle}
@@ -69,16 +74,16 @@ const ArtifactCard = ({artifact}) => {
     />
   );
 
-  const ArtifactStateTag = !state ? (
+  const ArtifactStateTag = !artifactState ? (
     <React.Fragment />
   ) : (
     <div className="btn" style={artifactTagStyle}>
-      {state}
+      {artifactState}
     </div>
   );
 
   return (
-    <React.Fragment key={id}>
+    <React.Fragment key={artifactId}>
       <div
         className="card-row--yl expanded"
         style={{color: theme.text.sectionText}}
@@ -109,18 +114,25 @@ const ArtifactCard = ({artifact}) => {
 const BuildCard = ({item}) => {
   const [expanded, toggleExpanded] = useState(true);
   const {theme} = useContext(ThemeContext);
-  const {id, branch, state} = item;
-  const stateNormed = state.toUpperCase();
+  const missing = (key) => `[no '${key}' in build]`;
+  const {
+    id: buildId = missing('id'),
+    branch: buildBranch = missing('build'),
+    state: buildState = missing('state'),
+    commit: buildCommit = missing('commit'),
+    message: buildMessage = missing('message'),
+  } = item;
+  const stateNormed = buildState.toUpperCase();
   const buildTagStyle = tagStyle({name: theme.name, stateNormed});
 
-  const COMMIT_LEN = 7;
+  const COMMIT_LEN = buildCommit === missing('commit') ? [0] : [0, 7];
 
   const CardTitle = `${
-    branch.toUpperCase() === 'MASTER' ? 'Master' : 'Pull'
+    buildBranch.toUpperCase() === 'MASTER' ? 'Master' : 'Pull'
   } [TODO: build name]`;
 
   const CardIcon =
-    branch.toUpperCase() === 'MASTER' ? (
+    buildBranch.toUpperCase() === 'MASTER' ? (
       <div className="card-left-icon--yl rotate-merge--yl">
         <GitCommit color={theme.icon.masterGreen} />
       </div>
@@ -162,18 +174,18 @@ const BuildCard = ({item}) => {
       className="btn"
       style={{backgroundColor: theme.border.filterUnselected}}
     >
-      {branch}
+      {buildBranch}
     </div>
   );
 
   const BuildState = (
     <div className="btn btn-primary" style={buildTagStyle}>
-      {state}
+      {buildState}
     </div>
   );
 
   const BuildLogs = (
-    <a href={id}>
+    <a href={buildId}>
       <FontAwesomeIcon
         icon={faAlignLeft}
         color={theme.text.sectionText}
@@ -188,7 +200,7 @@ const BuildCard = ({item}) => {
     </div>
   );
 
-  const BuildCommit = <div>{item.commit.slice(0, COMMIT_LEN)}</div>;
+  const BuildCommit = <div>{buildCommit.slice(...COMMIT_LEN)}</div>;
 
   return (
     <div
@@ -200,7 +212,7 @@ const BuildCard = ({item}) => {
         marginBottom: sharedThemes.marginBottom.block,
         padding: sharedThemes.padding.block,
       }}
-      key={id}
+      key={buildId}
     >
       <div className={'card-row--yl' + (expanded ? ' expanded' : '')}>
         {CardIcon}
@@ -223,7 +235,7 @@ const BuildCard = ({item}) => {
               {BuildState}
             </div>
             <div className="card-details-row--yl">{branchName}</div>
-            <div className="card-details-row--yl">{item.message}</div>
+            <div className="card-details-row--yl">{buildMessage}</div>
           </div>
           <div className="card-build-actions--yl">
             {BuildLogs}

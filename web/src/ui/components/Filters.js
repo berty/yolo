@@ -134,7 +134,7 @@ const Filters = () => {
         name: e[0],
         val: e[1],
       }))
-      .filter((p) => !!p.val);
+      .filter((p) => p.val);
     return (
       <React.Fragment>
         {platforms.length > 0 && (
