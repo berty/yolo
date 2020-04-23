@@ -6,6 +6,7 @@ import {ThemeStore} from './store/ThemeStore';
 
 // Import Tabler styles
 import 'tabler-react/dist/Tabler.css';
+import './assets/main.scss';
 import {ResultStore} from './store/ResultStore';
 
 const App = () => {

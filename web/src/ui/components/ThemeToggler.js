@@ -4,25 +4,25 @@ import {ThemeContext} from '../../store/ThemeStore';
 const detectBrowserTheme = () => {
   const supportsPreference =
     window.matchMedia('(prefers-color-scheme)').media !== 'not all';
-  const isDark =
+  const isLight =
     supportsPreference &&
-    window.matchMedia('(prefers-color-scheme: dark)').matches;
-  return {isDark};
+    window.matchMedia('(prefers-color-scheme: light)').matches;
+  return {isLight};
 };
 
 const ThemeToggler = () => {
   const {theme, changeTheme} = useContext(ThemeContext);
 
   useEffect(() => {
-    const {isDark} = detectBrowserTheme();
-    if (isDark) changeTheme('dark');
+    const {isLight} = detectBrowserTheme();
+    if (isLight) changeTheme('light');
   }, []);
 
   const buttonStyle = {
     display: 'flex',
     flex: '1 0 auto',
     justifyContent: 'flex-end',
-    marginRight: '80px',
+    marginRight: '0.5rem',
     fontSize: '2rem',
     cursor: 'pointer',
   };

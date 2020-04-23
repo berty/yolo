@@ -77,7 +77,7 @@ const ArtifactCard = ({artifact}) => {
   const ArtifactStateTag = !artifactState ? (
     <React.Fragment />
   ) : (
-    <div className="btn" style={artifactTagStyle}>
+    <div className="btn artifact-tag--yl" style={artifactTagStyle}>
       {artifactState}
     </div>
   );
@@ -91,7 +91,9 @@ const ArtifactCard = ({artifact}) => {
         <div className="card-left-icon--yl icon-top--yl">{PlatformIcon}</div>
         <div className="card-details--yl">
           <div className="card-details-row--yl">
-            <div>[TODO: platform] [TODO: artifact ID]</div>
+            <div className="vertical-center--yl">
+              [TODO: platform] [TODO: artifact ID]
+            </div>
             {ArtifactStateTag}
           </div>
           <div className="card-details-row--yl">
@@ -127,9 +129,12 @@ const BuildCard = ({item}) => {
 
   const COMMIT_LEN = buildCommit === missing('commit') ? [0] : [0, 7];
 
-  const CardTitle = `${
-    buildBranch.toUpperCase() === 'MASTER' ? 'Master' : 'Pull'
-  } [TODO: build name]`;
+  const CardTitle = (
+    <div className="card-title">
+      {`${buildBranch.toUpperCase() === 'MASTER' ? 'Master' : 'Pull'} [TODO:
+      build name]`}
+    </div>
+  );
 
   const CardIcon =
     buildBranch.toUpperCase() === 'MASTER' ? (
@@ -156,7 +161,10 @@ const BuildCard = ({item}) => {
 
   const ChevronIcon = (
     <div
-      style={{color: theme.text.blockTitle, cursor: 'pointer'}}
+      style={{
+        color: theme.text.blockTitle,
+        cursor: 'pointer',
+      }}
       onClick={() => toggleExpanded(!expanded)}
     >
       {expanded ? <ChevronUp /> : <ChevronDown />}
@@ -171,8 +179,10 @@ const BuildCard = ({item}) => {
 
   const branchName = (
     <div
-      className="btn"
-      style={{backgroundColor: theme.border.filterUnselected}}
+      className="btn btn-branch-name--yl"
+      style={{
+        backgroundColor: theme.border.filterUnselected,
+      }}
     >
       {buildBranch}
     </div>
@@ -200,7 +210,11 @@ const BuildCard = ({item}) => {
     </div>
   );
 
-  const BuildCommit = <div>{buildCommit.slice(...COMMIT_LEN)}</div>;
+  const BuildCommit = (
+    <div className="vertical-center--yl">
+      {buildCommit.slice(...COMMIT_LEN)}
+    </div>
+  );
 
   return (
     <div

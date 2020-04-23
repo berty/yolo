@@ -210,7 +210,6 @@ const Filters = () => {
 
   return (
     <div className="filter-wrapper--yl">
-      <div className="filter-select--yl"></div>
       {FiltersAppWidget()}
       {FiltersPlatformWidget()}
       {FiltersBranchWidget()}
