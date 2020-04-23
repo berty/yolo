@@ -77,12 +77,12 @@
   border-radius: 15px;
   margin-right: 0.75em;
   width: auto;
-  cursor: default; // no filters are interactive right now
+  cursor: pointer;
   //   cursor: pointer; // right now there are no filters to toggle
   div {
     flex: 0 0 auto;
   }
-  &.filter-not-implemented {
+  &.modal-filter-not-implemented--yl {
     border-style: dotted;
     cursor: default;
   }

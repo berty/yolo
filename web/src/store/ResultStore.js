@@ -10,13 +10,20 @@ export const PLATFORMS = {
   none: '3',
 };
 
-const INITIAL_STATE = {
+export const PLATFORM_NAMES = {
+  '1': 'iOS',
+  '2': 'android',
+  '3': 'none',
+};
+
+export const INITIAL_STATE = {
   platformId: PLATFORMS.iOS,
   apiKey: `${process.env.YOLO_APP_PW || ''}`,
   error: null,
   isLoaded: false,
   items: [],
   baseURL: `${process.env.API_SERVER}`,
+  needsRequest: true,
   filtersPlatform: {
     iOS: true,
     android: false,
@@ -33,7 +40,7 @@ const INITIAL_STATE = {
   },
   filtersImplemented: {
     apps: ['chat'],
-    os: ['iOS'],
+    os: ['iOS', 'android'],
     branch: ['all'],
   },
 };

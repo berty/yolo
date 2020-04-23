@@ -39,6 +39,7 @@ const Filters = () => {
         error: null,
         isLoaded: false,
         items: [],
+        needsRequest: true,
       });
       getData({platformId: state.platformId, apiKey: state.apiKey}).then(
         (result) => {
@@ -49,11 +50,13 @@ const Filters = () => {
             isLoaded: true,
             items: cloneDeep(builds),
             error: null,
+            needsRequest: false,
           });
         },
         (error) => {
           updateState({
             isLoaded: true,
+            needsRequest: false,
           });
           if (!error.response)
             return updateState(
@@ -70,10 +73,20 @@ const Filters = () => {
         }
       );
     };
-    if (state.platformId !== PLATFORMS.none && state.isLoaded === false) {
+    if (
+      (state.platformId !== PLATFORMS.none && state.isLoaded === false) ||
+      state.needsRequest
+    ) {
       makeRequest();
     }
-  }, [state.apiKey, state.platformId, state.appFilter, state.isLoaded]);
+  }, [
+    // TODO: Simplify to needsRequest
+    state.apiKey,
+    state.platformId,
+    state.appFilter,
+    state.isLoaded,
+    state.needsRequest,
+  ]);
 
   const filterAccentColor = theme.icon.filterSelected;
 
@@ -134,7 +147,7 @@ const Filters = () => {
         name: e[0],
         val: e[1],
       }))
-      .filter((p) => !!p.val);
+      .filter((p) => p.val);
     return (
       <React.Fragment>
         {platforms.length > 0 && (
