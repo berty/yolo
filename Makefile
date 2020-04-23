@@ -1,6 +1,12 @@
+DEV_RUN_OPTS ?=
+
 .PHONY: test
 test: generate
 	go test -test.timeout=20s -cover -covermode=atomic -race -coverprofile=coverage.txt ./...
+
+.PHONY: dev
+dev: install
+	yolo -v server --dev-mode --cors-allowed-origins="*" --max-builds=50 --db-path=/tmp/yolo-dev --basic-auth-password="uns3cur3" --auth-salt="uns3cur3" $(DEV_RUN_OPTS)
 
 .PHONY: install
 install: generate

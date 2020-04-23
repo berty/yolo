@@ -3,6 +3,7 @@ package main // import "berty.tech/yolo/cmd/yolo"
 import (
 	"context"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -42,6 +43,7 @@ func yolo(args []string) error {
 	log.SetFlags(0)
 	var (
 		verbose            bool
+		devMode            bool
 		maxBuilds          int
 		bearerSecretKey    string
 		buildkiteToken     string
@@ -62,16 +64,19 @@ func yolo(args []string) error {
 	var (
 		rootFlagSet   = flag.NewFlagSet("yolo", flag.ExitOnError)
 		serverFlagSet = flag.NewFlagSet("server", flag.ExitOnError)
+		storeFlagSet  = flag.NewFlagSet("store", flag.ExitOnError)
 	)
 	rand.Seed(time.Now().UnixNano())
 	rootFlagSet.SetOutput(os.Stderr)
 	rootFlagSet.BoolVar(&verbose, "v", false, "increase log verbosity")
+	serverFlagSet.BoolVar(&devMode, "dev-mode", false, "enable insecure helpers")
 	serverFlagSet.StringVar(&buildkiteToken, "buildkite-token", "", "BuildKite API Token")
 	serverFlagSet.StringVar(&bintrayUsername, "bintray-username", "", "Bintray username")
 	serverFlagSet.StringVar(&bintrayToken, "bintray-token", "", "Bintray API Token")
 	serverFlagSet.StringVar(&circleciToken, "circleci-token", "", "CircleCI API Token")
 	serverFlagSet.StringVar(&githubToken, "github-token", "", "GitHub API Token")
 	serverFlagSet.StringVar(&dbStorePath, "db-path", ":temp:", "DB Store path")
+	storeFlagSet.StringVar(&dbStorePath, "db-path", ":temp:", "DB Store path")
 	serverFlagSet.IntVar(&maxBuilds, "max-builds", 100, "maximum builds to fetch from external services (pagination)")
 	serverFlagSet.StringVar(&httpBind, "http-bind", ":8000", "HTTP bind address")
 	serverFlagSet.StringVar(&grpcBind, "grpc-bind", ":9000", "gRPC bind address")
@@ -145,6 +150,10 @@ func yolo(args []string) error {
 				gr.Add(func() error { return yolosvc.GithubWorker(ctx, db, ghc, dbSchema, opts) }, func(_ error) { cancel() })
 			}
 
+			if devMode {
+				logger.Warn("--dev-mode: insecure helpers are enabled")
+			}
+
 			// server
 			svc := yolosvc.NewService(db, dbSchema, yolosvc.ServiceOpts{
 				Logger:          logger,
@@ -153,6 +162,7 @@ func yolo(args []string) error {
 				BintrayClient:   btc,
 				GithubClient:    ghc,
 				AuthSalt:        authSalt,
+				DevMode:         devMode,
 			})
 			server, err := yolosvc.NewServer(ctx, svc, yolosvc.ServerOpts{
 				Logger:             logger,
@@ -174,10 +184,43 @@ func yolo(args []string) error {
 		},
 	}
 
+	dumpQuads := &ffcli.Command{
+		Name:    `dump-quads`,
+		FlagSet: storeFlagSet,
+		Options: []ff.Option{ff.WithEnvVarNoPrefix()},
+		Exec: func(_ context.Context, _ []string) error {
+			logger, err := loggerFromArgs(verbose)
+			if err != nil {
+				return err
+			}
+			db, dbCleanup, err := dbFromArgs(dbStorePath, logger)
+			if err != nil {
+				return err
+			}
+			defer dbCleanup()
+			dbSchema := yolosvc.SchemaConfig()
+
+			svc := yolosvc.NewService(db, dbSchema, yolosvc.ServiceOpts{
+				Logger:  logger,
+				DevMode: true,
+			})
+			ctx := context.Background()
+			ret, err := svc.DevDumpQuads(ctx, nil)
+			if err != nil {
+				return err
+			}
+			for _, line := range ret.Quads {
+				fmt.Println(line)
+			}
+
+			return nil
+		},
+	}
+
 	root := &ffcli.Command{
 		ShortUsage:  `server [flags] <subcommand>`,
 		FlagSet:     rootFlagSet,
-		Subcommands: []*ffcli.Command{server},
+		Subcommands: []*ffcli.Command{server, dumpQuads},
 		Options:     []ff.Option{ff.WithEnvVarNoPrefix()},
 		Exec: func(_ context.Context, _ []string) error {
 			return flag.ErrHelp
