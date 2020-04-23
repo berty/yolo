@@ -141,7 +141,8 @@ func circleciBuildToBatch(build *circleci.Build) yolopb.Build {
 		StartedAt:  build.StartTime,
 		Branch:     build.Branch,
 		Message:    build.Body,
-		Commit:     build.VcsRevision,
+		HasCommit:  &yolopb.Commit{ID: quad.IRI(build.VcsRevision)},
+		// FIXME: CommitURL
 		// duration
 	}
 	// FIXME: Creator: build.Creator...

@@ -39,7 +39,6 @@ func GithubWorker(ctx context.Context, db *cayley.Handle, ghc *github.Client, sc
 				opts.Logger.Warn("save batches", zap.Error(err))
 			}
 		}
-
 	}
 
 	// fetch recent activity in a loop
@@ -59,7 +58,9 @@ func GithubWorker(ctx context.Context, db *cayley.Handle, ghc *github.Client, sc
 		if err != nil {
 			opts.Logger.Warn("get rate limits", zap.Error(err))
 		} else {
-			opts.Logger.Debug("github: rate limits", zap.Any("limits", limits.Core))
+			reset := limits.Core.Reset.Time.Sub(time.Now())
+			remaining := limits.Core.Remaining
+			opts.Logger.Debug("github: rate limits", zap.Int("remaining", remaining), zap.Duration("reset", reset))
 		}
 
 		// FIXME: if rate limit errors, use the RetryAfter helper
@@ -67,7 +68,7 @@ func GithubWorker(ctx context.Context, db *cayley.Handle, ghc *github.Client, sc
 		select {
 		case <-ctx.Done():
 			return nil
-		case <-time.After(10 * time.Second):
+		case <-time.After(30 * time.Second):
 		}
 	}
 }
@@ -77,10 +78,12 @@ func fetchGitHubBaseObjects(ctx context.Context, ghc *github.Client, logger *zap
 
 	// list orgs
 	{
+		before := time.Now()
 		orgs, _, err := ghc.Organizations.List(ctx, "", nil)
 		if err != nil {
 			return nil, err
 		}
+		logger.Debug("github.Organizations.List", zap.Int("total", len(orgs)), zap.Duration("duration", time.Since(before)))
 		for _, org := range orgs {
 			batches = append(batches, handleGitHubOrganization(org))
 		}
@@ -88,10 +91,12 @@ func fetchGitHubBaseObjects(ctx context.Context, ghc *github.Client, logger *zap
 
 	// list repos
 	{
+		before := time.Now()
 		repos, _, err := ghc.Repositories.List(ctx, "", nil)
 		if err != nil {
 			return nil, err
 		}
+		logger.Debug("github.Repositories.List", zap.Int("total", len(repos)), zap.Duration("duration", time.Since(before)))
 		for _, repo := range repos {
 			batches = append(batches, handleGitHubRepo(repo, logger))
 		}
@@ -109,10 +114,12 @@ func fetchGitHubActivity(ctx context.Context, ghc *github.Client, maxBuilds int,
 		Direction: "desc",
 	}
 	opts.PerPage = maxBuilds // FIXME: support pager if maxBuilds is greater than API limits
+	before := time.Now()
 	pulls, _, err := ghc.PullRequests.List(ctx, "berty", "berty", opts)
 	if err != nil {
 		return nil, err
 	}
+	logger.Debug("github.PullRequests.List", zap.Int("total", len(pulls)), zap.Duration("duration", time.Since(before)))
 	for _, pull := range pulls {
 		batches = append(batches, handleGitHubPullRequest(pull, logger))
 	}
@@ -123,18 +130,24 @@ func handleGitHubPullRequest(pr *github.PullRequest, logger *zap.Logger) yolopb.
 	batch := yolopb.Batch{MergeRequests: []*yolopb.MergeRequest{}}
 	createdAt := pr.GetCreatedAt()
 	updatedAt := pr.GetUpdatedAt()
+	baseCommit := yolopb.Commit{ID: quad.IRI(pr.GetHead().GetSHA())}
+	project := yolopb.Project{ID: quad.IRI(pr.GetBase().GetRepo().GetHTMLURL())}
+	commitURL := pr.GetBase().GetRepo().GetHTMLURL() + "/commit/" + pr.GetBase().GetSHA()
+	branchURL := ""
 	mr := yolopb.MergeRequest{
-		ID:        quad.IRI(pr.GetHTMLURL()),
-		CreatedAt: &createdAt,
-		UpdatedAt: &updatedAt,
-		Title:     pr.GetTitle(),
-		Message:   pr.GetBody(),
-		Driver:    yolopb.Driver_GitHub,
-		Branch:    pr.GetHead().GetLabel(),
-		//HasCommit:  &yolopb.Commit{ID: quad.IRI(pr.GetHead().GetSHA())},
-		HasProject: &yolopb.Project{ID: quad.IRI(pr.GetBase().GetRepo().GetHTMLURL())},
-		// FIXME: CommitURL
-		// FIXME: BranchURL
+		ID:           quad.IRI(pr.GetHTMLURL()),
+		CreatedAt:    &createdAt,
+		UpdatedAt:    &updatedAt,
+		Title:        pr.GetTitle(),
+		Message:      pr.GetBody(),
+		Driver:       yolopb.Driver_GitHub,
+		Branch:       pr.GetHead().GetLabel(),
+		HasCommit:    &baseCommit,
+		HasProject:   &project,
+		CommitURL:    commitURL,
+		BranchURL:    branchURL,
+		HasAssignees: []*yolopb.Entity{},
+		HasReviewers: []*yolopb.Entity{},
 		// FIXME: labels
 		// FIXME: reviews
 		// FIXME: isFromMember vs isFromExternalContributor
@@ -158,12 +171,12 @@ func handleGitHubPullRequest(pr *github.PullRequest, logger *zap.Logger) yolopb.
 	for _, user := range pr.Assignees {
 		userBatch := handleGitHubUser(user, logger)
 		batch.Entities = append(batch.Entities, userBatch.Entities...)
-		// FIXME: add relationships
+		mr.HasAssignees = append(mr.HasAssignees, userBatch.Entities[0])
 	}
 	for _, user := range pr.RequestedReviewers {
 		userBatch := handleGitHubUser(user, logger)
 		batch.Entities = append(batch.Entities, userBatch.Entities...)
-		// FIXME: add relationships
+		mr.HasReviewers = append(mr.HasReviewers, userBatch.Entities[0])
 	}
 
 	batch.MergeRequests = append(batch.MergeRequests, &mr)

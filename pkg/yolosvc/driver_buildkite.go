@@ -96,7 +96,7 @@ func fetchBuildkite(bkc *buildkite.Client, since time.Time, maxPages int, logger
 			}
 		}
 		if len(builds) > 0 {
-			batches = append(batches, buildkiteBuildsToBatch(builds))
+			batches = append(batches, buildkiteBuildsToBatch(builds, logger))
 		}
 		if resp.NextPage == 0 {
 			break
@@ -106,18 +106,37 @@ func fetchBuildkite(bkc *buildkite.Client, since time.Time, maxPages int, logger
 	return batches, nil
 }
 
-func buildkiteBuildsToBatch(builds []buildkite.Build) yolopb.Batch {
+func buildkiteBuildsToBatch(builds []buildkite.Build, logger *zap.Logger) yolopb.Batch {
 	batch := yolopb.Batch{}
 	for _, build := range builds {
 		newBuild := yolopb.Build{
 			ID:        quad.IRI(*build.WebURL),
 			CreatedAt: &build.CreatedAt.Time,
 			Message:   *build.Message,
-			Commit:    *build.Commit,
+			HasCommit: &yolopb.Commit{ID: quad.IRI(*build.Commit)},
 			Branch:    *build.Branch,
 			Driver:    yolopb.Driver_Buildkite,
 			// FIXME: Creator: build.Creator...
 		}
+
+		switch provider := build.Pipeline.Provider.ID; provider {
+		case "github":
+			cloneURL := *build.Pipeline.Repository
+			parts := strings.Split(cloneURL, ":")
+			projectName := strings.TrimRight(parts[1], ".git")
+			projectURL := "https://github.com/" + projectName
+			newBuild.HasProject = &yolopb.Project{ID: quad.IRI(projectURL)}
+			// FIXME: CommitURL
+
+			if build.PullRequest != nil {
+				prURL := projectURL + "/pull/" + *build.PullRequest.ID
+				newBuild.HasMergerequest = &yolopb.MergeRequest{ID: quad.IRI(prURL)}
+				// FIXME: CommitURL based on forked repo
+			}
+		default:
+			logger.Warn("unknown pipeline provider", zap.String("provider", provider))
+		}
+
 		if build.FinishedAt != nil {
 			newBuild.FinishedAt = &build.FinishedAt.Time
 		}
@@ -158,9 +177,10 @@ func buildkiteArtifactsToBatch(artifacts []buildkite.Artifact, build buildkite.B
 			LocalPath:   *artifact.Path,
 			DownloadURL: *artifact.DownloadURL,
 			HasBuild:    &yolopb.Build{ID: quad.IRI(*build.WebURL)},
-			Driver:      yolopb.Driver_Buildkite,
-			Kind:        artifactKindByPath(*artifact.Path),
-			MimeType:    mimetypeByPath(*artifact.Path), // *artifact.MimeType,
+			// FIXME: hasRelease
+			Driver:   yolopb.Driver_Buildkite,
+			Kind:     artifactKindByPath(*artifact.Path),
+			MimeType: mimetypeByPath(*artifact.Path), // *artifact.MimeType,
 			// FIXME: Sha1Sum:     *artifact.Sha1Sum,
 		}
 		switch *artifact.State {
