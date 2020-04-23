@@ -24,6 +24,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"moul.io/godev"
 )
 
 type Service interface {
@@ -100,21 +101,120 @@ func (svc service) DevDumpQuads(ctx context.Context, req *yolopb.DevDumpQuads_Re
 	return &resp, nil
 }
 
+func (svc service) DevDumpObjects(ctx context.Context, req *yolopb.DevDumpObjects_Request) (*yolopb.DevDumpObjects_Response, error) {
+	if !svc.devMode {
+		return nil, status.Error(codes.PermissionDenied, "Permission Denied")
+	}
+
+	entities := []yolopb.Entity{}
+	if err := svc.schema.LoadTo(ctx, svc.db, &entities); err != nil {
+		return nil, fmt.Errorf("load entities: %w", err)
+	}
+	projects := []yolopb.Project{}
+	if err := svc.schema.LoadTo(ctx, svc.db, &projects); err != nil {
+		return nil, fmt.Errorf("load projects: %w", err)
+	}
+	commits := []yolopb.Commit{}
+	if err := svc.schema.LoadTo(ctx, svc.db, &commits); err != nil {
+		return nil, fmt.Errorf("load commits: %w", err)
+	}
+	artifacts := []yolopb.Artifact{}
+	if err := svc.schema.LoadTo(ctx, svc.db, &artifacts); err != nil {
+		return nil, fmt.Errorf("load artifacts: %w", err)
+	}
+	releases := []yolopb.Release{}
+	if err := svc.schema.LoadTo(ctx, svc.db, &releases); err != nil {
+		return nil, fmt.Errorf("load releases: %w", err)
+	}
+	mergeRequests := []yolopb.MergeRequest{}
+	if err := svc.schema.LoadTo(ctx, svc.db, &mergeRequests); err != nil {
+		return nil, fmt.Errorf("load mergeRequests: %w", err)
+	}
+	builds := []yolopb.Build{}
+	if err := svc.schema.LoadTo(ctx, svc.db, &builds); err != nil {
+		return nil, fmt.Errorf("load builds: %w", err)
+	}
+
+	batch := yolopb.Batch{
+		Entities:      make([]*yolopb.Entity, len(entities)),
+		Projects:      make([]*yolopb.Project, len(projects)),
+		Commits:       make([]*yolopb.Commit, len(commits)),
+		Artifacts:     make([]*yolopb.Artifact, len(artifacts)),
+		Releases:      make([]*yolopb.Release, len(releases)),
+		MergeRequests: make([]*yolopb.MergeRequest, len(mergeRequests)),
+		Builds:        make([]*yolopb.Build, len(builds)),
+	}
+	for idx, object := range entities {
+		clone := object
+		clone.Cleanup()
+		batch.Entities[idx] = &clone
+	}
+	for idx, object := range projects {
+		clone := object
+		clone.Cleanup()
+		batch.Projects[idx] = &clone
+	}
+	for idx, object := range commits {
+		clone := object
+		clone.Cleanup()
+		batch.Commits[idx] = &clone
+	}
+	for idx, object := range artifacts {
+		clone := object
+		clone.Cleanup()
+		batch.Artifacts[idx] = &clone
+	}
+	for idx, object := range releases {
+		clone := object
+		clone.Cleanup()
+		batch.Releases[idx] = &clone
+	}
+	for idx, object := range mergeRequests {
+		clone := object
+		clone.Cleanup()
+		batch.MergeRequests[idx] = &clone
+	}
+	for idx, object := range builds {
+		clone := object
+		clone.Cleanup()
+		batch.Builds[idx] = &clone
+	}
+
+	resp := yolopb.DevDumpObjects_Response{
+		Batch: &batch,
+	}
+	fmt.Println(len(godev.JSON(resp)))
+	return &resp, nil
+}
+
 func (svc service) Status(ctx context.Context, req *yolopb.Status_Request) (*yolopb.Status_Response, error) {
-	resp := yolopb.Status_Response{
+	ret := yolopb.Status_Response{
 		Uptime: int32(time.Since(svc.startTime).Seconds()),
 	}
 
 	// db
 	stats, err := svc.db.Stats(ctx, false)
 	if err == nil {
-		resp.DbNodes = stats.Nodes.Value
-		resp.DbQuads = stats.Quads.Value
+		ret.DbNodes = stats.Nodes.Value
+		ret.DbQuads = stats.Quads.Value
 	} else {
-		resp.DbErr = err.Error()
+		ret.DbErr = err.Error()
 	}
 
-	return &resp, nil
+	if svc.devMode {
+		resp, err := svc.DevDumpObjects(ctx, nil)
+		if err != nil {
+			return nil, err
+		}
+		ret.NbEntities = int32(len(resp.Batch.Entities))
+		ret.NbProjects = int32(len(resp.Batch.Projects))
+		ret.NbCommits = int32(len(resp.Batch.Commits))
+		ret.NbReleases = int32(len(resp.Batch.Releases))
+		ret.NbMergeRequests = int32(len(resp.Batch.MergeRequests))
+		ret.NbBuilds = int32(len(resp.Batch.Builds))
+	}
+
+	return &ret, nil
 }
 
 func (svc service) BuildList(ctx context.Context, req *yolopb.BuildList_Request) (*yolopb.BuildList_Response, error) {
@@ -125,7 +225,7 @@ func (svc service) BuildList(ctx context.Context, req *yolopb.BuildList_Request)
 	if req.ArtifactKind > 0 {
 		// this will filter builds with at least one artifact of the good kind
 		// but I don't know how to filter them during loading, so I will cleanup
-		// the result later, feel free to help me make things in a better way
+		// the result later, feel free to help me making things in a smarter way
 		p = p.HasPath(
 			cayleypath.StartMorphism().
 				In(quad.IRI("schema:hasBuild")).
@@ -133,14 +233,17 @@ func (svc service) BuildList(ctx context.Context, req *yolopb.BuildList_Request)
 		)
 	}
 	p = p.Limit(300)
+	// FIXME: sort by latest and limit to ~30
+	iterator, _ := p.BuildIterator(ctx).Optimize(ctx)
 
 	builds := []yolopb.Build{}
-	if err := svc.schema.LoadIteratorToDepth(ctx, svc.db, reflect.ValueOf(&builds), 1, p.BuildIterator(ctx)); err != nil {
+	if err := svc.schema.LoadIteratorToDepth(ctx, svc.db, reflect.ValueOf(&builds), -1, iterator); err != nil {
 		return nil, fmt.Errorf("load builds: %w", err)
 	}
+
 	// clean up the result and add signed URLs
 	for idx, build := range builds {
-		build.Cleanup()
+		build.FilterBuildList()
 		// cleanup artifact with invalid requested type (see comment above)
 		if req.ArtifactKind > 0 {
 			n := 0

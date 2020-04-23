@@ -29,6 +29,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"golang.org/x/oauth2"
+	"moul.io/godev"
 )
 
 func main() {
@@ -174,6 +175,7 @@ func yolo(args []string) error {
 				BasicAuth:          basicAuth,
 				Realm:              realm,
 				AuthSalt:           authSalt,
+				DevMode:            devMode,
 			})
 			if err != nil {
 				return err
@@ -217,10 +219,72 @@ func yolo(args []string) error {
 		},
 	}
 
+	dumpObjects := &ffcli.Command{
+		Name:    `dump-objects`,
+		FlagSet: storeFlagSet,
+		Options: []ff.Option{ff.WithEnvVarNoPrefix()},
+		Exec: func(_ context.Context, _ []string) error {
+			logger, err := loggerFromArgs(verbose)
+			if err != nil {
+				return err
+			}
+			db, dbCleanup, err := dbFromArgs(dbStorePath, logger)
+			if err != nil {
+				return err
+			}
+			defer dbCleanup()
+			dbSchema := yolosvc.SchemaConfig()
+
+			svc := yolosvc.NewService(db, dbSchema, yolosvc.ServiceOpts{
+				Logger:  logger,
+				DevMode: true,
+			})
+			ctx := context.Background()
+			ret, err := svc.DevDumpObjects(ctx, nil)
+			if err != nil {
+				return err
+			}
+			fmt.Println(godev.PrettyJSONPB(ret))
+
+			return nil
+		},
+	}
+
+	info := &ffcli.Command{
+		Name:    `info`,
+		FlagSet: storeFlagSet,
+		Options: []ff.Option{ff.WithEnvVarNoPrefix()},
+		Exec: func(_ context.Context, _ []string) error {
+			logger, err := loggerFromArgs(verbose)
+			if err != nil {
+				return err
+			}
+			db, dbCleanup, err := dbFromArgs(dbStorePath, logger)
+			if err != nil {
+				return err
+			}
+			defer dbCleanup()
+			dbSchema := yolosvc.SchemaConfig()
+
+			svc := yolosvc.NewService(db, dbSchema, yolosvc.ServiceOpts{
+				Logger:  logger,
+				DevMode: true,
+			})
+			ctx := context.Background()
+			ret, err := svc.Status(ctx, nil)
+			if err != nil {
+				return err
+			}
+			fmt.Println(godev.PrettyJSONPB(ret))
+
+			return nil
+		},
+	}
+
 	root := &ffcli.Command{
 		ShortUsage:  `server [flags] <subcommand>`,
 		FlagSet:     rootFlagSet,
-		Subcommands: []*ffcli.Command{server, dumpQuads},
+		Subcommands: []*ffcli.Command{server, dumpQuads, dumpObjects, info},
 		Options:     []ff.Option{ff.WithEnvVarNoPrefix()},
 		Exec: func(_ context.Context, _ []string) error {
 			return flag.ErrHelp

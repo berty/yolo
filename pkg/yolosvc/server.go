@@ -36,6 +36,7 @@ type Server struct {
 	grpcServer       *grpc.Server
 	grpcListenerAddr string
 	httpListenerAddr string
+	devMode          bool
 }
 
 type ServerOpts struct {
@@ -48,6 +49,7 @@ type ServerOpts struct {
 	BasicAuth          string
 	Realm              string
 	AuthSalt           string
+	DevMode            bool
 }
 
 func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, error) {
@@ -65,22 +67,30 @@ func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, erro
 	}
 
 	// gRPC internal server
-	srv := Server{logger: opts.Logger}
+	srv := Server{
+		logger:  opts.Logger,
+		devMode: opts.DevMode,
+	}
 
+	// gRPC interceptors
 	recoveryHandler := func(p interface{}) (err error) {
 		return status.Errorf(codes.Unknown, "panic triggered: %v", p)
 	}
 	recoveryOpts := []grpc_recovery.Option{grpc_recovery.WithRecoveryHandler(recoveryHandler)}
-	serverStreamOpts := []grpc.StreamServerInterceptor{
-		grpc_recovery.StreamServerInterceptor(recoveryOpts...),
-		grpc_zap.StreamServerInterceptor(srv.logger),
-		grpc_recovery.StreamServerInterceptor(recoveryOpts...),
+	serverStreamOpts := []grpc.StreamServerInterceptor{}
+	serverUnaryOpts := []grpc.UnaryServerInterceptor{}
+	if !srv.devMode {
+		serverStreamOpts = append(serverStreamOpts, grpc_recovery.StreamServerInterceptor(recoveryOpts...))
+		serverUnaryOpts = append(serverUnaryOpts, grpc_recovery.UnaryServerInterceptor(recoveryOpts...))
 	}
-	serverUnaryOpts := []grpc.UnaryServerInterceptor{
-		grpc_recovery.UnaryServerInterceptor(recoveryOpts...),
-		grpc_zap.UnaryServerInterceptor(srv.logger),
-		grpc_recovery.UnaryServerInterceptor(recoveryOpts...),
+	serverStreamOpts = append(serverStreamOpts, grpc_zap.StreamServerInterceptor(srv.logger))
+	serverUnaryOpts = append(serverUnaryOpts, grpc_zap.UnaryServerInterceptor(srv.logger))
+	if !srv.devMode {
+		serverStreamOpts = append(serverStreamOpts, grpc_recovery.StreamServerInterceptor(recoveryOpts...))
+		serverUnaryOpts = append(serverUnaryOpts, grpc_recovery.UnaryServerInterceptor(recoveryOpts...))
 	}
+
+	// gRPC server
 	srv.grpcServer = grpc.NewServer(
 		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(serverStreamOpts...)),
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(serverUnaryOpts...)),

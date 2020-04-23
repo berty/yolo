@@ -14,11 +14,12 @@ option (gogoproto.marshaler_all) = true;
 option (gogoproto.unmarshaler_all) = true;
 
 service YoloService {
-  rpc Ping(Ping.Request)                 returns (Ping.Response)         { option (google.api.http) = {get: "/ping"}; };
-  rpc Status(Status.Request)             returns (Status.Response)       { option (google.api.http) = {get: "/status"}; };
-  rpc BuildList(BuildList.Request)       returns (BuildList.Response)    { option (google.api.http) = {get: "/build-list"}; }
-  rpc DevDumpQuads(DevDumpQuads.Request) returns (DevDumpQuads.Response) { option (google.api.http) = {get: "/dev-dump-quads"}; }
-}
+  rpc Ping(Ping.Request)                     returns (Ping.Response)           { option (google.api.http) = {get: "/ping"}; };
+  rpc Status(Status.Request)                 returns (Status.Response)         { option (google.api.http) = {get: "/status"}; };
+  rpc BuildList(BuildList.Request)           returns (BuildList.Response)      { option (google.api.http) = {get: "/build-list"}; }
+  rpc DevDumpQuads(DevDumpQuads.Request)     returns (DevDumpQuads.Response)   { option (google.api.http) = {get: "/dev-dump-quads"}; }
+  rpc DevDumpObjects(DevDumpObjects.Request) returns (DevDumpObjects.Response) { option (google.api.http) = {get: "/dev-dump-objects"}; }
+  }
 
 //
 // RPC Requests & Responses
@@ -27,6 +28,13 @@ service YoloService {
 message Ping {
   message Request  {}
   message Response {}
+}
+
+message DevDumpObjects {
+  message Request  {}
+  message Response {
+    Batch batch = 1;
+  }
 }
 
 message DevDumpQuads {
@@ -43,6 +51,15 @@ message Status {
     string db_err = 2;
     int64 db_nodes = 3;
     int64 db_quads = 4;
+
+    /// stats
+
+    int32 nb_entities = 10;
+    int32 nb_projects = 11;
+    int32 nb_commits = 12;
+    int32 nb_releases = 13;
+    int32 nb_builds = 14;
+    int32 nb_merge_requests = 15;
   }
 }
 
@@ -70,7 +87,7 @@ message Build {
   string message = 6 [(gogoproto.moretags) = "quad:\"schema:message,optional\""];
   google.protobuf.Timestamp started_at = 7 [(gogoproto.moretags) = "quad:\"schema:startedAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
   google.protobuf.Timestamp finished_at = 8 [(gogoproto.moretags) = "quad:\"schema:finishedAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  string commit = 9 [(gogoproto.moretags) = "quad:\"schema:commit,optional\""];
+  string commit_url = 9 [(gogoproto.moretags) = "quad:\"schema:commit_url,optional\"", (gogoproto.customname) = "CommitURL"];
   string branch = 10 [(gogoproto.moretags) = "quad:\"schema:branch,optional\""];
   Driver driver = 11 [(gogoproto.moretags) = "quad:\"schema:driver,optional\""];
 
@@ -103,8 +120,8 @@ message Release {
   google.protobuf.Timestamp created_at = 2 [(gogoproto.moretags) = "quad:\"schema:createdAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
   google.protobuf.Timestamp updated_at = 3 [(gogoproto.moretags) = "quad:\"schema:updatedAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
   string message = 4 [(gogoproto.moretags) = "quad:\"schema:message,optional\""];
-  string commit = 5 [(gogoproto.moretags) = "quad:\"schema:commit,optional\""];
-  Driver driver = 6 [(gogoproto.moretags) = "quad:\"schema:driver,optional\""];
+  Driver driver = 5 [(gogoproto.moretags) = "quad:\"schema:driver,optional\""];
+  string commit_url = 6 [(gogoproto.moretags) = "quad:\"schema:commit_url,optional\"", (gogoproto.customname) = "CommitURL"];
 
   /// relationships
 
@@ -143,6 +160,8 @@ message MergeRequest {
   Driver driver = 6 [(gogoproto.moretags) = "quad:\"schema:driver,optional\""];
   string branch = 7 [(gogoproto.moretags) = "quad:\"schema:branch,optional\""];
   State state = 8 [(gogoproto.moretags) = "quad:\"schema:state,optional\""];
+  string commit_url = 9 [(gogoproto.moretags) = "quad:\"schema:commit_url,optional\"", (gogoproto.customname) = "CommitURL"];
+  string branch_url = 10 [(gogoproto.moretags) = "quad:\"schema:branch_url,optional\"", (gogoproto.customname) = "BranchURL"];
   // labels
   // bool is_wip
 
@@ -150,9 +169,11 @@ message MergeRequest {
 
   repeated Release has_releases = 101 [(gogoproto.moretags) = "quad:\"schema:hasMergeRequest < *,optional\""];
   repeated Build has_builds = 102 [(gogoproto.moretags) = "quad:\"schema:hasMergeRequest < *,optional\""];
-  Project has_project = 103 [(gogoproto.moretags) = "quad:\"schema:hasProject,optional\""];
-  Entity has_author = 104 [(gogoproto.moretags) = "quad:\"schema:hasAuthor,optional\""];
-  Commit has_commit = 105 [(gogoproto.moretags) = "quad:\"schema:hasCommit,optional\""];
+  repeated Entity has_assignees = 103 [(gogoproto.moretags) = "quad:\"schema:hasAssignee,optional\""];
+  repeated Entity has_reviewers = 104 [(gogoproto.moretags) = "quad:\"schema:hasReviewer,optional\""];
+  Project has_project = 105 [(gogoproto.moretags) = "quad:\"schema:hasProject,optional\""];
+  Entity has_author = 106 [(gogoproto.moretags) = "quad:\"schema:hasAuthor,optional\""];
+  Commit has_commit = 107 [(gogoproto.moretags) = "quad:\"schema:hasCommit,optional\""];
 
   /// enums
 
