@@ -22,6 +22,8 @@ import (
 	circleci "github.com/jszwedko/go-circleci"
 	"github.com/stretchr/signature"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type Service interface {
@@ -40,6 +42,7 @@ type service struct {
 	ccc       *circleci.Client
 	ghc       *github.Client
 	authSalt  string
+	devMode   bool
 }
 
 type ServiceOpts struct {
@@ -49,6 +52,7 @@ type ServiceOpts struct {
 	GithubClient    *github.Client
 	Logger          *zap.Logger
 	AuthSalt        string
+	DevMode         bool
 }
 
 func NewService(db *cayley.Handle, schema *schema.Config, opts ServiceOpts) Service {
@@ -64,11 +68,36 @@ func NewService(db *cayley.Handle, schema *schema.Config, opts ServiceOpts) Serv
 		btc:       opts.BintrayClient,
 		ccc:       opts.CircleciClient,
 		authSalt:  opts.AuthSalt,
+		devMode:   opts.DevMode,
 	}
 }
 
 func (svc service) Ping(ctx context.Context, req *yolopb.Ping_Request) (*yolopb.Ping_Response, error) {
 	return &yolopb.Ping_Response{}, nil
+}
+
+func (svc service) DevDumpQuads(ctx context.Context, req *yolopb.DevDumpQuads_Request) (*yolopb.DevDumpQuads_Response, error) {
+	if !svc.devMode {
+		return nil, status.Error(codes.PermissionDenied, "Permission Denied")
+	}
+
+	resp := yolopb.DevDumpQuads_Response{
+		Quads: []string{},
+	}
+
+	it := svc.db.QuadsAllIterator().Iterate()
+	for it.Next(ctx) {
+		q := svc.db.Quad(it.Result())
+		line := fmt.Sprintf(
+			"%v -- %v -> %v",
+			q.Subject,
+			q.Predicate,
+			q.Object,
+		)
+		resp.Quads = append(resp.Quads, line)
+	}
+
+	return &resp, nil
 }
 
 func (svc service) Status(ctx context.Context, req *yolopb.Status_Request) (*yolopb.Status_Response, error) {

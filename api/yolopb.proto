@@ -17,6 +17,7 @@ service YoloService {
   rpc Ping(Ping.Request)                 returns (Ping.Response)         { option (google.api.http) = {get: "/ping"}; };
   rpc Status(Status.Request)             returns (Status.Response)       { option (google.api.http) = {get: "/status"}; };
   rpc BuildList(BuildList.Request)       returns (BuildList.Response)    { option (google.api.http) = {get: "/build-list"}; }
+  rpc DevDumpQuads(DevDumpQuads.Request) returns (DevDumpQuads.Response) { option (google.api.http) = {get: "/dev-dump-quads"}; }
 }
 
 //
@@ -26,6 +27,13 @@ service YoloService {
 message Ping {
   message Request  {}
   message Response {}
+}
+
+message DevDumpQuads {
+  message Request  {}
+  message Response {
+    repeated string quads = 1;
+  }
 }
 
 message Status {
@@ -172,7 +180,7 @@ message Project {
   repeated Commit has_commits = 103 [(gogoproto.moretags) = "quad:\"schema:hasProject < *,optional\""];
   repeated Release has_releases = 104 [(gogoproto.moretags) = "quad:\"schema:hasProject < *,optional\""];
   repeated MergeRequest has_mergerequests = 105 [(gogoproto.moretags) = "quad:\"schema:hasProject < *,optional\""];
-  Entity hasOwner = 106 [(gogoproto.moretags) = "quad:\"schema:hasOwner\""];
+  Entity hasOwner = 106 [(gogoproto.moretags) = "quad:\"schema:hasOwner,optional\""];
 }
 
 message Entity {

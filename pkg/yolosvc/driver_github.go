@@ -44,15 +44,9 @@ func GithubWorker(ctx context.Context, db *cayley.Handle, ghc *github.Client, sc
 
 	// fetch recent activity in a loop
 	for {
-		since := time.Time{}
-		//since, err := lastBuildCreatedTime(ctx, db, yolopb.Driver_GitHub)
-		//if err != nil {
-		//	logger.Warn("get last github build created time", zap.Error(err))
-		//	since = time.Time{}
-		//}
-
-		opts.Logger.Debug("github: refresh", zap.Time("since", since))
-		batches, err := fetchGitHubActivity(ctx, ghc, since, opts.MaxBuilds, opts.Logger)
+		// FIXME: support "since"
+		opts.Logger.Debug("github: refresh")
+		batches, err := fetchGitHubActivity(ctx, ghc, opts.MaxBuilds, opts.Logger)
 		if err != nil {
 			opts.Logger.Warn("fetch github", zap.Error(err))
 		} else {
@@ -64,8 +58,9 @@ func GithubWorker(ctx context.Context, db *cayley.Handle, ghc *github.Client, sc
 		limits, _, err := ghc.RateLimits(ctx)
 		if err != nil {
 			opts.Logger.Warn("get rate limits", zap.Error(err))
+		} else {
+			opts.Logger.Debug("github: rate limits", zap.Any("limits", limits.Core))
 		}
-		opts.Logger.Debug("github: rate limits", zap.Any("limits", limits.Core))
 
 		// FIXME: if rate limit errors, use the RetryAfter helper
 
@@ -106,7 +101,7 @@ func fetchGitHubBaseObjects(ctx context.Context, ghc *github.Client, logger *zap
 	return batches, nil
 }
 
-func fetchGitHubActivity(ctx context.Context, ghc *github.Client, since time.Time, maxBuilds int, logger *zap.Logger) ([]yolopb.Batch, error) {
+func fetchGitHubActivity(ctx context.Context, ghc *github.Client, maxBuilds int, logger *zap.Logger) ([]yolopb.Batch, error) {
 	batches := []yolopb.Batch{}
 	opts := &github.PullRequestListOptions{
 		State:     "all",
@@ -129,15 +124,16 @@ func handleGitHubPullRequest(pr *github.PullRequest, logger *zap.Logger) yolopb.
 	createdAt := pr.GetCreatedAt()
 	updatedAt := pr.GetUpdatedAt()
 	mr := yolopb.MergeRequest{
-		ID:         quad.IRI(pr.GetHTMLURL()),
-		CreatedAt:  &createdAt,
-		UpdatedAt:  &updatedAt,
-		Title:      pr.GetTitle(),
-		Message:    pr.GetBody(),
-		Driver:     yolopb.Driver_GitHub,
-		Branch:     pr.GetHead().GetLabel(),
-		HasCommit:  &yolopb.Commit{ID: quad.IRI(pr.GetHead().GetSHA())},
+		ID:        quad.IRI(pr.GetHTMLURL()),
+		CreatedAt: &createdAt,
+		UpdatedAt: &updatedAt,
+		Title:     pr.GetTitle(),
+		Message:   pr.GetBody(),
+		Driver:    yolopb.Driver_GitHub,
+		Branch:    pr.GetHead().GetLabel(),
+		//HasCommit:  &yolopb.Commit{ID: quad.IRI(pr.GetHead().GetSHA())},
 		HasProject: &yolopb.Project{ID: quad.IRI(pr.GetBase().GetRepo().GetHTMLURL())},
+		// FIXME: CommitURL
 		// FIXME: BranchURL
 		// FIXME: labels
 		// FIXME: reviews

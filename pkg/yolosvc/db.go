@@ -18,6 +18,11 @@ func SchemaConfig() *schema.Config {
 	config := schema.NewConfig()
 	schema.RegisterType("yolo:Build", yolopb.Build{})
 	schema.RegisterType("yolo:Artifact", yolopb.Artifact{})
+	schema.RegisterType("yolo:Commit", yolopb.Commit{})
+	schema.RegisterType("yolo:Release", yolopb.Release{})
+	schema.RegisterType("yolo:MergeRequest", yolopb.MergeRequest{})
+	schema.RegisterType("yolo:Project", yolopb.Project{})
+	schema.RegisterType("yolo:Entity", yolopb.Entity{})
 	return config
 }
 
