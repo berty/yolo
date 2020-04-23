@@ -25,7 +25,9 @@ const ApiKeyPrompt = ({failedKey, setApiKey: submitNewApiKey}) => {
         </div>
         <button
           className="btn"
-          onClick={() => submitNewApiKey({apiKey: formApiKey})}
+          onClick={() => {
+            submitNewApiKey({apiKey: formApiKey, needsRequest: true});
+          }}
           disabled={!formApiKey}
         >
           Update

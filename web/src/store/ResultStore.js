@@ -23,6 +23,7 @@ export const INITIAL_STATE = {
   isLoaded: false,
   items: [],
   baseURL: `${process.env.API_SERVER}`,
+  needsRequest: true,
   filtersPlatform: {
     iOS: true,
     android: false,
