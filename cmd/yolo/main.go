@@ -18,7 +18,8 @@ import (
 	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/cayleygraph/cayley"
 	"github.com/cayleygraph/cayley/graph"
-	_ "github.com/cayleygraph/cayley/graph/kv/bolt"                       // required by cayley
+	_ "github.com/cayleygraph/cayley/graph/kv/bolt" // required by cayley
+	"github.com/google/go-github/v31/github"
 	_ "github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger/options" // required by protoc
 	circleci "github.com/jszwedko/go-circleci"
 	"github.com/oklog/run"
@@ -26,6 +27,7 @@ import (
 	"github.com/peterbourgon/ff/v2/ffcli"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"golang.org/x/oauth2"
 )
 
 func main() {
@@ -43,6 +45,7 @@ func yolo(args []string) error {
 		maxBuilds          int
 		bearerSecretKey    string
 		buildkiteToken     string
+		githubToken        string
 		bintrayUsername    string
 		bintrayToken       string
 		circleciToken      string
@@ -67,6 +70,7 @@ func yolo(args []string) error {
 	serverFlagSet.StringVar(&bintrayUsername, "bintray-username", "", "Bintray username")
 	serverFlagSet.StringVar(&bintrayToken, "bintray-token", "", "Bintray API Token")
 	serverFlagSet.StringVar(&circleciToken, "circleci-token", "", "CircleCI API Token")
+	serverFlagSet.StringVar(&githubToken, "github-token", "", "GitHub API Token")
 	serverFlagSet.StringVar(&dbStorePath, "db-path", ":temp:", "DB Store path")
 	serverFlagSet.IntVar(&maxBuilds, "max-builds", 100, "maximum builds to fetch from external services (pagination)")
 	serverFlagSet.StringVar(&httpBind, "http-bind", ":8000", "HTTP bind address")
@@ -124,13 +128,21 @@ func yolo(args []string) error {
 				gr.Add(func() error { return yolosvc.CircleciWorker(ctx, db, ccc, dbSchema, opts) }, func(_ error) { cancel() })
 			}
 			var btc *bintray.Client
-			if bintrayToken != "" {
+			if bintrayToken != "" && bintrayUsername != "" {
 				btc, err = bintrayClientFromArgs(bintrayUsername, bintrayToken)
 				if err != nil {
 					return err
 				}
 				opts := yolosvc.BintrayWorkerOpts{Logger: logger, MaxBuilds: maxBuilds}
 				gr.Add(func() error { return yolosvc.BintrayWorker(ctx, db, btc, dbSchema, opts) }, func(_ error) { cancel() })
+			}
+			ghc, err := githubClientFromArgs(githubToken)
+			if err != nil {
+				return err
+			}
+			if githubToken != "" {
+				opts := yolosvc.GithubWorkerOpts{Logger: logger, MaxBuilds: maxBuilds}
+				gr.Add(func() error { return yolosvc.GithubWorker(ctx, db, ghc, dbSchema, opts) }, func(_ error) { cancel() })
 			}
 
 			// server
@@ -139,6 +151,7 @@ func yolo(args []string) error {
 				BuildkiteClient: bkc,
 				CircleciClient:  ccc,
 				BintrayClient:   btc,
+				GithubClient:    ghc,
 				AuthSalt:        authSalt,
 			})
 			server, err := yolosvc.NewServer(ctx, svc, yolosvc.ServerOpts{
@@ -183,8 +196,21 @@ func circleciClientFromArgs(token string) (*circleci.Client, error) {
 	httpclient := &http.Client{
 		Timeout: time.Second * 1800,
 	}
-	ci := &circleci.Client{Token: token, HTTPClient: httpclient}
-	return ci, nil
+	ccc := &circleci.Client{Token: token, HTTPClient: httpclient}
+	return ccc, nil
+}
+
+func githubClientFromArgs(token string) (*github.Client, error) {
+	if token != "" {
+		ctx := context.Background()
+		ts := oauth2.StaticTokenSource(
+			&oauth2.Token{AccessToken: token},
+		)
+		tc := oauth2.NewClient(ctx, ts)
+		return github.NewClient(tc), nil
+	}
+
+	return github.NewClient(nil), nil
 }
 
 func buildkiteClientFromArgs(token string) (*buildkite.Client, error) {
