@@ -41,37 +41,60 @@ const Filters = () => {
         items: [],
         needsRequest: true,
       });
-      getData({platformId: state.platformId, apiKey: state.apiKey}).then(
-        (result) => {
-          const {
-            data: {builds},
-          } = result;
+      getData({platformId: state.platformId, apiKey: state.apiKey})
+        .then(
+          (result) => {
+            if (
+              !result ||
+              !result.data ||
+              !result.data.builds ||
+              !Array.isArray(result.data.builds)
+            ) {
+              throw new Error('No build list from server!');
+            }
+            const {
+              data: {builds},
+            } = result;
+
+            updateState({
+              isLoaded: true,
+              items: cloneDeep(builds),
+              error: null,
+              needsRequest: false,
+            });
+          },
+          (error) => {
+            updateState({
+              isLoaded: true,
+              needsRequest: false,
+            });
+            if (!error.response)
+              return updateState(
+                cloneDeep({
+                  error: {message: 'Network Error', status: 500, data: ''},
+                })
+              );
+            const {
+              response: {statusText: message, status, data},
+            } = error;
+            updateState({
+              error: {message, status, data},
+            });
+          }
+        )
+        .catch((err) => {
+          // TODO: This kind of stuff should be in an error boundary component.
           updateState({
             isLoaded: true,
-            items: cloneDeep(builds),
-            error: null,
             needsRequest: false,
+            items: [],
+            error: {
+              message: err.message || 'Error making your request.',
+              status: 0,
+              data: '',
+            },
           });
-        },
-        (error) => {
-          updateState({
-            isLoaded: true,
-            needsRequest: false,
-          });
-          if (!error.response)
-            return updateState(
-              cloneDeep({
-                error: {message: 'Network Error', status: 500, data: ''},
-              })
-            );
-          const {
-            response: {statusText: message, status, data},
-          } = error;
-          updateState({
-            error: {message, status, data},
-          });
-        }
-      );
+        });
     };
     if (
       (state.platformId !== PLATFORMS.none && state.isLoaded === false) ||
