@@ -50,6 +50,7 @@ export default {
       },
       inject: true,
       scriptLoading: 'defer',
+      favicon: 'src/assets/favicon/favicon-32x32.png',
     }),
   ],
   module: {
