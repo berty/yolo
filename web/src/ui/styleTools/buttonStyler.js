@@ -26,7 +26,7 @@ export const actionButtonStyle = ({name, stateNormed}) => {
   const styles = {
     FINISHED: {
       backgroundColor: theme.bg.tagGreen,
-      color: 'white',
+      color: theme.text.tagGreen,
       boxShadow: '0px 4px 0px ' + theme.shadow.btnDlMaster,
     },
     BUILDING: {display: 'none'},

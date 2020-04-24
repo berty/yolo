@@ -35,6 +35,7 @@
     "@fortawesome/react-fontawesome": "^0.1.9",
     "@hot-loader/react-dom": "16.13.0",
     "core-js": "3.6.4",
+    "dayjs": "^1.8.25",
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-feather": "2.0.3",

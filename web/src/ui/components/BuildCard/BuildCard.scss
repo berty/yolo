@@ -1,3 +1,5 @@
+@import '../../../assets/main.scss';
+
 p,
 div,
 .card div,
@@ -64,13 +66,18 @@ div.card {
   flex-flow: row wrap;
   margin-right: 8px;
   flex-basis: 100%;
+  font-size: 0.9rem;
+  @include md {
+    font-size: 1rem;
+  }
   .card-details-row--yl {
     display: flex;
-    flex: 1 0 100%;
+    flex: 1 1 100%;
     flex-wrap: wrap;
     margin-bottom: 16px;
-    div {
-      margin-right: 8px;
+    align-items: center;
+    > * {
+      margin-right: 10px;
     }
     div.btn {
       cursor: default;
@@ -83,11 +90,6 @@ div.card {
   }
 }
 
-.vertical-center--yl {
-  display: flex;
-  align-items: center;
-}
-
 .card div.card-row--yl .card-build-actions--yl {
   height: 100%;
   align-self: flex-start;
@@ -98,5 +100,16 @@ div.card {
   div,
   a {
     margin-bottom: 8px;
+  }
+  .btn {
+    // download, alert
+    flex-shrink: 0;
+    flex-grow: 0;
+    box-sizing: border-box;
+    svg,
+    span {
+      margin-top: 0.25rem;
+      margin-bottom: -0.25rem;
+    }
   }
 }

@@ -7,8 +7,9 @@ import {faQuestionCircle} from '@fortawesome/free-solid-svg-icons';
 import IconChat from '../../assets/svg/IconChat';
 import IconMini from '../../assets/svg/IconMini';
 import classNames from 'classnames';
-import {ResultContext, PLATFORMS} from '../../store/ResultStore';
+import {ResultContext} from '../../store/ResultStore';
 import './FilterModal.scss';
+import {PLATFORMS} from '../../constants';
 
 const FilterModal = ({closeAction, showingFiltersModal}) => {
   const {theme} = useContext(ThemeContext);
