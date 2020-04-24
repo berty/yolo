@@ -114,6 +114,7 @@ func buildkiteBuildsToBatch(builds []buildkite.Build, logger *zap.Logger) yolopb
 	for _, build := range builds {
 		newBuild := yolopb.Build{
 			ID:        quad.IRI(*build.WebURL),
+			ShortID:   fmt.Sprintf("%d", *build.Number),
 			CreatedAt: &build.CreatedAt.Time,
 			Message:   *build.Message,
 			HasCommit: &yolopb.Commit{ID: quad.IRI(*build.Commit)},

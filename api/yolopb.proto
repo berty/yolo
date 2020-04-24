@@ -90,6 +90,7 @@ message Build {
   string commit_url = 9 [(gogoproto.moretags) = "quad:\"schema:commit_url,optional\"", (gogoproto.customname) = "CommitURL"];
   string branch = 10 [(gogoproto.moretags) = "quad:\"schema:branch,optional\""];
   Driver driver = 11 [(gogoproto.moretags) = "quad:\"schema:driver,optional\""];
+  string short_id = 12 [(gogoproto.moretags) = "quad:\"schema:short_id,optional\"", (gogoproto.customname) = "ShortID"];
 
   /// relationships
 
@@ -122,6 +123,7 @@ message Release {
   string message = 4 [(gogoproto.moretags) = "quad:\"schema:message,optional\""];
   Driver driver = 5 [(gogoproto.moretags) = "quad:\"schema:driver,optional\""];
   string commit_url = 6 [(gogoproto.moretags) = "quad:\"schema:commit_url,optional\"", (gogoproto.customname) = "CommitURL"];
+  string short_id = 7 [(gogoproto.moretags) = "quad:\"schema:short_id,optional\"", (gogoproto.customname) = "ShortID"];
 
   /// relationships
 
@@ -162,7 +164,8 @@ message MergeRequest {
   State state = 8 [(gogoproto.moretags) = "quad:\"schema:state,optional\""];
   string commit_url = 9 [(gogoproto.moretags) = "quad:\"schema:commit_url,optional\"", (gogoproto.customname) = "CommitURL"];
   string branch_url = 10 [(gogoproto.moretags) = "quad:\"schema:branch_url,optional\"", (gogoproto.customname) = "BranchURL"];
-  // labels
+  string short_id = 11 [(gogoproto.moretags) = "quad:\"schema:short_id,optional\"", (gogoproto.customname) = "ShortID"];
+ // labels
   // bool is_wip
 
   /// relationships

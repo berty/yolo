@@ -104,6 +104,7 @@ func bintrayVersionToBatch(version bintray.GetVersionResponse) yolopb.Batch {
 	id := fmt.Sprintf("https://bintray.com/%s/%s/%s/%s", version.Owner, version.Repo, version.Package, version.Name)
 	newBuild := yolopb.Build{
 		ID:        quad.IRI(id),
+		ShortID:   version.Name,
 		CreatedAt: &version.Created,
 		UpdatedAt: &version.Updated,
 		Message:   version.GithubReleaseNotesFile,
