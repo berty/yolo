@@ -44,9 +44,7 @@ type ServiceOpts struct {
 }
 
 func NewService(db *cayley.Handle, schema *schema.Config, opts ServiceOpts) Service {
-	if opts.Logger == nil {
-		opts.Logger = zap.NewNop()
-	}
+	opts.applyDefaults()
 	return &service{
 		startTime: time.Now(),
 		db:        db,
@@ -55,7 +53,14 @@ func NewService(db *cayley.Handle, schema *schema.Config, opts ServiceOpts) Serv
 		bkc:       opts.BuildkiteClient,
 		btc:       opts.BintrayClient,
 		ccc:       opts.CircleciClient,
+		ghc:       opts.GithubClient,
 		authSalt:  opts.AuthSalt,
 		devMode:   opts.DevMode,
+	}
+}
+
+func (o *ServiceOpts) applyDefaults() {
+	if o.Logger == nil {
+		o.Logger = zap.NewNop()
 	}
 }

@@ -17,8 +17,8 @@ jobs:
       - checkout
       - tools/mod-download
       - tools/mod-tidy-check
-      - run: make test
       - run: make install
+      - run: make test GO_TEST_OPTS="-v -test.timeout=300s -test.parallel=1 -count=1 -gcflags=all=-d=checkptr=0" YOLO_DEBUG=1
       - moul/install_golangci-lint
       - run: make lint
       - codecov/upload:

@@ -15,18 +15,13 @@ import (
 type GithubWorkerOpts struct {
 	Logger    *zap.Logger
 	MaxBuilds int
+	LoopAfter time.Duration
+	Once      bool
 }
-
-const githubMaxPerPage = 30
 
 // GithubWorker goals is to manage the github update routine, it should try to support as much errors as possible by itself
 func GithubWorker(ctx context.Context, db *cayley.Handle, ghc *github.Client, schema *schema.Config, opts GithubWorkerOpts) error {
-	if opts.Logger == nil {
-		opts.Logger = zap.NewNop()
-	}
-	if opts.MaxBuilds == 0 {
-		opts.MaxBuilds = 100
-	}
+	opts.applyDefaults()
 
 	// fetch GitHub base objects (the ones that don't change very often).
 	// this is done only once (for now).
@@ -65,10 +60,13 @@ func GithubWorker(ctx context.Context, db *cayley.Handle, ghc *github.Client, sc
 
 		// FIXME: if rate limit errors, use the RetryAfter helper
 
+		if opts.Once {
+			return nil
+		}
 		select {
 		case <-ctx.Done():
 			return nil
-		case <-time.After(30 * time.Second):
+		case <-time.After(opts.LoopAfter):
 		}
 	}
 }
@@ -253,4 +251,16 @@ func handleGitHubOrganization(org *github.Organization) yolopb.Batch {
 	}
 	batch.Entities = append(batch.Entities, &owner)
 	return batch
+}
+
+func (o *GithubWorkerOpts) applyDefaults() {
+	if o.Logger == nil {
+		o.Logger = zap.NewNop()
+	}
+	if o.MaxBuilds == 0 {
+		o.MaxBuilds = 100
+	}
+	if o.LoopAfter == 0 {
+		o.LoopAfter = time.Second * 30
+	}
 }

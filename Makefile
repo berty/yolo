@@ -1,8 +1,11 @@
 DEV_RUN_OPTS ?=
 
+# tmp fix for go>=1.14 and bolt: see https://github.com/etcd-io/bbolt/issues/187
+GO_TEST_OPTS ?= -test.timeout=60s -gcflags=all=-d=checkptr=0
+
 .PHONY: test
 test: generate
-	go test -test.timeout=20s -cover -covermode=atomic -race -coverprofile=coverage.txt ./...
+	go test $(GO_TEST_OPTS) -cover -covermode=atomic -race -coverprofile=coverage.txt ./...
 
 .PHONY: dev
 dev: install

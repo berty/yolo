@@ -18,18 +18,18 @@ import (
 type BuildkiteWorkerOpts struct {
 	Logger    *zap.Logger
 	MaxBuilds int
+	LoopAfter time.Duration
+	Once      bool
 }
 
 // BuildkiteWorker goals is to manage the buildkite update routine, it should try to support as much errors as possible by itself
 func BuildkiteWorker(ctx context.Context, db *cayley.Handle, bkc *buildkite.Client, schema *schema.Config, opts BuildkiteWorkerOpts) error {
-	if opts.Logger == nil {
-		opts.Logger = zap.NewNop()
-	}
-	if opts.MaxBuilds == 0 {
-		opts.MaxBuilds = 100
-	}
-	logger := opts.Logger
-	maxPages := int(math.Ceil(float64(opts.MaxBuilds) / 30))
+	opts.applyDefaults()
+
+	var (
+		logger   = opts.Logger
+		maxPages = int(math.Ceil(float64(opts.MaxBuilds) / 30))
+	)
 
 	for {
 		since, err := lastBuildCreatedTime(ctx, db, yolopb.Driver_Buildkite)
@@ -49,13 +49,16 @@ func BuildkiteWorker(ctx context.Context, db *cayley.Handle, bkc *buildkite.Clie
 		}
 		// FIXME: fetch artifacts for builds with job that are successful and have a not empty artifact path
 
+		if opts.Once {
+			return nil
+		}
+
 		select {
 		case <-ctx.Done():
 			return nil
-		case <-time.After(5 * time.Second):
+		case <-time.After(opts.LoopAfter):
 		}
 	}
-	return nil
 }
 
 func fetchBuildkite(bkc *buildkite.Client, since time.Time, maxPages int, logger *zap.Logger) ([]yolopb.Batch, error) {
@@ -199,4 +202,16 @@ func buildkiteArtifactsToBatch(artifacts []buildkite.Artifact, build buildkite.B
 		batch.Artifacts = append(batch.Artifacts, &newArtifact)
 	}
 	return batch
+}
+
+func (o *BuildkiteWorkerOpts) applyDefaults() {
+	if o.Logger == nil {
+		o.Logger = zap.NewNop()
+	}
+	if o.MaxBuilds == 0 {
+		o.MaxBuilds = 100
+	}
+	if o.LoopAfter == 0 {
+		o.LoopAfter = 10 * time.Second
+	}
 }
