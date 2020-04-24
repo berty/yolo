@@ -7,7 +7,6 @@ import (
 	"berty.tech/yolo/v2/pkg/yolopb"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"moul.io/godev"
 )
 
 func (svc service) DevDumpQuads(ctx context.Context, req *yolopb.DevDumpQuads_Request) (*yolopb.DevDumpQuads_Response, error) {
@@ -116,6 +115,5 @@ func (svc service) DevDumpObjects(ctx context.Context, req *yolopb.DevDumpObject
 	resp := yolopb.DevDumpObjects_Response{
 		Batch: &batch,
 	}
-	fmt.Println(len(godev.JSON(resp)))
 	return &resp, nil
 }

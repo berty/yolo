@@ -2,6 +2,7 @@ package yolosvc
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"berty.tech/yolo/v2/pkg/yolopb"
@@ -134,6 +135,7 @@ func handleGitHubPullRequest(pr *github.PullRequest, logger *zap.Logger) yolopb.
 	branchURL := ""
 	mr := yolopb.MergeRequest{
 		ID:           quad.IRI(pr.GetHTMLURL()),
+		ShortID:      fmt.Sprintf("%d", pr.GetNumber()),
 		CreatedAt:    &createdAt,
 		UpdatedAt:    &updatedAt,
 		Title:        pr.GetTitle(),

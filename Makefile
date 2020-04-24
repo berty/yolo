@@ -11,6 +11,13 @@ test: generate
 dev: install
 	yolo -v server --dev-mode --cors-allowed-origins="*" --max-builds=50 --db-path=/tmp/yolo-dev --basic-auth-password="uns3cur3" --auth-salt="uns3cur3" $(DEV_RUN_OPTS)
 
+.PHONY: update-golden
+update-golden:
+	# first, update the golden image that requires internet
+	go test -v -test.timeout=600s ./pkg/yolosvc/ -debug -update -run TestPullAndSave
+	# then, update all the offline golden files
+	BINTRAY_TOKEN="" go test -v -test.timeout=600s ./pkg/yolosvc/ -debug -update
+
 .PHONY: install
 install: generate
 	go install ./cmd/yolo

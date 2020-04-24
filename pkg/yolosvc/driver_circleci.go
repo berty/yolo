@@ -136,6 +136,7 @@ func handleCircleciBuilds(ccc *circleci.Client, builds []*circleci.Build, logger
 func circleciBuildToBatch(build *circleci.Build) yolopb.Build {
 	newBuild := yolopb.Build{
 		ID:         quad.IRI(build.BuildURL),
+		ShortID:    fmt.Sprintf("%d", build.BuildNum),
 		Driver:     yolopb.Driver_CircleCI,
 		CreatedAt:  build.AuthorDate,
 		FinishedAt: build.StopTime,
