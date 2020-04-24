@@ -20,6 +20,7 @@ import (
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/oklog/run"
+	cache "github.com/patrickmn/go-cache"
 	"github.com/rs/cors"
 	"github.com/stretchr/signature"
 	chilogger "github.com/treastech/logger"
@@ -37,6 +38,7 @@ type Server struct {
 	grpcListenerAddr string
 	httpListenerAddr string
 	devMode          bool
+	cache            *cache.Cache
 }
 
 type ServerOpts struct {
@@ -140,6 +142,12 @@ func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, erro
 	}
 
 	var handler http.Handler = gwmux
+
+	if !srv.devMode {
+		srv.cache = cache.New(1*time.Minute, 2*time.Minute)
+		handler = cacheMiddleware(handler, srv.cache, srv.logger)
+	}
+
 	r.Route("/api", func(r chi.Router) {
 		r.Use(jsonp.Handler)
 		r.Mount("/", http.StripPrefix("/api", handler))
