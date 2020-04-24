@@ -139,7 +139,7 @@ func yolo(args []string) error {
 				if err != nil {
 					return err
 				}
-				opts := yolosvc.BintrayWorkerOpts{Logger: logger, MaxBuilds: maxBuilds}
+				opts := yolosvc.BintrayWorkerOpts{Logger: logger}
 				gr.Add(func() error { return yolosvc.BintrayWorker(ctx, db, btc, dbSchema, opts) }, func(_ error) { cancel() })
 			}
 			ghc, err := githubClientFromArgs(githubToken)
@@ -321,9 +321,6 @@ func githubClientFromArgs(token string) (*github.Client, error) {
 }
 
 func buildkiteClientFromArgs(token string) (*buildkite.Client, error) {
-	if token == "" {
-		token = os.Getenv("BUILDKITE_TOKEN")
-	}
 	config, err := buildkite.NewTokenConfig(token, false)
 	if err != nil {
 		return nil, err

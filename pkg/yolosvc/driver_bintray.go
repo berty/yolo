@@ -15,14 +15,13 @@ import (
 
 type BintrayWorkerOpts struct {
 	Logger    *zap.Logger
-	MaxBuilds int
+	LoopAfter time.Duration
+	Once      bool
 }
 
 // BintrayWorker goals is to manage the bintray update routine, it should try to support as much errors as possible by itself
 func BintrayWorker(ctx context.Context, db *cayley.Handle, btc *bintray.Client, schema *schema.Config, opts BintrayWorkerOpts) error {
-	if opts.Logger == nil {
-		opts.Logger = zap.NewNop()
-	}
+	opts.applyDefaults()
 
 	logger := opts.Logger
 
@@ -38,13 +37,16 @@ func BintrayWorker(ctx context.Context, db *cayley.Handle, btc *bintray.Client, 
 			}
 		}
 
+		if opts.Once {
+			return nil
+		}
+
 		select {
 		case <-ctx.Done():
 			return nil
-		case <-time.After(1200 * time.Second):
+		case <-time.After(opts.LoopAfter):
 		}
 	}
-	return nil
 }
 
 func fetchBintray(btc *bintray.Client, logger *zap.Logger) ([]yolopb.Batch, error) {
@@ -141,4 +143,13 @@ func bintrayFilesToBatch(files bintray.GetPackageFilesResponse) yolopb.Batch {
 		batch.Artifacts = append(batch.Artifacts, &newArtifact)
 	}
 	return batch
+}
+
+func (o *BintrayWorkerOpts) applyDefaults() {
+	if o.Logger == nil {
+		o.Logger = zap.NewNop()
+	}
+	if o.LoopAfter == 0 {
+		o.LoopAfter = 1200 * time.Second
+	}
 }

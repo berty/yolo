@@ -12,6 +12,10 @@ import (
 )
 
 func (svc service) BuildList(ctx context.Context, req *yolopb.BuildList_Request) (*yolopb.BuildList_Response, error) {
+	if req == nil {
+		req = &yolopb.BuildList_Request{}
+	}
+
 	resp := yolopb.BuildList_Response{}
 
 	p := cayleypath.StartPath(svc.db).

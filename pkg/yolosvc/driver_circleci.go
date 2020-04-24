@@ -16,18 +16,16 @@ import (
 type CircleciWorkerOpts struct {
 	Logger    *zap.Logger
 	MaxBuilds int
+	LoopAfter time.Duration
+	Once      bool
 }
 
 const circleciMaxPerPage = 30
 
 // CircleciWorker goals is to manage the circleci update routine, it should try to support as much errors as possible by itself
 func CircleciWorker(ctx context.Context, db *cayley.Handle, ccc *circleci.Client, schema *schema.Config, opts CircleciWorkerOpts) error {
-	if opts.Logger == nil {
-		opts.Logger = zap.NewNop()
-	}
-	if opts.MaxBuilds == 0 {
-		opts.MaxBuilds = 100
-	}
+	opts.applyDefaults()
+
 	logger := opts.Logger
 	for {
 		since, err := lastBuildCreatedTime(ctx, db, yolopb.Driver_CircleCI)
@@ -47,13 +45,16 @@ func CircleciWorker(ctx context.Context, db *cayley.Handle, ccc *circleci.Client
 		}
 		// FIXME: fetch artifacts for builds with job that are successful and have a not empty artifact path
 
+		if opts.Once {
+			return nil
+		}
+
 		select {
 		case <-ctx.Done():
 			return nil
-		case <-time.After(5 * time.Second):
+		case <-time.After(opts.LoopAfter):
 		}
 	}
-	return nil
 }
 
 func fetchCircleci(ccc *circleci.Client, since time.Time, maxBuilds int, logger *zap.Logger) ([]yolopb.Batch, error) {
@@ -198,4 +199,16 @@ func circleciArtifactsToBatch(artifacts []*circleci.Artifact, build *circleci.Bu
 		batch.Artifacts = append(batch.Artifacts, &newArtifact)
 	}
 	return batch
+}
+
+func (o *CircleciWorkerOpts) applyDefaults() {
+	if o.Logger == nil {
+		o.Logger = zap.NewNop()
+	}
+	if o.MaxBuilds == 0 {
+		o.MaxBuilds = 100
+	}
+	if o.LoopAfter == 0 {
+		o.LoopAfter = time.Second * 10
+	}
 }
