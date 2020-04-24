@@ -20,6 +20,7 @@ require (
 	github.com/jszwedko/go-circleci v0.3.0
 	github.com/karrick/godirwalk v1.15.6 // indirect
 	github.com/oklog/run v1.1.0
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/peterbourgon/ff/v2 v2.0.0
 	github.com/rs/cors v1.7.0
 	github.com/spf13/cobra v1.0.0 // indirect
