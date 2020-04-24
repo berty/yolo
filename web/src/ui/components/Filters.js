@@ -1,8 +1,5 @@
 import React, {useEffect, useContext} from 'react';
-import axios from 'axios';
-import {response} from '../../assets/faker.js';
-import {ResultContext, PLATFORMS} from '../../store/ResultStore.js';
-import {cloneDeep} from 'lodash';
+import {ResultContext} from '../../store/ResultStore.js';
 import {ThemeContext} from '../../store/ThemeStore.js';
 import './Filters.scss';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
@@ -11,23 +8,8 @@ import {faQuestionCircle} from '@fortawesome/free-solid-svg-icons';
 import IconChat from '../../assets/svg/IconChat';
 import IconMini from '../../assets/svg/IconMini';
 import {GitMerge, GitBranch, GitCommit} from 'react-feather';
-
-const getData = ({platformId, apiKey}) =>
-  process.env.YOLO_UI_TEST === 'true'
-    ? Promise.resolve(response).then(async (response) => {
-        await new Promise((r) => setTimeout(r, 200));
-        return await response;
-      })
-    : axios.get(
-        `${process.env.API_SERVER}/api/build-list?artifact_kind=${platformId}&`,
-        {
-          headers: apiKey
-            ? {
-                Authorization: 'Basic ' + btoa(`${apiKey}`),
-              }
-            : {},
-        }
-      );
+import {getData} from '../../api';
+import {PLATFORMS} from '../../constants/index.js';
 
 const Filters = () => {
   const {state, updateState} = useContext(ResultContext);
@@ -41,60 +23,32 @@ const Filters = () => {
         items: [],
         needsRequest: true,
       });
-      getData({platformId: state.platformId, apiKey: state.apiKey})
-        .then(
-          (result) => {
-            if (
-              !result ||
-              !result.data ||
-              !result.data.builds ||
-              !Array.isArray(result.data.builds)
-            ) {
-              throw new Error('No build list from server!');
-            }
-            const {
-              data: {builds},
-            } = result;
-
-            updateState({
-              isLoaded: true,
-              items: cloneDeep(builds),
-              error: null,
-              needsRequest: false,
-            });
-          },
-          (error) => {
-            updateState({
-              isLoaded: true,
-              needsRequest: false,
-            });
-            if (!error.response)
-              return updateState(
-                cloneDeep({
-                  error: {message: 'Network Error', status: 500, data: ''},
-                })
-              );
-            const {
-              response: {statusText: message, status, data},
-            } = error;
-            updateState({
-              error: {message, status, data},
-            });
-          }
-        )
-        .catch((err) => {
-          // TODO: This kind of stuff should be in an error boundary component.
+      getData({platformId: state.platformId, apiKey: state.apiKey}).then(
+        (result) => {
+          const {data: {builds = []} = {builds: []}} = result;
+          updateState({
+            isLoaded: true,
+            items: builds,
+            error: null,
+            needsRequest: false,
+          });
+        },
+        (err) => {
+          const defaultResponse = {
+            statusText: 'Network error',
+            status: 500,
+            data: '',
+          };
+          const {
+            response: {statusText: message, status, data} = defaultResponse,
+          } = err || {};
           updateState({
             isLoaded: true,
             needsRequest: false,
-            items: [],
-            error: {
-              message: err.message || 'Error making your request.',
-              status: 0,
-              data: '',
-            },
+            error: {message, status, data},
           });
-        });
+        }
+      );
     };
     if (
       (state.platformId !== PLATFORMS.none && state.isLoaded === false) ||

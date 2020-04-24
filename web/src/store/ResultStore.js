@@ -1,20 +1,9 @@
 import React, {useState, useContext, useReducer, createContext} from 'react';
 import {cloneDeep} from 'lodash';
+import {PLATFORMS} from '../constants';
 
 // TODO: Yes, this file needs a new name, and should maybe be split
 export const ResultContext = React.createContext();
-
-export const PLATFORMS = {
-  iOS: '1',
-  android: '2',
-  none: '3',
-};
-
-export const PLATFORM_NAMES = {
-  '1': 'iOS',
-  '2': 'android',
-  '3': 'none',
-};
 
 export const INITIAL_STATE = {
   platformId: PLATFORMS.iOS,

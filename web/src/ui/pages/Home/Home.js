@@ -3,13 +3,14 @@ import React, {useContext, useState, useEffect} from 'react';
 import {ThemeContext} from '../../../store/ThemeStore';
 import './Home.scss';
 import Header from '../../components/Header/Header';
-import {ResultContext, PLATFORMS} from '../../../store/ResultStore';
+import {ResultContext} from '../../../store/ResultStore';
 import ErrorDisplay from '../../components/ErrorDisplay';
 import BuildList from '../../components/BuildList';
 import ApiKeyPrompt from '../../components/ApiKeyPrompt';
 import {cloneDeep} from 'lodash';
 import ShowFiltersButton from '../../components/ShowFiltersButton';
 import FilterModal from '../../components/FilterModal';
+import {PLATFORMS} from '../../../constants';
 
 const Home = () => {
   const {theme} = useContext(ThemeContext);

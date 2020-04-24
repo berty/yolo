@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {themes} from '../styleTools/themes';
+import {themes} from '../ui/styleTools/themes';
 
 export const ThemeContext = React.createContext();
 
