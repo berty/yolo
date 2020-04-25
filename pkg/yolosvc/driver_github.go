@@ -44,27 +44,20 @@ func GithubWorker(ctx context.Context, db *cayley.Handle, ghc *github.Client, sc
 
 	// fetch recent activity in a loop
 	for {
-		fmt.Println("AAAAAAAAAAA1")
 		// FIXME: support "since"
 		logger.Debug("github: refresh")
 		batch, err := fetchGitHubActivity(ctx, ghc, opts.MaxBuilds, logger)
-		fmt.Println("AAAAAAAAAAA2")
 		if err != nil {
 			logger.Warn("fetch github", zap.Error(err))
 		} else {
-			fmt.Println("AAAAAAAAAAA3")
 			if !batch.Empty() {
-				fmt.Println("AAAAAAAAAAA4")
 				if err := saveBatch(ctx, db, batch, schema, logger); err != nil {
 					logger.Warn("save batch", zap.Error(err))
 				}
-				fmt.Println("AAAAAAAAAAA5")
 				opts.ClearCache.Set()
-				fmt.Println("AAAAAAAAAAA6")
 			}
 		}
 
-		fmt.Println("AAAAAAAAAAA7")
 		limits, _, err := ghc.RateLimits(ctx)
 		if err != nil {
 			logger.Warn("get rate limits", zap.Error(err))
@@ -79,13 +72,11 @@ func GithubWorker(ctx context.Context, db *cayley.Handle, ghc *github.Client, sc
 		if opts.Once {
 			return nil
 		}
-		fmt.Println("AAAAAAAAAAA8")
 		select {
 		case <-ctx.Done():
 			return nil
 		case <-time.After(opts.LoopAfter):
 		}
-		fmt.Println("AAAAAAAAAAA9")
 	}
 }
 

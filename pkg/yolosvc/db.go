@@ -12,7 +12,6 @@ import (
 	"github.com/cayleygraph/cayley/schema"
 	"github.com/cayleygraph/quad"
 	"go.uber.org/zap"
-	"moul.io/godev"
 )
 
 func SchemaConfig() *schema.Config {
@@ -44,8 +43,6 @@ func saveBatch(ctx context.Context, db *cayley.Handle, batch *yolopb.Batch, sche
 		zap.Int("artifacts", len(batch.Artifacts)),
 		zap.Int("releases", len(batch.Releases)),
 	)
-
-	fmt.Println("___")
 
 	tx := cayley.NewTransaction()
 	dw := graph.NewTxWriter(tx, graph.Delete)
@@ -79,13 +76,10 @@ func saveBatch(ctx context.Context, db *cayley.Handle, batch *yolopb.Batch, sche
 		}
 	}
 	for _, entity := range batch.Entities {
-		fmt.Println("C")
 		var working yolopb.Entity
 		if err := schema.LoadTo(ctx, db, &working, entity.ID); err == nil {
 			_, _ = schema.WriteAsQuads(dw, working)
 		}
-		fmt.Println("AAA1", godev.PrettyJSON(working))
-		fmt.Println("AAA2", godev.PrettyJSON(entity))
 
 		working = *entity
 		if _, err := schema.WriteAsQuads(iw, working); err != nil {
@@ -93,7 +87,6 @@ func saveBatch(ctx context.Context, db *cayley.Handle, batch *yolopb.Batch, sche
 		}
 	}
 	for _, project := range batch.Projects {
-		fmt.Println("D")
 		var working yolopb.Project
 		if err := schema.LoadTo(ctx, db, &working, project.ID); err == nil {
 			_, _ = schema.WriteAsQuads(dw, working)
@@ -105,7 +98,6 @@ func saveBatch(ctx context.Context, db *cayley.Handle, batch *yolopb.Batch, sche
 		}
 	}
 	for _, release := range batch.Releases {
-		fmt.Println("E")
 		var working yolopb.Release
 		if err := schema.LoadTo(ctx, db, &working, release.ID); err == nil {
 			_, _ = schema.WriteAsQuads(dw, working)
@@ -117,7 +109,6 @@ func saveBatch(ctx context.Context, db *cayley.Handle, batch *yolopb.Batch, sche
 		}
 	}
 	for _, commit := range batch.Commits {
-		fmt.Println("F")
 		var working yolopb.Commit
 		if err := schema.LoadTo(ctx, db, &working, commit.ID); err == nil {
 			_, _ = schema.WriteAsQuads(dw, working)
@@ -129,14 +120,10 @@ func saveBatch(ctx context.Context, db *cayley.Handle, batch *yolopb.Batch, sche
 		}
 	}
 	for _, mergeRequest := range batch.MergeRequests {
-		fmt.Println("G")
 		var working yolopb.MergeRequest
 		if err := schema.LoadTo(ctx, db, &working, mergeRequest.ID); err == nil {
 			_, _ = schema.WriteAsQuads(dw, working)
 		}
-
-		fmt.Println("AAA1", godev.PrettyJSON(working))
-		fmt.Println("AAA2", godev.PrettyJSON(mergeRequest))
 
 		working = *mergeRequest
 		if _, err := schema.WriteAsQuads(iw, working); err != nil {
@@ -144,7 +131,6 @@ func saveBatch(ctx context.Context, db *cayley.Handle, batch *yolopb.Batch, sche
 		}
 	}
 
-	fmt.Println("H")
 	if err := db.ApplyTransaction(tx); err != nil {
 		return fmt.Errorf("apply tx: %w", err)
 	}
