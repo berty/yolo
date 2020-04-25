@@ -26,6 +26,7 @@ import (
 	"github.com/oklog/run"
 	ff "github.com/peterbourgon/ff/v2"
 	"github.com/peterbourgon/ff/v2/ffcli"
+	"github.com/tevino/abool"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"golang.org/x/oauth2"
@@ -114,6 +115,8 @@ func yolo(args []string) error {
 			ctx, cancel := context.WithCancel(ctx)
 			defer cancel()
 
+			cc := abool.New() // clear cache signal
+
 			// service workers
 			var bkc *buildkite.Client
 			if buildkiteToken != "" {
@@ -121,7 +124,7 @@ func yolo(args []string) error {
 				if err != nil {
 					return err
 				}
-				opts := yolosvc.BuildkiteWorkerOpts{Logger: logger, MaxBuilds: maxBuilds}
+				opts := yolosvc.BuildkiteWorkerOpts{Logger: logger, MaxBuilds: maxBuilds, ClearCache: cc}
 				gr.Add(func() error { return yolosvc.BuildkiteWorker(ctx, db, bkc, dbSchema, opts) }, func(_ error) { cancel() })
 			}
 			var ccc *circleci.Client
@@ -130,7 +133,7 @@ func yolo(args []string) error {
 				if err != nil {
 					return err
 				}
-				opts := yolosvc.CircleciWorkerOpts{Logger: logger, MaxBuilds: maxBuilds}
+				opts := yolosvc.CircleciWorkerOpts{Logger: logger, MaxBuilds: maxBuilds, ClearCache: cc}
 				gr.Add(func() error { return yolosvc.CircleciWorker(ctx, db, ccc, dbSchema, opts) }, func(_ error) { cancel() })
 			}
 			var btc *bintray.Client
@@ -139,7 +142,7 @@ func yolo(args []string) error {
 				if err != nil {
 					return err
 				}
-				opts := yolosvc.BintrayWorkerOpts{Logger: logger}
+				opts := yolosvc.BintrayWorkerOpts{Logger: logger, ClearCache: cc}
 				gr.Add(func() error { return yolosvc.BintrayWorker(ctx, db, btc, dbSchema, opts) }, func(_ error) { cancel() })
 			}
 			ghc, err := githubClientFromArgs(githubToken)
@@ -147,7 +150,7 @@ func yolo(args []string) error {
 				return err
 			}
 			if githubToken != "" {
-				opts := yolosvc.GithubWorkerOpts{Logger: logger, MaxBuilds: maxBuilds}
+				opts := yolosvc.GithubWorkerOpts{Logger: logger, MaxBuilds: maxBuilds, ClearCache: cc}
 				gr.Add(func() error { return yolosvc.GithubWorker(ctx, db, ghc, dbSchema, opts) }, func(_ error) { cancel() })
 			}
 
@@ -176,6 +179,7 @@ func yolo(args []string) error {
 				Realm:              realm,
 				AuthSalt:           authSalt,
 				DevMode:            devMode,
+				ClearCache:         cc,
 			})
 			if err != nil {
 				return err
