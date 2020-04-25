@@ -10,14 +10,16 @@ import (
 	"github.com/cayleygraph/cayley/schema"
 	"github.com/cayleygraph/quad"
 	circleci "github.com/jszwedko/go-circleci"
+	"github.com/tevino/abool"
 	"go.uber.org/zap"
 )
 
 type CircleciWorkerOpts struct {
-	Logger    *zap.Logger
-	MaxBuilds int
-	LoopAfter time.Duration
-	Once      bool
+	Logger     *zap.Logger
+	MaxBuilds  int
+	LoopAfter  time.Duration
+	ClearCache *abool.AtomicBool
+	Once       bool
 }
 
 const circleciMaxPerPage = 30
@@ -35,12 +37,15 @@ func CircleciWorker(ctx context.Context, db *cayley.Handle, ccc *circleci.Client
 		}
 		logger.Debug("circleci: refresh", zap.Time("since", since))
 		// FIXME: only fetch builds since most recent known
-		batches, err := fetchCircleci(ccc, since, opts.MaxBuilds, logger)
+		batch, err := fetchCircleci(ccc, since, opts.MaxBuilds, logger)
 		if err != nil {
 			logger.Warn("fetch circleci", zap.Error(err))
 		} else {
-			if err := saveBatches(ctx, db, batches, schema); err != nil {
-				logger.Warn("save batches", zap.Error(err))
+			if !batch.Empty() {
+				if err := saveBatch(ctx, db, batch, schema, logger); err != nil {
+					logger.Warn("save batch", zap.Error(err))
+				}
+				opts.ClearCache.Set()
 			}
 		}
 		// FIXME: fetch artifacts for builds with job that are successful and have a not empty artifact path
@@ -57,8 +62,8 @@ func CircleciWorker(ctx context.Context, db *cayley.Handle, ccc *circleci.Client
 	}
 }
 
-func fetchCircleci(ccc *circleci.Client, since time.Time, maxBuilds int, logger *zap.Logger) ([]yolopb.Batch, error) {
-	batches := []yolopb.Batch{}
+func fetchCircleci(ccc *circleci.Client, since time.Time, maxBuilds int, logger *zap.Logger) (*yolopb.Batch, error) {
+	batch := yolopb.NewBatch()
 	if since.IsZero() { // initial fetch
 		// FIXME: handle circleciMaxPerPage
 		before := time.Now()
@@ -67,11 +72,11 @@ func fetchCircleci(ccc *circleci.Client, since time.Time, maxBuilds int, logger 
 			return nil, fmt.Errorf("list recent builds: %w", err)
 		}
 		logger.Debug("circleci.ListRecentBuilds", zap.Int("builds", len(builds)), zap.Duration("duration", time.Since(before)))
-		batch, err := handleCircleciBuilds(ccc, builds, logger)
+		newBatch, err := handleCircleciBuilds(ccc, builds, logger)
 		if err != nil {
 			return nil, fmt.Errorf("handle circle builds: %w", err)
 		}
-		batches = append(batches, batch)
+		batch.Merge(newBatch)
 	} else { // only recents
 		perPage := maxBuilds
 		if perPage > circleciMaxPerPage {
@@ -95,11 +100,11 @@ func fetchCircleci(ccc *circleci.Client, since time.Time, maxBuilds int, logger 
 			}
 			logger.Debug("circleci.ListRecentBuilds", zap.Int("builds", len(builds)), zap.Int("new builds", i), zap.Duration("duration", time.Since(before)))
 			if i > 0 {
-				batch, err := handleCircleciBuilds(ccc, newBuilds, logger)
+				newBatch, err := handleCircleciBuilds(ccc, newBuilds, logger)
 				if err != nil {
 					return nil, fmt.Errorf("handle circle builds: %w", err)
 				}
-				batches = append(batches, batch)
+				batch.Merge(newBatch)
 			}
 			if i == 0 || i < perPage {
 				break
@@ -108,11 +113,11 @@ func fetchCircleci(ccc *circleci.Client, since time.Time, maxBuilds int, logger 
 		}
 	}
 
-	return batches, nil
+	return batch, nil
 }
 
-func handleCircleciBuilds(ccc *circleci.Client, builds []*circleci.Build, logger *zap.Logger) (yolopb.Batch, error) {
-	batch := yolopb.Batch{Builds: []*yolopb.Build{}}
+func handleCircleciBuilds(ccc *circleci.Client, builds []*circleci.Build, logger *zap.Logger) (*yolopb.Batch, error) {
+	batch := yolopb.NewBatch()
 	for _, build := range builds {
 		if build == nil {
 			continue
@@ -180,8 +185,8 @@ func circleciBuildToBatch(build *circleci.Build) yolopb.Build {
 	return newBuild
 }
 
-func circleciArtifactsToBatch(artifacts []*circleci.Artifact, build *circleci.Build) yolopb.Batch {
-	batch := yolopb.Batch{}
+func circleciArtifactsToBatch(artifacts []*circleci.Artifact, build *circleci.Build) *yolopb.Batch {
+	batch := yolopb.NewBatch()
 	for _, artifact := range artifacts {
 		id := "circleci_" + md5Sum(artifact.URL)
 		newArtifact := yolopb.Artifact{
@@ -211,5 +216,8 @@ func (o *CircleciWorkerOpts) applyDefaults() {
 	}
 	if o.LoopAfter == 0 {
 		o.LoopAfter = time.Second * 10
+	}
+	if o.ClearCache == nil {
+		o.ClearCache = abool.New()
 	}
 }

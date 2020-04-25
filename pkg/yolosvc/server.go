@@ -23,6 +23,7 @@ import (
 	cache "github.com/patrickmn/go-cache"
 	"github.com/rs/cors"
 	"github.com/stretchr/signature"
+	"github.com/tevino/abool"
 	chilogger "github.com/treastech/logger"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -39,6 +40,7 @@ type Server struct {
 	httpListenerAddr string
 	devMode          bool
 	cache            *cache.Cache
+	clearCache       *abool.AtomicBool
 }
 
 type ServerOpts struct {
@@ -52,26 +54,17 @@ type ServerOpts struct {
 	Realm              string
 	AuthSalt           string
 	DevMode            bool
+	ClearCache         *abool.AtomicBool
 }
 
 func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, error) {
-	if opts.Logger == nil {
-		opts.Logger = zap.NewNop()
-	}
-	if opts.HTTPBind == "" {
-		opts.HTTPBind = ":0"
-	}
-	if opts.GRPCBind == "" {
-		opts.GRPCBind = ":0"
-	}
-	if opts.Realm == "" {
-		opts.Realm = "Yolo"
-	}
+	opts.applyDefaults()
 
 	// gRPC internal server
 	srv := Server{
-		logger:  opts.Logger,
-		devMode: opts.DevMode,
+		logger:     opts.Logger,
+		devMode:    opts.DevMode,
+		clearCache: opts.ClearCache,
 	}
 
 	// gRPC interceptors
@@ -146,6 +139,16 @@ func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, erro
 	if !srv.devMode {
 		srv.cache = cache.New(1*time.Minute, 2*time.Minute)
 		handler = cacheMiddleware(handler, srv.cache, srv.logger)
+		srv.workers.Add(func() error {
+			for {
+				if srv.clearCache.IsSet() {
+					srv.logger.Debug("flushing cache")
+					srv.cache.Flush()
+					srv.clearCache.UnSet()
+				}
+				time.Sleep(time.Second)
+			}
+		}, func(_ error) {})
 	}
 
 	r.Route("/api", func(r chi.Router) {
@@ -209,5 +212,29 @@ func auth(basicAuth, realm, salt string) func(http.Handler) http.Handler {
 			}
 			next.ServeHTTP(w, r)
 		})
+	}
+}
+
+func (o *ServerOpts) applyDefaults() {
+	if o.Logger == nil {
+		o.Logger = zap.NewNop()
+	}
+	if o.HTTPBind == "" {
+		o.HTTPBind = ":0"
+	}
+	if o.GRPCBind == "" {
+		o.GRPCBind = ":0"
+	}
+	if o.Realm == "" {
+		o.Realm = "Yolo"
+	}
+	if o.RequestTimeout == 0 {
+		o.RequestTimeout = 10 * time.Second
+	}
+	if o.ShutdownTimeout == 0 {
+		o.ShutdownTimeout = 11 * time.Second
+	}
+	if o.ClearCache == nil {
+		o.ClearCache = abool.New()
 	}
 }

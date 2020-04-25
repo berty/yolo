@@ -10,13 +10,15 @@ import (
 	"github.com/cayleygraph/cayley"
 	"github.com/cayleygraph/cayley/schema"
 	"github.com/cayleygraph/quad"
+	"github.com/tevino/abool"
 	"go.uber.org/zap"
 )
 
 type BintrayWorkerOpts struct {
-	Logger    *zap.Logger
-	LoopAfter time.Duration
-	Once      bool
+	Logger     *zap.Logger
+	LoopAfter  time.Duration
+	ClearCache *abool.AtomicBool
+	Once       bool
 }
 
 // BintrayWorker goals is to manage the bintray update routine, it should try to support as much errors as possible by itself
@@ -24,19 +26,20 @@ func BintrayWorker(ctx context.Context, db *cayley.Handle, btc *bintray.Client, 
 	opts.applyDefaults()
 
 	logger := opts.Logger
-
 	for {
 		logger.Debug("bintray: refresh")
 
-		batches, err := fetchBintray(btc, logger)
+		batch, err := fetchBintray(btc, logger)
 		if err != nil {
 			logger.Warn("fetch bintray", zap.Error(err))
 		} else {
-			if err := saveBatches(ctx, db, batches, schema); err != nil {
-				logger.Warn("save batches", zap.Error(err))
+			if !batch.Empty() {
+				if err := saveBatch(ctx, db, batch, schema, logger); err != nil {
+					logger.Warn("save batch", zap.Error(err))
+				}
+				opts.ClearCache.Set()
 			}
 		}
-
 		if opts.Once {
 			return nil
 		}
@@ -49,8 +52,8 @@ func BintrayWorker(ctx context.Context, db *cayley.Handle, btc *bintray.Client, 
 	}
 }
 
-func fetchBintray(btc *bintray.Client, logger *zap.Logger) ([]yolopb.Batch, error) {
-	batches := []yolopb.Batch{}
+func fetchBintray(btc *bintray.Client, logger *zap.Logger) (*yolopb.Batch, error) {
+	batch := yolopb.NewBatch()
 
 	// FIXME: support pagination
 	user, err := btc.GetUser(btc.Subject())
@@ -79,23 +82,25 @@ func fetchBintray(btc *bintray.Client, logger *zap.Logger) ([]yolopb.Batch, erro
 					return nil, fmt.Errorf("bintray.GetVersion: %w", err)
 				}
 				logger.Debug("bintray.GetVersion", zap.Any("version", version))
-				batches = append(batches, bintrayVersionToBatch(version))
+				batch.Merge(bintrayVersionToBatch(version))
 
 				files, err := btc.GetPackageFiles(orgName, repo.Name, pkg.Name)
 				if err != nil {
 					return nil, fmt.Errorf("bintray.GetPackageFiles: %w", err)
 				}
 				logger.Debug("bintray.GetPackageFiles", zap.Any("files", files))
-				batches = append(batches, bintrayFilesToBatch(files))
+				batch.Merge(bintrayFilesToBatch(files))
 			}
 		}
 	}
 
-	return batches, nil
+	// FIXME: only call saveBatches when there are actual changes, but for now,
+	//        it's not a problem since bintray is very rarely updated
+	return batch, nil
 }
 
-func bintrayVersionToBatch(version bintray.GetVersionResponse) yolopb.Batch {
-	batch := yolopb.Batch{}
+func bintrayVersionToBatch(version bintray.GetVersionResponse) *yolopb.Batch {
+	batch := yolopb.NewBatch()
 
 	if version.Owner == "" {
 		return batch
@@ -120,8 +125,8 @@ func bintrayVersionToBatch(version bintray.GetVersionResponse) yolopb.Batch {
 	return batch
 }
 
-func bintrayFilesToBatch(files bintray.GetPackageFilesResponse) yolopb.Batch {
-	batch := yolopb.Batch{}
+func bintrayFilesToBatch(files bintray.GetPackageFilesResponse) *yolopb.Batch {
+	batch := yolopb.NewBatch()
 
 	for _, file := range files {
 		buildID := fmt.Sprintf("https://bintray.com/%s/%s/%s/%s", file.Owner, file.Repo, file.Package, file.Version)
@@ -152,5 +157,8 @@ func (o *BintrayWorkerOpts) applyDefaults() {
 	}
 	if o.LoopAfter == 0 {
 		o.LoopAfter = 1200 * time.Second
+	}
+	if o.ClearCache == nil {
+		o.ClearCache = abool.New()
 	}
 }

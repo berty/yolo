@@ -12,14 +12,16 @@ import (
 	"github.com/cayleygraph/cayley"
 	"github.com/cayleygraph/cayley/schema"
 	"github.com/cayleygraph/quad"
+	"github.com/tevino/abool"
 	"go.uber.org/zap"
 )
 
 type BuildkiteWorkerOpts struct {
-	Logger    *zap.Logger
-	MaxBuilds int
-	LoopAfter time.Duration
-	Once      bool
+	Logger     *zap.Logger
+	MaxBuilds  int
+	LoopAfter  time.Duration
+	ClearCache *abool.AtomicBool
+	Once       bool
 }
 
 // BuildkiteWorker goals is to manage the buildkite update routine, it should try to support as much errors as possible by itself
@@ -39,12 +41,15 @@ func BuildkiteWorker(ctx context.Context, db *cayley.Handle, bkc *buildkite.Clie
 		}
 		logger.Debug("buildkite: refresh", zap.Time("since", since))
 		// FIXME: only fetch builds since most recent known
-		batches, err := fetchBuildkite(bkc, since, maxPages, logger)
+		batch, err := fetchBuildkite(bkc, since, maxPages, logger)
 		if err != nil {
 			logger.Warn("fetch buildkite", zap.Error(err))
 		} else {
-			if err := saveBatches(ctx, db, batches, schema); err != nil {
-				logger.Warn("save batches", zap.Error(err))
+			if !batch.Empty() {
+				if err := saveBatch(ctx, db, batch, schema, logger); err != nil {
+					logger.Warn("save batch", zap.Error(err))
+				}
+				opts.ClearCache.Set()
 			}
 		}
 		// FIXME: fetch artifacts for builds with job that are successful and have a not empty artifact path
@@ -61,8 +66,8 @@ func BuildkiteWorker(ctx context.Context, db *cayley.Handle, bkc *buildkite.Clie
 	}
 }
 
-func fetchBuildkite(bkc *buildkite.Client, since time.Time, maxPages int, logger *zap.Logger) ([]yolopb.Batch, error) {
-	batches := []yolopb.Batch{}
+func fetchBuildkite(bkc *buildkite.Client, since time.Time, maxPages int, logger *zap.Logger) (*yolopb.Batch, error) {
+	batch := yolopb.NewBatch()
 	total := 0
 	callOpts := &buildkite.BuildsListOptions{
 		FinishedFrom: since,
@@ -95,22 +100,22 @@ func fetchBuildkite(bkc *buildkite.Client, since time.Time, maxPages int, logger
 					return nil, fmt.Errorf("buildkite.Artifacts.ListByBuild: %w", err)
 				}
 				logger.Debug("buildkite.Artifacts.List", zap.Int("len", len(artifacts)))
-				batches = append(batches, buildkiteArtifactsToBatch(artifacts, build))
+				batch.Merge(buildkiteArtifactsToBatch(artifacts, build))
 			}
 		}
 		if len(builds) > 0 {
-			batches = append(batches, buildkiteBuildsToBatch(builds, logger))
+			batch.Merge(buildkiteBuildsToBatch(builds, logger))
 		}
 		if resp.NextPage == 0 {
 			break
 		}
 		callOpts.Page = resp.NextPage
 	}
-	return batches, nil
+	return batch, nil
 }
 
-func buildkiteBuildsToBatch(builds []buildkite.Build, logger *zap.Logger) yolopb.Batch {
-	batch := yolopb.Batch{}
+func buildkiteBuildsToBatch(builds []buildkite.Build, logger *zap.Logger) *yolopb.Batch {
+	batch := yolopb.NewBatch()
 	for _, build := range builds {
 		newBuild := yolopb.Build{
 			ID:        quad.IRI(*build.WebURL),
@@ -170,8 +175,8 @@ func buildkiteBuildsToBatch(builds []buildkite.Build, logger *zap.Logger) yolopb
 	return batch
 }
 
-func buildkiteArtifactsToBatch(artifacts []buildkite.Artifact, build buildkite.Build) yolopb.Batch {
-	batch := yolopb.Batch{}
+func buildkiteArtifactsToBatch(artifacts []buildkite.Artifact, build buildkite.Build) *yolopb.Batch {
+	batch := yolopb.NewBatch()
 	for _, artifact := range artifacts {
 		id := "buildkite_" + md5Sum(*artifact.DownloadURL)
 		newArtifact := yolopb.Artifact{
@@ -214,5 +219,8 @@ func (o *BuildkiteWorkerOpts) applyDefaults() {
 	}
 	if o.LoopAfter == 0 {
 		o.LoopAfter = 10 * time.Second
+	}
+	if o.ClearCache == nil {
+		o.ClearCache = abool.New()
 	}
 }

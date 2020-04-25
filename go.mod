@@ -28,6 +28,7 @@ require (
 	github.com/stretchr/stew v0.0.0-20130812190256-80ef0842b48b // indirect
 	github.com/stretchr/testify v1.5.1
 	github.com/stretchr/tracer v0.0.0-20140124184152-66d3696bba97 // indirect
+	github.com/tevino/abool v0.0.0-20170917061928-9b9efcf221b5
 	github.com/treastech/logger v0.0.0-20180705232552-e381e9ecf2e3
 	go.uber.org/zap v1.14.1
 	golang.org/x/crypto v0.0.0-20200423211502-4bdfaf469ed5 // indirect

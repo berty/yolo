@@ -10,53 +10,68 @@ import (
 	"github.com/cayleygraph/cayley/schema"
 	"github.com/cayleygraph/quad"
 	"github.com/google/go-github/v31/github"
+	"github.com/tevino/abool"
 	"go.uber.org/zap"
 )
 
 type GithubWorkerOpts struct {
-	Logger    *zap.Logger
-	MaxBuilds int
-	LoopAfter time.Duration
-	Once      bool
+	Logger     *zap.Logger
+	MaxBuilds  int
+	LoopAfter  time.Duration
+	ClearCache *abool.AtomicBool
+	Once       bool
 }
 
 // GithubWorker goals is to manage the github update routine, it should try to support as much errors as possible by itself
 func GithubWorker(ctx context.Context, db *cayley.Handle, ghc *github.Client, schema *schema.Config, opts GithubWorkerOpts) error {
 	opts.applyDefaults()
 
+	logger := opts.Logger
+
 	// fetch GitHub base objects (the ones that don't change very often).
 	// this is done only once (for now).
 	{
-		batches, err := fetchGitHubBaseObjects(ctx, ghc, opts.Logger)
+		batch, err := fetchGitHubBaseObjects(ctx, ghc, logger)
 		if err != nil {
-			opts.Logger.Warn("fetch GitHub base", zap.Error(err))
+			logger.Warn("fetch GitHub base", zap.Error(err))
 		} else {
-			if err := saveBatches(ctx, db, batches, schema); err != nil {
-				opts.Logger.Warn("save batches", zap.Error(err))
+			if err := saveBatch(ctx, db, batch, schema, logger); err != nil {
+				logger.Warn("save batch", zap.Error(err))
 			}
+			opts.ClearCache.Set()
 		}
 	}
 
 	// fetch recent activity in a loop
 	for {
+		fmt.Println("AAAAAAAAAAA1")
 		// FIXME: support "since"
-		opts.Logger.Debug("github: refresh")
-		batches, err := fetchGitHubActivity(ctx, ghc, opts.MaxBuilds, opts.Logger)
+		logger.Debug("github: refresh")
+		batch, err := fetchGitHubActivity(ctx, ghc, opts.MaxBuilds, logger)
+		fmt.Println("AAAAAAAAAAA2")
 		if err != nil {
-			opts.Logger.Warn("fetch github", zap.Error(err))
+			logger.Warn("fetch github", zap.Error(err))
 		} else {
-			if err := saveBatches(ctx, db, batches, schema); err != nil {
-				opts.Logger.Warn("save batches", zap.Error(err))
+			fmt.Println("AAAAAAAAAAA3")
+			if !batch.Empty() {
+				fmt.Println("AAAAAAAAAAA4")
+				if err := saveBatch(ctx, db, batch, schema, logger); err != nil {
+					logger.Warn("save batch", zap.Error(err))
+				}
+				fmt.Println("AAAAAAAAAAA5")
+				opts.ClearCache.Set()
+				fmt.Println("AAAAAAAAAAA6")
 			}
 		}
 
+		fmt.Println("AAAAAAAAAAA7")
 		limits, _, err := ghc.RateLimits(ctx)
 		if err != nil {
-			opts.Logger.Warn("get rate limits", zap.Error(err))
+			logger.Warn("get rate limits", zap.Error(err))
 		} else {
 			reset := limits.Core.Reset.Time.Sub(time.Now())
 			remaining := limits.Core.Remaining
-			opts.Logger.Debug("github: rate limits", zap.Int("remaining", remaining), zap.Duration("reset", reset))
+			logger.Debug("github: rate limits", zap.Int("remaining", remaining), zap.Duration("reset", reset))
 		}
 
 		// FIXME: if rate limit errors, use the RetryAfter helper
@@ -64,16 +79,18 @@ func GithubWorker(ctx context.Context, db *cayley.Handle, ghc *github.Client, sc
 		if opts.Once {
 			return nil
 		}
+		fmt.Println("AAAAAAAAAAA8")
 		select {
 		case <-ctx.Done():
 			return nil
 		case <-time.After(opts.LoopAfter):
 		}
+		fmt.Println("AAAAAAAAAAA9")
 	}
 }
 
-func fetchGitHubBaseObjects(ctx context.Context, ghc *github.Client, logger *zap.Logger) ([]yolopb.Batch, error) {
-	batches := []yolopb.Batch{}
+func fetchGitHubBaseObjects(ctx context.Context, ghc *github.Client, logger *zap.Logger) (*yolopb.Batch, error) {
+	batch := yolopb.NewBatch()
 
 	// list orgs
 	{
@@ -84,7 +101,7 @@ func fetchGitHubBaseObjects(ctx context.Context, ghc *github.Client, logger *zap
 		}
 		logger.Debug("github.Organizations.List", zap.Int("total", len(orgs)), zap.Duration("duration", time.Since(before)))
 		for _, org := range orgs {
-			batches = append(batches, handleGitHubOrganization(org))
+			batch.Merge(handleGitHubOrganization(org))
 		}
 	}
 
@@ -97,16 +114,16 @@ func fetchGitHubBaseObjects(ctx context.Context, ghc *github.Client, logger *zap
 		}
 		logger.Debug("github.Repositories.List", zap.Int("total", len(repos)), zap.Duration("duration", time.Since(before)))
 		for _, repo := range repos {
-			batches = append(batches, handleGitHubRepo(repo, logger))
+			batch.Merge(handleGitHubRepo(repo, logger))
 		}
 		// FIXME: list last branches, commits etc for each repo
 	}
 
-	return batches, nil
+	return batch, nil
 }
 
-func fetchGitHubActivity(ctx context.Context, ghc *github.Client, maxBuilds int, logger *zap.Logger) ([]yolopb.Batch, error) {
-	batches := []yolopb.Batch{}
+func fetchGitHubActivity(ctx context.Context, ghc *github.Client, maxBuilds int, logger *zap.Logger) (*yolopb.Batch, error) {
+	batch := yolopb.NewBatch()
 	opts := &github.PullRequestListOptions{
 		State:     "all",
 		Sort:      "updated",
@@ -120,13 +137,13 @@ func fetchGitHubActivity(ctx context.Context, ghc *github.Client, maxBuilds int,
 	}
 	logger.Debug("github.PullRequests.List", zap.Int("total", len(pulls)), zap.Duration("duration", time.Since(before)))
 	for _, pull := range pulls {
-		batches = append(batches, handleGitHubPullRequest(pull, logger))
+		batch.Merge(handleGitHubPullRequest(pull, logger))
 	}
-	return batches, nil
+	return batch, nil
 }
 
-func handleGitHubPullRequest(pr *github.PullRequest, logger *zap.Logger) yolopb.Batch {
-	batch := yolopb.Batch{MergeRequests: []*yolopb.MergeRequest{}}
+func handleGitHubPullRequest(pr *github.PullRequest, logger *zap.Logger) *yolopb.Batch {
+	batch := yolopb.NewBatch()
 	createdAt := pr.GetCreatedAt()
 	updatedAt := pr.GetUpdatedAt()
 	baseCommit := yolopb.Commit{ID: quad.IRI(pr.GetHead().GetSHA())}
@@ -165,17 +182,17 @@ func handleGitHubPullRequest(pr *github.PullRequest, logger *zap.Logger) yolopb.
 
 	if user := pr.GetUser(); user != nil {
 		userBatch := handleGitHubUser(user, logger)
-		batch.Entities = append(batch.Entities, userBatch.Entities...)
+		batch.Merge(userBatch)
 		mr.HasAuthor = &yolopb.Entity{ID: userBatch.Entities[0].ID}
 	}
 	for _, user := range pr.Assignees {
 		userBatch := handleGitHubUser(user, logger)
-		batch.Entities = append(batch.Entities, userBatch.Entities...)
+		batch.Merge(userBatch)
 		mr.HasAssignees = append(mr.HasAssignees, userBatch.Entities[0])
 	}
 	for _, user := range pr.RequestedReviewers {
 		userBatch := handleGitHubUser(user, logger)
-		batch.Entities = append(batch.Entities, userBatch.Entities...)
+		batch.Merge(userBatch)
 		mr.HasReviewers = append(mr.HasReviewers, userBatch.Entities[0])
 	}
 
@@ -183,11 +200,8 @@ func handleGitHubPullRequest(pr *github.PullRequest, logger *zap.Logger) yolopb.
 	return batch
 }
 
-func handleGitHubRepo(repo *github.Repository, logger *zap.Logger) yolopb.Batch {
-	batch := yolopb.Batch{
-		Projects: []*yolopb.Project{},
-		Entities: []*yolopb.Entity{},
-	}
+func handleGitHubRepo(repo *github.Repository, logger *zap.Logger) *yolopb.Batch {
+	batch := yolopb.NewBatch()
 	createdAt := repo.GetCreatedAt().Time
 	updatedAt := repo.GetUpdatedAt().Time
 	project := yolopb.Project{
@@ -202,7 +216,7 @@ func handleGitHubRepo(repo *github.Repository, logger *zap.Logger) yolopb.Batch 
 
 	if repoOwner := repo.GetOwner(); repoOwner != nil {
 		ownerBatch := handleGitHubUser(repoOwner, logger)
-		batch.Entities = append(batch.Entities, ownerBatch.Entities...)
+		batch.Merge(ownerBatch)
 		project.HasOwner = &yolopb.Entity{ID: ownerBatch.Entities[0].ID}
 	}
 
@@ -210,10 +224,8 @@ func handleGitHubRepo(repo *github.Repository, logger *zap.Logger) yolopb.Batch 
 	return batch
 }
 
-func handleGitHubUser(user *github.User, logger *zap.Logger) yolopb.Batch {
-	batch := yolopb.Batch{
-		Entities: []*yolopb.Entity{},
-	}
+func handleGitHubUser(user *github.User, logger *zap.Logger) *yolopb.Batch {
+	batch := yolopb.NewBatch()
 	owner := yolopb.Entity{
 		ID:        quad.IRI(user.GetHTMLURL()),
 		Name:      user.GetLogin(),
@@ -234,10 +246,8 @@ func handleGitHubUser(user *github.User, logger *zap.Logger) yolopb.Batch {
 	return batch
 }
 
-func handleGitHubOrganization(org *github.Organization) yolopb.Batch {
-	batch := yolopb.Batch{
-		Entities: []*yolopb.Entity{},
-	}
+func handleGitHubOrganization(org *github.Organization) *yolopb.Batch {
+	batch := yolopb.NewBatch()
 
 	id := org.GetHTMLURL()
 	if id == "" {
@@ -263,6 +273,9 @@ func (o *GithubWorkerOpts) applyDefaults() {
 		o.MaxBuilds = 100
 	}
 	if o.LoopAfter == 0 {
-		o.LoopAfter = time.Second * 30
+		o.LoopAfter = time.Second * 10
+	}
+	if o.ClearCache == nil {
+		o.ClearCache = abool.New()
 	}
 }
