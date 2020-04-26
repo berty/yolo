@@ -4,7 +4,6 @@ import {hot} from 'react-hot-loader';
 import Home from './ui/pages/Home/Home';
 import {ThemeStore} from './store/ThemeStore';
 
-// Import Tabler styles
 import 'tabler-react/dist/Tabler.css';
 import './assets/main.scss';
 import {ResultStore} from './store/ResultStore';

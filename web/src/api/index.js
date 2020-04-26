@@ -9,7 +9,7 @@ const baseMockRequest = () =>
 
 const baseRequest = ({platformId, apiKey}) =>
   axios.get(
-    `${process.env.API_SERVER}/api/build-list?artifact_kinds=${platformId}`,
+    `${process.env.API_SERVER}/api/build-list?artifact-kinds=${platformId}&`,
     {
       headers: apiKey
         ? {
@@ -23,3 +23,28 @@ export const getData = ({platformId, apiKey}) =>
   process.env.YOLO_UI_TEST === 'true'
     ? baseMockRequest()
     : baseRequest({platformId, apiKey});
+
+export const validateError = ({error}) => {
+  const {message: axiosMessage} = error.toJSON();
+  const {
+    response: {data: customTopLevelMessage = '', status, statusText} = {
+      data: '',
+      status: 0,
+      statusText: '',
+    },
+  } = error || {};
+  const {
+    response: {data: {message: customNestedMessage} = {data: {message: ''}}},
+  } = error || {};
+  const humanMessage =
+    typeof customTopLevelMessage === 'string'
+      ? customTopLevelMessage
+      : typeof customNestedMessage === 'string'
+      ? customNestedMessage
+      : axiosMessage;
+  return {
+    humanMessage,
+    status,
+    statusText,
+  };
+};

@@ -3,12 +3,15 @@ import {ThemeContext} from '../../../store/ThemeStore';
 import {Clock, Calendar, ArrowDownCircle, AlertTriangle} from 'react-feather';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faAndroid, faApple} from '@fortawesome/free-brands-svg-icons';
-import './BuildCard.scss';
-import {tagStyle, actionButtonStyle} from '../../styleTools/buttonStyler';
 import dayjs from 'dayjs';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
 import relativeTime from 'dayjs/plugin/relativeTime';
+
+import {tagStyle, actionButtonStyle} from '../../styleTools/buttonStyler';
+
 import {KIND_TO_PLATFORM} from '../../../constants';
+
+import './BuildCard.scss';
 
 const ArtifactCard = ({artifact, buildMergeUpdatedAt, buildMergeId}) => {
   const {theme} = useContext(ThemeContext);

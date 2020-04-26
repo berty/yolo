@@ -39,7 +39,7 @@ function _reducer(state, action) {
     case 'updateState':
       return {...state, ...action.payload};
     default:
-      throw new Error(); // TODO: Handle me
+      return {...state};
   }
 }
 

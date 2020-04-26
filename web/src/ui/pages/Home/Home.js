@@ -1,18 +1,22 @@
 /* eslint-disable import/no-named-as-default */
 import React, {useContext, useState, useEffect} from 'react';
-import {ThemeContext} from '../../../store/ThemeStore';
-import './Home.scss';
+import {cloneDeep} from 'lodash';
+
 import Header from '../../components/Header/Header';
-import {ResultContext} from '../../../store/ResultStore';
 import ErrorDisplay from '../../components/ErrorDisplay';
 import BuildList from '../../components/BuildList';
 import ApiKeyPrompt from '../../components/ApiKeyPrompt';
-import {cloneDeep} from 'lodash';
 import ShowFiltersButton from '../../components/ShowFiltersButton';
-import FilterModal from '../../components/FilterModal';
+import FilterModal from '../../components/FilterModal/FilterModal';
+
+import {ThemeContext} from '../../../store/ThemeStore';
+import {ResultContext} from '../../../store/ResultStore';
+
 import {PLATFORMS} from '../../../constants';
 import MessageModal from '../../components/MessageModal';
 import Cookies from 'js-cookie';
+
+import './Home.scss';
 
 const Home = () => {
   const {theme} = useContext(ThemeContext);
