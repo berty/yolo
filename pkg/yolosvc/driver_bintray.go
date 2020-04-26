@@ -7,9 +7,6 @@ import (
 
 	"berty.tech/yolo/v2/pkg/bintray"
 	"berty.tech/yolo/v2/pkg/yolopb"
-	"github.com/cayleygraph/cayley"
-	"github.com/cayleygraph/cayley/schema"
-	"github.com/cayleygraph/quad"
 	"github.com/tevino/abool"
 	"go.uber.org/zap"
 )
@@ -21,25 +18,24 @@ type BintrayWorkerOpts struct {
 	Once       bool
 }
 
-// BintrayWorker goals is to manage the bintray update routine, it should try to support as much errors as possible by itself
-func BintrayWorker(ctx context.Context, db *cayley.Handle, btc *bintray.Client, schema *schema.Config, opts BintrayWorkerOpts) error {
+// BintrayWorker goals is to manage the github update routine, it should try to support as much errors as possible by itself
+func (svc *service) BintrayWorker(ctx context.Context, opts BintrayWorkerOpts) error {
 	opts.applyDefaults()
 
-	logger := opts.Logger
-	for {
-		logger.Debug("bintray: refresh")
+	var logger = opts.Logger
 
-		batch, err := fetchBintray(btc, logger)
+	for iteration := 0; ; iteration++ {
+		logger.Debug("bintray: refresh", zap.Int("iteration", iteration))
+		// FIXME: only fetch builds since most recent known
+		batch, err := fetchBintray(svc.btc, logger)
 		if err != nil {
 			logger.Warn("fetch bintray", zap.Error(err))
 		} else {
-			if !batch.Empty() {
-				if err := saveBatch(ctx, db, batch, schema, logger); err != nil {
-					logger.Warn("save batch", zap.Error(err))
-				}
-				opts.ClearCache.Set()
+			if err := svc.saveBatch(ctx, batch); err != nil {
+				logger.Warn("save batch", zap.Error(err))
 			}
 		}
+
 		if opts.Once {
 			return nil
 		}
@@ -108,7 +104,7 @@ func bintrayVersionToBatch(version bintray.GetVersionResponse) *yolopb.Batch {
 
 	id := fmt.Sprintf("https://bintray.com/%s/%s/%s/%s", version.Owner, version.Repo, version.Package, version.Name)
 	newBuild := yolopb.Build{
-		ID:        quad.IRI(id),
+		ID:        id,
 		ShortID:   version.Name,
 		CreatedAt: &version.Created,
 		UpdatedAt: &version.Updated,
@@ -133,12 +129,12 @@ func bintrayFilesToBatch(files bintray.GetPackageFilesResponse) *yolopb.Batch {
 		downloadURL := fmt.Sprintf("https://dl.bintray.com/%s/%s/%s", file.Owner, file.Repo, file.Path)
 		id := fmt.Sprintf("bintray_%s", md5Sum(downloadURL))
 		newArtifact := yolopb.Artifact{
-			ID:          quad.IRI(id),
+			ID:          id,
 			CreatedAt:   &file.Created,
 			FileSize:    int64(file.Size),
 			LocalPath:   file.Path,
 			DownloadURL: downloadURL,
-			HasBuild:    &yolopb.Build{ID: quad.IRI(buildID)},
+			HasBuildID:  buildID,
 			Sha1Sum:     file.Sha1,
 			Sha256Sum:   file.Sha256,
 			State:       yolopb.Artifact_Finished,

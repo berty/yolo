@@ -1,15 +1,13 @@
-package main // import "berty.tech/yolo/cmd/yolo"
+package main
 
 import (
 	"context"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
 	"os"
-	"path"
 	"syscall"
 	"time"
 
@@ -17,11 +15,10 @@ import (
 	"berty.tech/yolo/v2/pkg/yolosvc"
 	bearer "github.com/Bearer/bearer-go"
 	"github.com/buildkite/go-buildkite/buildkite"
-	"github.com/cayleygraph/cayley"
-	"github.com/cayleygraph/cayley/graph"
-	_ "github.com/cayleygraph/cayley/graph/kv/bolt" // required by cayley
 	"github.com/google/go-github/v31/github"
 	_ "github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger/options" // required by protoc
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	circleci "github.com/jszwedko/go-circleci"
 	"github.com/oklog/run"
 	ff "github.com/peterbourgon/ff/v2"
@@ -62,6 +59,7 @@ func yolo(args []string) error {
 		basicAuth          string
 		authSalt           string
 		realm              string
+		// FIXME: once bool
 	)
 	var (
 		rootFlagSet   = flag.NewFlagSet("yolo", flag.ExitOnError)
@@ -103,12 +101,11 @@ func yolo(args []string) error {
 			if bearerSecretKey != "" {
 				bearer.ReplaceGlobals(bearer.Init(bearerSecretKey))
 			}
-			db, dbCleanup, err := dbFromArgs(dbStorePath, logger)
+			db, err := dbFromArgs(dbStorePath, logger)
 			if err != nil {
 				return err
 			}
-			defer dbCleanup()
-			dbSchema := yolosvc.SchemaConfig()
+			defer db.Close()
 
 			gr := run.Group{}
 			gr.Add(run.SignalHandler(ctx, syscall.SIGKILL, syscall.SIGTERM))
@@ -117,15 +114,13 @@ func yolo(args []string) error {
 
 			cc := abool.New() // clear cache signal
 
-			// service workers
+			// service conns
 			var bkc *buildkite.Client
 			if buildkiteToken != "" {
 				bkc, err = buildkiteClientFromArgs(buildkiteToken)
 				if err != nil {
 					return err
 				}
-				opts := yolosvc.BuildkiteWorkerOpts{Logger: logger, MaxBuilds: maxBuilds, ClearCache: cc}
-				gr.Add(func() error { return yolosvc.BuildkiteWorker(ctx, db, bkc, dbSchema, opts) }, func(_ error) { cancel() })
 			}
 			var ccc *circleci.Client
 			if circleciToken != "" {
@@ -133,8 +128,6 @@ func yolo(args []string) error {
 				if err != nil {
 					return err
 				}
-				opts := yolosvc.CircleciWorkerOpts{Logger: logger, MaxBuilds: maxBuilds, ClearCache: cc}
-				gr.Add(func() error { return yolosvc.CircleciWorker(ctx, db, ccc, dbSchema, opts) }, func(_ error) { cancel() })
 			}
 			var btc *bintray.Client
 			if bintrayToken != "" && bintrayUsername != "" {
@@ -142,24 +135,18 @@ func yolo(args []string) error {
 				if err != nil {
 					return err
 				}
-				opts := yolosvc.BintrayWorkerOpts{Logger: logger, ClearCache: cc}
-				gr.Add(func() error { return yolosvc.BintrayWorker(ctx, db, btc, dbSchema, opts) }, func(_ error) { cancel() })
 			}
 			ghc, err := githubClientFromArgs(githubToken)
 			if err != nil {
 				return err
-			}
-			if githubToken != "" {
-				opts := yolosvc.GithubWorkerOpts{Logger: logger, MaxBuilds: maxBuilds, ClearCache: cc}
-				gr.Add(func() error { return yolosvc.GithubWorker(ctx, db, ghc, dbSchema, opts) }, func(_ error) { cancel() })
 			}
 
 			if devMode {
 				logger.Warn("--dev-mode: insecure helpers are enabled")
 			}
 
-			// server
-			svc := yolosvc.NewService(db, dbSchema, yolosvc.ServiceOpts{
+			// service
+			svc, err := yolosvc.NewService(db, yolosvc.ServiceOpts{
 				Logger:          logger,
 				BuildkiteClient: bkc,
 				CircleciClient:  ccc,
@@ -168,6 +155,29 @@ func yolo(args []string) error {
 				AuthSalt:        authSalt,
 				DevMode:         devMode,
 			})
+			if err != nil {
+				return err
+			}
+
+			// service workers
+			if bkc != nil {
+				opts := yolosvc.BuildkiteWorkerOpts{Logger: logger, MaxBuilds: maxBuilds, ClearCache: cc}
+				gr.Add(func() error { return svc.BuildkiteWorker(ctx, opts) }, func(_ error) { cancel() })
+			}
+			if ccc != nil {
+				opts := yolosvc.CircleciWorkerOpts{Logger: logger, MaxBuilds: maxBuilds, ClearCache: cc}
+				gr.Add(func() error { return svc.CircleciWorker(ctx, opts) }, func(_ error) { cancel() })
+			}
+			if btc != nil {
+				opts := yolosvc.BintrayWorkerOpts{Logger: logger, ClearCache: cc}
+				gr.Add(func() error { return svc.BintrayWorker(ctx, opts) }, func(_ error) { cancel() })
+			}
+			if githubToken != "" {
+				opts := yolosvc.GithubWorkerOpts{Logger: logger, MaxBuilds: maxBuilds, ClearCache: cc}
+				gr.Add(func() error { return svc.GitHubWorker(ctx, opts) }, func(_ error) { cancel() })
+			}
+
+			// server/API
 			server, err := yolosvc.NewServer(ctx, svc, yolosvc.ServerOpts{
 				Logger:             logger,
 				GRPCBind:           grpcBind,
@@ -190,39 +200,6 @@ func yolo(args []string) error {
 		},
 	}
 
-	dumpQuads := &ffcli.Command{
-		Name:    `dump-quads`,
-		FlagSet: storeFlagSet,
-		Options: []ff.Option{ff.WithEnvVarNoPrefix()},
-		Exec: func(_ context.Context, _ []string) error {
-			logger, err := loggerFromArgs(verbose)
-			if err != nil {
-				return err
-			}
-			db, dbCleanup, err := dbFromArgs(dbStorePath, logger)
-			if err != nil {
-				return err
-			}
-			defer dbCleanup()
-			dbSchema := yolosvc.SchemaConfig()
-
-			svc := yolosvc.NewService(db, dbSchema, yolosvc.ServiceOpts{
-				Logger:  logger,
-				DevMode: true,
-			})
-			ctx := context.Background()
-			ret, err := svc.DevDumpQuads(ctx, nil)
-			if err != nil {
-				return err
-			}
-			for _, line := range ret.Quads {
-				fmt.Println(line)
-			}
-
-			return nil
-		},
-	}
-
 	dumpObjects := &ffcli.Command{
 		Name:    `dump-objects`,
 		FlagSet: storeFlagSet,
@@ -232,17 +209,20 @@ func yolo(args []string) error {
 			if err != nil {
 				return err
 			}
-			db, dbCleanup, err := dbFromArgs(dbStorePath, logger)
+			db, err := dbFromArgs(dbStorePath, logger)
 			if err != nil {
 				return err
 			}
-			defer dbCleanup()
-			dbSchema := yolosvc.SchemaConfig()
+			defer db.Close()
 
-			svc := yolosvc.NewService(db, dbSchema, yolosvc.ServiceOpts{
+			svc, err := yolosvc.NewService(db, yolosvc.ServiceOpts{
 				Logger:  logger,
 				DevMode: true,
 			})
+			if err != nil {
+				return err
+			}
+
 			ctx := context.Background()
 			ret, err := svc.DevDumpObjects(ctx, nil)
 			if err != nil {
@@ -263,17 +243,20 @@ func yolo(args []string) error {
 			if err != nil {
 				return err
 			}
-			db, dbCleanup, err := dbFromArgs(dbStorePath, logger)
+			db, err := dbFromArgs(dbStorePath, logger)
 			if err != nil {
 				return err
 			}
-			defer dbCleanup()
-			dbSchema := yolosvc.SchemaConfig()
+			defer db.Close()
 
-			svc := yolosvc.NewService(db, dbSchema, yolosvc.ServiceOpts{
+			svc, err := yolosvc.NewService(db, yolosvc.ServiceOpts{
 				Logger:  logger,
 				DevMode: true,
 			})
+			if err != nil {
+				return err
+			}
+
 			ctx := context.Background()
 			ret, err := svc.Status(ctx, nil)
 			if err != nil {
@@ -288,7 +271,7 @@ func yolo(args []string) error {
 	root := &ffcli.Command{
 		ShortUsage:  `server [flags] <subcommand>`,
 		FlagSet:     rootFlagSet,
-		Subcommands: []*ffcli.Command{server, dumpQuads, dumpObjects, info},
+		Subcommands: []*ffcli.Command{server, dumpObjects, info},
 		Options:     []ff.Option{ff.WithEnvVarNoPrefix()},
 		Exec: func(_ context.Context, _ []string) error {
 			return flag.ErrHelp
@@ -345,27 +328,10 @@ func loggerFromArgs(verbose bool) (*zap.Logger, error) {
 	return config.Build()
 }
 
-func dbFromArgs(dbPath string, logger *zap.Logger) (*cayley.Handle, func(), error) {
-	cleanup := func() {}
-	if dbPath == ":temp:" {
-		dir, err := ioutil.TempDir("", "yolo")
-		if err != nil {
-			return nil, nil, err
-		}
-		dbPath = dir
-		logger.Debug("using temporary db", zap.String("path", dir))
-
-	}
-	if _, err := os.Stat(path.Join(dbPath, "indexes.bolt")); err != nil {
-		if err := graph.InitQuadStore("bolt", dbPath, nil); err != nil {
-			cleanup()
-			return nil, nil, err
-		}
-	}
-	db, err := cayley.NewGraph("bolt", dbPath, nil)
+func dbFromArgs(dbPath string, logger *zap.Logger) (*gorm.DB, error) {
+	db, err := gorm.Open("sqlite3", dbPath)
 	if err != nil {
-		cleanup()
-		return nil, nil, err
+		return nil, err
 	}
-	return db, cleanup, nil
+	return db, nil
 }

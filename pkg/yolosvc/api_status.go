@@ -13,16 +13,10 @@ func (svc service) Status(ctx context.Context, req *yolopb.Status_Request) (*yol
 	}
 
 	// db
-	stats, err := svc.db.Stats(ctx, false)
-	if err == nil {
-		ret.DbNodes = stats.Nodes.Value
-		ret.DbQuads = stats.Quads.Value
-	} else {
-		ret.DbErr = err.Error()
-	}
-
+	// FIXME: check if db is available
+	// FIXME: check if CI clients are set, if they can connect, and if they are rate limited
 	if svc.devMode {
-		resp, err := svc.DevDumpObjects(ctx, nil)
+		resp, err := svc.DevDumpObjects(ctx, &yolopb.DevDumpObjects_Request{})
 		if err != nil {
 			return nil, err
 		}

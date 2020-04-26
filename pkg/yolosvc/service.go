@@ -1,16 +1,17 @@
 package yolosvc
 
 import (
+	"context"
 	"net/http"
 	"time"
 
 	"berty.tech/yolo/v2/pkg/bintray"
 	"berty.tech/yolo/v2/pkg/yolopb"
 	"github.com/buildkite/go-buildkite/buildkite"
-	"github.com/cayleygraph/cayley"
-	"github.com/cayleygraph/cayley/schema"
 	"github.com/google/go-github/v31/github"
+	"github.com/jinzhu/gorm"
 	circleci "github.com/jszwedko/go-circleci"
+	"github.com/tevino/abool"
 	"go.uber.org/zap"
 )
 
@@ -18,19 +19,24 @@ type Service interface {
 	yolopb.YoloServiceServer
 	PlistGenerator(w http.ResponseWriter, r *http.Request)
 	ArtifactDownloader(w http.ResponseWriter, r *http.Request)
+
+	GitHubWorker(ctx context.Context, opts GithubWorkerOpts) error
+	BuildkiteWorker(ctx context.Context, opts BuildkiteWorkerOpts) error
+	CircleciWorker(ctx context.Context, opts CircleciWorkerOpts) error
+	BintrayWorker(ctx context.Context, opts BintrayWorkerOpts) error
 }
 
 type service struct {
-	startTime time.Time
-	db        *cayley.Handle
-	logger    *zap.Logger
-	schema    *schema.Config
-	bkc       *buildkite.Client
-	btc       *bintray.Client
-	ccc       *circleci.Client
-	ghc       *github.Client
-	authSalt  string
-	devMode   bool
+	startTime  time.Time
+	db         *gorm.DB
+	logger     *zap.Logger
+	bkc        *buildkite.Client
+	btc        *bintray.Client
+	ccc        *circleci.Client
+	ghc        *github.Client
+	authSalt   string
+	devMode    bool
+	clearCache *abool.AtomicBool
 }
 
 type ServiceOpts struct {
@@ -41,26 +47,36 @@ type ServiceOpts struct {
 	Logger          *zap.Logger
 	AuthSalt        string
 	DevMode         bool
+	ClearCache      *abool.AtomicBool
 }
 
-func NewService(db *cayley.Handle, schema *schema.Config, opts ServiceOpts) Service {
+func NewService(db *gorm.DB, opts ServiceOpts) (Service, error) {
 	opts.applyDefaults()
-	return &service{
-		startTime: time.Now(),
-		db:        db,
-		logger:    opts.Logger,
-		schema:    schema,
-		bkc:       opts.BuildkiteClient,
-		btc:       opts.BintrayClient,
-		ccc:       opts.CircleciClient,
-		ghc:       opts.GithubClient,
-		authSalt:  opts.AuthSalt,
-		devMode:   opts.DevMode,
+
+	db, err := initDB(db, opts.Logger)
+	if err != nil {
+		return nil, err
 	}
+
+	return &service{
+		startTime:  time.Now(),
+		db:         db,
+		logger:     opts.Logger,
+		bkc:        opts.BuildkiteClient,
+		btc:        opts.BintrayClient,
+		ccc:        opts.CircleciClient,
+		ghc:        opts.GithubClient,
+		authSalt:   opts.AuthSalt,
+		devMode:    opts.DevMode,
+		clearCache: opts.ClearCache,
+	}, nil
 }
 
 func (o *ServiceOpts) applyDefaults() {
 	if o.Logger == nil {
 		o.Logger = zap.NewNop()
+	}
+	if o.ClearCache == nil {
+		o.ClearCache = abool.New()
 	}
 }

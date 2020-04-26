@@ -17,7 +17,6 @@ service YoloService {
   rpc Ping(Ping.Request)                     returns (Ping.Response)           { option (google.api.http) = {get: "/ping"}; };
   rpc Status(Status.Request)                 returns (Status.Response)         { option (google.api.http) = {get: "/status"}; };
   rpc BuildList(BuildList.Request)           returns (BuildList.Response)      { option (google.api.http) = {get: "/build-list"}; }
-  rpc DevDumpQuads(DevDumpQuads.Request)     returns (DevDumpQuads.Response)   { option (google.api.http) = {get: "/dev-dump-quads"}; }
   rpc DevDumpObjects(DevDumpObjects.Request) returns (DevDumpObjects.Response) { option (google.api.http) = {get: "/dev-dump-objects"}; }
   }
 
@@ -31,16 +30,11 @@ message Ping {
 }
 
 message DevDumpObjects {
-  message Request  {}
+  message Request  {
+    bool with_preloading = 1;
+  }
   message Response {
     Batch batch = 1;
-  }
-}
-
-message DevDumpQuads {
-  message Request  {}
-  message Response {
-    repeated string quads = 1;
   }
 }
 
@@ -49,8 +43,6 @@ message Status {
   message Response {
     int32 uptime = 1;
     string db_err = 2;
-    int64 db_nodes = 3;
-    int64 db_quads = 4;
 
     /// stats
 
@@ -65,7 +57,8 @@ message Status {
 
 message BuildList {
   message Request {
-    Artifact.Kind artifact_kind = 1;
+    repeated Artifact.Kind artifact_kinds = 1;
+    int32 limit = 2;
   }
   message Response {
     repeated Build builds = 1;
@@ -79,25 +72,28 @@ message BuildList {
 message Build {
   /// fields
 
-  string id = 1 [(gogoproto.casttype) = "github.com/cayleygraph/quad.IRI", (gogoproto.moretags) = "quad:\"@id\"", (gogoproto.customname) = "ID"]; // canonical URI
-  google.protobuf.Timestamp created_at = 2 [(gogoproto.moretags) = "quad:\"schema:createdAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  google.protobuf.Timestamp updated_at = 3 [(gogoproto.moretags) = "quad:\"schema:updatedAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  State state = 4 [(gogoproto.moretags) = "quad:\"schema:state,optional\""];
-  google.protobuf.Timestamp completed_at = 5 [(gogoproto.moretags) = "quad:\"schema:completedAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  string message = 6 [(gogoproto.moretags) = "quad:\"schema:message,optional\""];
-  google.protobuf.Timestamp started_at = 7 [(gogoproto.moretags) = "quad:\"schema:startedAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  google.protobuf.Timestamp finished_at = 8 [(gogoproto.moretags) = "quad:\"schema:finishedAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  string commit_url = 9 [(gogoproto.moretags) = "quad:\"schema:commit_url,optional\"", (gogoproto.customname) = "CommitURL"];
-  string branch = 10 [(gogoproto.moretags) = "quad:\"schema:branch,optional\""];
-  Driver driver = 11 [(gogoproto.moretags) = "quad:\"schema:driver,optional\""];
-  string short_id = 12 [(gogoproto.moretags) = "quad:\"schema:short_id,optional\"", (gogoproto.customname) = "ShortID"];
+  string id = 1 [(gogoproto.moretags) = "gorm:\"primary_key\"", (gogoproto.customname) = "ID"];
+  google.protobuf.Timestamp created_at = 2 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp updated_at = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  State state = 4;
+  google.protobuf.Timestamp completed_at = 5 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  string message = 6;
+  google.protobuf.Timestamp started_at = 7 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp finished_at = 8 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  string commit_url = 9 [(gogoproto.customname) = "CommitURL"];
+  string branch = 10;
+  Driver driver = 11;
+  string short_id = 12 [(gogoproto.customname) = "ShortID"];
 
   /// relationships
 
-  repeated Artifact has_artifacts = 101 [(gogoproto.moretags) = "quad:\"schema:hasBuild < *,optional\""];
-  Commit has_commit = 102 [(gogoproto.moretags) = "quad:\"schema:hasCommit,optional\""];
-  Project has_project = 103 [(gogoproto.moretags) = "quad:\"schema:hasProject,optional\""];
-  MergeRequest has_mergerequest = 104 [(gogoproto.moretags) = "quad:\"schema:hasMergeRequest,optional\""];
+  repeated Artifact has_artifacts = 101 [(gogoproto.moretags) = "gorm:\"foreignkey:HasBuildID\""];
+  Commit has_commit = 102;
+  string has_commit_id = 103 [(gogoproto.customname) = "HasCommitID"];
+  Project has_project = 104;
+  string has_project_id = 105 [(gogoproto.customname) = "HasProjectID"];
+  MergeRequest has_mergerequest = 106;
+  string has_mergerequest_id = 107 [(gogoproto.customname) = "HasMergerequestID"];
 
   /// enums
 
@@ -117,66 +113,70 @@ message Build {
 message Release {
   /// fields
 
-  string id = 1 [(gogoproto.casttype) = "github.com/cayleygraph/quad.IRI", (gogoproto.moretags) = "quad:\"@id\"", (gogoproto.customname) = "ID"]; // canonical URI
-  google.protobuf.Timestamp created_at = 2 [(gogoproto.moretags) = "quad:\"schema:createdAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  google.protobuf.Timestamp updated_at = 3 [(gogoproto.moretags) = "quad:\"schema:updatedAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  string message = 4 [(gogoproto.moretags) = "quad:\"schema:message,optional\""];
-  Driver driver = 5 [(gogoproto.moretags) = "quad:\"schema:driver,optional\""];
-  string commit_url = 6 [(gogoproto.moretags) = "quad:\"schema:commit_url,optional\"", (gogoproto.customname) = "CommitURL"];
-  string short_id = 7 [(gogoproto.moretags) = "quad:\"schema:short_id,optional\"", (gogoproto.customname) = "ShortID"];
+  string id = 1 [(gogoproto.moretags) = "gorm:\"primary_key\"", (gogoproto.customname) = "ID"];
+  google.protobuf.Timestamp created_at = 2 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp updated_at = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  string message = 4;
+  Driver driver = 5;
+  string commit_url = 6 [(gogoproto.customname) = "CommitURL"];
+  string short_id = 7 [(gogoproto.customname) = "ShortID"];
 
   /// relationships
 
-  repeated Artifact has_artifacts = 101 [(gogoproto.moretags) = "quad:\"schema:hasRelease < *,optional\""];
-  Commit has_commit = 102 [(gogoproto.moretags) = "quad:\"schema:hasCommit,optional\""];
-  Project has_project = 103 [(gogoproto.moretags) = "quad:\"schema:hasProject,optional\""];
-  MergeRequest has_mergerequest = 104 [(gogoproto.moretags) = "quad:\"schema:hasMergeRequest,optional\""];
+  repeated Artifact has_artifacts = 101;
+  Commit has_commit = 102;
+  Project has_project = 103;
+  MergeRequest has_mergerequest = 104;
 }
 
 message Commit {
   /// fields
 
-  string id = 1 [(gogoproto.casttype) = "github.com/cayleygraph/quad.IRI", (gogoproto.moretags) = "quad:\"@id\"", (gogoproto.customname) = "ID"]; // canonical URI
-  google.protobuf.Timestamp created_at = 2 [(gogoproto.moretags) = "quad:\"schema:createdAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  string message = 3 [(gogoproto.moretags) = "quad:\"schema:message,optional\""];
-  Driver driver = 4 [(gogoproto.moretags) = "quad:\"schema:driver,optional\""];
-  string branch = 5 [(gogoproto.moretags) = "quad:\"schema:branch,optional\""];
+  string id = 1 [(gogoproto.moretags) = "gorm:\"primary_key\"", (gogoproto.customname) = "ID"];
+  google.protobuf.Timestamp created_at = 2 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp updated_at = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  string message = 4;
+  Driver driver = 5;
+  string branch = 6;
 
   /// relationships
 
-  repeated Release has_releases = 101 [(gogoproto.moretags) = "quad:\"schema:hasCommit < *,optional\""];
-  repeated Build has_builds = 102 [(gogoproto.moretags) = "quad:\"schema:hasCommit < *,optional\""];
-  Project has_project = 103 [(gogoproto.moretags) = "quad:\"schema:hasProject,optional\""];
-  Entity has_author = 104 [(gogoproto.moretags) = "quad:\"schema:hasAuthor,optional\""];
-  MergeRequest has_mergerequest = 105 [(gogoproto.moretags) = "quad:\"schema:hasMergeRequest,optional\""];
+  repeated Release has_releases = 101;
+  repeated Build has_builds = 102;
+  Project has_project = 103;
+  Entity has_author = 104;
+  MergeRequest has_mergerequest = 105;
 }
 
 message MergeRequest {
   /// fields
 
-  string id = 1 [(gogoproto.casttype) = "github.com/cayleygraph/quad.IRI", (gogoproto.moretags) = "quad:\"@id\"", (gogoproto.customname) = "ID"]; // canonical URI
-  google.protobuf.Timestamp created_at = 2 [(gogoproto.moretags) = "quad:\"schema:createdAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  google.protobuf.Timestamp updated_at = 3 [(gogoproto.moretags) = "quad:\"schema:updatedAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  string title = 4 [(gogoproto.moretags) = "quad:\"schema:title,optional\""];
-  string message = 5 [(gogoproto.moretags) = "quad:\"schema:message,optional\""];
-  Driver driver = 6 [(gogoproto.moretags) = "quad:\"schema:driver,optional\""];
-  string branch = 7 [(gogoproto.moretags) = "quad:\"schema:branch,optional\""];
-  State state = 8 [(gogoproto.moretags) = "quad:\"schema:state,optional\""];
-  string commit_url = 9 [(gogoproto.moretags) = "quad:\"schema:commit_url,optional\"", (gogoproto.customname) = "CommitURL"];
-  string branch_url = 10 [(gogoproto.moretags) = "quad:\"schema:branch_url,optional\"", (gogoproto.customname) = "BranchURL"];
-  string short_id = 11 [(gogoproto.moretags) = "quad:\"schema:short_id,optional\"", (gogoproto.customname) = "ShortID"];
- // labels
+  string id = 1 [(gogoproto.moretags) = "gorm:\"primary_key\"", (gogoproto.customname) = "ID"];
+  google.protobuf.Timestamp created_at = 2 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp updated_at = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  string title = 4;
+  string message = 5;
+  Driver driver = 6;
+  string branch = 7;
+  State state = 8;
+  string commit_url = 9 [(gogoproto.customname) = "CommitURL"];
+  string branch_url = 10 [(gogoproto.customname) = "BranchURL"];
+  string short_id = 11 [(gogoproto.customname) = "ShortID"];
+  // labels
   // bool is_wip
 
   /// relationships
 
-  repeated Release has_releases = 101 [(gogoproto.moretags) = "quad:\"schema:hasMergeRequest < *,optional\""];
-  repeated Build has_builds = 102 [(gogoproto.moretags) = "quad:\"schema:hasMergeRequest < *,optional\""];
-  repeated Entity has_assignees = 103 [(gogoproto.moretags) = "quad:\"schema:hasAssignee,optional\""];
-  repeated Entity has_reviewers = 104 [(gogoproto.moretags) = "quad:\"schema:hasReviewer,optional\""];
-  Project has_project = 105 [(gogoproto.moretags) = "quad:\"schema:hasProject,optional\""];
-  Entity has_author = 106 [(gogoproto.moretags) = "quad:\"schema:hasAuthor,optional\""];
-  Commit has_commit = 107 [(gogoproto.moretags) = "quad:\"schema:hasCommit,optional\""];
+  repeated Release has_releases = 101;
+  repeated Build has_builds = 102;
+  repeated Entity has_assignees = 103 [(gogoproto.moretags) = "gorm:\"many2many:mr_assignees\""];
+  repeated Entity has_reviewers = 104 [(gogoproto.moretags) = "gorm:\"many2many:mr_reviewers\""];
+  Project has_project = 105;
+  string has_project_id = 106 [(gogoproto.customname) = "HasProjectID"];
+  Entity has_author = 107;
+  string has_author_id = 108 [(gogoproto.customname) = "HasAuthorID"];
+  Commit has_commit = 109;
+  string has_commit_id = 110 [(gogoproto.customname) = "HasCommitID"];
 
   /// enums
 
@@ -190,40 +190,41 @@ message MergeRequest {
 message Project {
   /// fields
 
-  string id = 1 [(gogoproto.casttype) = "github.com/cayleygraph/quad.IRI", (gogoproto.moretags) = "quad:\"@id\"", (gogoproto.customname) = "ID"]; // canonical URI
-  google.protobuf.Timestamp created_at = 2 [(gogoproto.moretags) = "quad:\"schema:createdAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  google.protobuf.Timestamp updated_at = 3 [(gogoproto.moretags) = "quad:\"schema:updatedAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  Driver driver = 5 [(gogoproto.moretags) = "quad:\"schema:driver,optional\""];
-  string name = 6 [(gogoproto.moretags) = "quad:\"schema:name,optional\""];
-  string description = 7 [(gogoproto.moretags) = "quad:\"schema:description,optional\""];
+  string id = 1 [(gogoproto.moretags) = "gorm:\"primary_key\"", (gogoproto.customname) = "ID"];
+  google.protobuf.Timestamp created_at = 2 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp updated_at = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  Driver driver = 5;
+  string name = 6;
+  string description = 7;
 
   /// relationships
 
-  repeated Artifact has_artifacts = 101 [(gogoproto.moretags) = "quad:\"schema:hasProject < *,optional\""];
-  repeated Build has_builds = 102 [(gogoproto.moretags) = "quad:\"schema:hasProject < *,optional\""];
-  repeated Commit has_commits = 103 [(gogoproto.moretags) = "quad:\"schema:hasProject < *,optional\""];
-  repeated Release has_releases = 104 [(gogoproto.moretags) = "quad:\"schema:hasProject < *,optional\""];
-  repeated MergeRequest has_mergerequests = 105 [(gogoproto.moretags) = "quad:\"schema:hasProject < *,optional\""];
-  Entity hasOwner = 106 [(gogoproto.moretags) = "quad:\"schema:hasOwner,optional\""];
+  repeated Artifact has_artifacts = 101;
+  repeated Build has_builds = 102;
+  repeated Commit has_commits = 103;
+  repeated Release has_releases = 104;
+  repeated MergeRequest has_mergerequests = 105;
+  Entity has_owner = 106;
+  string has_owner_id = 107 [(gogoproto.customname) = "HasOwnerID"];
 }
 
 message Entity {
   /// fields
 
-  string id = 1 [(gogoproto.casttype) = "github.com/cayleygraph/quad.IRI", (gogoproto.moretags) = "quad:\"@id\"", (gogoproto.customname) = "ID"]; // canonical URI
-  google.protobuf.Timestamp created_at = 2 [(gogoproto.moretags) = "quad:\"schema:createdAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  google.protobuf.Timestamp updated_at = 3 [(gogoproto.moretags) = "quad:\"schema:updatedAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  string name = 4 [(gogoproto.moretags) = "quad:\"schema:name,optional\""];
-  Driver driver = 5 [(gogoproto.moretags) = "quad:\"schema:driver,optional\""];
-  string avatar_url = 6 [(gogoproto.moretags) = "quad:\"schema:avatar_url,optional\"", (gogoproto.customname) = "AvatarURL"];
-  Kind kind = 7 [(gogoproto.moretags) = "quad:\"schema:kind,optional\""];
-  string description = 8 [(gogoproto.moretags) = "quad:\"schema:description,optional\""];
+  string id = 1 [(gogoproto.moretags) = "gorm:\"primary_key\"", (gogoproto.customname) = "ID"];
+  google.protobuf.Timestamp created_at = 2 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp updated_at = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  string name = 4;
+  Driver driver = 5;
+  string avatar_url = 6 [(gogoproto.customname) = "AvatarURL"];
+  Kind kind = 7;
+  string description = 8;
 
   /// relationships
 
-  repeated Project has_projects = 101 [(gogoproto.moretags) = "quad:\"schema:hasOwner < *,optional\""];
-  repeated Commit has_commits = 102 [(gogoproto.moretags) = "quad:\"schema:hasAuthor < *,optional\""];
-  repeated MergeRequest has_mergerequests = 103 [(gogoproto.moretags) = "quad:\"schema:hasAuthor < *,optional\""];
+  repeated Project has_projects = 101;
+  repeated Commit has_commits = 102;
+  repeated MergeRequest has_mergerequests = 103;
 
   /// enums
 
@@ -238,27 +239,30 @@ message Entity {
 message Artifact {
   /// fields
 
-  string id = 1 [(gogoproto.casttype) = "github.com/cayleygraph/quad.IRI", (gogoproto.moretags) = "quad:\"@id\"", (gogoproto.customname) = "ID"]; // canonical URI
-  google.protobuf.Timestamp created_at = 2 [(gogoproto.moretags) = "quad:\"schema:createdAt,optional\"", (gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  int64 file_size = 3 [(gogoproto.moretags) = "quad:\"schema:file_size,optional\""];
-  string local_path = 4 [(gogoproto.moretags) = "quad:\"schema:local_path,optional\""];
-  string download_url = 5 [(gogoproto.moretags) = "quad:\"schema:download_url,optional\"", (gogoproto.customname) = "DownloadURL"];
-  string mime_type= 6 [(gogoproto.moretags) = "quad:\"schema:mime_type,optional\""];
-  string sha1_sum= 7 [(gogoproto.moretags) = "quad:\"schema:sha1_sum,optional\""];
-  string sha256_sum= 8 [(gogoproto.moretags) = "quad:\"schema:sha256_sum,optional\""];
-  State state = 9 [(gogoproto.moretags) = "quad:\"schema:state,optional\""];
-  Kind kind = 10 [(gogoproto.moretags) = "quad:\"schema:kind,optional\""];
-  Driver driver = 11 [(gogoproto.moretags) = "quad:\"schema:driver,optional\""];
+  string id = 1 [(gogoproto.moretags) = "gorm:\"primary_key\"", (gogoproto.customname) = "ID"];
+  google.protobuf.Timestamp created_at = 2 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp updated_at = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  int64 file_size = 4;
+  string local_path = 5;
+  string download_url = 6 [(gogoproto.customname) = "DownloadURL"];
+  string mime_type = 7;
+  string sha1_sum = 8;
+  string sha256_sum = 9;
+  State state = 10;
+  Kind kind = 11;
+  Driver driver = 12;
 
   /// relationships
 
-  Build has_build = 101 [(gogoproto.moretags) = "quad:\"schema:hasBuild,optional\""];
-  Release has_release = 102 [(gogoproto.moretags) = "quad:\"schema:hasRelease,optional\""];
+  Build has_build = 101;
+  string has_build_id = 102 [(gogoproto.customname) = "HasBuildID"];
+  Release has_release = 103;
+  string has_release_id = 104 [(gogoproto.customname) = "HasReleaseID"];
 
   /// non-stored fields
 
-  string dl_artifact_signed_url = 201 [(gogoproto.moretags) = "quad:\"-\"",(gogoproto.customname) = "DLArtifactSignedURL"];
-  string plist_signed_url = 202 [(gogoproto.moretags) = "quad:\"-\"",(gogoproto.customname) = "PListSignedURL"];
+  string dl_artifact_signed_url = 201 [(gogoproto.customname) = "DLArtifactSignedURL"];
+  string plist_signed_url = 202 [(gogoproto.customname) = "PListSignedURL"];
 
   /// enums
 

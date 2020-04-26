@@ -9,9 +9,6 @@ import (
 
 	"berty.tech/yolo/v2/pkg/yolopb"
 	"github.com/buildkite/go-buildkite/buildkite"
-	"github.com/cayleygraph/cayley"
-	"github.com/cayleygraph/cayley/schema"
-	"github.com/cayleygraph/quad"
 	"github.com/tevino/abool"
 	"go.uber.org/zap"
 )
@@ -24,8 +21,8 @@ type BuildkiteWorkerOpts struct {
 	Once       bool
 }
 
-// BuildkiteWorker goals is to manage the buildkite update routine, it should try to support as much errors as possible by itself
-func BuildkiteWorker(ctx context.Context, db *cayley.Handle, bkc *buildkite.Client, schema *schema.Config, opts BuildkiteWorkerOpts) error {
+// BuildkiteWorker goals is to manage the github update routine, it should try to support as much errors as possible by itself
+func (svc *service) BuildkiteWorker(ctx context.Context, opts BuildkiteWorkerOpts) error {
 	opts.applyDefaults()
 
 	var (
@@ -33,23 +30,19 @@ func BuildkiteWorker(ctx context.Context, db *cayley.Handle, bkc *buildkite.Clie
 		maxPages = int(math.Ceil(float64(opts.MaxBuilds) / 30))
 	)
 
-	for {
-		since, err := lastBuildCreatedTime(ctx, db, yolopb.Driver_Buildkite)
+	for iteration := 0; ; iteration++ {
+		since, err := lastBuildCreatedTime(ctx, svc.db, yolopb.Driver_Buildkite)
 		if err != nil {
 			logger.Warn("get last buildkite build created time", zap.Error(err))
-			since = time.Time{}
 		}
-		logger.Debug("buildkite: refresh", zap.Time("since", since))
+		logger.Debug("buildkite: refresh", zap.Int("iteration", iteration), zap.Time("since", since))
 		// FIXME: only fetch builds since most recent known
-		batch, err := fetchBuildkite(bkc, since, maxPages, logger)
+		batch, err := fetchBuildkiteBuilds(ctx, svc.bkc, since, maxPages, logger)
 		if err != nil {
 			logger.Warn("fetch buildkite", zap.Error(err))
 		} else {
-			if !batch.Empty() {
-				if err := saveBatch(ctx, db, batch, schema, logger); err != nil {
-					logger.Warn("save batch", zap.Error(err))
-				}
-				opts.ClearCache.Set()
+			if err := svc.saveBatch(ctx, batch); err != nil {
+				logger.Warn("save batch", zap.Error(err))
 			}
 		}
 		// FIXME: fetch artifacts for builds with job that are successful and have a not empty artifact path
@@ -66,7 +59,7 @@ func BuildkiteWorker(ctx context.Context, db *cayley.Handle, bkc *buildkite.Clie
 	}
 }
 
-func fetchBuildkite(bkc *buildkite.Client, since time.Time, maxPages int, logger *zap.Logger) (*yolopb.Batch, error) {
+func fetchBuildkiteBuilds(ctx context.Context, bkc *buildkite.Client, since time.Time, maxPages int, logger *zap.Logger) (*yolopb.Batch, error) {
 	batch := yolopb.NewBatch()
 	total := 0
 	callOpts := &buildkite.BuildsListOptions{
@@ -100,11 +93,13 @@ func fetchBuildkite(bkc *buildkite.Client, since time.Time, maxPages int, logger
 					return nil, fmt.Errorf("buildkite.Artifacts.ListByBuild: %w", err)
 				}
 				logger.Debug("buildkite.Artifacts.List", zap.Int("len", len(artifacts)))
-				batch.Merge(buildkiteArtifactsToBatch(artifacts, build))
+				for _, artifact := range artifacts {
+					batch.Artifacts = append(batch.Artifacts, artifactFromBuildkiteArtifact(artifact, build))
+				}
 			}
 		}
-		if len(builds) > 0 {
-			batch.Merge(buildkiteBuildsToBatch(builds, logger))
+		for _, build := range builds {
+			batch.Builds = append(batch.Builds, buildFromBuildkiteBuild(build, logger))
 		}
 		if resp.NextPage == 0 {
 			break
@@ -114,100 +109,94 @@ func fetchBuildkite(bkc *buildkite.Client, since time.Time, maxPages int, logger
 	return batch, nil
 }
 
-func buildkiteBuildsToBatch(builds []buildkite.Build, logger *zap.Logger) *yolopb.Batch {
-	batch := yolopb.NewBatch()
-	for _, build := range builds {
-		newBuild := yolopb.Build{
-			ID:        quad.IRI(*build.WebURL),
-			ShortID:   fmt.Sprintf("%d", *build.Number),
-			CreatedAt: &build.CreatedAt.Time,
-			Message:   *build.Message,
-			HasCommit: &yolopb.Commit{ID: quad.IRI(*build.Commit)},
-			Branch:    *build.Branch,
-			Driver:    yolopb.Driver_Buildkite,
-			// FIXME: Creator: build.Creator...
-		}
-
-		switch provider := build.Pipeline.Provider.ID; provider {
-		case "github":
-			cloneURL := *build.Pipeline.Repository
-			parts := strings.Split(cloneURL, ":")
-			projectName := strings.TrimRight(parts[1], ".git")
-			projectURL := "https://github.com/" + projectName
-			newBuild.HasProject = &yolopb.Project{ID: quad.IRI(projectURL)}
-			// FIXME: CommitURL
-
-			if build.PullRequest != nil {
-				prURL := projectURL + "/pull/" + *build.PullRequest.ID
-				newBuild.HasMergerequest = &yolopb.MergeRequest{ID: quad.IRI(prURL)}
-				// FIXME: CommitURL based on forked repo
-			}
-		default:
-			logger.Warn("unknown pipeline provider", zap.String("provider", provider))
-		}
-
-		if build.FinishedAt != nil {
-			newBuild.FinishedAt = &build.FinishedAt.Time
-		}
-		if build.StartedAt != nil {
-			newBuild.StartedAt = &build.StartedAt.Time
-		}
-		switch *build.State {
-		case "running":
-			newBuild.State = yolopb.Build_Running
-		case "failed":
-			newBuild.State = yolopb.Build_Failed
-		case "passed":
-			newBuild.State = yolopb.Build_Passed
-		case "not_run":
-			newBuild.State = yolopb.Build_NotRun
-		case "skipped":
-			newBuild.State = yolopb.Build_Skipped
-		case "canceled":
-			newBuild.State = yolopb.Build_Canceled
-		case "scheduled":
-			newBuild.State = yolopb.Build_Scheduled
-		default:
-			fmt.Println("unknown state: ", *build.State)
-		}
-		batch.Builds = append(batch.Builds, &newBuild)
+func buildFromBuildkiteBuild(build buildkite.Build, logger *zap.Logger) *yolopb.Build {
+	newBuild := yolopb.Build{
+		ID:          *build.WebURL,
+		ShortID:     fmt.Sprintf("%d", *build.Number),
+		CreatedAt:   &build.CreatedAt.Time,
+		Message:     *build.Message,
+		HasCommitID: *build.Commit,
+		Branch:      *build.Branch,
+		Driver:      yolopb.Driver_Buildkite,
+		// FIXME: Creator: build.Creator...
 	}
-	return batch
+
+	switch provider := build.Pipeline.Provider.ID; provider {
+	case "github":
+		cloneURL := *build.Pipeline.Repository
+		parts := strings.Split(cloneURL, ":")
+		projectName := strings.TrimRight(parts[1], ".git")
+		projectURL := "https://github.com/" + projectName
+		newBuild.HasProjectID = projectURL
+		// FIXME: CommitURL
+
+		if build.PullRequest != nil {
+			prURL := projectURL + "/pull/" + *build.PullRequest.ID
+			newBuild.HasMergerequestID = prURL
+			// FIXME: CommitURL based on forked repo
+		}
+	default:
+		logger.Warn("unknown pipeline provider", zap.String("provider", provider))
+	}
+
+	if build.FinishedAt != nil {
+		newBuild.FinishedAt = &build.FinishedAt.Time
+	}
+	if build.StartedAt != nil {
+		newBuild.StartedAt = &build.StartedAt.Time
+	}
+	switch *build.State {
+	case "running":
+		newBuild.State = yolopb.Build_Running
+	case "failed":
+		newBuild.State = yolopb.Build_Failed
+	case "passed":
+		newBuild.State = yolopb.Build_Passed
+	case "not_run":
+		newBuild.State = yolopb.Build_NotRun
+	case "skipped":
+		newBuild.State = yolopb.Build_Skipped
+	case "canceled":
+		newBuild.State = yolopb.Build_Canceled
+	case "scheduled":
+		newBuild.State = yolopb.Build_Scheduled
+	default:
+		fmt.Println("unknown state: ", *build.State)
+	}
+
+	return &newBuild
 }
 
-func buildkiteArtifactsToBatch(artifacts []buildkite.Artifact, build buildkite.Build) *yolopb.Batch {
-	batch := yolopb.NewBatch()
-	for _, artifact := range artifacts {
-		id := "buildkite_" + md5Sum(*artifact.DownloadURL)
-		newArtifact := yolopb.Artifact{
-			ID:          quad.IRI(id),
-			CreatedAt:   &build.CreatedAt.Time,
-			FileSize:    *artifact.FileSize,
-			LocalPath:   *artifact.Path,
-			DownloadURL: *artifact.DownloadURL,
-			HasBuild:    &yolopb.Build{ID: quad.IRI(*build.WebURL)},
-			// FIXME: hasRelease
-			Driver:   yolopb.Driver_Buildkite,
-			Kind:     artifactKindByPath(*artifact.Path),
-			MimeType: mimetypeByPath(*artifact.Path), // *artifact.MimeType,
-			// FIXME: Sha1Sum:     *artifact.Sha1Sum,
-		}
-		switch *artifact.State {
-		case "finished":
-			newArtifact.State = yolopb.Artifact_Finished
-		case "new":
-			newArtifact.State = yolopb.Artifact_New
-		case "error":
-			newArtifact.State = yolopb.Artifact_Error
-		case "deleted":
-			newArtifact.State = yolopb.Artifact_Deleted
-		default:
-			newArtifact.State = yolopb.Artifact_UnknownState
-			fmt.Println("unknown state: ", *artifact.State)
-		}
-		batch.Artifacts = append(batch.Artifacts, &newArtifact)
+func artifactFromBuildkiteArtifact(artifact buildkite.Artifact, build buildkite.Build) *yolopb.Artifact {
+	id := "buildkite_" + md5Sum(*artifact.DownloadURL)
+	newArtifact := yolopb.Artifact{
+		ID:          id,
+		CreatedAt:   &build.CreatedAt.Time,
+		FileSize:    *artifact.FileSize,
+		LocalPath:   *artifact.Path,
+		DownloadURL: *artifact.DownloadURL,
+		HasBuild:    &yolopb.Build{ID: *build.WebURL},
+		HasBuildID:  *build.WebURL,
+		// FIXME: hasRelease
+		Driver:   yolopb.Driver_Buildkite,
+		Kind:     artifactKindByPath(*artifact.Path),
+		MimeType: mimetypeByPath(*artifact.Path), // *artifact.MimeType,
+		// FIXME: Sha1Sum:     *artifact.Sha1Sum,
 	}
-	return batch
+	switch *artifact.State {
+	case "finished":
+		newArtifact.State = yolopb.Artifact_Finished
+	case "new":
+		newArtifact.State = yolopb.Artifact_New
+	case "error":
+		newArtifact.State = yolopb.Artifact_Error
+	case "deleted":
+		newArtifact.State = yolopb.Artifact_Deleted
+	default:
+		newArtifact.State = yolopb.Artifact_UnknownState
+		fmt.Println("unknown state: ", *artifact.State)
+	}
+	return &newArtifact
 }
 
 func (o *BuildkiteWorkerOpts) applyDefaults() {
