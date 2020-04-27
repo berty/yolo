@@ -1,6 +1,8 @@
-import React, {useState, useRef, useEffect} from 'react';
+import React, {useState, useRef, useEffect, useContext} from 'react';
+import {ThemeContext} from '../../store/ThemeStore';
 
 const ApiKeyPrompt = ({failedKey, setApiKey: submitNewApiKey}) => {
+  const {theme} = useContext(ThemeContext);
   const [formApiKey, updateFormApiKey] = useState(failedKey);
   const inputEl = useRef(null);
   useEffect(() => inputEl.current.focus());
@@ -8,7 +10,14 @@ const ApiKeyPrompt = ({failedKey, setApiKey: submitNewApiKey}) => {
   return (
     <section>
       <div className="form-group">
-        <label className="mt-3 form-label">Enter an API key</label>
+        <label className="mt-3 form-label mb-2">
+          Enter an API key in the form of{' '}
+          <span
+            style={{fontFamily: 'monospace', color: theme.text.sectionTitle}}
+          >
+            username:password
+          </span>
+        </label>
         <div className="input mb-3">
           <input
             ref={inputEl}
