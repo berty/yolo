@@ -13,11 +13,11 @@ import './Header.scss';
 
 const Header = () => {
   const {theme} = useContext(ThemeContext);
-  const {state, updateState} = useContext(ResultContext);
+  const {updateState} = useContext(ResultContext);
 
   return (
-    <div className={'header--yl'} style={{backgroundColor: theme.bg.page}}>
-      <div className="header-logo--yl">
+    <div className={'Header'} style={{backgroundColor: theme.bg.page}}>
+      <div className="header-logo">
         <img src={YoloLogo}></img>
       </div>
       <ActionWidgets>

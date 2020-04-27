@@ -78,8 +78,8 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
     const implemented = state.filtersImplemented.apps.includes(name);
     const colorIcon = colorsIcon({selected});
     const colorWidget = colorsWidget({selected});
-    const widgetClass = classNames('modal-filter-widget--yl', {
-      'modal-filter-not-implemented--yl': !implemented,
+    const widgetClass = classNames('modal-filter-widget', {
+      'modal-filter-not-implemented': !implemented,
     });
     const icon =
       name === 'chat' ? (
@@ -98,7 +98,7 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
     return (
       <div className={widgetClass} style={colorWidget}>
         {icon}
-        <p className="filter-text--yl">{projectName}</p>
+        <p className="filter-text">{projectName}</p>
       </div>
     );
   };
@@ -108,8 +108,8 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
     const implemented = state.filtersImplemented.os.includes(name);
     const colorIcon = colorsIcon({selected});
     const colorWidget = colorsWidget({selected});
-    const widgetClass = classNames('modal-filter-widget--yl', {
-      'modal-filter-not-implemented--yl': !implemented,
+    const widgetClass = classNames('modal-filter-widget', {
+      'modal-filter-not-implemented': !implemented,
     });
     const icon =
       name === 'iOS' ? (
@@ -136,7 +136,7 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
         onClick={implemented ? () => updateLocalOs({name}) : () => {}}
       >
         {icon}
-        <p className="filter-text--yl">{osName}</p>
+        <p className="filter-text">{osName}</p>
       </div>
     );
   };
@@ -146,8 +146,8 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
     const implemented = state.filtersImplemented.branch.includes(name);
     const colorIcon = colorsIcon({selected});
     const colorWidget = colorsWidget({selected});
-    const widgetClass = classNames('modal-filter-widget--yl', {
-      'modal-filter-not-implemented--yl': !implemented,
+    const widgetClass = classNames('modal-filter-widget', {
+      'modal-filter-not-implemented': !implemented,
     });
     const icon =
       name === 'all' ? (
@@ -170,7 +170,7 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
     return (
       <div className={widgetClass} style={colorWidget}>
         {icon}
-        <p className="filter-text--yl">{branchName}</p>
+        <p className="filter-text">{branchName}</p>
       </div>
     );
   };
@@ -194,7 +194,7 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
                   Filter the builds
                 </h5>
                 <div
-                  className="btn-close--yl"
+                  className="btn-close"
                   data-dismiss="modal"
                   aria-label="Close"
                   onClick={closeAction}
@@ -204,26 +204,26 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
                 </div>
               </div>
               <div className="modal-body">
-                <div style={colorsModalTitle} className="subtitle--yl">
+                <div style={colorsModalTitle} className="subtitle">
                   Projects
                 </div>
-                <div className="filter-row--yl">
+                <div className="filter-row">
                   {ProjectFilter({name: 'chat'})}
                   {ProjectFilter({name: 'mini'})}
                   {ProjectFilter({name: 'maxi'})}
                 </div>
-                <div style={colorsModalTitle} className="subtitle--yl">
+                <div style={colorsModalTitle} className="subtitle">
                   OS
                 </div>
-                <div className="filter-row--yl">
+                <div className="filter-row">
                   {OsFilter({name: 'iOS'})}
                   {OsFilter({name: 'android'})}
                   {OsFilter({name: 'macOS'})}
                 </div>
-                <div style={colorsModalTitle} className="subtitle--yl">
+                <div style={colorsModalTitle} className="subtitle">
                   Branches
                 </div>
-                <div className="filter-row--yl">
+                <div className="filter-row">
                   {BranchFilter({name: 'all'})}
                   {BranchFilter({name: 'master'})}
                   {BranchFilter({name: 'develop'})}
@@ -232,7 +232,7 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
               <div className="modal-footer">
                 <div
                   type="button"
-                  className="btn-primary--yl"
+                  className="btn-primary"
                   data-dismiss="modal"
                   // TODO: Create action instead of doing this work here
                   onClick={() => {
@@ -257,7 +257,7 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
                   style={applyFilterButtonColors}
                 >
                   <Check />
-                  <div className="btn-text--yl">Apply Filters</div>
+                  <div className="btn-text">Apply Filters</div>
                 </div>
               </div>
             </div>

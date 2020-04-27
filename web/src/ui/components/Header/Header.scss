@@ -1,6 +1,6 @@
 @import '../../../assets/main.scss';
 
-.header--yl {
+.Header {
   box-sizing: border-box;
   margin: 0;
   margin-bottom: 0.5rem;
@@ -18,18 +18,18 @@
   @include sm {
     padding-right: 75px;
   }
-}
 
-.header-logo--yl {
-  display: none;
-  @include sm {
-    margin-left: 1rem;
-    margin-right: 36px;
-    display: block;
-  }
-  img {
+  .header-logo {
+    display: none;
     @include sm {
-      height: 2.75rem;
+      margin-left: 1rem;
+      margin-right: 36px;
+      display: block;
+    }
+    img {
+      @include sm {
+        height: 2.75rem;
+      }
     }
   }
 }

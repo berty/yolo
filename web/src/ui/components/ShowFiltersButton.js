@@ -6,7 +6,7 @@ import {ThemeContext} from '../../store/ThemeStore';
 const ShowFiltersButton = ({clickAction, showingFiltersModal}) => {
   const {theme} = useContext(ThemeContext);
 
-  const notShowingFiltersStyle = {
+  const showFiltersButtonStyle = {
     position: 'fixed',
     right: '1em',
     bottom: '1em',
@@ -22,7 +22,7 @@ const ShowFiltersButton = ({clickAction, showingFiltersModal}) => {
   };
 
   return (
-    <div style={notShowingFiltersStyle} onClick={clickAction}>
+    <div style={showFiltersButtonStyle} onClick={clickAction}>
       <Sliders color="white" />
     </div>
   );

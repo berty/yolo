@@ -47,27 +47,27 @@ const BuildCard = ({item}) => {
 
   const CardIcon =
     buildBranch.toUpperCase() === 'MASTER' ? (
-      <div className="card-left-icon--yl rotate-merge--yl">
+      <div className="card-left-icon rotate-merge">
         <GitCommit color={theme.icon.masterGreen} />
       </div>
     ) : (
-      <div className="card-left-icon--yl">
+      <div className="card-left-icon">
         <GitMerge color={theme.icon.branchPurple} />
       </div>
     );
 
   const CommitIcon = commitUrl ? (
-    <a href={commitUrl} className={'card-left-icon--yl icon-top--yl'}>
+    <a href={commitUrl} className={'card-left-icon icon-top'}>
       <GitCommit color={theme.text.sectionTitle} />
     </a>
   ) : (
-    <div className={'card-left-icon--yl icon-top--yl'}>
+    <div className={'card-left-icon icon-top'}>
       <GitCommit color={theme.text.sectionText} />
     </div>
   );
 
   const Author = (
-    <div style={{color: theme.text.author}} className="card-author--yl">
+    <div style={{color: theme.text.author}} className="card-author">
       [TODO: author]
     </div>
   );
@@ -85,14 +85,14 @@ const BuildCard = ({item}) => {
   );
 
   const AuthorImage = (
-    <div className="card-avatar--yl">
+    <div className="card-avatar">
       <User color={theme.text.sectionText} />
     </div>
   );
 
   const BranchName = buildBranch && (
     <div
-      className="btn btn-branch-name--yl"
+      className="btn btn-branch-name"
       style={{
         backgroundColor: theme.border.filterUnselected,
       }}
@@ -130,56 +130,58 @@ const BuildCard = ({item}) => {
   const BuildCommit = <div>{buildCommitId.slice(...COMMIT_LEN)}</div>;
 
   return (
-    <div
-      className="card"
-      style={{
-        backgroundColor: theme.bg.block,
-        boxShadow: theme.shadowStyle.block,
-        borderRadius: sharedThemes.borderRadius.block,
-        marginBottom: sharedThemes.marginBottom.block,
-        padding: sharedThemes.padding.block,
-      }}
-      key={buildId}
-    >
-      <div className={'card-row--yl' + (expanded ? ' expanded' : '')}>
-        {CardIcon}
-        <h2 className="card-title--yl" style={{color: theme.text.blockTitle}}>
-          {CardTitle}
-        </h2>
-        {Author}
-        {AuthorImage}
-        {ChevronIcon}
-      </div>
-      {expanded && (
-        <div
-          className={'card-row--yl' + (expanded ? ' expanded' : '')}
-          style={{color: theme.text.sectionText}}
-        >
-          {CommitIcon}
-          <div className="card-details--yl">
-            <div className="card-details-row--yl">
-              {BuildCommit}
-              {BuildState}
-            </div>
-            <div className="card-details-row--yl">{BranchName}</div>
-            <div className="card-details-row--yl">{buildMessage}</div>
-          </div>
-          <div className="card-build-actions--yl">
-            {BuildLogs}
-            {GithubLink}
-          </div>
+    <div className="BuildCard">
+      <div
+        className="card"
+        style={{
+          backgroundColor: theme.bg.block,
+          boxShadow: theme.shadowStyle.block,
+          borderRadius: sharedThemes.borderRadius.block,
+          marginBottom: sharedThemes.marginBottom.block,
+          padding: sharedThemes.padding.block,
+        }}
+        key={buildId}
+      >
+        <div className={'card-row' + (expanded ? ' expanded' : '')}>
+          {CardIcon}
+          <h2 className="card-title" style={{color: theme.text.blockTitle}}>
+            {CardTitle}
+          </h2>
+          {Author}
+          {AuthorImage}
+          {ChevronIcon}
         </div>
-      )}
-      {expanded &&
-        item.has_artifacts &&
-        item.has_artifacts.map((artifact) => (
-          <ArtifactCard
-            artifact={artifact}
-            buildMergeUpdatedAt={buildMergeUpdatedAt}
-            buildMergeId={buildMergeId}
-            key={artifact.id}
-          />
-        ))}
+        {expanded && (
+          <div
+            className={'card-row' + (expanded ? ' expanded' : '')}
+            style={{color: theme.text.sectionText}}
+          >
+            {CommitIcon}
+            <div className="card-details">
+              <div className="card-details-row">
+                {BuildCommit}
+                {BuildState}
+              </div>
+              <div className="card-details-row">{BranchName}</div>
+              <div className="card-details-row">{buildMessage}</div>
+            </div>
+            <div className="card-build-actions">
+              {BuildLogs}
+              {GithubLink}
+            </div>
+          </div>
+        )}
+        {expanded &&
+          item.has_artifacts &&
+          item.has_artifacts.map((artifact) => (
+            <ArtifactCard
+              artifact={artifact}
+              buildMergeUpdatedAt={buildMergeUpdatedAt}
+              buildMergeId={buildMergeId}
+              key={artifact.id}
+            />
+          ))}
+      </div>
     </div>
   );
 };

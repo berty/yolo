@@ -1,115 +1,117 @@
 @import '../../../assets/main.scss';
 
-p,
-div,
-.card div,
-.card p {
-  padding: 0px;
-}
-
-div.card {
-  max-width: 100vw;
-}
-
-.card div.card-row--yl {
-  display: flex;
-  margin: 0px;
-  padding: 15px;
-  width: 100%;
-  align-items: center;
-  height: 100%;
-  margin-bottom: 16px;
-  &.expanded {
-    border-bottom: 1px solid gray;
+.BuildCard {
+  p,
+  div,
+  .card div,
+  .card p {
+    padding: 0px;
   }
-  a {
-    cursor: pointer;
+
+  div.card {
+    max-width: 100vw;
   }
-}
 
-.card div.card-row--yl .card-left-icon--yl {
-  height: 100%;
-  margin-right: 0.8em;
-  flex-shrink: 0;
-  margin-top: 0.2rem;
-  &.rotate-merge--yl {
-    transform: rotate(90deg);
-  }
-  &.icon-top--yl {
-    align-self: flex-start;
-  }
-}
-
-.card div.card-row--yl .card-title--yl {
-  height: 100%;
-  padding: 0px;
-  margin: 0px;
-  flex: 0 1 auto;
-  margin-right: auto;
-}
-
-.card div.card-row--yl .card-author--yl {
-  font-size: smaller;
-  margin-right: 8px;
-  flex-shrink: 0;
-}
-
-.card div.card-row--yl .card-avatar--yl {
-  margin-right: 16px;
-  flex-shrink: 0;
-}
-
-// Build body
-
-.card div.card-row--yl .card-details--yl {
-  display: flex;
-  flex-flow: row wrap;
-  margin-right: 8px;
-  flex-basis: 100%;
-  font-size: 0.9rem;
-  @include md {
-    font-size: 1rem;
-  }
-  .card-details-row--yl {
+  .card div.card-row {
     display: flex;
-    flex: 1 1 100%;
-    flex-wrap: wrap;
-    margin-bottom: 16px;
+    margin: 0px;
+    padding: 15px;
+    width: 100%;
     align-items: center;
-    > * {
-      margin-right: 10px;
+    height: 100%;
+    margin-bottom: 16px;
+    &.expanded {
+      border-bottom: 1px solid gray;
     }
-    div.btn {
-      cursor: default;
-      &.btn-branch-name--yl {
-        word-wrap: unset;
-        white-space: unset;
-        text-align: left;
+    a {
+      cursor: pointer;
+    }
+  }
+
+  .card div.card-row .card-left-icon {
+    height: 100%;
+    margin-right: 0.8em;
+    flex-shrink: 0;
+    margin-top: 0.2rem;
+    &.rotate-merge {
+      transform: rotate(90deg);
+    }
+    &.icon-top {
+      align-self: flex-start;
+    }
+  }
+
+  .card div.card-row .card-title {
+    height: 100%;
+    padding: 0px;
+    margin: 0px;
+    flex: 0 1 auto;
+    margin-right: auto;
+  }
+
+  .card div.card-row .card-author {
+    font-size: smaller;
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+
+  .card div.card-row .card-avatar {
+    margin-right: 16px;
+    flex-shrink: 0;
+  }
+
+  // Build body
+
+  .card div.card-row .card-details {
+    display: flex;
+    flex-flow: row wrap;
+    margin-right: 8px;
+    flex-basis: 100%;
+    font-size: 0.9rem;
+    @include md {
+      font-size: 1rem;
+    }
+    .card-details-row {
+      display: flex;
+      flex: 1 1 100%;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      align-items: center;
+      > * {
+        margin-right: 10px;
+      }
+      div.btn {
+        cursor: default;
+        &.btn-branch-name {
+          word-wrap: unset;
+          white-space: unset;
+          text-align: left;
+        }
       }
     }
   }
-}
 
-.card div.card-row--yl .card-build-actions--yl {
-  height: 100%;
-  align-self: flex-start;
-  display: flex;
-  flex-shrink: 0;
-  flex-grow: 0;
-  flex-direction: column;
-  div,
-  a {
-    margin-bottom: 8px;
-  }
-  .btn {
-    // download, alert
+  .card div.card-row .card-build-actions {
+    height: 100%;
+    align-self: flex-start;
+    display: flex;
     flex-shrink: 0;
     flex-grow: 0;
-    box-sizing: border-box;
-    svg,
-    span {
-      margin-top: 0.25rem;
-      margin-bottom: -0.25rem;
+    flex-direction: column;
+    div,
+    a {
+      margin-bottom: 8px;
+    }
+    .btn {
+      // download, alert
+      flex-shrink: 0;
+      flex-grow: 0;
+      box-sizing: border-box;
+      svg,
+      span {
+        margin-top: 0.25rem;
+        margin-bottom: -0.25rem;
+      }
     }
   }
 }

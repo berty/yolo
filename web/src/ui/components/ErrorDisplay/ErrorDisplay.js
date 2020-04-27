@@ -1,23 +1,14 @@
 import React, {useContext} from 'react';
-import {ThemeContext} from '../../store/ThemeStore';
+import {ThemeContext} from '../../../store/ThemeStore';
+
+import './ErrorDisplay.scss';
 
 const ErrorDisplay = ({error}) => {
   const {theme} = useContext(ThemeContext);
   const ErrorStatus =
     error.status > 0 ? `Error ${error.status}: ${error.statusText}` : `Error:`;
   return (
-    <div
-      style={{
-        alignSelf: 'center',
-        margin: 'auto',
-        marginTop: '3rem',
-        marginBottom: '2rem',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexDirection: 'column',
-      }}
-    >
+    <div className="ErrorDisplay">
       <h3 className="title" style={{color: theme.text.sectionTitle}}>
         {ErrorStatus}
       </h3>
