@@ -1,105 +1,89 @@
-// tabler overrides
-
-#modal-simple {
-  padding-right: 15px;
-  display: block;
-}
-
-.modal.modal-blur.fade.show {
-  padding-right: 15px;
-  display: block;
-  top: auto;
-  bottom: 0.75em;
-  left: 0;
-  right: 0;
-}
-
-.modal-dialog .modal-content {
-  border-radius: 15px;
-  border: none;
-  padding: 15px;
-}
-
-.modal-content .modal-header {
-  border-bottom: none;
-}
-
-.modal-content .modal-footer {
-  border-top: none;
-  justify-content: center;
-}
-
-.modal-title {
-  font-size: larger;
-}
-
-.btn-close--yl {
-  display: flex;
-  justify-content: center;
-  padding: 0.3em;
-  border-radius: 50%;
-}
-
-// custom classes
-
-.faded {
-  position: fixed;
-  width: 100vw;
-  height: 100vh;
-  z-index: 1049;
-  background-color: black;
-  opacity: 0.4;
-}
-
-// TODO: Hover, active, etc
-.btn-primary--yl {
-  padding: 8px 14px 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-radius: 6px;
-  display: flex;
-  justify-content: center;
-  color: white;
-  cursor: pointer;
-  div {
-    margin-left: 0.5em;
+.FilterModal {
+  .modal.modal-blur.fade.show {
+    padding-right: 15px;
+    display: block;
+    top: auto;
+    bottom: 0.75em;
+    left: 0;
+    right: 0;
   }
-}
 
-.modal-filter-widget--yl {
-  display: flex;
-  flex-flow: column nowrap;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 15px;
-  border-width: 2px;
-  border-style: solid;
-  border-radius: 15px;
-  margin-right: 0.75em;
-  width: auto;
-  cursor: pointer;
-  //   cursor: pointer; // right now there are no filters to toggle
-  div {
-    flex: 0 0 auto;
+  .modal-dialog .modal-content {
+    border-radius: 15px;
+    border: none;
+    padding: 15px;
   }
-  &.modal-filter-not-implemented--yl {
-    border-style: dotted;
-    cursor: default;
+
+  .modal-content .modal-header {
+    border-bottom: none;
   }
-}
 
-.subtitle--yl {
-  font-size: small;
-  margin-bottom: 0.5em;
-}
+  .modal-content .modal-footer {
+    border-top: none;
+    justify-content: center;
+  }
 
-.filter-row--yl {
-  display: flex;
-  margin-bottom: 1.5em;
-}
+  .modal-title {
+    font-size: larger;
+  }
 
-p.filter-text--yl {
-  font-size: 0.7em;
-  padding: 0px;
-  margin: 0px;
+  .btn-close--yl {
+    display: flex;
+    justify-content: center;
+    padding: 0.3em;
+    border-radius: 50%;
+  }
+
+  // TODO: Hover, active, etc
+  .btn-primary--yl {
+    padding: 8px 14px 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    div {
+      margin-left: 0.5em;
+    }
+  }
+
+  .modal-filter-widget--yl {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 15px;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 15px;
+    margin-right: 0.75em;
+    width: auto;
+    cursor: pointer;
+    //   cursor: pointer; // right now there are no filters to toggle
+    div {
+      flex: 0 0 auto;
+    }
+    &.modal-filter-not-implemented--yl {
+      border-style: dotted;
+      cursor: default;
+    }
+  }
+
+  .subtitle--yl {
+    font-size: small;
+    margin-bottom: 0.5em;
+  }
+
+  .filter-row--yl {
+    display: flex;
+    margin-bottom: 1.5em;
+  }
+
+  p.filter-text--yl {
+    font-size: 0.7em;
+    padding: 0px;
+    margin: 0px;
+  }
 }
