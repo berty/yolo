@@ -1,0 +1,39 @@
+@import '../../assets/variables';
+
+.MessageModal {
+  .modal.modal-blur.fade.show {
+    padding-right: 15px;
+    display: block;
+    top: 33%;
+    left: 0;
+    right: 0;
+  }
+
+  .modal-dialog .modal-content {
+    border-radius: 15px;
+    border: none;
+    padding: 15px;
+    color: $body-bg-dark;
+    background-color: #f7d68e;
+    text-align: center;
+  }
+
+  .modal-content .modal-header {
+    border-bottom: none;
+  }
+
+  .modal-content .modal-footer {
+    border-top: none;
+    justify-content: center;
+    flex-basis: 100%;
+  }
+
+  .modal-title {
+    font-size: larger;
+    flex-basis: 100%;
+  }
+
+  .btn.btn-ghost-dark {
+    background-color: transparent;
+  }
+}

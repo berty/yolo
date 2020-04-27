@@ -176,95 +176,95 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
   };
 
   return (
-    <>
+    <React.Fragment>
       <div className="faded" />
-      <div
-        className="modal modal-blur fade show"
-        id="modal-large"
-        tabIndex="-1"
-        role="dialog"
-        aria-modal="true"
-      >
+      <div className="FilterModal">
         <div
-          className="modal-dialog modal-lg modal-dialog-centered"
-          role="document"
+          className="modal modal-blur fade show"
+          role="dialog"
+          aria-modal="true"
         >
-          <div className="modal-content" style={colorsModal}>
-            <div className="modal-header">
-              <h5 className="modal-title" style={colorsModalTitle}>
-                Filter the builds
-              </h5>
-              <div
-                className="btn-close--yl"
-                data-dismiss="modal"
-                aria-label="Close"
-                onClick={closeAction}
-                style={colorsCloseButton}
-              >
-                <X size={14} strokeWidth={3} color={filterSelectedAccent} />
+          <div
+            className="modal-dialog modal-lg modal-dialog-centered"
+            role="document"
+          >
+            <div className="modal-content" style={colorsModal}>
+              <div className="modal-header">
+                <h5 className="modal-title" style={colorsModalTitle}>
+                  Filter the builds
+                </h5>
+                <div
+                  className="btn-close--yl"
+                  data-dismiss="modal"
+                  aria-label="Close"
+                  onClick={closeAction}
+                  style={colorsCloseButton}
+                >
+                  <X size={14} strokeWidth={3} color={filterSelectedAccent} />
+                </div>
               </div>
-            </div>
-            <div className="modal-body">
-              <div style={colorsModalTitle} className="subtitle--yl">
-                Projects
+              <div className="modal-body">
+                <div style={colorsModalTitle} className="subtitle--yl">
+                  Projects
+                </div>
+                <div className="filter-row--yl">
+                  {ProjectFilter({name: 'chat'})}
+                  {ProjectFilter({name: 'mini'})}
+                  {ProjectFilter({name: 'maxi'})}
+                </div>
+                <div style={colorsModalTitle} className="subtitle--yl">
+                  OS
+                </div>
+                <div className="filter-row--yl">
+                  {OsFilter({name: 'iOS'})}
+                  {OsFilter({name: 'android'})}
+                  {OsFilter({name: 'macOS'})}
+                </div>
+                <div style={colorsModalTitle} className="subtitle--yl">
+                  Branches
+                </div>
+                <div className="filter-row--yl">
+                  {BranchFilter({name: 'all'})}
+                  {BranchFilter({name: 'master'})}
+                  {BranchFilter({name: 'develop'})}
+                </div>
               </div>
-              <div className="filter-row--yl">
-                {ProjectFilter({name: 'chat'})}
-                {ProjectFilter({name: 'mini'})}
-                {ProjectFilter({name: 'maxi'})}
-              </div>
-              <div style={colorsModalTitle} className="subtitle--yl">
-                OS
-              </div>
-              <div className="filter-row--yl">
-                {OsFilter({name: 'iOS'})}
-                {OsFilter({name: 'android'})}
-                {OsFilter({name: 'macOS'})}
-              </div>
-              <div style={colorsModalTitle} className="subtitle--yl">
-                Branches
-              </div>
-              <div className="filter-row--yl">
-                {BranchFilter({name: 'all'})}
-                {BranchFilter({name: 'master'})}
-                {BranchFilter({name: 'develop'})}
-              </div>
-            </div>
-            <div className="modal-footer">
-              <div
-                type="button"
-                className="btn-primary--yl"
-                data-dismiss="modal"
-                // TODO: Create action instead of doing this work here
-                onClick={() => {
-                  const emptyFilters = {
-                    iOS: false,
-                    android: false,
-                  };
-                  const [localPlatformName] = selectedOs;
-                  localPlatformId === state.platformId
-                    ? {}
-                    : updateState({
-                        platformId: localPlatformId,
-                        isLoaded: false,
-                        items: [],
-                        filtersPlatform: {
-                          ...emptyFilters,
-                          [localPlatformName]: true,
-                        },
-                      });
-                  closeAction();
-                }}
-                style={applyFilterButtonColors}
-              >
-                <Check />
-                <div className="btn-text--yl">Apply Filters</div>
+              <div className="modal-footer">
+                <div
+                  type="button"
+                  className="btn-primary--yl"
+                  data-dismiss="modal"
+                  // TODO: Create action instead of doing this work here
+                  onClick={() => {
+                    const emptyFilters = {
+                      iOS: false,
+                      android: false,
+                    };
+                    const [localPlatformName] = selectedOs;
+                    localPlatformId === state.platformId
+                      ? {}
+                      : updateState({
+                          platformId: localPlatformId,
+                          isLoaded: false,
+                          items: [],
+                          filtersPlatform: {
+                            ...emptyFilters,
+                            [localPlatformName]: true,
+                          },
+                        });
+                    closeAction();
+                  }}
+                  style={applyFilterButtonColors}
+                >
+                  <Check />
+                  <div className="btn-text--yl">Apply Filters</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </>
+    </React.Fragment>
   );
 };
 
