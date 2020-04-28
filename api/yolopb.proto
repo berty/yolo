@@ -14,10 +14,11 @@ option (gogoproto.marshaler_all) = true;
 option (gogoproto.unmarshaler_all) = true;
 
 service YoloService {
-  rpc Ping(Ping.Request)                     returns (Ping.Response)           { option (google.api.http) = {get: "/ping"}; };
-  rpc Status(Status.Request)                 returns (Status.Response)         { option (google.api.http) = {get: "/status"}; };
-  rpc BuildList(BuildList.Request)           returns (BuildList.Response)      { option (google.api.http) = {get: "/build-list"}; }
-  rpc DevDumpObjects(DevDumpObjects.Request) returns (DevDumpObjects.Response) { option (google.api.http) = {get: "/dev-dump-objects"}; }
+  rpc Ping(Ping.Request)                         returns (Ping.Response)             { option (google.api.http) = {get: "/ping"}; };
+  rpc Status(Status.Request)                     returns (Status.Response)           { option (google.api.http) = {get: "/status"}; };
+  rpc BuildList(BuildList.Request)               returns (BuildList.Response)        { option (google.api.http) = {get: "/build-list"}; }
+  rpc BuildListFilters(BuildListFilters.Request) returns (BuildListFilters.Response) { option (google.api.http) = {get: "/build-list-filters"}; }
+  rpc DevDumpObjects(DevDumpObjects.Request)     returns (DevDumpObjects.Response)   { option (google.api.http) = {get: "/dev-dump-objects"}; }
   }
 
 //
@@ -68,6 +69,14 @@ message BuildList {
   }
   message Response {
     repeated Build builds = 1;
+  }
+}
+
+message BuildListFilters {
+  message Request  {}
+  message Response {
+    repeated Entity entities = 1;
+    repeated Project projects = 2;
   }
 }
 

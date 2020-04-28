@@ -100,6 +100,24 @@ func local_request_YoloService_BuildList_0(ctx context.Context, marshaler runtim
 
 }
 
+func request_YoloService_BuildListFilters_0(ctx context.Context, marshaler runtime.Marshaler, client YoloServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq BuildListFilters_Request
+	var metadata runtime.ServerMetadata
+
+	msg, err := client.BuildListFilters(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_YoloService_BuildListFilters_0(ctx context.Context, marshaler runtime.Marshaler, server YoloServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq BuildListFilters_Request
+	var metadata runtime.ServerMetadata
+
+	msg, err := server.BuildListFilters(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
 var (
 	filter_YoloService_DevDumpObjects_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
 )
@@ -195,6 +213,26 @@ func RegisterYoloServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 		}
 
 		forward_YoloService_BuildList_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("GET", pattern_YoloService_BuildListFilters_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_YoloService_BuildListFilters_0(rctx, inboundMarshaler, server, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_YoloService_BuildListFilters_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -319,6 +357,26 @@ func RegisterYoloServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 
 	})
 
+	mux.Handle("GET", pattern_YoloService_BuildListFilters_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_YoloService_BuildListFilters_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_YoloService_BuildListFilters_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
 	mux.Handle("GET", pattern_YoloService_DevDumpObjects_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -349,6 +407,8 @@ var (
 
 	pattern_YoloService_BuildList_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"build-list"}, "", runtime.AssumeColonVerbOpt(true)))
 
+	pattern_YoloService_BuildListFilters_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"build-list-filters"}, "", runtime.AssumeColonVerbOpt(true)))
+
 	pattern_YoloService_DevDumpObjects_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"dev-dump-objects"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
@@ -358,6 +418,8 @@ var (
 	forward_YoloService_Status_0 = runtime.ForwardResponseMessage
 
 	forward_YoloService_BuildList_0 = runtime.ForwardResponseMessage
+
+	forward_YoloService_BuildListFilters_0 = runtime.ForwardResponseMessage
 
 	forward_YoloService_DevDumpObjects_0 = runtime.ForwardResponseMessage
 )
