@@ -126,7 +126,6 @@ func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, erro
 	r.Use(chilogger.Logger(srv.logger))
 	r.Use(middleware.Timeout(opts.RequestTimeout))
 	r.Use(middleware.Recoverer)
-	r.Use(auth(opts.BasicAuth, opts.Realm, opts.AuthSalt))
 
 	gwmux := runtime.NewServeMux(
 		runtime.WithMarshalerOption(runtime.MIMEWildcard, &gateway.JSONPb{EmitDefaults: false, Indent: "  ", OrigName: true}),
@@ -155,6 +154,7 @@ func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, erro
 	}
 
 	r.Route("/api", func(r chi.Router) {
+		r.Use(auth(opts.BasicAuth, opts.Realm, opts.AuthSalt))
 		r.Use(jsonp.Handler)
 		r.Mount("/", http.StripPrefix("/api", handler))
 		r.Get("/plist-gen/{artifactID}.plist", svc.PlistGenerator)
