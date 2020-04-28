@@ -2,7 +2,7 @@ version: 2.1
 
 orbs:
   codecov: codecov/codecov@1.0.5
-  moul: moul/build@1.14.0
+  moul: moul/build@1.16.0
   tools: gotest/tools@0.0.13
 
 jobs:
@@ -18,7 +18,7 @@ jobs:
       - tools/mod-download
       - tools/mod-tidy-check
       - run: make install
-      - run: make test GO_TEST_OPTS="-v -test.timeout=300s -test.parallel=1 -count=1 -gcflags=all=-d=checkptr=0" YOLO_DEBUG=1
+      - run: make test GO_TEST_OPTS="-v -test.timeout=300s -test.parallel=1 -count=1" YOLO_DEBUG=1
       - moul/install_golangci-lint
       - run: make lint
       - codecov/upload:

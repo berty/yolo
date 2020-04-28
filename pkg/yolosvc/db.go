@@ -2,166 +2,89 @@ package yolosvc
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"berty.tech/yolo/v2/pkg/yolopb"
-	"github.com/cayleygraph/cayley"
-	"github.com/cayleygraph/cayley/graph"
-	cayleypath "github.com/cayleygraph/cayley/query/path"
-	"github.com/cayleygraph/cayley/schema"
-	"github.com/cayleygraph/quad"
+	"github.com/jinzhu/gorm"
 	"go.uber.org/zap"
+	"moul.io/zapgorm"
 )
 
-func SchemaConfig() *schema.Config {
-	// FIXME: temporarily forced to register it only once
-	config := schema.NewConfig()
-	schema.RegisterType("yolo:Build", yolopb.Build{})
-	schema.RegisterType("yolo:Artifact", yolopb.Artifact{})
-	schema.RegisterType("yolo:Commit", yolopb.Commit{})
-	schema.RegisterType("yolo:Release", yolopb.Release{})
-	schema.RegisterType("yolo:MergeRequest", yolopb.MergeRequest{})
-	schema.RegisterType("yolo:Project", yolopb.Project{})
-	schema.RegisterType("yolo:Entity", yolopb.Entity{})
-	return config
+func initDB(db *gorm.DB, logger *zap.Logger) (*gorm.DB, error) {
+	db.SetLogger(zapgorm.New(logger))
+	db.Callback().Create().Remove("gorm:update_time_stamp")
+	db.Callback().Update().Remove("gorm:update_time_stamp")
+	db = db.Set("gorm:auto_preload", false)
+	db = db.Set("gorm:association_autoupdate", false)
+	db.BlockGlobalUpdate(true)
+	db.SingularTable(true)
+	db.LogMode(true)
+	if err := db.AutoMigrate(yolopb.AllModels()...).Error; err != nil {
+		return nil, err
+	}
+	return db, nil
 }
 
-func saveBatch(ctx context.Context, db *cayley.Handle, batch *yolopb.Batch, schema *schema.Config, logger *zap.Logger) error {
+func (svc *service) saveBatch(ctx context.Context, batch *yolopb.Batch) error {
 	if batch.Empty() {
 		return nil
 	}
+	batch.Optimize() // remove duplicates
 
-	batch.Optimize()
-
-	logger.Debug("saveBatch",
-		zap.Int("projects", len(batch.Projects)),
-		zap.Int("builds", len(batch.Builds)),
-		zap.Int("commits", len(batch.Commits)),
-		zap.Int("merge_requests", len(batch.MergeRequests)),
-		zap.Int("entities", len(batch.Entities)),
-		zap.Int("artifacts", len(batch.Artifacts)),
-		zap.Int("releases", len(batch.Releases)),
-	)
-
-	tx := cayley.NewTransaction()
-	dw := graph.NewTxWriter(tx, graph.Delete)
-	iw := graph.NewTxWriter(tx, graph.Add)
-
-	// FIXME: check if different instead of always deleting and inserting again
-	// FIXME: and then, be the only place to set the clearCache flag
-
-	for _, build := range batch.Builds {
-		fmt.Println("A")
-		var working yolopb.Build
-		if err := schema.LoadTo(ctx, db, &working, build.ID); err == nil {
-			_, _ = schema.WriteAsQuads(dw, working)
+	{
+		log := svc.logger.With()
+		if l := len(batch.Projects); l > 0 {
+			log = log.With(zap.Int("projects", l))
 		}
-
-		working = *build
-		if _, err := schema.WriteAsQuads(iw, working); err != nil {
-			return fmt.Errorf("write as quads: %w", err)
+		if l := len(batch.Releases); l > 0 {
+			log = log.With(zap.Int("releases", l))
 		}
-	}
-	for _, artifact := range batch.Artifacts {
-		fmt.Println("B")
-		var working yolopb.Artifact
-		if err := schema.LoadTo(ctx, db, &working, artifact.ID); err == nil {
-			_, _ = schema.WriteAsQuads(dw, working)
+		if l := len(batch.MergeRequests); l > 0 {
+			log = log.With(zap.Int("merge_requests", l))
 		}
-
-		working = *artifact
-		if _, err := schema.WriteAsQuads(iw, working); err != nil {
-			return fmt.Errorf("write as quads: %w", err)
+		if l := len(batch.Artifacts); l > 0 {
+			log = log.With(zap.Int("artifacts", l))
 		}
-	}
-	for _, entity := range batch.Entities {
-		var working yolopb.Entity
-		if err := schema.LoadTo(ctx, db, &working, entity.ID); err == nil {
-			_, _ = schema.WriteAsQuads(dw, working)
+		if l := len(batch.Builds); l > 0 {
+			log = log.With(zap.Int("builds", l))
 		}
-
-		working = *entity
-		if _, err := schema.WriteAsQuads(iw, working); err != nil {
-			return fmt.Errorf("write as quads: %w", err)
+		if l := len(batch.Commits); l > 0 {
+			log = log.With(zap.Int("commits", l))
 		}
-	}
-	for _, project := range batch.Projects {
-		var working yolopb.Project
-		if err := schema.LoadTo(ctx, db, &working, project.ID); err == nil {
-			_, _ = schema.WriteAsQuads(dw, working)
+		if l := len(batch.Entities); l > 0 {
+			log = log.With(zap.Int("entities", l))
 		}
-
-		working = *project
-		if _, err := schema.WriteAsQuads(iw, working); err != nil {
-			return fmt.Errorf("write as quads: %w", err)
-		}
-	}
-	for _, release := range batch.Releases {
-		var working yolopb.Release
-		if err := schema.LoadTo(ctx, db, &working, release.ID); err == nil {
-			_, _ = schema.WriteAsQuads(dw, working)
-		}
-
-		working = *release
-		if _, err := schema.WriteAsQuads(iw, working); err != nil {
-			return fmt.Errorf("write as quads: %w", err)
-		}
-	}
-	for _, commit := range batch.Commits {
-		var working yolopb.Commit
-		if err := schema.LoadTo(ctx, db, &working, commit.ID); err == nil {
-			_, _ = schema.WriteAsQuads(dw, working)
-		}
-
-		working = *commit
-		if _, err := schema.WriteAsQuads(iw, working); err != nil {
-			return fmt.Errorf("write as quads: %w", err)
-		}
-	}
-	for _, mergeRequest := range batch.MergeRequests {
-		var working yolopb.MergeRequest
-		if err := schema.LoadTo(ctx, db, &working, mergeRequest.ID); err == nil {
-			_, _ = schema.WriteAsQuads(dw, working)
-		}
-
-		working = *mergeRequest
-		if _, err := schema.WriteAsQuads(iw, working); err != nil {
-			return fmt.Errorf("write as quads: %w", err)
-		}
+		log.Debug("saveBatch")
 	}
 
-	if err := db.ApplyTransaction(tx); err != nil {
-		return fmt.Errorf("apply tx: %w", err)
+	err := svc.db.Transaction(func(tx *gorm.DB) error {
+		// FIXME: use this for Entities (users, orgs): db.Model(&entity).Update(&entity)?
+		for _, object := range batch.AllObjects() {
+			if err := tx.Set("gorm:association_autocreate", true).Save(object).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return err
 	}
-	fmt.Println("I")
+
+	svc.clearCache.Set()
 
 	return nil
 }
 
-func lastBuildCreatedTime(ctx context.Context, db *cayley.Handle, driver yolopb.Driver) (time.Time, error) {
-	// FIXME: find a better approach
-	chain := cayleypath.StartPath(db).
-		Both().
-		Has(quad.IRI("rdf:type"), quad.IRI("yolo:Build"))
-	if driver != yolopb.Driver_UnknownDriver {
-		chain = chain.Has(quad.IRI("schema:driver"), quad.Int(driver))
+func lastBuildCreatedTime(ctx context.Context, db *gorm.DB, driver yolopb.Driver) (time.Time, error) {
+	build := yolopb.Build{
+		Driver: driver,
 	}
-	chain = chain.Out(quad.IRI("schema:finishedAt"))
-
-	values, err := chain.Iterate(ctx).Paths(false).AllValues(db)
+	err := db.Order("finished_at desc").Where(&build).Select("finished_at").First(&build).Error
 	if err != nil {
-		return time.Time{}, fmt.Errorf("chain.Iterate: %w", err)
+		return time.Time{}, err
 	}
 
-	since := time.Time{}
-	for _, value := range values {
-		typed := quad.NativeOf(value).(time.Time)
-		if since.Before(typed) {
-			since = typed
-		}
-	}
-
+	since := *build.FinishedAt
 	if !since.IsZero() {
 		since = since.Add(time.Second) // in order to skip the last one
 	}

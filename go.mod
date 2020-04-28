@@ -5,8 +5,6 @@ go 1.13
 require (
 	github.com/Bearer/bearer-go v1.2.1
 	github.com/buildkite/go-buildkite v2.2.0+incompatible
-	github.com/cayleygraph/cayley v0.7.7
-	github.com/cayleygraph/quad v1.2.4
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/go-chi/chi v4.0.4+incompatible
 	github.com/go-chi/jsonp v0.0.0-20170809160916-b971022286e2
@@ -17,16 +15,15 @@ require (
 	github.com/google/go-github/v31 v31.0.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway v1.14.3
+	github.com/jinzhu/gorm v1.9.12
 	github.com/jszwedko/go-circleci v0.3.0
 	github.com/karrick/godirwalk v1.15.6 // indirect
 	github.com/oklog/run v1.1.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/peterbourgon/ff/v2 v2.0.0
 	github.com/rs/cors v1.7.0
-	github.com/spf13/cobra v1.0.0 // indirect
 	github.com/stretchr/signature v0.0.0-20160104132143-168b2a1e1b56
 	github.com/stretchr/stew v0.0.0-20130812190256-80ef0842b48b // indirect
-	github.com/stretchr/testify v1.5.1
 	github.com/stretchr/tracer v0.0.0-20140124184152-66d3696bba97 // indirect
 	github.com/tevino/abool v0.0.0-20170917061928-9b9efcf221b5
 	github.com/treastech/logger v0.0.0-20180705232552-e381e9ecf2e3
@@ -40,6 +37,5 @@ require (
 	howett.net/plist v0.0.0-20200225050739-77e249a2e2ba
 	moul.io/depviz/v3 v3.11.4
 	moul.io/godev v1.6.0
+	moul.io/zapgorm v1.0.0
 )
-
-replace github.com/cayleygraph/cayley v0.7.7 => github.com/cayleygraph/cayley v0.7.7-0.20200130230943-9fb4d58e0e07

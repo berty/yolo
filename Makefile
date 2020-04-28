@@ -1,7 +1,6 @@
 DEV_RUN_OPTS ?= --dev-mode
 
-# tmp fix for go>=1.14 and bolt: see https://github.com/etcd-io/bbolt/issues/187
-GO_TEST_OPTS ?= -test.timeout=60s -gcflags=all=-d=checkptr=0
+GO_TEST_OPTS ?= -test.timeout=60s
 
 .PHONY: test
 test: generate
@@ -9,7 +8,7 @@ test: generate
 
 .PHONY: dev
 dev: install
-	yolo -v server --cors-allowed-origins="*" --max-builds=50 --db-path=/tmp/yolo-dev --basic-auth-password="uns3cur3" --auth-salt="uns3cur3" $(DEV_RUN_OPTS)
+	yolo -v server --cors-allowed-origins="*" --max-builds=50 --db-path=/tmp/yolo-dev.sqlite --basic-auth-password="uns3cur3" --auth-salt="uns3cur3" $(DEV_RUN_OPTS)
 
 .PHONY: update-golden
 update-golden:

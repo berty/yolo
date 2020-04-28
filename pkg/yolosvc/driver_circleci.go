@@ -2,13 +2,10 @@ package yolosvc
 
 import (
 	"context"
-	fmt "fmt"
+	"fmt"
 	"time"
 
 	"berty.tech/yolo/v2/pkg/yolopb"
-	"github.com/cayleygraph/cayley"
-	"github.com/cayleygraph/cayley/schema"
-	"github.com/cayleygraph/quad"
 	circleci "github.com/jszwedko/go-circleci"
 	"github.com/tevino/abool"
 	"go.uber.org/zap"
@@ -24,28 +21,24 @@ type CircleciWorkerOpts struct {
 
 const circleciMaxPerPage = 30
 
-// CircleciWorker goals is to manage the circleci update routine, it should try to support as much errors as possible by itself
-func CircleciWorker(ctx context.Context, db *cayley.Handle, ccc *circleci.Client, schema *schema.Config, opts CircleciWorkerOpts) error {
+// CircleciWorker goals is to manage the github update routine, it should try to support as much errors as possible by itself
+func (svc *service) CircleciWorker(ctx context.Context, opts CircleciWorkerOpts) error {
 	opts.applyDefaults()
 
-	logger := opts.Logger
-	for {
-		since, err := lastBuildCreatedTime(ctx, db, yolopb.Driver_CircleCI)
+	var logger = opts.Logger
+
+	for iteration := 0; ; iteration++ {
+		since, err := lastBuildCreatedTime(ctx, svc.db, yolopb.Driver_CircleCI)
 		if err != nil {
 			logger.Warn("get last circleci build created time", zap.Error(err))
-			since = time.Time{}
 		}
-		logger.Debug("circleci: refresh", zap.Time("since", since))
-		// FIXME: only fetch builds since most recent known
-		batch, err := fetchCircleci(ccc, since, opts.MaxBuilds, logger)
+		logger.Debug("circleci: refresh", zap.Int("iteration", iteration), zap.Time("since", since))
+		batch, err := fetchCircleciBuilds(svc.ccc, since, opts.MaxBuilds, logger)
 		if err != nil {
 			logger.Warn("fetch circleci", zap.Error(err))
 		} else {
-			if !batch.Empty() {
-				if err := saveBatch(ctx, db, batch, schema, logger); err != nil {
-					logger.Warn("save batch", zap.Error(err))
-				}
-				opts.ClearCache.Set()
+			if err := svc.saveBatch(ctx, batch); err != nil {
+				logger.Warn("save batch", zap.Error(err))
 			}
 		}
 		// FIXME: fetch artifacts for builds with job that are successful and have a not empty artifact path
@@ -62,7 +55,7 @@ func CircleciWorker(ctx context.Context, db *cayley.Handle, ccc *circleci.Client
 	}
 }
 
-func fetchCircleci(ccc *circleci.Client, since time.Time, maxBuilds int, logger *zap.Logger) (*yolopb.Batch, error) {
+func fetchCircleciBuilds(ccc *circleci.Client, since time.Time, maxBuilds int, logger *zap.Logger) (*yolopb.Batch, error) {
 	batch := yolopb.NewBatch()
 	if since.IsZero() { // initial fetch
 		// FIXME: handle circleciMaxPerPage
@@ -140,15 +133,15 @@ func handleCircleciBuilds(ccc *circleci.Client, builds []*circleci.Build, logger
 
 func circleciBuildToBatch(build *circleci.Build) yolopb.Build {
 	newBuild := yolopb.Build{
-		ID:         quad.IRI(build.BuildURL),
-		ShortID:    fmt.Sprintf("%d", build.BuildNum),
-		Driver:     yolopb.Driver_CircleCI,
-		CreatedAt:  build.AuthorDate,
-		FinishedAt: build.StopTime,
-		StartedAt:  build.StartTime,
-		Branch:     build.Branch,
-		Message:    build.Body,
-		HasCommit:  &yolopb.Commit{ID: quad.IRI(build.VcsRevision)},
+		ID:          build.BuildURL,
+		ShortID:     fmt.Sprintf("%d", build.BuildNum),
+		Driver:      yolopb.Driver_CircleCI,
+		CreatedAt:   build.AuthorDate,
+		FinishedAt:  build.StopTime,
+		StartedAt:   build.StartTime,
+		Branch:      build.Branch,
+		Message:     build.Body,
+		HasCommitID: build.VcsRevision,
 		// FIXME: CommitURL
 		// duration
 	}
@@ -190,11 +183,11 @@ func circleciArtifactsToBatch(artifacts []*circleci.Artifact, build *circleci.Bu
 	for _, artifact := range artifacts {
 		id := "circleci_" + md5Sum(artifact.URL)
 		newArtifact := yolopb.Artifact{
-			ID:          quad.IRI(id),
+			ID:          id,
 			CreatedAt:   build.AuthorDate,
 			LocalPath:   artifact.PrettyPath,
 			DownloadURL: artifact.URL,
-			HasBuild:    &yolopb.Build{ID: quad.IRI(build.BuildURL)},
+			HasBuildID:  build.BuildURL,
 			Driver:      yolopb.Driver_CircleCI,
 			Kind:        artifactKindByPath(artifact.PrettyPath),
 			State:       yolopb.Artifact_Finished,

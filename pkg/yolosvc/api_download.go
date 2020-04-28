@@ -7,23 +7,18 @@ import (
 
 	"berty.tech/yolo/v2/pkg/bintray"
 	"berty.tech/yolo/v2/pkg/yolopb"
-	cayleypath "github.com/cayleygraph/cayley/query/path"
-	"github.com/cayleygraph/quad"
 	"github.com/go-chi/chi"
 )
 
 func (svc service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "artifactID")
 
-	p := cayleypath.
-		StartPath(svc.db, quad.IRI(id)).
-		Has(quad.IRI("rdf:type"), quad.IRI("yolo:Artifact"))
 	var artifact yolopb.Artifact
-	if err := svc.schema.LoadPathTo(r.Context(), svc.db, &artifact, p); err != nil {
+	err := svc.db.First(&artifact, "ID = ?", id).Error
+	if err != nil {
 		http.Error(w, fmt.Sprintf("err: %v", err), http.StatusInternalServerError)
 		return
 	}
-	artifact.Cleanup()
 
 	base := path.Base(artifact.LocalPath)
 	w.Header().Add("Content-Disposition", fmt.Sprintf("inline; filename=%s", base))
@@ -34,7 +29,6 @@ func (svc service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", artifact.MimeType)
 	}
 
-	var err error
 	switch artifact.Driver {
 	case yolopb.Driver_Buildkite:
 		if svc.bkc == nil {
