@@ -27,7 +27,7 @@
     font-size: larger;
   }
 
-  .btn-close--yl {
+  .btn-close {
     display: flex;
     justify-content: center;
     padding: 0.3em;
@@ -35,7 +35,7 @@
   }
 
   // TODO: Hover, active, etc
-  .btn-primary--yl {
+  .btn-primary {
     padding: 8px 14px 8px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -49,7 +49,7 @@
     }
   }
 
-  .modal-filter-widget--yl {
+  .modal-filter-widget {
     display: flex;
     flex-flow: column nowrap;
     align-items: center;
@@ -65,23 +65,23 @@
     div {
       flex: 0 0 auto;
     }
-    &.modal-filter-not-implemented--yl {
+    &.modal-filter-not-implemented {
       border-style: dotted;
       cursor: default;
     }
   }
 
-  .subtitle--yl {
+  .subtitle {
     font-size: small;
     margin-bottom: 0.5em;
   }
 
-  .filter-row--yl {
+  .filter-row {
     display: flex;
     margin-bottom: 1.5em;
   }
 
-  p.filter-text--yl {
+  p.filter-text {
     font-size: 0.7em;
     padding: 0px;
     margin: 0px;

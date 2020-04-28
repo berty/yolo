@@ -82,7 +82,7 @@ const ArtifactCard = ({artifact, buildMergeUpdatedAt, buildMergeId}) => {
   const ArtifactStateTag = !artifactState ? (
     <React.Fragment />
   ) : (
-    <div className="btn artifact-tag--yl" style={artifactTagStyle}>
+    <div className="btn artifact-tag" style={artifactTagStyle}>
       {artifactState}
     </div>
   );
@@ -106,23 +106,23 @@ const ArtifactCard = ({artifact, buildMergeUpdatedAt, buildMergeId}) => {
   return (
     <React.Fragment key={artifactId}>
       <div
-        className="card-row--yl expanded"
+        className="card-row expanded"
         style={{color: theme.text.sectionText}}
       >
-        <div className="card-left-icon--yl icon-top--yl">{PlatformIcon}</div>
-        <div className="card-details--yl">
-          <div className="card-details-row--yl">
+        <div className="card-left-icon icon-top">{PlatformIcon}</div>
+        <div className="card-details">
+          <div className="card-details-row">
             <div className="">
               {ArtifactKindName} {BuildMergeId}
             </div>
             {ArtifactStateTag}
           </div>
-          <div className="card-details-row--yl">
+          <div className="card-details-row">
             {TimeSinceBuildUpdated}
             {PlaceholderDuration}
           </div>
         </div>
-        <div className="card-build-actions--yl">{ArtifactActionButton}</div>
+        <div className="card-build-actions">{ArtifactActionButton}</div>
       </div>
     </React.Fragment>
   );

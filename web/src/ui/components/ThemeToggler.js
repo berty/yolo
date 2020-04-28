@@ -18,7 +18,7 @@ const ThemeToggler = () => {
     if (isLight) changeTheme('light');
   }, []);
 
-  const buttonStyle = {
+  const themeTogglerButtonStyle = {
     display: 'flex',
     flex: '1 0 auto',
     justifyContent: 'flex-end',
@@ -29,7 +29,7 @@ const ThemeToggler = () => {
 
   return (
     <div
-      style={buttonStyle}
+      style={themeTogglerButtonStyle}
       onClick={() => {
         return changeTheme(theme.name === 'light' ? 'dark' : 'light');
       }}

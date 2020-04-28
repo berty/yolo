@@ -52,16 +52,16 @@ const Filters = () => {
     }
   }, [state.needsRequest]);
 
-  const filterAccentColor = theme.icon.filterSelected;
+  const widgetAccentColor = theme.icon.filterSelected;
 
   const headerWidgetWrapperColors = {
-    color: filterAccentColor,
-    borderColor: filterAccentColor,
+    color: widgetAccentColor,
+    borderColor: widgetAccentColor,
     backgroundColor: theme.bg.filter,
   };
 
   const HeaderWidgetWrapper = ({children}) => (
-    <div className="filter--yl" style={headerWidgetWrapperColors}>
+    <div className="widget-wrapper" style={headerWidgetWrapperColors}>
       {children}
     </div>
   );
@@ -70,7 +70,7 @@ const Filters = () => {
     return (
       <React.Fragment>
         {children}
-        {text && <p className="filter-text--yl">{text}</p>}
+        {text && <p className="widget-text">{text}</p>}
       </React.Fragment>
     );
   };
@@ -86,7 +86,7 @@ const Filters = () => {
             children={
               <HeaderWidget
                 text="Chat"
-                children={<IconChat stroke={filterAccentColor} />}
+                children={<IconChat stroke={widgetAccentColor} />}
               />
             }
           />
@@ -96,7 +96,7 @@ const Filters = () => {
             children={
               <HeaderWidget
                 text="Mini"
-                children={<IconMini stroke={filterAccentColor} />}
+                children={<IconMini stroke={widgetAccentColor} />}
               />
             }
           />
@@ -129,7 +129,7 @@ const Filters = () => {
                         : faQuestionCircle
                     }
                     size="lg"
-                    color={filterAccentColor}
+                    color={widgetAccentColor}
                   />
                 }
               />
@@ -149,21 +149,21 @@ const Filters = () => {
       branchWidget = (
         <HeaderWidget
           text="All"
-          children={<GitBranch color={filterAccentColor} />}
+          children={<GitBranch color={widgetAccentColor} />}
         />
       );
     } else if (master) {
       branchWidget = (
         <HeaderWidget
           text="Master"
-          children={<GitCommit color={filterAccentColor} />}
+          children={<GitCommit color={widgetAccentColor} />}
         />
       );
     } else if (develop) {
       branchWidget = (
         <HeaderWidget
           text="Develop"
-          children={<GitMerge color={filterAccentColor} />}
+          children={<GitMerge color={widgetAccentColor} />}
         />
       );
     } else {
@@ -173,7 +173,7 @@ const Filters = () => {
   };
 
   return (
-    <div className="filter-wrapper--yl">
+    <div className="Filters">
       {FiltersAppWidget()}
       {FiltersPlatformWidget()}
       {FiltersBranchWidget()}
