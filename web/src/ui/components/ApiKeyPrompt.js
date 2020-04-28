@@ -1,5 +1,6 @@
 import React, {useState, useRef, useEffect, useContext} from 'react';
 import {ThemeContext} from '../../store/ThemeStore';
+import {setAuthCookie} from '../../api/auth';
 
 const ApiKeyPrompt = ({failedKey, setApiKey: submitNewApiKey}) => {
   const {theme} = useContext(ThemeContext);
@@ -12,21 +13,18 @@ const ApiKeyPrompt = ({failedKey, setApiKey: submitNewApiKey}) => {
       <div className="form-group">
         <label className="mt-3 form-label mb-2">
           Enter an API key in the form of{' '}
-          <span
+          <strong
             style={{fontFamily: 'monospace', color: theme.text.sectionTitle}}
           >
-            username:password
-          </span>
+            :password
+          </strong>
         </label>
         <div className="input mb-3">
           <input
             ref={inputEl}
             type="text"
             className="form-control"
-            placeholder={
-              'Current key: ' +
-              (failedKey || process.env.YOLO_APP_PW || 'no key set')
-            }
+            placeholder={'Current key: ' + (failedKey || 'no key set')}
             onChange={(e) => {
               updateFormApiKey(e.target.value);
             }}
@@ -35,7 +33,8 @@ const ApiKeyPrompt = ({failedKey, setApiKey: submitNewApiKey}) => {
         <button
           className="btn"
           onClick={() => {
-            submitNewApiKey({apiKey: formApiKey, needsRequest: true});
+            setAuthCookie({apiKey: `${formApiKey}`});
+            submitNewApiKey({apiKey: btoa(formApiKey), needsRequest: true});
           }}
           disabled={!formApiKey}
         >

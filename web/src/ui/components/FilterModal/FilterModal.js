@@ -244,6 +244,7 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
                     localPlatformId === state.platformId
                       ? {}
                       : updateState({
+                          needsRequest: true,
                           platformId: localPlatformId,
                           isLoaded: false,
                           items: [],

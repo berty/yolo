@@ -9,11 +9,11 @@ const baseMockRequest = () =>
 
 const baseRequest = ({platformId, apiKey}) =>
   axios.get(
-    `${process.env.API_SERVER}/api/build-list?artifact-kinds=${platformId}&`,
+    `${process.env.API_SERVER}/api/build-list?artifact_kinds=${platformId}&`,
     {
       headers: apiKey
         ? {
-            Authorization: 'Basic ' + btoa(`${apiKey}`),
+            Authorization: `Basic ${apiKey}`,
           }
         : {},
     }

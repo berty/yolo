@@ -1,13 +1,14 @@
-import React, {useState, useContext, useReducer, createContext} from 'react';
+import React, {useReducer} from 'react';
 import {cloneDeep} from 'lodash';
 import {PLATFORMS} from '../constants';
+import {retrieveAuthCookie} from '../api/auth';
 
 // TODO: Yes, this file needs a new name, and should maybe be split
 export const ResultContext = React.createContext();
 
 export const INITIAL_STATE = {
   platformId: PLATFORMS.iOS,
-  apiKey: `${process.env.YOLO_APP_PW || ''}`,
+  apiKey: retrieveAuthCookie() || null,
   error: null,
   isLoaded: false,
   items: [],
