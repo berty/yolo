@@ -41,6 +41,7 @@ type Server struct {
 	devMode          bool
 	cache            *cache.Cache
 	clearCache       *abool.AtomicBool
+	withCache        bool
 }
 
 type ServerOpts struct {
@@ -55,6 +56,7 @@ type ServerOpts struct {
 	AuthSalt           string
 	DevMode            bool
 	ClearCache         *abool.AtomicBool
+	WithCache          bool
 }
 
 func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, error) {
@@ -65,6 +67,7 @@ func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, erro
 		logger:     opts.Logger,
 		devMode:    opts.DevMode,
 		clearCache: opts.ClearCache,
+		withCache:  opts.WithCache,
 	}
 
 	// gRPC interceptors
@@ -136,7 +139,7 @@ func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, erro
 
 	var handler http.Handler = gwmux
 
-	if !srv.devMode {
+	if srv.withCache {
 		srv.cache = cache.New(1*time.Minute, 2*time.Minute)
 		handler = cacheMiddleware(handler, srv.cache, srv.logger)
 		srv.workers.Add(func() error {

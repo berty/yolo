@@ -43,6 +43,7 @@ func yolo(args []string) error {
 	var (
 		verbose            bool
 		devMode            bool
+		withCache          bool
 		maxBuilds          int
 		bearerSecretKey    string
 		buildkiteToken     string
@@ -70,6 +71,7 @@ func yolo(args []string) error {
 	rootFlagSet.SetOutput(os.Stderr)
 	rootFlagSet.BoolVar(&verbose, "v", false, "increase log verbosity")
 	serverFlagSet.BoolVar(&devMode, "dev-mode", false, "enable insecure helpers")
+	serverFlagSet.BoolVar(&withCache, "with-cache", false, "enable API caching")
 	serverFlagSet.StringVar(&buildkiteToken, "buildkite-token", "", "BuildKite API Token")
 	serverFlagSet.StringVar(&bintrayUsername, "bintray-username", "", "Bintray username")
 	serverFlagSet.StringVar(&bintrayToken, "bintray-token", "", "Bintray API Token")
@@ -189,6 +191,7 @@ func yolo(args []string) error {
 				Realm:              realm,
 				AuthSalt:           authSalt,
 				DevMode:            devMode,
+				WithCache:          withCache,
 				ClearCache:         cc,
 			})
 			if err != nil {
