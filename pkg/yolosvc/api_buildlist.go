@@ -5,14 +5,16 @@ import (
 	"fmt"
 
 	"berty.tech/yolo/v2/pkg/yolopb"
+	"moul.io/godev"
 )
 
 func (svc service) BuildList(ctx context.Context, req *yolopb.BuildList_Request) (*yolopb.BuildList_Response, error) {
+	fmt.Println(godev.PrettyJSON(req))
 	if req == nil {
 		req = &yolopb.BuildList_Request{}
 	}
 	if req.Limit == 0 {
-		req.Limit = 30
+		req.Limit = 50
 	}
 	if !req.WithArtifacts {
 		req.WithArtifacts = len(req.ArtifactKinds) > 0
@@ -24,17 +26,38 @@ func (svc service) BuildList(ctx context.Context, req *yolopb.BuildList_Request)
 		Model(&yolopb.Build{})
 
 	switch {
-	case len(req.ArtifactKinds) > 0:
+	case len(req.BuildID) > 0:
 		query = query.
-			Joins("JOIN artifact ON artifact.has_build_id = build.id AND artifact.kind IN (?)", req.ArtifactKinds).
-			Preload("HasArtifacts", "kind IN (?)", req.ArtifactKinds)
-	case req.WithArtifacts:
+			Where("id IN (?) OR yolo_id IN (?)", req.BuildID, req.BuildID).
+			Preload("HasArtifacts")
+	case len(req.ArtifactID) > 0:
 		query = query.
-			Joins("JOIN artifact ON artifact.has_build_id = build.id", req.ArtifactKinds).
+			Joins("JOIN artifact ON artifact.has_build_id = build.id AND (artifact.id IN (?) OR artifact.yolo_id IN (?))", req.ArtifactID, req.ArtifactID).
 			Preload("HasArtifacts")
 	default:
-		query = query.
-			Preload("HasArtifacts")
+		switch {
+		case len(req.ArtifactKinds) > 0:
+			query = query.
+				Joins("JOIN artifact ON artifact.has_build_id = build.id AND artifact.kind IN (?)", req.ArtifactKinds).
+				Preload("HasArtifacts", "kind IN (?)", req.ArtifactKinds)
+		case req.WithArtifacts:
+			query = query.
+				Joins("JOIN artifact ON artifact.has_build_id = build.id", req.ArtifactKinds).
+				Preload("HasArtifacts")
+		default:
+			query = query.
+				Preload("HasArtifacts")
+		}
+
+		if req.BuildDriver != yolopb.Driver_UnknownDriver {
+			query = query.Where(&yolopb.Build{
+				Driver: req.BuildDriver,
+			})
+		}
+
+		if len(req.ProjectID) > 0 {
+			query = query.Joins("JOIN project ON project.id = build.has_project_id AND (project.id IN (?) OR project.yolo_id IN (?))", req.ProjectID, req.ProjectID)
+		}
 	}
 
 	query = query.

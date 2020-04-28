@@ -18,6 +18,7 @@ require (
 	github.com/jinzhu/gorm v1.9.12
 	github.com/jszwedko/go-circleci v0.3.0
 	github.com/karrick/godirwalk v1.15.6 // indirect
+	github.com/mr-tron/base58 v1.1.3
 	github.com/oklog/run v1.1.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/peterbourgon/ff/v2 v2.0.0

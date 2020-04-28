@@ -66,6 +66,18 @@ message BuildList {
 
     // filter builds without any artifacts
     bool with_artifacts = 3;
+
+    // only a specific build by its ID or yolo_id
+    repeated string build_id = 4 [(gogoproto.customname) = "BuildID"];
+
+    // builds of a specific project by its ID or yolo_id
+    repeated string project_id = 5 [(gogoproto.customname) = "ProjectID"];
+
+    // filter on builds that contain at least on of these artifacts
+    repeated string artifact_id = 6 [(gogoproto.customname) = "ArtifactID"];
+
+    // filter by build driver (GitHub, CircleCI, ...)
+    Driver build_driver = 7;
   }
   message Response {
     repeated Build builds = 1;
