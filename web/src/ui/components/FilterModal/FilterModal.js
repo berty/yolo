@@ -1,15 +1,15 @@
 import React, {useContext, useState} from 'react';
-import {ThemeContext} from '../../store/ThemeStore';
+import {ThemeContext} from '../../../store/ThemeStore';
 import {Check, GitBranch, GitMerge, GitCommit, X} from 'react-feather';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faAndroid, faApple} from '@fortawesome/free-brands-svg-icons';
 import {faQuestionCircle} from '@fortawesome/free-solid-svg-icons';
-import IconChat from '../../assets/svg/IconChat';
-import IconMini from '../../assets/svg/IconMini';
+import IconChat from '../../../assets/svg/IconChat';
+import IconMini from '../../../assets/svg/IconMini';
 import classNames from 'classnames';
-import {ResultContext} from '../../store/ResultStore';
+import {ResultContext} from '../../../store/ResultStore';
 import './FilterModal.scss';
-import {PLATFORMS} from '../../constants';
+import {PLATFORMS} from '../../../constants';
 
 const FilterModal = ({closeAction, showingFiltersModal}) => {
   const {theme} = useContext(ThemeContext);

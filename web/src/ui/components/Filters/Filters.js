@@ -1,15 +1,18 @@
 import React, {useEffect, useContext} from 'react';
-import {ResultContext} from '../../store/ResultStore.js';
-import {ThemeContext} from '../../store/ThemeStore.js';
-import './Filters.scss';
+import {GitMerge, GitBranch, GitCommit} from 'react-feather';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faAndroid, faApple} from '@fortawesome/free-brands-svg-icons';
 import {faQuestionCircle} from '@fortawesome/free-solid-svg-icons';
-import IconChat from '../../assets/svg/IconChat';
-import IconMini from '../../assets/svg/IconMini';
-import {GitMerge, GitBranch, GitCommit} from 'react-feather';
-import {getData} from '../../api';
-import {PLATFORMS} from '../../constants/index.js';
+
+import {getData, validateError} from '../../../api';
+
+import {ResultContext} from '../../../store/ResultStore.js';
+import {ThemeContext} from '../../../store/ThemeStore.js';
+
+import IconChat from '../../../assets/svg/IconChat';
+import IconMini from '../../../assets/svg/IconMini';
+
+import './Filters.scss';
 
 const Filters = () => {
   const {state, updateState} = useContext(ResultContext);
@@ -21,49 +24,33 @@ const Filters = () => {
         error: null,
         isLoaded: false,
         items: [],
-        needsRequest: true,
       });
-      getData({platformId: state.platformId, apiKey: state.apiKey}).then(
-        (result) => {
-          const {data: {builds = []} = {builds: []}} = result;
-          updateState({
-            isLoaded: true,
-            items: builds,
-            error: null,
-            needsRequest: false,
-          });
-        },
-        (err) => {
-          const defaultResponse = {
-            statusText: 'Network error',
-            status: 500,
-            data: '',
-          };
-          const {
-            response: {statusText: message, status, data} = defaultResponse,
-          } = err || {};
+      getData({platformId: state.platformId, apiKey: state.apiKey})
+        .then(
+          (result) => {
+            const {data: {builds = []} = {builds: []}} = result;
+            updateState({
+              items: builds,
+              error: null,
+            });
+          },
+          (error) => {
+            updateState({
+              error: validateError({error}),
+            });
+          }
+        )
+        .finally(() => {
           updateState({
             isLoaded: true,
             needsRequest: false,
-            error: {message, status, data},
           });
-        }
-      );
+        });
     };
-    if (
-      (state.platformId !== PLATFORMS.none && state.isLoaded === false) ||
-      state.needsRequest
-    ) {
+    if (state.needsRequest) {
       makeRequest();
     }
-  }, [
-    // TODO: Simplify to needsRequest
-    state.apiKey,
-    state.platformId,
-    state.appFilter,
-    state.isLoaded,
-    state.needsRequest,
-  ]);
+  }, [state.needsRequest]);
 
   const filterAccentColor = theme.icon.filterSelected;
 

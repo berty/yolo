@@ -1,6 +1,7 @@
 import React, {useContext} from 'react';
-import {ThemeContext} from '../../store/ThemeStore';
 import {Sliders} from 'react-feather';
+
+import {ThemeContext} from '../../store/ThemeStore';
 
 const ShowFiltersButton = ({clickAction, showingFiltersModal}) => {
   const {theme} = useContext(ThemeContext);

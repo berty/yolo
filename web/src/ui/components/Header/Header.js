@@ -1,13 +1,15 @@
 import React, {useContext} from 'react';
-import Filters from '../Filters';
+import Filters from '../Filters/Filters';
 
 import {ThemeContext} from '../../../store/ThemeStore';
 import YoloLogo from '../../../assets/svg/yolo.svg';
+
 import ActionWidgets from '../ActionWidgets';
 import ThemeToggler from '../ThemeToggler';
-import {User} from 'react-feather';
-import './Header.scss';
+
 import {ResultContext} from '../../../store/ResultStore';
+
+import './Header.scss';
 
 const Header = () => {
   const {theme} = useContext(ThemeContext);
@@ -24,9 +26,7 @@ const Header = () => {
           className="btn btn-outline-info btn-sm"
           onClick={() =>
             updateState({
-              isLoaded: false,
-              items: [],
-              platformId: state.platformId,
+              needsRequest: true,
             })
           }
         >

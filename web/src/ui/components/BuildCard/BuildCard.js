@@ -1,13 +1,16 @@
 import React, {useContext, useState} from 'react';
-import {ThemeContext} from '../../../store/ThemeStore';
-import {sharedThemes} from '../../styleTools/themes';
 import {GitCommit, GitMerge, User, ChevronUp, ChevronDown} from 'react-feather';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faGithub} from '@fortawesome/free-brands-svg-icons';
 import {faAlignLeft} from '@fortawesome/free-solid-svg-icons';
-import './BuildCard.scss';
+
+import {ThemeContext} from '../../../store/ThemeStore';
+import {sharedThemes} from '../../styleTools/themes';
+
 import {tagStyle} from '../../styleTools/buttonStyler';
 import ArtifactCard from './ArtifactCard';
+
+import './BuildCard.scss';
 
 const BuildCard = ({item}) => {
   const [expanded, toggleExpanded] = useState(true);
