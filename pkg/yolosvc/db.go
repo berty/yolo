@@ -2,6 +2,10 @@ package yolosvc
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/base64"
+	"fmt"
+	"strings"
 	"time"
 
 	"berty.tech/yolo/v2/pkg/yolopb"
@@ -14,6 +18,7 @@ func initDB(db *gorm.DB, logger *zap.Logger) (*gorm.DB, error) {
 	db.SetLogger(zapgorm.New(logger))
 	db.Callback().Create().Remove("gorm:update_time_stamp")
 	db.Callback().Update().Remove("gorm:update_time_stamp")
+	db.Callback().Create().Before("gorm:create").Register("yolo_before_create", beforeCreate)
 	db = db.Set("gorm:auto_preload", false)
 	db = db.Set("gorm:association_autoupdate", false)
 	db.BlockGlobalUpdate(true)
@@ -89,4 +94,26 @@ func lastBuildCreatedTime(ctx context.Context, db *gorm.DB, driver yolopb.Driver
 		since = since.Add(time.Second) // in order to skip the last one
 	}
 	return since, nil
+}
+
+func beforeCreate(scope *gorm.Scope) {
+	if !scope.HasColumn("yolo_id") {
+		return
+	}
+
+	field, found := scope.FieldByName("id")
+	if !found {
+		return
+	}
+
+	table := scope.TableName()
+	id := field.Field.String()
+	hash := sha256.Sum256([]byte(id))
+	encoded := base64.StdEncoding.EncodeToString(hash[:])
+	prefix := strings.ToLower(table[:1])
+	yoloID := fmt.Sprintf("%s:%s", prefix, encoded)
+	err := scope.SetColumn("yolo_id", yoloID)
+	if err != nil {
+		panic(err)
+	}
 }

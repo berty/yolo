@@ -79,17 +79,18 @@ message Build {
   /// fields
 
   string id = 1 [(gogoproto.moretags) = "gorm:\"primary_key\"", (gogoproto.customname) = "ID"];
-  google.protobuf.Timestamp created_at = 2 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  google.protobuf.Timestamp updated_at = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  State state = 4;
-  google.protobuf.Timestamp completed_at = 5 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  string message = 6;
-  google.protobuf.Timestamp started_at = 7 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  google.protobuf.Timestamp finished_at = 8 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  string commit_url = 9 [(gogoproto.customname) = "CommitURL"];
-  string branch = 10;
-  Driver driver = 11;
-  string short_id = 12 [(gogoproto.customname) = "ShortID"];
+  string yolo_id = 2 [(gogoproto.customname) = "YoloID"]; // hash
+  google.protobuf.Timestamp created_at = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp updated_at = 4 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  State state = 5;
+  google.protobuf.Timestamp completed_at = 6 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  string message = 7;
+  google.protobuf.Timestamp started_at = 8 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp finished_at = 9 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  string commit_url = 10 [(gogoproto.customname) = "CommitURL"];
+  string branch = 11;
+  Driver driver = 12;
+  string short_id = 13 [(gogoproto.customname) = "ShortID"];
 
   /// relationships
 
@@ -120,12 +121,13 @@ message Release {
   /// fields
 
   string id = 1 [(gogoproto.moretags) = "gorm:\"primary_key\"", (gogoproto.customname) = "ID"];
-  google.protobuf.Timestamp created_at = 2 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  google.protobuf.Timestamp updated_at = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  string message = 4;
-  Driver driver = 5;
-  string commit_url = 6 [(gogoproto.customname) = "CommitURL"];
-  string short_id = 7 [(gogoproto.customname) = "ShortID"];
+  string yolo_id = 2 [(gogoproto.customname) = "YoloID"]; // hash
+  google.protobuf.Timestamp created_at = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp updated_at = 4 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  string message = 5;
+  Driver driver = 6;
+  string commit_url = 7 [(gogoproto.customname) = "CommitURL"];
+  string short_id = 8 [(gogoproto.customname) = "ShortID"];
 
   /// relationships
 
@@ -139,11 +141,12 @@ message Commit {
   /// fields
 
   string id = 1 [(gogoproto.moretags) = "gorm:\"primary_key\"", (gogoproto.customname) = "ID"];
-  google.protobuf.Timestamp created_at = 2 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  google.protobuf.Timestamp updated_at = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  string message = 4;
-  Driver driver = 5;
-  string branch = 6;
+  string yolo_id = 2 [(gogoproto.customname) = "YoloID"]; // hash
+  google.protobuf.Timestamp created_at = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp updated_at = 4 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  string message = 5;
+  Driver driver = 6;
+  string branch = 7;
 
   /// relationships
 
@@ -158,16 +161,17 @@ message MergeRequest {
   /// fields
 
   string id = 1 [(gogoproto.moretags) = "gorm:\"primary_key\"", (gogoproto.customname) = "ID"];
-  google.protobuf.Timestamp created_at = 2 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  google.protobuf.Timestamp updated_at = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  string title = 4;
-  string message = 5;
-  Driver driver = 6;
-  string branch = 7;
-  State state = 8;
-  string commit_url = 9 [(gogoproto.customname) = "CommitURL"];
-  string branch_url = 10 [(gogoproto.customname) = "BranchURL"];
-  string short_id = 11 [(gogoproto.customname) = "ShortID"];
+  string yolo_id = 2 [(gogoproto.customname) = "YoloID"]; // hash
+  google.protobuf.Timestamp created_at = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp updated_at = 4 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  string title = 5;
+  string message = 6;
+  Driver driver = 7;
+  string branch = 8;
+  State state = 9;
+  string commit_url = 10 [(gogoproto.customname) = "CommitURL"];
+  string branch_url = 11 [(gogoproto.customname) = "BranchURL"];
+  string short_id = 12 [(gogoproto.customname) = "ShortID"];
   // labels
   // bool is_wip
 
@@ -197,8 +201,9 @@ message Project {
   /// fields
 
   string id = 1 [(gogoproto.moretags) = "gorm:\"primary_key\"", (gogoproto.customname) = "ID"];
-  google.protobuf.Timestamp created_at = 2 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  google.protobuf.Timestamp updated_at = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  string yolo_id = 2 [(gogoproto.customname) = "YoloID"]; // hash
+  google.protobuf.Timestamp created_at = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp updated_at = 4 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
   Driver driver = 5;
   string name = 6;
   string description = 7;
@@ -218,13 +223,14 @@ message Entity {
   /// fields
 
   string id = 1 [(gogoproto.moretags) = "gorm:\"primary_key\"", (gogoproto.customname) = "ID"];
-  google.protobuf.Timestamp created_at = 2 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  google.protobuf.Timestamp updated_at = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  string name = 4;
-  Driver driver = 5;
-  string avatar_url = 6 [(gogoproto.customname) = "AvatarURL"];
-  Kind kind = 7;
-  string description = 8;
+  string yolo_id = 2 [(gogoproto.customname) = "YoloID"]; // hash
+  google.protobuf.Timestamp created_at = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp updated_at = 4 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  string name = 5;
+  Driver driver = 6;
+  string avatar_url = 7 [(gogoproto.customname) = "AvatarURL"];
+  Kind kind = 8;
+  string description = 9;
 
   /// relationships
 
@@ -246,17 +252,18 @@ message Artifact {
   /// fields
 
   string id = 1 [(gogoproto.moretags) = "gorm:\"primary_key\"", (gogoproto.customname) = "ID"];
-  google.protobuf.Timestamp created_at = 2 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  google.protobuf.Timestamp updated_at = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  int64 file_size = 4;
-  string local_path = 5;
-  string download_url = 6 [(gogoproto.customname) = "DownloadURL"];
-  string mime_type = 7;
-  string sha1_sum = 8;
-  string sha256_sum = 9;
-  State state = 10;
-  Kind kind = 11;
-  Driver driver = 12;
+  string yolo_id = 2 [(gogoproto.customname) = "YoloID"]; // hash
+  google.protobuf.Timestamp created_at = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  google.protobuf.Timestamp updated_at = 4 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  int64 file_size = 5;
+  string local_path = 6;
+  string download_url = 7 [(gogoproto.customname) = "DownloadURL"];
+  string mime_type = 8;
+  string sha1_sum = 9;
+  string sha256_sum = 10;
+  State state = 11;
+  Kind kind = 12;
+  Driver driver = 13;
 
   /// relationships
 
