@@ -57,8 +57,14 @@ message Status {
 
 message BuildList {
   message Request {
-    repeated Artifact.Kind artifact_kinds = 1;
-    int32 limit = 2;
+    // max amount of builds
+    int32 limit = 1;
+
+    // filter on artifact kinds
+    repeated Artifact.Kind artifact_kinds = 2;
+
+    // filter builds without any artifacts
+    bool with_artifacts = 3;
   }
   message Response {
     repeated Build builds = 1;
