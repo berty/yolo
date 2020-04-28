@@ -1,3 +1,5 @@
+import * as actions from './actions.js';
+
 export const KIND_TO_PLATFORM = {
   IPA: 'iOS',
   APK: 'Android',
@@ -10,3 +12,5 @@ export const PLATFORMS = {
   android: '2',
   none: '3',
 };
+
+export {actions};
