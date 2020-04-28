@@ -21,9 +21,7 @@ func (svc service) BuildList(ctx context.Context, req *yolopb.BuildList_Request)
 	resp := yolopb.BuildList_Response{}
 
 	query := svc.db.
-		Model(&yolopb.Build{}).
-		Limit(req.Limit).
-		Order("created_at desc")
+		Model(&yolopb.Build{})
 
 	switch {
 	case len(req.ArtifactKinds) > 0:
@@ -38,6 +36,17 @@ func (svc service) BuildList(ctx context.Context, req *yolopb.BuildList_Request)
 		query = query.
 			Preload("HasArtifacts")
 	}
+
+	query = query.
+		Preload("HasCommit").
+		Preload("HasProject").
+		Preload("HasProject.HasOwner").
+		Preload("HasMergerequest").
+		Preload("HasMergerequest.HasProject").
+		Preload("HasMergerequest.HasAuthor").
+		Preload("HasMergerequest.HasCommit").
+		Limit(req.Limit).
+		Order("created_at desc")
 
 	err := query.Find(&resp.Builds).Error
 	if err != nil {
