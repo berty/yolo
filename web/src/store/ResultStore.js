@@ -1,7 +1,7 @@
 import React, {useReducer} from 'react';
 import {cloneDeep} from 'lodash';
-import {PLATFORMS} from '../constants';
 import {retrieveAuthCookie} from '../api/auth';
+import {actions, PLATFORMS} from '../constants';
 
 // TODO: Yes, this file needs a new name, and should maybe be split
 export const ResultContext = React.createContext();
@@ -37,7 +37,7 @@ export const INITIAL_STATE = {
 
 function _reducer(state, action) {
   switch (action.type) {
-    case 'updateState':
+    case actions.UPDATE_STATE:
       return {...state, ...action.payload};
     default:
       return {...state};
@@ -46,12 +46,15 @@ function _reducer(state, action) {
 
 export const ResultStore = ({children}) => {
   const [state, dispatch] = useReducer(_reducer, INITIAL_STATE);
-  const updateState = (newState) => {
-    return dispatch({type: 'updateState', payload: cloneDeep(newState)});
+
+  // custom actions can go here; for now we just have one
+  const updateState = (payload) => {
+    dispatch({type: actions.UPDATE_STATE, payload: cloneDeep(payload)});
   };
 
+  // pass dispatch if we want to trigger an action without an action creator
   return (
-    <ResultContext.Provider value={{state, updateState}}>
+    <ResultContext.Provider value={{state, dispatch, updateState}}>
       {children}
     </ResultContext.Provider>
   );
