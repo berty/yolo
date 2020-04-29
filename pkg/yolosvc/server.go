@@ -3,6 +3,7 @@ package yolosvc
 import (
 	"context"
 	"crypto/subtle"
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
@@ -208,7 +209,7 @@ func auth(basicAuth, realm, salt string) func(http.Handler) http.Handler {
 				if !ok || subtle.ConstantTimeCompare([]byte(password), []byte(basicAuth)) != 1 {
 					w.Header().Add("WWW-Authenticate", fmt.Sprintf(`Basic realm="%s"`, realm))
 					w.WriteHeader(http.StatusUnauthorized)
-					fmt.Fprintf(w, "invalid credentials\n")
+					httpError(w, fmt.Errorf("invalid credentials"), codes.Unauthenticated)
 					return
 				}
 				// FIXME: setup cookies
@@ -216,6 +217,20 @@ func auth(basicAuth, realm, salt string) func(http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+func httpError(w http.ResponseWriter, err error, code codes.Code) {
+	msg := struct {
+		Code    codes.Code `json:"code"`
+		Message string     `json:"message"`
+		Details string     `json:"details"`
+	}{
+		Code:    code,
+		Message: code.String(),
+		Details: fmt.Sprintf("%v", err),
+	}
+	out, _ := json.MarshalIndent(msg, "", "  ")
+	http.Error(w, string(out), runtime.HTTPStatusFromCode(code))
 }
 
 func (o *ServerOpts) applyDefaults() {

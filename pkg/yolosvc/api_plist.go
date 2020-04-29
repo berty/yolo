@@ -8,6 +8,7 @@ import (
 	"berty.tech/yolo/v2/pkg/yolopb"
 	"github.com/go-chi/chi"
 	"github.com/stretchr/signature"
+	"google.golang.org/grpc/codes"
 )
 
 func (svc service) PlistGenerator(w http.ResponseWriter, r *http.Request) {
@@ -16,7 +17,7 @@ func (svc service) PlistGenerator(w http.ResponseWriter, r *http.Request) {
 	var artifact yolopb.Artifact
 	err := svc.db.First(&artifact, "ID = ?", id).Error
 	if err != nil {
-		http.Error(w, fmt.Sprintf("err: %v", err), http.StatusInternalServerError)
+		httpError(w, err, codes.InvalidArgument)
 		return
 	}
 
@@ -34,7 +35,7 @@ func (svc service) PlistGenerator(w http.ResponseWriter, r *http.Request) {
 
 	url, err = signature.GetSignedURL("GET", url, "", svc.authSalt)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("err: %v", err), http.StatusInternalServerError)
+		httpError(w, err, codes.Internal)
 		return
 	}
 
@@ -42,7 +43,7 @@ func (svc service) PlistGenerator(w http.ResponseWriter, r *http.Request) {
 
 	b, err := plistgen.Release(bundleID, version, title, url)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("err: %v", err), http.StatusInternalServerError)
+		httpError(w, err, codes.Internal)
 		return
 	}
 	w.Header().Add("Content-Type", "application/x-plist")
