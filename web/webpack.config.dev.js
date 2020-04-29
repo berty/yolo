@@ -3,6 +3,7 @@ import webpack from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import path from 'path';
 import Dotenv from 'dotenv-webpack';
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 export default {
   resolve: {
@@ -45,6 +46,7 @@ export default {
       scriptLoading: 'defer',
       favicon: 'src/assets/favicon/favicon-32x32.png',
     }),
+    new CopyWebpackPlugin([{from: 'src/assets/favicon'}]),
   ],
   module: {
     rules: [
