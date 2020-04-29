@@ -5,11 +5,9 @@ import (
 	"fmt"
 
 	"berty.tech/yolo/v2/pkg/yolopb"
-	"moul.io/godev"
 )
 
 func (svc service) BuildList(ctx context.Context, req *yolopb.BuildList_Request) (*yolopb.BuildList_Response, error) {
-	fmt.Println(godev.PrettyJSON(req))
 	if req == nil {
 		req = &yolopb.BuildList_Request{}
 	}
@@ -49,14 +47,32 @@ func (svc service) BuildList(ctx context.Context, req *yolopb.BuildList_Request)
 				Preload("HasArtifacts")
 		}
 
-		if req.BuildDriver != yolopb.Driver_UnknownDriver {
-			query = query.Where(&yolopb.Build{
-				Driver: req.BuildDriver,
-			})
+		if len(req.BuildState) > 0 {
+			query = query.Where("state IN (?)", req.BuildState)
+		}
+
+		if len(req.BuildDriver) > 0 {
+			query = query.Where("driver IN (?)", req.BuildDriver)
 		}
 
 		if len(req.ProjectID) > 0 {
 			query = query.Joins("JOIN project ON project.id = build.has_project_id AND (project.id IN (?) OR project.yolo_id IN (?))", req.ProjectID, req.ProjectID)
+		}
+
+		if len(req.MergeRequestID) > 0 {
+			query = query.Where("has_mergerequest_id IN (?)", req.MergeRequestID)
+		}
+
+		if len(req.MergeRequestAuthorID) > 0 ||
+			len(req.MergerequestState) > 0 ||
+			req.WithMergerequest {
+			query = query.Joins("JOIN merge_request ON merge_request.id = build.has_mergerequest_id")
+		}
+		if len(req.MergeRequestAuthorID) > 0 {
+			query = query.Where("merge_request.has_author_id IN (?)", req.MergeRequestAuthorID)
+		}
+		if len(req.MergerequestState) > 0 {
+			query = query.Where("merge_request.state IN (?)", req.MergerequestState)
 		}
 	}
 

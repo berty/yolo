@@ -77,7 +77,22 @@ message BuildList {
     repeated string artifact_id = 6 [(gogoproto.customname) = "ArtifactID"];
 
     // filter by build driver (GitHub, CircleCI, ...)
-    Driver build_driver = 7;
+    repeated Driver build_driver = 7;
+
+    // filter by state of build (passed, running, failed, etc)
+    repeated Build.State build_state = 8;
+
+    // filter on builds for a specific merge request
+    repeated string mergerequest_id = 9 [(gogoproto.customname) = "MergeRequestID"];
+
+    // filter on builds linked to the merge requests opened by a specific author
+    repeated string mergerequest_author_id = 10 [(gogoproto.customname) = "MergeRequestAuthorID"];
+
+    // filter on builds with a linked merge request
+    bool with_mergerequest = 11;
+
+    // filter on builds with a linked merge request of a specific state
+    repeated MergeRequest.State mergerequest_state = 12;
   }
   message Response {
     repeated Build builds = 1;
