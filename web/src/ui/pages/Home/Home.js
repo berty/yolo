@@ -43,7 +43,7 @@ const Home = () => {
     if (!locationSearch) {
       history.push({
         pathname: '/',
-        search: queryString.stringify({'artifact-kinds': state.platformId}),
+        search: queryString.stringify({artifact_kinds: state.platformId}),
       });
     }
   }, []);
