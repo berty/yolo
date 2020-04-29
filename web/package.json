@@ -70,6 +70,7 @@
     "chalk": "3.0.0",
     "concurrently": "5.1.0",
     "connect-history-api-fallback": "1.6.0",
+    "copy-webpack-plugin": "^5.1.1",
     "coveralls": "3.0.11",
     "cross-env": "7.0.2",
     "css-loader": "3.4.2",
