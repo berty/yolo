@@ -10,8 +10,8 @@ const BuildList = ({loaded, builds}) => {
     loading
   ) : (
     <div className="container">
-      {builds.map((item) => (
-        <BuildCard key={item.id} item={item} />
+      {builds.map((item, i) => (
+        <BuildCard key={'item.id' + i} item={item} />
       ))}
     </div>
   );
