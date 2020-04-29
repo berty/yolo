@@ -24,7 +24,9 @@ const ApiKeyPrompt = ({failedKey, setApiKey: submitNewApiKey}) => {
             ref={inputEl}
             type="text"
             className="form-control"
-            placeholder={'Current key: ' + (failedKey || 'no key set')}
+            placeholder={
+              'Current key: ' + ((failedKey && atob(failedKey)) || 'no key set')
+            }
             onChange={(e) => {
               updateFormApiKey(e.target.value);
             }}

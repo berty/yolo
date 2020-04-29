@@ -1,6 +1,13 @@
 /* eslint-disable import/no-named-as-default */
 import React, {useContext, useState, useEffect} from 'react';
+import {
+  BrowserRouter as Router,
+  Link,
+  useLocation,
+  useHistory,
+} from 'react-router-dom';
 import {cloneDeep} from 'lodash';
+import queryString from 'query-string';
 
 import Header from '../../components/Header/Header';
 import ErrorDisplay from '../../components/ErrorDisplay/ErrorDisplay';
@@ -24,12 +31,30 @@ const Home = () => {
   const {state, updateState} = useContext(ResultContext);
   const [showingFiltersModal, toggleShowFilters] = useState(false);
   const [showingDisclaimerModal, toggleShowDisclaimer] = useState(false);
+  const [defaultParams, setDefaultParams] = useState(false);
+  const {search} = useLocation();
+  const history = useHistory();
 
   useEffect(() => {
     document.body.style.backgroundColor = theme.bg.page;
+  }, [theme.name]);
+
+  useEffect(() => {
     const disclaimerAccepted = Cookies.get('disclaimerAccepted');
     toggleShowDisclaimer(disclaimerAccepted ? false : true);
-  }, [theme.name]);
+  }, []);
+
+  useEffect(() => {
+    if (!search && !defaultParams) {
+      history.push({
+        pathname: '/',
+        search: queryString.stringify({'artifact-kinds': state.platformId}),
+      });
+    }
+    setDefaultParams(true);
+  }, []);
+
+  useEffect(() => {});
 
   const setDisclaimerAccepted = (accepted) => {
     Cookies.set('disclaimerAccepted', 1, {expires: 7});

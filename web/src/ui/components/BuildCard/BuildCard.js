@@ -24,6 +24,8 @@ const BuildCard = ({item}) => {
     commit: buildCommit = missing('commit'), // legacy
     has_commit: {id: buildCommitId = ''} = {},
     message: buildMessage = missing('message'),
+    started_at: startedAt = '',
+    finished_at: finishedAt = '',
     has_mergerequest: {
       commit_url: commitUrl = '',
       updated_at: buildMergeUpdatedAt = '',
@@ -178,6 +180,8 @@ const BuildCard = ({item}) => {
               artifact={artifact}
               buildMergeUpdatedAt={buildMergeUpdatedAt}
               buildMergeId={buildMergeId}
+              startedAt={startedAt}
+              finishedAt={finishedAt}
               key={artifact.id}
             />
           ))}
