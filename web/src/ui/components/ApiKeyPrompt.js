@@ -2,7 +2,7 @@ import React, {useState, useRef, useEffect, useContext} from 'react';
 import {ThemeContext} from '../../store/ThemeStore';
 import {setAuthCookie} from '../../api/auth';
 
-const ApiKeyPrompt = ({failedKey, setApiKey: submitNewApiKey}) => {
+const ApiKeyPrompt = ({failedKey, updateState}) => {
   const {theme} = useContext(ThemeContext);
   const [formApiKey, updateFormApiKey] = useState(failedKey);
   const inputEl = useRef(null);
@@ -36,7 +36,10 @@ const ApiKeyPrompt = ({failedKey, setApiKey: submitNewApiKey}) => {
           className="btn"
           onClick={() => {
             setAuthCookie({apiKey: `${formApiKey}`});
-            submitNewApiKey({apiKey: btoa(formApiKey), needsRequest: true});
+            updateState({
+              apiKey: btoa(formApiKey),
+              needsProgrammaticQuery: true,
+            });
           }}
           disabled={!formApiKey}
         >
