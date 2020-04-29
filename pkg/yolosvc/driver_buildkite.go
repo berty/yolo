@@ -36,8 +36,12 @@ func (svc *service) BuildkiteWorker(ctx context.Context, opts BuildkiteWorkerOpt
 			logger.Warn("get last buildkite build created time", zap.Error(err))
 		}
 		logger.Debug("buildkite: refresh", zap.Int("iteration", iteration), zap.Time("since", since))
-		// FIXME: only fetch builds since most recent known
-		batch, err := fetchBuildkiteBuilds(ctx, svc.bkc, since, maxPages, logger)
+
+		// fetch recent builds
+		callOpts := buildkite.BuildsListOptions{
+			FinishedFrom: since,
+		}
+		batch, err := fetchBuildkiteBuilds(ctx, svc.bkc, since, maxPages, callOpts, logger)
 		if err != nil {
 			logger.Warn("fetch buildkite", zap.Error(err))
 		} else {
@@ -45,6 +49,20 @@ func (svc *service) BuildkiteWorker(ctx context.Context, opts BuildkiteWorkerOpt
 				logger.Warn("save batch", zap.Error(err))
 			}
 		}
+
+		// always fetch "running" builds even if they are already known (to update last states)
+		callOpts = buildkite.BuildsListOptions{
+			State: []string{"running", "scheduled"},
+		}
+		batch, err = fetchBuildkiteBuilds(ctx, svc.bkc, since, maxPages, callOpts, logger)
+		if err != nil {
+			logger.Warn("fetch buildkite", zap.Error(err))
+		} else {
+			if err := svc.saveBatch(ctx, batch); err != nil {
+				logger.Warn("save batch", zap.Error(err))
+			}
+		}
+
 		// FIXME: fetch artifacts for builds with job that are successful and have a not empty artifact path
 
 		if opts.Once {
@@ -59,15 +77,12 @@ func (svc *service) BuildkiteWorker(ctx context.Context, opts BuildkiteWorkerOpt
 	}
 }
 
-func fetchBuildkiteBuilds(ctx context.Context, bkc *buildkite.Client, since time.Time, maxPages int, logger *zap.Logger) (*yolopb.Batch, error) {
+func fetchBuildkiteBuilds(ctx context.Context, bkc *buildkite.Client, since time.Time, maxPages int, callOpts buildkite.BuildsListOptions, logger *zap.Logger) (*yolopb.Batch, error) {
 	batch := yolopb.NewBatch()
 	total := 0
-	callOpts := &buildkite.BuildsListOptions{
-		FinishedFrom: since,
-	}
 	for i := 0; i < maxPages; i++ {
 		before := time.Now()
-		builds, resp, err := bkc.Builds.List(callOpts)
+		builds, resp, err := bkc.Builds.List(&callOpts)
 		if err != nil {
 			return nil, fmt.Errorf("buildkite.Builds.List: %w", err)
 		}
