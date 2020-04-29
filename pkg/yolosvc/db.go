@@ -3,13 +3,13 @@ package yolosvc
 import (
 	"context"
 	"crypto/sha256"
-	"encoding/base64"
 	"fmt"
 	"strings"
 	"time"
 
 	"berty.tech/yolo/v2/pkg/yolopb"
 	"github.com/jinzhu/gorm"
+	"github.com/mr-tron/base58"
 	"go.uber.org/zap"
 	"moul.io/zapgorm"
 )
@@ -109,7 +109,7 @@ func beforeCreate(scope *gorm.Scope) {
 	table := scope.TableName()
 	id := field.Field.String()
 	hash := sha256.Sum256([]byte(id))
-	encoded := base64.StdEncoding.EncodeToString(hash[:])
+	encoded := base58.Encode(hash[:])
 	prefix := strings.ToLower(table[:1])
 	yoloID := fmt.Sprintf("%s:%s", prefix, encoded)
 	err := scope.SetColumn("yolo_id", yoloID)
