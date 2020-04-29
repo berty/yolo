@@ -8,6 +8,7 @@ import (
 	"berty.tech/yolo/v2/pkg/bintray"
 	"berty.tech/yolo/v2/pkg/yolopb"
 	"github.com/go-chi/chi"
+	"google.golang.org/grpc/codes"
 )
 
 func (svc service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
@@ -16,7 +17,7 @@ func (svc service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
 	var artifact yolopb.Artifact
 	err := svc.db.First(&artifact, "ID = ?", id).Error
 	if err != nil {
-		http.Error(w, fmt.Sprintf("err: %v", err), http.StatusInternalServerError)
+		httpError(w, err, codes.InvalidArgument)
 		return
 	}
 
@@ -43,6 +44,6 @@ func (svc service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
 		err = fmt.Errorf("download not supported for this driver")
 	}
 	if err != nil {
-		http.Error(w, fmt.Sprintf("err: %v", err), http.StatusInternalServerError)
+		httpError(w, err, codes.Internal)
 	}
 }
