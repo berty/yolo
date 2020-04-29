@@ -13,7 +13,13 @@ import {KIND_TO_PLATFORM} from '../../../constants';
 
 import './BuildCard.scss';
 
-const ArtifactCard = ({artifact, buildMergeUpdatedAt, buildMergeId}) => {
+const ArtifactCard = ({
+  artifact,
+  buildMergeUpdatedAt,
+  buildMergeId,
+  startedAt,
+  finishedAt,
+}) => {
   const {theme} = useContext(ThemeContext);
   const {
     id: artifactId = '',
@@ -33,6 +39,13 @@ const ArtifactCard = ({artifact, buildMergeUpdatedAt, buildMergeId}) => {
   const timeSinceBuildUpdated = buildMergeUpdatedAt
     ? dayjs(dayjs(buildMergeUpdatedAt, 'YYYY-MM-DDTHH:mm:ssZ')).fromNow()
     : '';
+  const buildDuration =
+    startedAt && finishedAt
+      ? `${dayjs(dayjs(finishedAt, 'YYYY-MM-DDTHH:mm:ssZ')).diff(
+          dayjs(startedAt, 'YYYY-MM-DDTHH:mm:ssZ'),
+          'minute'
+        )} minutes`
+      : '';
   const ArtifactKindName = KIND_TO_PLATFORM[artifactKind] || 'Unknown OS';
   const BuildMergeId = buildMergeId || '';
 
@@ -96,11 +109,13 @@ const ArtifactCard = ({artifact, buildMergeUpdatedAt, buildMergeId}) => {
     ''
   );
 
-  const PlaceholderDuration = (
+  const BuildDuration = buildDuration ? (
     <>
       <Clock />
-      <div>[TODO: Duration]</div>
+      <div>{buildDuration}</div>
     </>
+  ) : (
+    ''
   );
 
   return (
@@ -119,7 +134,7 @@ const ArtifactCard = ({artifact, buildMergeUpdatedAt, buildMergeId}) => {
           </div>
           <div className="card-details-row">
             {TimeSinceBuildUpdated}
-            {PlaceholderDuration}
+            {BuildDuration}
           </div>
         </div>
         <div className="card-build-actions">{ArtifactActionButton}</div>
