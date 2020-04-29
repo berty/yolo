@@ -14,6 +14,7 @@ import './BuildCard.scss';
 
 const BuildCard = ({item}) => {
   const [expanded, toggleExpanded] = useState(true);
+  const [messageExpanded, toggleMessageExpanded] = useState(false);
   const {theme} = useContext(ThemeContext);
   const missing = (key) => `[no '${key}' in build]`;
   const {
@@ -21,15 +22,19 @@ const BuildCard = ({item}) => {
     id: buildId = missing('id'),
     branch: buildBranch = '',
     state: buildState = missing('state'),
-    commit: buildCommit = missing('commit'), // legacy
-    has_commit: {id: buildCommitId = ''} = {},
-    message: buildMessage = missing('message'),
+    has_commit_id: buildCommitId = '',
+    message: buildMessage = '',
     started_at: startedAt = '',
     finished_at: finishedAt = '',
     has_mergerequest: {
       commit_url: commitUrl = '',
       updated_at: buildMergeUpdatedAt = '',
       id: buildMergeIdUrl = '',
+      has_author: {
+        name: buildAuthorName = '',
+        id: buildAuthorId,
+        avatar_url: buildAuthorAvatarUrl = '',
+      } = {},
     } = {},
     has_project: {id: buildProjectUrl = ''} = {},
   } = item || {};
@@ -37,7 +42,12 @@ const BuildCard = ({item}) => {
 
   const [buildMergeId] = buildMergeIdUrl.match(/\d+?$/) || [];
   const buildTagStyle = tagStyle({name: theme.name, stateNormed});
-  const COMMIT_LEN = !buildCommitId ? [0] : [0, 7];
+  const COMMIT_LEN = 7;
+  const MESSAGE_LEN = 280;
+
+  const colorInteractiveText = {
+    color: theme.text.blockTitle,
+  };
 
   const CardTitle = (
     <div className="card-title">
@@ -68,9 +78,41 @@ const BuildCard = ({item}) => {
     </div>
   );
 
-  const Author = (
-    <div style={{color: theme.text.author}} className="card-author">
-      [TODO: author]
+  const Author = buildAuthorName && (
+    <div className="card-author">
+      {buildAuthorName && buildAuthorId ? (
+        <a
+          href={buildAuthorId}
+          style={colorInteractiveText}
+          className="interactive-text"
+        >
+          {buildAuthorName}
+        </a>
+      ) : (
+        buildAuthorName
+      )}
+    </div>
+  );
+
+  const BuildMessage = !buildMessage ? (
+    ''
+  ) : buildMessage.length < MESSAGE_LEN ? (
+    buildMessage
+  ) : messageExpanded ? (
+    <div
+      className="interactive-text"
+      onClick={() => toggleMessageExpanded(false)}
+    >
+      {buildMessage + ' '}
+      <span style={colorInteractiveText}>[show less]</span>
+    </div>
+  ) : (
+    <div
+      className="interactive-text"
+      onClick={() => toggleMessageExpanded(true)}
+    >
+      {buildMessage.slice(0, MESSAGE_LEN)}...{' '}
+      <span style={colorInteractiveText}>[show more]</span>
     </div>
   );
 
@@ -86,11 +128,18 @@ const BuildCard = ({item}) => {
     </div>
   );
 
-  const AuthorImage = (
-    <div className="card-avatar">
-      <User color={theme.text.sectionText} />
-    </div>
-  );
+  const AuthorImage =
+    buildAuthorId && buildAuthorAvatarUrl ? (
+      <div className="card-avatar">
+        <a href={buildAuthorId}>
+          <img src={buildAuthorAvatarUrl} alt={buildAuthorId} />
+        </a>
+      </div>
+    ) : (
+      <div className="card-avatar" title="Unknown author">
+        <User color={theme.text.sectionText} />
+      </div>
+    );
 
   const BranchName = buildBranch && (
     <div
@@ -115,6 +164,7 @@ const BuildCard = ({item}) => {
         icon={faAlignLeft}
         color={theme.text.sectionText}
         size="2x"
+        title={buildId}
       />
     </a>
   );
@@ -125,11 +175,14 @@ const BuildCard = ({item}) => {
         icon={faGithub}
         color={theme.text.sectionText}
         size="2x"
+        title={buildProjectUrl}
       />
     </a>
   );
 
-  const BuildCommit = <div>{buildCommitId.slice(...COMMIT_LEN)}</div>;
+  const BuildCommit = buildCommitId && (
+    <div title={buildCommitId}>{buildCommitId.slice(0, COMMIT_LEN)}</div>
+  );
 
   return (
     <div className="BuildCard">
@@ -165,7 +218,7 @@ const BuildCard = ({item}) => {
                 {BuildState}
               </div>
               <div className="card-details-row">{BranchName}</div>
-              <div className="card-details-row">{buildMessage}</div>
+              <div className="card-details-row">{BuildMessage}</div>
             </div>
             <div className="card-build-actions">
               {BuildLogs}

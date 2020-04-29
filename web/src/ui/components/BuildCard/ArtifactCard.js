@@ -3,6 +3,8 @@ import {ThemeContext} from '../../../store/ThemeStore';
 import {Clock, Calendar, ArrowDownCircle, AlertTriangle} from 'react-feather';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faAndroid, faApple} from '@fortawesome/free-brands-svg-icons';
+
+import {faQuestionCircle} from '@fortawesome/free-solid-svg-icons';
 import dayjs from 'dayjs';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -86,7 +88,13 @@ const ArtifactCard = ({
 
   const PlatformIcon = (
     <FontAwesomeIcon
-      icon={artifact.kind === 'APK' ? faAndroid : faApple}
+      icon={
+        artifactKind === 'APK'
+          ? faAndroid
+          : artifactKind === 'DMG' || artifactKind === 'IPA'
+          ? faApple
+          : faQuestionCircle
+      }
       size="lg"
       color={theme.text.sectionText}
     />
