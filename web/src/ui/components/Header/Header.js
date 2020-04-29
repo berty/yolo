@@ -27,20 +27,22 @@ const Header = () => {
           className="btn btn-outline-info btn-sm mr-1"
           onClick={() =>
             updateState({
-              needsRequest: true,
+              // Note, won't work for maually inputted URLs
+              needsProgrammaticQuery: true,
             })
           }
         >
           F5
         </div>
-        {state.apiKey && (
+        {state.apiKey && state.isAuthed && (
           <div
             className="btn btn-outline-info btn-sm"
             onClick={() => {
               removeAuthCookie();
               updateState({
+                isAuthed: false,
                 apiKey: '',
-                needsRequest: true,
+                needsProgrammaticQuery: true,
               });
             }}
           >

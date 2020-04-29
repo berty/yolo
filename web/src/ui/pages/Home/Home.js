@@ -1,13 +1,9 @@
 /* eslint-disable import/no-named-as-default */
 import React, {useContext, useState, useEffect} from 'react';
-import {
-  BrowserRouter as Router,
-  Link,
-  useLocation,
-  useHistory,
-} from 'react-router-dom';
+import {useLocation, useHistory} from 'react-router-dom';
 import {cloneDeep} from 'lodash';
 import queryString from 'query-string';
+import Cookies from 'js-cookie';
 
 import Header from '../../components/Header/Header';
 import ErrorDisplay from '../../components/ErrorDisplay/ErrorDisplay';
@@ -21,8 +17,7 @@ import {ThemeContext} from '../../../store/ThemeStore';
 import {ResultContext} from '../../../store/ResultStore';
 
 import {PLATFORMS} from '../../../constants';
-
-import Cookies from 'js-cookie';
+import {getBuildList, validateError} from '../../../api';
 
 import './Home.scss';
 
@@ -31,8 +26,8 @@ const Home = () => {
   const {state, updateState} = useContext(ResultContext);
   const [showingFiltersModal, toggleShowFilters] = useState(false);
   const [showingDisclaimerModal, toggleShowDisclaimer] = useState(false);
-  const [defaultParams, setDefaultParams] = useState(false);
-  const {search} = useLocation();
+  const [needsNewFetch, setNeedsNewFetch] = useState(true);
+  const {search: locationSearch} = useLocation();
   const history = useHistory();
 
   useEffect(() => {
@@ -45,16 +40,67 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    if (!search && !defaultParams) {
+    if (!locationSearch) {
       history.push({
         pathname: '/',
         search: queryString.stringify({'artifact-kinds': state.platformId}),
       });
     }
-    setDefaultParams(true);
   }, []);
 
-  useEffect(() => {});
+  useEffect(() => {
+    const getNewFetch = () => {
+      updateState({
+        error: null,
+        isLoaded: false,
+      });
+      getBuildList({
+        apiKey: state.apiKey,
+        queryObject: queryString.parse(locationSearch),
+        locationQuery: queryString.parse({'user-query': locationSearch}),
+      })
+        .then(
+          (result) => {
+            const {data: {builds = []} = {builds: []}} = result;
+            updateState({
+              items: builds,
+              error: null,
+              isAuthed: true,
+            });
+          },
+          (error) => {
+            const validatedError = validateError({error});
+            updateState({
+              error: validatedError,
+              isAuthed: validatedError.status !== 401,
+            });
+          }
+        )
+        .finally(() => {
+          setNeedsNewFetch(false);
+          updateState({
+            isLoaded: true,
+          });
+        });
+    };
+    if (needsNewFetch) {
+      getNewFetch();
+    }
+  }, [locationSearch, needsNewFetch]);
+
+  useEffect(() => {
+    const triggerNewQuery = () => {
+      updateState({
+        needsProgrammaticQuery: false,
+      });
+      history.push({
+        path: '/',
+        search: queryString.stringify({artifact_kinds: [state.platformId]}),
+      });
+      setNeedsNewFetch(true);
+    };
+    if (state.needsProgrammaticQuery === true) triggerNewQuery();
+  }, [state.needsProgrammaticQuery]);
 
   const setDisclaimerAccepted = (accepted) => {
     Cookies.set('disclaimerAccepted', 1, {expires: 7});
@@ -67,7 +113,7 @@ const Home = () => {
         <Header />
         {state.error && <ErrorDisplay error={state.error} />}
         {state.error && state.error.status === 401 && (
-          <ApiKeyPrompt failedKey={state.apiKey} setApiKey={updateState} />
+          <ApiKeyPrompt failedKey={state.apiKey} updateState={updateState} />
         )}
         {!state.error && state.platformId !== PLATFORMS.none && (
           <BuildList builds={cloneDeep(state.items)} loaded={state.isLoaded} />

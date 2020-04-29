@@ -9,11 +9,12 @@ export const ResultContext = React.createContext();
 export const INITIAL_STATE = {
   platformId: PLATFORMS.iOS,
   apiKey: retrieveAuthCookie() || null,
+  isAuthed: false,
   error: null,
   isLoaded: false,
   items: [],
   baseURL: `${process.env.API_SERVER}`,
-  needsRequest: true,
+  needsProgrammaticQuery: false,
   filtersPlatform: {
     iOS: true,
     android: false,

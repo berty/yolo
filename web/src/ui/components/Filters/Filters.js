@@ -13,77 +13,10 @@ import IconChat from '../../../assets/svg/IconChat';
 import IconMini from '../../../assets/svg/IconMini';
 
 import './Filters.scss';
-import {useHistory, useLocation} from 'react-router-dom';
-import queryString from 'query-string';
-import {PLATFORMS} from '../../../constants';
 
 const Filters = () => {
-  const {state, updateState} = useContext(ResultContext);
+  const {state} = useContext(ResultContext);
   const {theme} = useContext(ThemeContext);
-  const history = useHistory();
-  const {search} = useLocation();
-
-  useEffect(() => {
-    // TDOO: This is a weird place to make this request
-    const makeRequest = () => {
-      const {filtersPlatform, filtersImplemented} = state;
-      const locationQuery = {'user-query': search};
-
-      // Validate current filter state, then update URL bar with query
-      // (Platform filters only; other query strings will trigger API call directly)
-      const osToRequest = Object.entries(filtersPlatform)
-        .map((p) => ({os: p[0], toInclude: p[1]}))
-        .map((p) => ({...p, implemented: filtersImplemented.os.includes(p.os)}))
-        .map((p) => ({...p, id: PLATFORMS[p.os]}))
-        .filter((p) => p.implemented && p.toInclude)
-        .map((p) => p.id);
-      const queryObject = {
-        artifact_kinds: osToRequest,
-      };
-      history.push({
-        pathname: '/',
-        search: queryString.stringify(queryObject),
-      });
-
-      updateState({
-        error: null,
-        isLoaded: false,
-        items: [],
-      });
-
-      // send filters to API consumer function
-      getBuildList({
-        platformId: state.platformId,
-        apiKey: state.apiKey,
-        queryObject,
-        locationQuery,
-      })
-        .then(
-          (result) => {
-            const {data: {builds = []} = {builds: []}} = result;
-            updateState({
-              items: builds,
-              error: null,
-            });
-          },
-          (error) => {
-            updateState({
-              error: validateError({error}),
-            });
-          }
-        )
-        .finally(() => {
-          updateState({
-            isLoaded: true,
-            needsRequest: false,
-          });
-        });
-    };
-    if (state.needsRequest) {
-      makeRequest();
-    }
-  }, [state.needsRequest]);
-
   const widgetAccentColor = theme.icon.filterSelected;
 
   const headerWidgetWrapperColors = {

@@ -1,19 +1,8 @@
 import axios from 'axios';
 import queryString from 'query-string';
-import {response as mockResponse} from '../assets/faker.js';
+import {baseMockRequest} from './mock';
 
-const baseMockRequest = () =>
-  Promise.resolve(mockResponse).then(async (response) => {
-    await new Promise((r) => setTimeout(r, 200));
-    return await response;
-  });
-
-const baseRequest = ({
-  platformId,
-  apiKey = '',
-  queryObject = {},
-  locationQuery = '',
-}) => {
+const baseRequest = ({apiKey = '', queryObject = {}, locationQuery = ''}) => {
   const options = {
     method: 'get',
     baseURL: `${process.env.API_SERVER}/api/build-list`,
@@ -26,15 +15,10 @@ const baseRequest = ({
   return axios(options);
 };
 
-export const getBuildList = ({
-  platformId,
-  apiKey = '',
-  queryObject,
-  locationQuery,
-}) =>
+export const getBuildList = ({apiKey = '', queryObject, locationQuery}) =>
   process.env.YOLO_UI_TEST === 'true'
-    ? baseMockRequest()
-    : baseRequest({platformId, apiKey, queryObject, locationQuery});
+    ? baseMockRequest({apiKey, queryObject, locationQuery})
+    : baseRequest({apiKey, queryObject, locationQuery});
 
 export const validateError = ({error}) => {
   const {message: axiosMessage} = error.toJSON();
