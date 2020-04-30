@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"berty.tech/yolo/v2/pkg/yolopb"
+	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/jsonp"
@@ -162,7 +162,7 @@ func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, erro
 		r.Get("/artifact-dl/{artifactID}", svc.ArtifactDownloader)
 	})
 
-	box := packr.New("web", "../../web")
+	box := packr.New("web", "../../../web")
 	chiutil.FileServer(r, "/", box)
 
 	httpListener, err := net.Listen("tcp", opts.HTTPBind)

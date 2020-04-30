@@ -17,10 +17,10 @@ jobs:
       - checkout
       - tools/mod-download
       - tools/mod-tidy-check
-      - run: make install
-      - run: make test GO_TEST_OPTS="-v -test.timeout=300s -test.parallel=1 -count=1" YOLO_DEBUG=1
+      - run: cd go && make install
+      - run: cd go && make test GO_TEST_OPTS="-v -test.timeout=300s -test.parallel=1 -count=1" YOLO_DEBUG=1
       - moul/install_golangci-lint
-      - run: make lint
+      - run: cd go && make lint
       - codecov/upload:
           file: coverage.txt
   docker-build:

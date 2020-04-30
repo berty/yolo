@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"berty.tech/yolo/v2/pkg/plistgen"
-	"berty.tech/yolo/v2/pkg/yolopb"
+	"berty.tech/yolo/v2/go/pkg/plistgen"
+	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"github.com/go-chi/chi"
 	"github.com/stretchr/signature"
 	"google.golang.org/grpc/codes"

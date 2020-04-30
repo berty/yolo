@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"berty.tech/yolo/v2/pkg/yolopb"
+	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"github.com/google/go-github/v31/github"
 	"github.com/tevino/abool"
 	"go.uber.org/zap"

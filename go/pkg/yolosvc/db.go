@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"berty.tech/yolo/v2/pkg/yolopb"
+	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"github.com/jinzhu/gorm"
 	"github.com/mr-tron/base58"
 	"go.uber.org/zap"

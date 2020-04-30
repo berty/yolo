@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"berty.tech/yolo/v2/pkg/bintray"
-	"berty.tech/yolo/v2/pkg/yolopb"
+	"berty.tech/yolo/v2/go/pkg/bintray"
+	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/google/go-github/v31/github"
 	"github.com/jinzhu/gorm"
