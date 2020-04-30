@@ -14,12 +14,13 @@ RUN             apk add --update --no-cache git gcc musl-dev make perl-utils
 RUN             GO111MODULE=off go get github.com/gobuffalo/packr/v2/packr2
 WORKDIR         /go/src/berty.tech/yolo
 ENV             GO111MODULE=on \
-    GOPROXY=proxy.golang.org
+                GOPROXY=proxy.golang.org
 COPY            go.* ./
 RUN             go mod download
-COPY            . ./
+COPY            go ./go/
 RUN             rm -rf web
 COPY            --from=web-build /app/dist web
+WORKDIR         /go/src/berty.tech/yolo/go
 RUN		        make packr
 RUN             make install
 

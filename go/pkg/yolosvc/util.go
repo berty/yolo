@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"path/filepath"
 
-	"berty.tech/yolo/v2/pkg/yolopb"
+	"berty.tech/yolo/v2/go/pkg/yolopb"
 )
 
 func artifactKindByPath(path string) yolopb.Artifact_Kind {

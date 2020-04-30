@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"berty.tech/yolo/v2/pkg/bintray"
-	"berty.tech/yolo/v2/pkg/yolopb"
+	"berty.tech/yolo/v2/go/pkg/bintray"
+	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"github.com/tevino/abool"
 	"go.uber.org/zap"
 )

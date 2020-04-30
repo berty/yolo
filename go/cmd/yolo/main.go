@@ -11,8 +11,8 @@ import (
 	"syscall"
 	"time"
 
-	"berty.tech/yolo/v2/pkg/bintray"
-	"berty.tech/yolo/v2/pkg/yolosvc"
+	"berty.tech/yolo/v2/go/pkg/bintray"
+	"berty.tech/yolo/v2/go/pkg/yolosvc"
 	bearer "github.com/Bearer/bearer-go"
 	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/google/go-github/v31/github"

@@ -131,7 +131,7 @@ You will need to get multiple CI tokens to allow Yolo to fetch your last builds.
 
 ### Install
 
-`go get -u berty.tech/yolo`
+`go get -u berty.tech/yolo/v2/go/cmd/yolo`
 
 Or grab the last Docker image available [on the official Docker Registry]().
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"berty.tech/yolo/v2/pkg/yolopb"
+	"berty.tech/yolo/v2/go/pkg/yolopb"
 )
 
 func (svc service) Status(ctx context.Context, req *yolopb.Status_Request) (*yolopb.Status_Response, error) {

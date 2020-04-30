@@ -1,1 +1,1 @@
-package yolo // import "berty.tech/yolo"
+package yolo

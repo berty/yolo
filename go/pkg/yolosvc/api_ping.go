@@ -3,7 +3,7 @@ package yolosvc
 import (
 	"context"
 
-	"berty.tech/yolo/v2/pkg/yolopb"
+	"berty.tech/yolo/v2/go/pkg/yolopb"
 )
 
 func (svc service) Ping(ctx context.Context, req *yolopb.Ping_Request) (*yolopb.Ping_Response, error) {
