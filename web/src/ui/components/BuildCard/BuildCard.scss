@@ -98,6 +98,13 @@
       > * {
         margin-right: 10px;
       }
+      .time-display {
+        display: flex;
+        align-items: center;
+        div {
+          margin-left: 8px;
+        }
+      }
       div.btn {
         cursor: default;
         &.btn-branch-name {

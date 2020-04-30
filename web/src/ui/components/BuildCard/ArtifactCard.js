@@ -41,13 +41,24 @@ const ArtifactCard = ({
   const timeSinceBuildUpdated = buildMergeUpdatedAt
     ? dayjs(dayjs(buildMergeUpdatedAt, 'YYYY-MM-DDTHH:mm:ssZ')).fromNow()
     : '';
-  const buildDuration =
+  const buildDurationSeconds =
     startedAt && finishedAt
-      ? `${dayjs(dayjs(finishedAt, 'YYYY-MM-DDTHH:mm:ssZ')).diff(
+      ? dayjs(dayjs(finishedAt, 'YYYY-MM-DDTHH:mm:ssZ')).diff(
           dayjs(startedAt, 'YYYY-MM-DDTHH:mm:ssZ'),
-          'minute'
-        )} minutes`
+          'second'
+        )
+      : 0;
+  const buildDurationShort =
+    buildDurationSeconds > 0
+      ? `${parseInt(buildDurationSeconds / 60)} minutes`
       : '';
+  const buildDurationDetails =
+    buildDurationSeconds > 0
+      ? `duration: ${parseInt(buildDurationSeconds / 60)}m${
+          buildDurationSeconds % 60
+        }s`
+      : '';
+  const timeSinceBuildUpdatedString = `updated: ${buildMergeUpdatedAt}`;
   const ArtifactKindName = KIND_TO_PLATFORM[artifactKind] || 'Unknown OS';
   const BuildMergeId = buildMergeId || '';
 
@@ -109,19 +120,19 @@ const ArtifactCard = ({
   );
 
   const TimeSinceBuildUpdated = timeSinceBuildUpdated ? (
-    <>
+    <div className="time-display" title={timeSinceBuildUpdatedString}>
       <Calendar />
       <div>{timeSinceBuildUpdated}</div>
-    </>
+    </div>
   ) : (
     ''
   );
 
-  const BuildDuration = buildDuration ? (
-    <>
+  const BuildDuration = buildDurationShort ? (
+    <div className="time-display" title={buildDurationDetails || ''}>
       <Clock />
-      <div>{buildDuration}</div>
-    </>
+      <div>{buildDurationShort}</div>
+    </div>
   ) : (
     ''
   );
