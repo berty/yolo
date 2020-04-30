@@ -7,10 +7,13 @@
 <h3 align="center">Yolo is an over-the-air installation distributor for your mobile applications</h3>
 
 <p align="center">
+    <a href="https://berty.tech"><img alt="Made by Berty Technologies" src="https://assets.berty.tech/files/badge--1_badge.svg" /></a>
     <a href="https://crpt.fyi/berty-discord"><img alt="discord" src="https://img.shields.io/badge/discord-gray?logo=discord" /></a>
     <a href="https://github.com/berty"><img alt="github" src="https://img.shields.io/badge/@berty-471961?logo=github" /></a>
     <a href="https://twitter.com/berty"><img alt="twitter" src="https://img.shields.io/twitter/follow/berty?label=%40berty&style=flat&logo=twitter" /></a>
-    <a href="https://berty.tech"><img alt="Made by Berty Technologies" src="https://assets.berty.tech/files/badge--1_badge.svg" /></a>
+    <a href="https://pkg.go.dev/berty.tech/yolo/v2?tab=subdirectories"><img alt="go.dev reference" src="https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white" /></a>
+    <a href="https://github.com/berty/yolo/releases"><img alt="GitHub release" src="https://img.shields.io/github/v/release/berty/yolo" /></a>
+    
 </p>
 
 > Multi-platform over-the-air installation aggregator (a TestFlight alternative).
