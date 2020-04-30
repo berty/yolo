@@ -83,7 +83,7 @@ const Home = () => {
           });
         });
     };
-    if (needsNewFetch) {
+    if (needsNewFetch && locationSearch) {
       getNewFetch();
     }
   }, [locationSearch, needsNewFetch]);
