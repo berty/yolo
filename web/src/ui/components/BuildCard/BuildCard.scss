@@ -6,10 +6,12 @@
   .card div,
   .card p {
     padding: 0px;
+    min-width: 0;
   }
 
   div.card {
     max-width: 100vw;
+    min-width: 0;
   }
 
   .card div.card-row {
