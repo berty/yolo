@@ -27,6 +27,7 @@ const BuildCard = ({item}) => {
     started_at: startedAt = '',
     finished_at: finishedAt = '',
     has_mergerequest: {
+      short_id: buildMrId = '',
       commit_url: commitUrl = '',
       updated_at: buildMergeUpdatedAt = '',
       id: buildMergeIdUrl = '',
@@ -49,11 +50,15 @@ const BuildCard = ({item}) => {
     color: theme.text.blockTitle,
   };
 
+  const colorPlainText = {
+    color: theme.text.sectionText,
+  };
+
   const CardTitle = (
     <div className="card-title">
       {`${
         buildBranch.toUpperCase() === 'MASTER' ? 'Master' : 'Pull'
-      } ${buildShortId}`}
+      } ${buildMrId}`}
     </div>
   );
 
@@ -69,11 +74,15 @@ const BuildCard = ({item}) => {
     );
 
   const CommitIcon = commitUrl ? (
-    <a href={commitUrl} className={'card-left-icon icon-top'}>
+    <a
+      href={commitUrl}
+      className={'card-left-icon icon-top'}
+      title={buildCommitId || ''}
+    >
       <GitCommit color={theme.text.sectionTitle} />
     </a>
   ) : (
-    <div className={'card-left-icon icon-top'}>
+    <div className={'card-left-icon icon-top'} title={buildCommitId || ''}>
       <GitCommit color={theme.text.sectionText} />
     </div>
   );
@@ -181,7 +190,11 @@ const BuildCard = ({item}) => {
   );
 
   const BuildCommit = buildCommitId && (
-    <div title={buildCommitId}>{buildCommitId.slice(0, COMMIT_LEN)}</div>
+    <div title={buildCommitId}>
+      <a href={commitUrl} style={colorPlainText} className="interactive-text">
+        {buildCommitId.slice(0, COMMIT_LEN)}
+      </a>
+    </div>
   );
 
   return (
