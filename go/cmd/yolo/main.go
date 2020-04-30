@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"berty.tech/yolo/v2/go/pkg/bintray"
+	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"berty.tech/yolo/v2/go/pkg/yolosvc"
 	bearer "github.com/Bearer/bearer-go"
 	"github.com/buildkite/go-buildkite/buildkite"
@@ -52,6 +53,7 @@ func yolo(args []string) error {
 		bintrayToken       string
 		circleciToken      string
 		dbStorePath        string
+		withPreloading     bool
 		grpcBind           string
 		httpBind           string
 		corsAllowedOrigins string
@@ -77,8 +79,9 @@ func yolo(args []string) error {
 	serverFlagSet.StringVar(&bintrayToken, "bintray-token", "", "Bintray API Token")
 	serverFlagSet.StringVar(&circleciToken, "circleci-token", "", "CircleCI API Token")
 	serverFlagSet.StringVar(&githubToken, "github-token", "", "GitHub API Token")
-	serverFlagSet.StringVar(&dbStorePath, "db-path", ":temp:", "DB Store path")
-	storeFlagSet.StringVar(&dbStorePath, "db-path", ":temp:", "DB Store path")
+	serverFlagSet.StringVar(&dbStorePath, "db-path", ":memory:", "DB Store path")
+	storeFlagSet.StringVar(&dbStorePath, "db-path", ":memory:", "DB Store path")
+	storeFlagSet.BoolVar(&withPreloading, "with-preloading", false, "with auto DB preloading")
 	serverFlagSet.IntVar(&maxBuilds, "max-builds", 100, "maximum builds to fetch from external services (pagination)")
 	serverFlagSet.StringVar(&httpBind, "http-bind", ":8000", "HTTP bind address")
 	serverFlagSet.StringVar(&grpcBind, "grpc-bind", ":9000", "gRPC bind address")
@@ -227,7 +230,10 @@ func yolo(args []string) error {
 			}
 
 			ctx := context.Background()
-			ret, err := svc.DevDumpObjects(ctx, nil)
+			input := &yolopb.DevDumpObjects_Request{
+				WithPreloading: withPreloading,
+			}
+			ret, err := svc.DevDumpObjects(ctx, input)
 			if err != nil {
 				return err
 			}
