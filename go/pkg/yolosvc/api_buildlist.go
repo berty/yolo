@@ -26,7 +26,7 @@ func (svc service) BuildList(ctx context.Context, req *yolopb.BuildList_Request)
 	switch {
 	case len(req.BuildID) > 0:
 		query = query.
-			Where("id IN (?) OR yolo_id IN (?)", req.BuildID, req.BuildID).
+			Where("build.id IN (?) OR build.yolo_id IN (?)", req.BuildID, req.BuildID).
 			Preload("HasArtifacts")
 	case len(req.ArtifactID) > 0:
 		query = query.
@@ -48,11 +48,11 @@ func (svc service) BuildList(ctx context.Context, req *yolopb.BuildList_Request)
 		}
 
 		if len(req.BuildState) > 0 {
-			query = query.Where("state IN (?)", req.BuildState)
+			query = query.Where("build.state IN (?)", req.BuildState)
 		}
 
 		if len(req.BuildDriver) > 0 {
-			query = query.Where("driver IN (?)", req.BuildDriver)
+			query = query.Where("build.driver IN (?)", req.BuildDriver)
 		}
 
 		if len(req.ProjectID) > 0 {
@@ -60,7 +60,7 @@ func (svc service) BuildList(ctx context.Context, req *yolopb.BuildList_Request)
 		}
 
 		if len(req.MergeRequestID) > 0 {
-			query = query.Where("has_mergerequest_id IN (?)", req.MergeRequestID)
+			query = query.Where("build.has_mergerequest_id IN (?)", req.MergeRequestID)
 		}
 
 		if len(req.MergeRequestAuthorID) > 0 ||
