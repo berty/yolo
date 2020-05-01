@@ -207,7 +207,8 @@ func auth(basicAuth, realm, salt string) func(http.Handler) http.Handler {
 			if basicAuth != "" {
 				_, password, ok := r.BasicAuth()
 				if !ok || subtle.ConstantTimeCompare([]byte(password), []byte(basicAuth)) != 1 {
-					w.Header().Add("WWW-Authenticate", fmt.Sprintf(`Basic realm="%s"`, realm))
+					// fix for #143, it can be better to just switch to oauth
+					// w.Header().Add("WWW-Authenticate", fmt.Sprintf(`Basic realm="%s"`, realm))
 					w.WriteHeader(http.StatusUnauthorized)
 					httpError(w, fmt.Errorf("invalid credentials"), codes.Unauthenticated)
 					return
