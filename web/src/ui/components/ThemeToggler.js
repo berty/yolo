@@ -23,8 +23,8 @@ const ThemeToggler = () => {
     flex: '1 0 auto',
     justifyContent: 'flex-end',
     marginRight: '0.5rem',
+    marginLeft: 'auto',
     fontSize: '2rem',
-    cursor: 'pointer',
   };
 
   return (
@@ -34,7 +34,9 @@ const ThemeToggler = () => {
         return changeTheme(theme.name === 'light' ? 'dark' : 'light');
       }}
     >
-      {theme.name === 'light' ? '🌙' : '☀️'}
+      <div style={{display: 'inline', cursor: 'pointer'}}>
+        {theme.name === 'light' ? '🌙' : '☀️'}
+      </div>
     </div>
   );
 };

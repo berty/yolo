@@ -126,13 +126,13 @@ const Home = () => {
       {showingDisclaimerModal && (
         <MessageModal closeAction={() => setDisclaimerAccepted(true)} />
       )}
-      {!showingFiltersModal && (
+      {!showingFiltersModal && state.isAuthed && (
         <ShowFiltersButton
           showingFiltersModal={showingFiltersModal}
           clickAction={() => toggleShowFilters(!showingFiltersModal)}
         />
       )}
-      {showingFiltersModal && (
+      {showingFiltersModal && state.isAuthed && (
         <FilterModal closeAction={() => toggleShowFilters(false)} />
       )}
     </div>

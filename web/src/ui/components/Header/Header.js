@@ -21,35 +21,37 @@ const Header = () => {
       <div className="header-logo">
         <img src={YoloLogo}></img>
       </div>
-      <ActionWidgets>
-        <Filters />
-        <div
-          className="btn btn-outline-info btn-sm mr-1"
-          onClick={() =>
-            updateState({
-              // Note, won't work for maually inputted URLs
-              needsProgrammaticQuery: true,
-            })
-          }
-        >
-          F5
-        </div>
-        {state.apiKey && state.isAuthed && (
+      {state.isAuthed && (
+        <ActionWidgets>
+          <Filters />
           <div
-            className="btn btn-outline-info btn-sm"
-            onClick={() => {
-              removeAuthCookie();
+            className="btn btn-outline-info btn-sm mr-1"
+            onClick={() =>
               updateState({
-                isAuthed: false,
-                apiKey: '',
+                // Note, won't work for maually inputted URLs
                 needsProgrammaticQuery: true,
-              });
-            }}
+              })
+            }
           >
-            Logout
+            F5
           </div>
-        )}
-      </ActionWidgets>
+          {state.apiKey && state.isAuthed && (
+            <div
+              className="btn btn-outline-info btn-sm"
+              onClick={() => {
+                removeAuthCookie();
+                updateState({
+                  isAuthed: false,
+                  apiKey: '',
+                  needsProgrammaticQuery: true,
+                });
+              }}
+            >
+              Logout
+            </div>
+          )}
+        </ActionWidgets>
+      )}
       <ThemeToggler />
     </div>
   );
