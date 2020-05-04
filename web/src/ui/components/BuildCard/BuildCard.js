@@ -2,7 +2,7 @@ import React, {useContext, useState} from 'react';
 import {GitCommit, GitMerge, User, ChevronUp, ChevronDown} from 'react-feather';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faGithub} from '@fortawesome/free-brands-svg-icons';
-import {faAlignLeft} from '@fortawesome/free-solid-svg-icons';
+import {faAlignLeft, faQuestionCircle} from '@fortawesome/free-solid-svg-icons';
 
 import {ThemeContext} from '../../../store/ThemeStore';
 import {sharedThemes} from '../../styleTools/themes';
@@ -11,6 +11,24 @@ import {tagStyle} from '../../styleTools/buttonStyler';
 import ArtifactCard from './ArtifactCard';
 
 import './BuildCard.scss';
+
+const MERGE_REQUEST_STATE = {
+  UnknownState: 'UnknownState',
+  Opened: 'Opened',
+  Closed: 'Closed',
+};
+
+var BUILD_STATE = {
+  UnknownState: 'UnknownState',
+  Running: 'Running',
+  Failed: 'Failed',
+  Passed: 'Passed',
+  Canceled: 'Canceled',
+  Scheduled: 'Scheduled',
+  Skipped: 'Skipped',
+  NotRun: 'NotRun',
+  Timedout: 'Timedout',
+};
 
 const BuildCard = ({item}) => {
   const [expanded, toggleExpanded] = useState(true);
@@ -32,6 +50,7 @@ const BuildCard = ({item}) => {
       updated_at: buildMergeUpdatedAt = '',
       id: mrId = '',
       title: mrTitle = '',
+      state: mrState = MERGE_REQUEST_STATE.UnknownState,
       has_author: {
         name: buildAuthorName = '',
         id: buildAuthorId,
@@ -41,7 +60,6 @@ const BuildCard = ({item}) => {
     has_project: {id: buildProjectUrl = ''} = {},
   } = item || {};
   const buildStateNormed = buildState.toUpperCase();
-  const buildBranchNormed = buildBranch.toUpperCase();
 
   const buildTagStyle = tagStyle({name: theme.name, buildStateNormed});
   const COMMIT_LEN = 7;
@@ -74,12 +92,21 @@ const BuildCard = ({item}) => {
       <div className="card-left-icon rotate-merge">
         <GitCommit color={theme.icon.masterGreen} />
       </div>
-    ) : (
+    ) : mrState ? (
       <div className="card-left-icon">
-        <GitMerge color={theme.icon.branchPurple} />
+        <GitMerge
+          color={
+            mrState === MERGE_REQUEST_STATE.Opened
+              ? theme.icon.masterGreen
+              : mrState === MERGE_REQUEST_STATE.Closed
+              ? theme.icon.branchPurple
+              : theme.text.sectionText
+          }
+        />
       </div>
+    ) : (
+      <GitMerge color={theme.text.sectionText} />
     );
-
   const CommitIcon = commitUrl ? (
     <a
       href={commitUrl}
