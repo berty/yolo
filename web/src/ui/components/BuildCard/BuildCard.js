@@ -2,7 +2,7 @@ import React, {useContext, useState} from 'react';
 import {GitCommit, GitMerge, User, ChevronUp, ChevronDown} from 'react-feather';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faGithub} from '@fortawesome/free-brands-svg-icons';
-import {faAlignLeft} from '@fortawesome/free-solid-svg-icons';
+import {faAlignLeft, faHammer} from '@fortawesome/free-solid-svg-icons';
 
 import {ThemeContext} from '../../../store/ThemeStore';
 import {sharedThemes} from '../../styleTools/themes';
@@ -26,12 +26,14 @@ const BuildCard = ({build, toCollapse}) => {
     message: buildMessage = '',
     started_at: startedAt = '',
     finished_at: finishedAt = '',
+    driver: buildDriver = '',
     has_mergerequest: {
       short_id: mrShortId = '',
       commit_url: commitUrl = '',
       updated_at: buildMergeUpdatedAt = '',
       id: mrId = '',
       title: mrTitle = '',
+      driver: mrDriver = '',
       has_author: {
         name: buildAuthorName = '',
         id: buildAuthorId,
@@ -206,6 +208,23 @@ const BuildCard = ({build, toCollapse}) => {
     </div>
   );
 
+  const BuildDriver = buildDriver && (
+    <div className="detail-icon-label" title={'Build driver: ' + buildDriver}>
+      <FontAwesomeIcon icon={faHammer} color={theme.text.sectionText} />
+      <div>Build driver: {buildDriver}</div>
+    </div>
+  );
+
+  const MrDriver = mrDriver && (
+    <div
+      className="detail-icon-label"
+      title={'Merge request driver: ' + mrDriver}
+    >
+      <FontAwesomeIcon icon={faHammer} color={theme.text.sectionText} />
+      <div>{mrDriver}</div>
+    </div>
+  );
+
   return (
     <div className="BuildCard">
       <div
@@ -238,9 +257,11 @@ const BuildCard = ({build, toCollapse}) => {
               <div className="card-details-row">
                 {BuildCommit}
                 {BuildState}
+                {MrDriver}
               </div>
               <div className="card-details-row">{BranchName}</div>
               <div className="card-details-row">{BuildMessage}</div>
+              <div className="card-details-row">{BuildDriver}</div>
             </div>
             <div className="card-build-actions">
               {BuildLogs}
