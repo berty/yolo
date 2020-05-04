@@ -3,11 +3,11 @@ import {ThemeContext} from '../../../store/ThemeStore';
 import {Clock, Calendar, ArrowDownCircle, AlertTriangle} from 'react-feather';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faAndroid, faApple} from '@fortawesome/free-brands-svg-icons';
-
-import {faQuestionCircle} from '@fortawesome/free-solid-svg-icons';
+import {faQuestionCircle, faFile} from '@fortawesome/free-solid-svg-icons';
 import dayjs from 'dayjs';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import className from 'classnames';
 
 import {tagStyle, actionButtonStyle} from '../../styleTools/buttonStyler';
 
@@ -23,12 +23,15 @@ const ArtifactCard = ({
   finishedAt,
 }) => {
   const {theme} = useContext(ThemeContext);
+  const plainText = className('plaintext', theme.name);
   const {
     id: artifactId = '',
     state: artifactState = '',
     plist_signed_url: artifactPlistSignedUrl = '',
     dl_artifact_signed_url: artifactDlArtifactSignedUrl = '',
     kind: artifactKind = '',
+    local_path: artifactLocalPath = '',
+    file_size: artifactFileSize = '',
   } = artifact;
   const normedStates = ['FINISHED', 'BUILDING', 'FAILED', 'DEFAULT'];
   const stateNormed =
@@ -120,7 +123,7 @@ const ArtifactCard = ({
   );
 
   const TimeSinceBuildUpdated = timeSinceBuildUpdated ? (
-    <div className="time-display" title={timeSinceBuildUpdatedString}>
+    <div className="detail-icon-label" title={timeSinceBuildUpdatedString}>
       <Calendar />
       <div>{timeSinceBuildUpdated}</div>
     </div>
@@ -129,12 +132,28 @@ const ArtifactCard = ({
   );
 
   const BuildDuration = buildDurationShort ? (
-    <div className="time-display" title={buildDurationDetails || ''}>
+    <div className="detail-icon-label" title={buildDurationDetails || ''}>
       <Clock />
       <div>{buildDurationShort}</div>
     </div>
   ) : (
     ''
+  );
+
+  const ArtifactFileSize = artifactFileSize &&
+    parseInt(artifactFileSize) !== NaN && (
+      <div className="detail-icon-label">
+        <FontAwesomeIcon icon={faFile} size="lg" />
+        <div className={plainText}>
+          {Math.round(artifactFileSize / 1000)} kB
+        </div>
+      </div>
+    );
+
+  const ArtifactLocalPathRow = artifactLocalPath && (
+    <div className="card-details-row artifact-local-path">
+      {artifactLocalPath}
+    </div>
   );
 
   return (
@@ -151,9 +170,11 @@ const ArtifactCard = ({
             </div>
             {ArtifactStateTag}
           </div>
+          {ArtifactLocalPathRow}
           <div className="card-details-row">
             {TimeSinceBuildUpdated}
             {BuildDuration}
+            {ArtifactFileSize}
           </div>
         </div>
         <div className="card-build-actions">{ArtifactActionButton}</div>
