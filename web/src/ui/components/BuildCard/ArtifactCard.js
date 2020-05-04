@@ -3,7 +3,11 @@ import {ThemeContext} from '../../../store/ThemeStore';
 import {Clock, Calendar, ArrowDownCircle, AlertTriangle} from 'react-feather';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faAndroid, faApple} from '@fortawesome/free-brands-svg-icons';
-import {faQuestionCircle, faFile} from '@fortawesome/free-solid-svg-icons';
+import {
+  faQuestionCircle,
+  faFile,
+  faHammer,
+} from '@fortawesome/free-solid-svg-icons';
 import dayjs from 'dayjs';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -32,6 +36,7 @@ const ArtifactCard = ({
     kind: artifactKind = '',
     local_path: artifactLocalPath = '',
     file_size: artifactFileSize = '',
+    driver: artifactDriver = '',
   } = artifact;
   const normedStates = ['FINISHED', 'BUILDING', 'FAILED', 'DEFAULT'];
   const stateNormed =
@@ -156,6 +161,16 @@ const ArtifactCard = ({
     </div>
   );
 
+  const ArtifactDriver = artifactDriver && (
+    <div
+      className="detail-icon-label"
+      title={'Artifact driver: ' + artifactDriver}
+    >
+      <FontAwesomeIcon icon={faHammer} color={theme.text.sectionText} />
+      <div>{artifactDriver}</div>
+    </div>
+  );
+
   return (
     <React.Fragment key={artifactId}>
       <div
@@ -175,6 +190,7 @@ const ArtifactCard = ({
             {TimeSinceBuildUpdated}
             {BuildDuration}
             {ArtifactFileSize}
+            {ArtifactDriver}
           </div>
         </div>
         <div className="card-build-actions">{ArtifactActionButton}</div>
