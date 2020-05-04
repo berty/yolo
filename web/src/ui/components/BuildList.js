@@ -8,6 +8,8 @@ const BuildList = ({loaded, builds}) => {
   const loading = <div style={{color: theme.text.sectionText}}>Loading...</div>;
   return !loaded ? (
     loading
+  ) : !builds.length ? (
+    <div>No results match your query.</div>
   ) : (
     <div className="container">
       {builds.map((item, i) => (
