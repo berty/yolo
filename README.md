@@ -13,10 +13,16 @@
     <a href="https://twitter.com/berty"><img alt="twitter" src="https://img.shields.io/twitter/follow/berty?label=%40berty&style=flat&logo=twitter" /></a>
     <a href="https://pkg.go.dev/berty.tech/yolo/v2?tab=subdirectories"><img alt="go.dev reference" src="https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white" /></a>
     <a href="https://github.com/berty/yolo/releases"><img alt="GitHub release" src="https://img.shields.io/github/v/release/berty/yolo" /></a>
-    
+
 </p>
 
 > Multi-platform over-the-air installation aggregator (a TestFlight alternative).
+
+## Philosophy
+
+Mobile app development workflows should be as free as possible from corporate ecosystem constraints.
+
+## Introduction
 
 Yolo is one-stop realtime feed of ready-to-install releases and tests for your apps. We're using it at [berty](https://github.com/berty) to make releases and test branches ready to download and use on a developer's device within minutes after passing our CI.
 
@@ -196,8 +202,8 @@ FLAGS
 
 #### Other Resources
 
-* UI style and asset specifications on HackMD [here](https://hackmd.io/@berty/H1fZ9D_PU)
-* Sketch templates [here](https://assets.berty.tech/categories/yolo__v2/)
+-   UI style and asset specifications on HackMD [here](https://hackmd.io/@berty/H1fZ9D_PU)
+-   Sketch templates [here](https://assets.berty.tech/categories/yolo__v2/)
 
 ## Contributing
 
@@ -210,7 +216,6 @@ If you want to help out, please see [CONTRIBUTING.md](./CONTRIBUTING.md).
 This repository falls under the Berty [Code of Conduct](https://github.com/berty/community/blob/master/CODE_OF_CONDUCT.md).
 
 You can contact us on the [`#dev-💻`](https://crpt.fyi/berty-dev-discord) channel on [discord](https://crpt.fyi/berty-discord).
-
 
 ## License
 
