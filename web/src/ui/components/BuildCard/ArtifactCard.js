@@ -18,7 +18,7 @@ import './BuildCard.scss';
 const ArtifactCard = ({
   artifact,
   buildMergeUpdatedAt,
-  buildMergeId,
+  mrShortId,
   startedAt,
   finishedAt,
 }) => {
@@ -60,7 +60,7 @@ const ArtifactCard = ({
       : '';
   const timeSinceBuildUpdatedString = `updated: ${buildMergeUpdatedAt}`;
   const ArtifactKindName = KIND_TO_PLATFORM[artifactKind] || 'Unknown OS';
-  const BuildMergeId = buildMergeId || '';
+  const MrShortId = mrShortId || '';
 
   const artifactTagStyle = tagStyle({name: theme.name, stateNormed});
   const artifactActionButtonStyle = actionButtonStyle({
@@ -147,7 +147,7 @@ const ArtifactCard = ({
         <div className="card-details">
           <div className="card-details-row">
             <div className="">
-              {ArtifactKindName} {BuildMergeId}
+              {ArtifactKindName} {MrShortId}
             </div>
             {ArtifactStateTag}
           </div>

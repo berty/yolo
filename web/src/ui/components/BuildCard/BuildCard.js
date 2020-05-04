@@ -27,10 +27,11 @@ const BuildCard = ({item}) => {
     started_at: startedAt = '',
     finished_at: finishedAt = '',
     has_mergerequest: {
-      short_id: buildMrId = '',
+      short_id: mrShortId = '',
       commit_url: commitUrl = '',
       updated_at: buildMergeUpdatedAt = '',
-      id: buildMergeIdUrl = '',
+      id: mrId = '',
+      title: mrTitle = '',
       has_author: {
         name: buildAuthorName = '',
         id: buildAuthorId,
@@ -39,10 +40,10 @@ const BuildCard = ({item}) => {
     } = {},
     has_project: {id: buildProjectUrl = ''} = {},
   } = item || {};
-  const stateNormed = buildState.toUpperCase();
+  const buildStateNormed = buildState.toUpperCase();
+  const buildBranchNormed = buildBranch.toUpperCase();
 
-  const [buildMergeId] = buildMergeIdUrl.match(/\d+?$/) || [];
-  const buildTagStyle = tagStyle({name: theme.name, stateNormed});
+  const buildTagStyle = tagStyle({name: theme.name, buildStateNormed});
   const COMMIT_LEN = 7;
   const MESSAGE_LEN = 280;
 
@@ -56,9 +57,15 @@ const BuildCard = ({item}) => {
 
   const CardTitle = (
     <div className="card-title">
-      {`${
-        buildBranch.toUpperCase() === 'MASTER' ? 'Master' : 'Pull'
-      } ${buildMrId}`}
+      {mrTitle
+        ? mrTitle
+        : `${
+            mrShortId
+              ? 'Pull: ' + mrShortId
+              : buildShortId
+              ? 'Build: ' + buildShortId
+              : ''
+          }`}
     </div>
   );
 
@@ -245,7 +252,8 @@ const BuildCard = ({item}) => {
             <ArtifactCard
               artifact={artifact}
               buildMergeUpdatedAt={buildMergeUpdatedAt}
-              buildMergeId={buildMergeId}
+              mrId={mrId}
+              mrShortId={mrShortId}
               startedAt={startedAt}
               finishedAt={finishedAt}
               key={artifact.id}
