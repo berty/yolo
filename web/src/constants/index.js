@@ -13,4 +13,8 @@ export const PLATFORMS = {
   none: '3',
 };
 
+export const BRANCH = {
+  MASTER: 'MASTER',
+};
+
 export {actions};
