@@ -12,8 +12,8 @@ import ArtifactCard from './ArtifactCard';
 
 import './BuildCard.scss';
 
-const BuildCard = ({item}) => {
-  const [expanded, toggleExpanded] = useState(true);
+const BuildCard = ({build, toCollapse}) => {
+  const [expanded, toggleExpanded] = useState(!toCollapse);
   const [messageExpanded, toggleMessageExpanded] = useState(false);
   const {theme} = useContext(ThemeContext);
   const missing = (key) => `[no '${key}' in build]`;
@@ -39,7 +39,7 @@ const BuildCard = ({item}) => {
       } = {},
     } = {},
     has_project: {id: buildProjectUrl = ''} = {},
-  } = item || {};
+  } = build || {};
   const buildStateNormed = buildState.toUpperCase();
   const buildBranchNormed = buildBranch.toUpperCase();
 
@@ -247,8 +247,8 @@ const BuildCard = ({item}) => {
           </div>
         )}
         {expanded &&
-          item.has_artifacts &&
-          item.has_artifacts.map((artifact) => (
+          build.has_artifacts &&
+          build.has_artifacts.map((artifact) => (
             <ArtifactCard
               artifact={artifact}
               buildMergeUpdatedAt={buildMergeUpdatedAt}

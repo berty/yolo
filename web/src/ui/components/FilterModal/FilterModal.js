@@ -247,7 +247,7 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
                           needsProgrammaticQuery: true,
                           platformId: localPlatformId,
                           isLoaded: false,
-                          items: [],
+                          builds: [],
                           filtersPlatform: {
                             ...emptyFilters,
                             [localPlatformName]: true,
