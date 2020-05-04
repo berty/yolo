@@ -12,7 +12,7 @@ export const INITIAL_STATE = {
   isAuthed: false,
   error: null,
   isLoaded: false,
-  items: [],
+  builds: [],
   baseURL: `${process.env.API_SERVER}`,
   needsProgrammaticQuery: false,
   filtersPlatform: {

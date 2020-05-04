@@ -20,6 +20,7 @@ import {PLATFORMS} from '../../../constants';
 import {getBuildList, validateError} from '../../../api';
 
 import './Home.scss';
+import {queryHasMaster} from '../../../api/dataTransforms';
 
 const Home = () => {
   const {theme} = useContext(ThemeContext);
@@ -63,7 +64,7 @@ const Home = () => {
           (result) => {
             const {data: {builds = []} = {builds: []}} = result;
             updateState({
-              items: builds,
+              builds,
               error: null,
               isAuthed: true,
             });
@@ -116,7 +117,11 @@ const Home = () => {
           <ApiKeyPrompt failedKey={state.apiKey} updateState={updateState} />
         )}
         {!state.error && state.platformId !== PLATFORMS.none && (
-          <BuildList builds={cloneDeep(state.items)} loaded={state.isLoaded} />
+          <BuildList
+            builds={cloneDeep(state.builds)}
+            loaded={state.isLoaded}
+            collapseCondition={queryHasMaster}
+          />
         )}
         <div
           className="footer p-4"
