@@ -17,11 +17,11 @@ const BuildList = ({loaded, builds, collapseCondition}) => {
         <BuildCard
           key={'item.id' + i}
           build={build}
-          // toCollapse={
-          //   useCollapseCondition && collapseCondition.toCollapse(build)
-          //     ? true
-          //     : false
-          // }
+          toCollapse={
+            useCollapseCondition && collapseCondition.toCollapse(build)
+              ? true
+              : false
+          }
         />
       ))}
     </div>

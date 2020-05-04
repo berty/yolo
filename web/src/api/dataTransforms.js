@@ -14,8 +14,7 @@ export const queryHasMaster = {
       : true,
   toCollapse: (build) => {
     return (
-      (build && !build.branch) ||
-      (build && build.branch && build.branch.toUpperCase() !== BRANCH.MASTER)
+      build && build.branch && build.branch.toUpperCase() !== BRANCH.MASTER
     );
   },
 };
