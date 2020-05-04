@@ -65,11 +65,37 @@
   }
 
   .card div.card-row .card-title {
-    height: 100%;
     padding: 0px;
     margin: 0px;
     flex: 0 1 auto;
     margin-right: auto;
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    @include lg {
+      flex-wrap: nowrap;
+      white-space: unset;
+    }
+    .short-card-title {
+      flex: 1 1 100%;
+      white-space: nowrap;
+      @include lg {
+        flex: 1 1 auto;
+        white-space: unset;
+      }
+    }
+    .card-mr-subtitle {
+      font-size: 0.9rem;
+      margin-top: 0.2rem;
+      margin-left: 0px;
+      flex: 0 1 100%;
+      @include lg {
+        font-size: 1.125rem;
+        flex: 0 1 auto;
+        margin-top: 0px;
+        margin-left: 8px;
+      }
+    }
   }
 
   .card div.card-row .card-author {

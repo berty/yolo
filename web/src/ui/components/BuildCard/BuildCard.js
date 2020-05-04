@@ -57,15 +57,17 @@ const BuildCard = ({build, toCollapse}) => {
 
   const CardTitle = (
     <div className="card-title">
-      {mrTitle
-        ? mrTitle
-        : `${
-            mrShortId
-              ? 'Pull: ' + mrShortId
-              : buildShortId
-              ? 'Build: ' + buildShortId
-              : ''
-          }`}
+      <div className="short-card-title">
+        {mrShortId
+          ? 'Pull ' + mrShortId
+          : buildShortId
+          ? (buildBranchNormed === 'MASTER' ? 'Master ' : 'Build ') +
+            buildShortId
+          : ''}
+      </div>
+      <div className="card-mr-subtitle" style={colorPlainText}>
+        {mrTitle ? mrTitle : ''}
+      </div>
     </div>
   );
 
