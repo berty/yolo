@@ -1,5 +1,13 @@
 import React, {useContext, useState} from 'react';
-import {GitCommit, GitMerge, User, ChevronUp, ChevronDown} from 'react-feather';
+import {
+  GitCommit,
+  GitMerge,
+  GitPullRequest,
+  User,
+  ChevronUp,
+  ChevronDown,
+  AlertCircle,
+} from 'react-feather';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faGithub} from '@fortawesome/free-brands-svg-icons';
 import {faAlignLeft, faHammer} from '@fortawesome/free-solid-svg-icons';
@@ -11,6 +19,7 @@ import {tagStyle} from '../../styleTools/buttonStyler';
 import ArtifactCard from './ArtifactCard';
 
 import './BuildCard.scss';
+import {MR_STATE, BUILD_STATE} from '../../../constants';
 
 const BuildCard = ({build, toCollapse}) => {
   const [expanded, toggleExpanded] = useState(!toCollapse);
@@ -34,6 +43,7 @@ const BuildCard = ({build, toCollapse}) => {
       id: mrId = '',
       title: mrTitle = '',
       driver: mrDriver = '',
+      state: mrState = '',
       has_author: {
         name: buildAuthorName = '',
         id: buildAuthorId,
@@ -42,10 +52,9 @@ const BuildCard = ({build, toCollapse}) => {
     } = {},
     has_project: {id: buildProjectUrl = ''} = {},
   } = build || {};
-  const buildStateNormed = buildState.toUpperCase();
+
   const buildBranchNormed = buildBranch.toUpperCase();
 
-  const buildTagStyle = tagStyle({name: theme.name, buildStateNormed});
   const COMMIT_LEN = 7;
   const MESSAGE_LEN = 280;
 
@@ -92,6 +101,10 @@ const BuildCard = ({build, toCollapse}) => {
     >
       <GitCommit color={theme.text.sectionTitle} />
     </a>
+  ) : !(buildCommitId || mrState || mrDriver) ? (
+    <div className="card-left-icon icon-top rotate-merge">
+      <GitCommit color={theme.text.sectionText} />
+    </div>
   ) : (
     <div className={'card-left-icon icon-top'} title={buildCommitId || ''}>
       <GitCommit color={theme.text.sectionText} />
@@ -172,8 +185,27 @@ const BuildCard = ({build, toCollapse}) => {
     </div>
   );
 
-  const BuildState = (
-    <div className="btn btn-primary" style={buildTagStyle}>
+  const BuildState = !buildState ? (
+    ''
+  ) : buildState === BUILD_STATE.Passed ? (
+    <div
+      title={buildId || 'Build state'}
+      className="btn btn-primary"
+      style={tagStyle({
+        name: theme.name,
+        state: BUILD_STATE[buildState],
+        cursor: 'pointer',
+      })}
+      onClick={buildId ? () => (window.location = buildId) : () => {}}
+    >
+      {buildState}
+    </div>
+  ) : (
+    <div
+      title="Build state"
+      className="btn btn-primary"
+      style={tagStyle({name: theme.name, state: BUILD_STATE[buildState]})}
+    >
       {buildState}
     </div>
   );
@@ -225,6 +257,17 @@ const BuildCard = ({build, toCollapse}) => {
     </div>
   );
 
+  const MrState = mrState && (
+    <div
+      title="Merge request state"
+      className="btn btn-primary"
+      style={tagStyle({name: theme.name, state: MR_STATE[mrState]})}
+    >
+      {mrState === MR_STATE.Opened ? <AlertCircle /> : <GitPullRequest />}
+      {mrState}
+    </div>
+  );
+
   return (
     <div className="BuildCard">
       <div
@@ -254,13 +297,20 @@ const BuildCard = ({build, toCollapse}) => {
           >
             {CommitIcon}
             <div className="card-details">
-              <div className="card-details-row">
-                {BuildCommit}
-                {BuildState}
-                {MrDriver}
-              </div>
-              <div className="card-details-row">{BranchName}</div>
-              <div className="card-details-row">{BuildMessage}</div>
+              {(buildCommitId || mrState || mrDriver) && (
+                <div className="card-details-row">
+                  {BuildCommit}
+                  {BuildState}
+                  {MrState}
+                  {MrDriver}
+                </div>
+              )}
+              {buildBranch && (
+                <div className="card-details-row">{BranchName}</div>
+              )}
+              {buildMessage && (
+                <div className="card-details-row">{BuildMessage}</div>
+              )}
               <div className="card-details-row">{BuildDriver}</div>
             </div>
             <div className="card-build-actions">

@@ -17,4 +17,30 @@ export const BRANCH = {
   MASTER: 'MASTER',
 };
 
+export const MR_STATE = {
+  UnknownState: 'UnknownState',
+  Opened: 'Opened',
+  Closed: 'Closed',
+};
+
+export const BUILD_STATE = {
+  UnknownState: 'UnknownState',
+  Running: 'Running',
+  Failed: 'Failed',
+  Passed: 'Passed',
+  Canceled: 'Canceled',
+  Scheduled: 'Scheduled',
+  Skipped: 'Skipped',
+  NotRun: 'NotRun',
+  Timedout: 'Timedout',
+};
+
+export const ARTIFACT_STATE = {
+  UnknownState: 'UnknownState',
+  Finished: 'Finished',
+  New: 'New',
+  Error: 'Error',
+  Deleted: 'Deleted',
+};
+
 export {actions};

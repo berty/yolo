@@ -9,7 +9,12 @@
     min-width: 0;
   }
 
+  .cursor-default {
+    cursor: default;
+  }
+
   .plaintext {
+    text-transform: none;
     &.light {
       color: $body-color-light;
     }
@@ -53,14 +58,21 @@
 
   .card div.card-row .card-left-icon {
     height: 100%;
-    margin-right: 0.8em;
-    flex-shrink: 0;
+    // margin-right: 0.8em;
+    // flex-shrink: 1;
     margin-top: 0.2rem;
-    &.rotate-merge {
-      transform: rotate(90deg);
-    }
+    // display: none;
+    display: flex;
+    flex-flow: column nowrap;
+    min-width: 0.9rem;
+    margin-right: 0.8rem;
+    flex-shrink: 0;
     &.icon-top {
       align-self: flex-start;
+    }
+    &.rotate-merge {
+      transform: rotate(90deg);
+      // margin-left: -3px;
     }
   }
 
@@ -138,6 +150,7 @@
       flex-wrap: wrap;
       margin-bottom: 16px;
       align-items: center;
+      min-height: 30px;
       > * {
         margin-right: 10px;
       }
@@ -159,8 +172,16 @@
           margin-left: 8px;
         }
       }
+      // tags inside card details
+      // can be overriden by tagStyle() inline function
       div.btn {
         cursor: default;
+        display: flex;
+        align-items: center;
+        svg {
+          min-width: 0;
+          height: 1rem;
+        }
         &.btn-branch-name {
           word-wrap: unset;
           white-space: unset;
