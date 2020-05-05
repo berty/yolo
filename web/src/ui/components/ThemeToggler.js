@@ -18,25 +18,15 @@ const ThemeToggler = () => {
     if (isLight) changeTheme('light');
   }, []);
 
-  const themeTogglerButtonStyle = {
-    display: 'flex',
-    flex: '1 0 auto',
-    justifyContent: 'flex-end',
-    marginRight: '0.5rem',
-    marginLeft: 'auto',
-    fontSize: '2rem',
-  };
-
   return (
     <div
-      style={themeTogglerButtonStyle}
-      onClick={() => {
-        return changeTheme(theme.name === 'light' ? 'dark' : 'light');
-      }}
+      className="btn btn-sm btn-small"
+      style={{cursor: 'pointer'}}
+      onClick={() => changeTheme(theme.name === 'light' ? 'dark' : 'light')}
     >
-      <div style={{display: 'inline', cursor: 'pointer'}}>
-        {theme.name === 'light' ? '🌙' : '☀️'}
-      </div>
+      {theme.name === 'light'
+        ? '🌙 Switch to dark theme'
+        : '☀️ Use light theme'}
     </div>
   );
 };

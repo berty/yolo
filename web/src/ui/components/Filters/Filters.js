@@ -1,10 +1,8 @@
-import React, {useEffect, useContext} from 'react';
-import {GitMerge, GitBranch, GitCommit} from 'react-feather';
+import React, {useContext} from 'react';
+import {GitMerge, GitBranch, GitCommit, LogOut} from 'react-feather';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faAndroid, faApple} from '@fortawesome/free-brands-svg-icons';
 import {faQuestionCircle} from '@fortawesome/free-solid-svg-icons';
-
-import {getBuildList, validateError} from '../../../api';
 
 import {ResultContext} from '../../../store/ResultStore.js';
 import {ThemeContext} from '../../../store/ThemeStore.js';
@@ -13,9 +11,10 @@ import IconChat from '../../../assets/svg/IconChat';
 import IconMini from '../../../assets/svg/IconMini';
 
 import './Filters.scss';
+import {removeAuthCookie} from '../../../api/auth';
 
 const Filters = () => {
-  const {state} = useContext(ResultContext);
+  const {state, updateState} = useContext(ResultContext);
   const {theme} = useContext(ThemeContext);
   const widgetAccentColor = theme.icon.filterSelected;
 
@@ -25,12 +24,14 @@ const Filters = () => {
     backgroundColor: theme.bg.filter,
   };
 
+  // TODO: Unecessary abstraction
   const HeaderWidgetWrapper = ({children}) => (
     <div className="widget-wrapper" style={headerWidgetWrapperColors}>
       {children}
     </div>
   );
 
+  // TODO: Unecessary abstraction
   const HeaderWidget = ({children, text}) => {
     return (
       <React.Fragment>
@@ -137,11 +138,46 @@ const Filters = () => {
     return <HeaderWidgetWrapper children={branchWidget} />;
   };
 
+  const RefreshActionButton = (
+    <div
+      className="widget-wrapper"
+      style={{color: theme.text.sectionTitle}}
+      onClick={() => {
+        updateState({
+          // Note, won't work for maually inputted URLs
+          needsProgrammaticQuery: true,
+        });
+      }}
+    >
+      <div className="widget-text no-svg is-interactive">F5</div>
+    </div>
+  );
+
+  const Logout = (
+    <div
+      className="widget-wrapper"
+      style={{color: theme.text.sectionTitle}}
+      onClick={() => {
+        removeAuthCookie();
+        updateState({
+          isAuthed: false,
+          apiKey: '',
+          needsProgrammaticQuery: true,
+        });
+      }}
+    >
+      <LogOut />
+      <p className="widget-text is-interactive">Logout</p>
+    </div>
+  );
+
   return (
     <div className="Filters">
       {FiltersAppWidget()}
       {FiltersPlatformWidget()}
       {FiltersBranchWidget()}
+      {RefreshActionButton}
+      {Logout}
     </div>
   );
 };

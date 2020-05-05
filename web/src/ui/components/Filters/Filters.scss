@@ -18,6 +18,9 @@
     svg:first-child {
       margin-left: 0px;
     }
+    .is-interactive {
+      cursor: pointer;
+    }
   }
 
   p.widget-text {
@@ -25,5 +28,8 @@
     padding: 0px;
     margin: 0px;
     margin-left: 1em;
+    &.no-svg {
+      margin-left: 0em;
+    }
   }
 }
