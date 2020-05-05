@@ -8,14 +8,11 @@ import {
   faFile,
   faHammer,
 } from '@fortawesome/free-solid-svg-icons';
-import dayjs from 'dayjs';
-import advancedFormat from 'dayjs/plugin/advancedFormat';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import className from 'classnames';
 
 import {tagStyle, actionButtonStyle} from '../../styleTools/buttonStyler';
 
-import {KIND_TO_PLATFORM} from '../../../constants';
+import {KIND_TO_PLATFORM, ARTIFACT_STATE} from '../../../constants';
+import {getTimeDuration, getRelativeTime} from '../../../util/date';
 
 import './BuildCard.scss';
 
@@ -23,11 +20,10 @@ const ArtifactCard = ({
   artifact,
   buildMergeUpdatedAt,
   mrShortId,
-  startedAt,
-  finishedAt,
+  buildStartedAt,
+  buildFinishedAt,
 }) => {
   const {theme} = useContext(ThemeContext);
-  const plainText = className('plaintext', theme.name);
   const {
     id: artifactId = '',
     state: artifactState = '',
@@ -38,28 +34,12 @@ const ArtifactCard = ({
     file_size: artifactFileSize = '',
     driver: artifactDriver = '',
   } = artifact;
-  const normedStates = ['FINISHED', 'BUILDING', 'FAILED', 'DEFAULT'];
-  const stateNormed =
-    artifactState && normedStates.includes(artifactState.toUpperCase())
-      ? artifactState.toUpperCase()
-      : 'DEFAULT';
 
-  dayjs.extend(advancedFormat);
-  dayjs.extend(relativeTime);
-  const timeSinceBuildUpdated = buildMergeUpdatedAt
-    ? dayjs(dayjs(buildMergeUpdatedAt, 'YYYY-MM-DDTHH:mm:ssZ')).fromNow()
+  const timeSinceBuildUpdated = getRelativeTime(buildMergeUpdatedAt);
+  const buildDurationSeconds = getTimeDuration(buildStartedAt, buildFinishedAt);
+  const buildDurationShort = buildDurationSeconds
+    ? `${parseInt(buildDurationSeconds / 60)} minutes`
     : '';
-  const buildDurationSeconds =
-    startedAt && finishedAt
-      ? dayjs(dayjs(finishedAt, 'YYYY-MM-DDTHH:mm:ssZ')).diff(
-          dayjs(startedAt, 'YYYY-MM-DDTHH:mm:ssZ'),
-          'second'
-        )
-      : 0;
-  const buildDurationShort =
-    buildDurationSeconds > 0
-      ? `${parseInt(buildDurationSeconds / 60)} minutes`
-      : '';
   const buildDurationDetails =
     buildDurationSeconds > 0
       ? `duration: ${parseInt(buildDurationSeconds / 60)}m${
@@ -70,15 +50,15 @@ const ArtifactCard = ({
   const ArtifactKindName = KIND_TO_PLATFORM[artifactKind] || 'Unknown OS';
   const MrShortId = mrShortId || '';
 
-  const artifactTagStyle = tagStyle({name: theme.name, stateNormed});
+  const artifactTagStyle = tagStyle({name: theme.name, state: artifactState});
   const artifactActionButtonStyle = actionButtonStyle({
     name: theme.name,
-    stateNormed,
+    state: artifactState,
   });
 
   const getArtifactActionButton = () => {
-    switch (stateNormed) {
-      case 'FINISHED':
+    switch (artifactState) {
+      case ARTIFACT_STATE.Finished:
         return (
           <a
             href={
@@ -92,7 +72,7 @@ const ArtifactCard = ({
             <ArrowDownCircle />
           </a>
         );
-      case 'FAILED':
+      case ARTIFACT_STATE.Error:
         return (
           <div className="btn" style={artifactActionButtonStyle}>
             <AlertTriangle />
@@ -127,31 +107,28 @@ const ArtifactCard = ({
     </div>
   );
 
-  const TimeSinceBuildUpdated = timeSinceBuildUpdated ? (
-    <div className="detail-icon-label" title={timeSinceBuildUpdatedString}>
+  const TimeSinceBuildUpdated = timeSinceBuildUpdated && (
+    <div
+      className="btn normal-caps details"
+      title={timeSinceBuildUpdatedString}
+    >
       <Calendar />
-      <div>{timeSinceBuildUpdated}</div>
+      {timeSinceBuildUpdated}
     </div>
-  ) : (
-    ''
   );
 
-  const BuildDuration = buildDurationShort ? (
-    <div className="detail-icon-label" title={buildDurationDetails || ''}>
+  const BuildDuration = buildDurationShort && (
+    <div className="btn normal-caps details" title={buildDurationDetails || ''}>
       <Clock />
-      <div>{buildDurationShort}</div>
+      {buildDurationShort}
     </div>
-  ) : (
-    ''
   );
 
   const ArtifactFileSize = artifactFileSize &&
     parseInt(artifactFileSize) !== NaN && (
-      <div className="detail-icon-label">
+      <div className="btn normal-caps details" title="File size">
         <FontAwesomeIcon icon={faFile} size="lg" />
-        <div className={plainText}>
-          {Math.round(artifactFileSize / 1000)} kB
-        </div>
+        {Math.round(artifactFileSize / 1000)} kB
       </div>
     );
 
@@ -163,7 +140,7 @@ const ArtifactCard = ({
 
   const ArtifactDriver = artifactDriver && (
     <div
-      className="detail-icon-label"
+      className="btn normal-caps details"
       title={'Artifact driver: ' + artifactDriver}
     >
       <FontAwesomeIcon icon={faHammer} color={theme.text.sectionText} />

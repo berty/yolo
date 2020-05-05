@@ -165,15 +165,28 @@
           overflow-wrap: anywhere;
         }
       }
-      .detail-icon-label {
-        display: flex;
-        align-items: center;
-        div {
-          margin-left: 8px;
+
+      // small svg + text inside card details
+      // TODO: Merge with btn style below
+      .btn.details {
+        font-size: 0.95rem;
+        letter-spacing: normal;
+        &.normal-caps {
+          text-transform: none;
+        }
+        svg {
+          margin-right: 5px;
+        }
+        &.btn-sm {
+          svg {
+            margin-right: 5px;
+          }
         }
       }
-      // tags inside card details
+
+      // colored tags inside card details
       // can be overriden by tagStyle() inline function
+      // TODO: Merge with above
       div.btn {
         cursor: default;
         display: flex;
