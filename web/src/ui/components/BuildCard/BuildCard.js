@@ -7,10 +7,15 @@ import {
   ChevronUp,
   ChevronDown,
   AlertCircle,
+  Calendar,
 } from 'react-feather';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faGithub} from '@fortawesome/free-brands-svg-icons';
-import {faAlignLeft, faHammer} from '@fortawesome/free-solid-svg-icons';
+import {
+  faAlignLeft,
+  faHammer,
+  faPencilAlt,
+} from '@fortawesome/free-solid-svg-icons';
 
 import {ThemeContext} from '../../../store/ThemeStore';
 import {sharedThemes} from '../../styleTools/themes';
@@ -18,23 +23,27 @@ import {sharedThemes} from '../../styleTools/themes';
 import {tagStyle} from '../../styleTools/buttonStyler';
 import ArtifactCard from './ArtifactCard';
 
-import './BuildCard.scss';
 import {MR_STATE, BUILD_STATE} from '../../../constants';
+import {getRelativeTime, getTimeLabel} from '../../../util/date';
+
+import './BuildCard.scss';
 
 const BuildCard = ({build, toCollapse}) => {
   const [expanded, toggleExpanded] = useState(!toCollapse);
   const [messageExpanded, toggleMessageExpanded] = useState(false);
   const {theme} = useContext(ThemeContext);
-  const missing = (key) => `[no '${key}' in build]`;
   const {
     short_id: buildShortId = '',
-    id: buildId = missing('id'),
+    id: buildId = '',
     branch: buildBranch = '',
-    state: buildState = missing('state'),
+    state: buildState = '',
     has_commit_id: buildCommitId = '',
     message: buildMessage = '',
-    started_at: startedAt = '',
-    finished_at: finishedAt = '',
+    started_at: buildStartedAt = '',
+    finished_at: buildFinishedAt = '',
+    created_at: buildCreatedAt = '',
+    completed_at: buildCompletedAt = '',
+    updated_at: buildUpdatedAt = '',
     driver: buildDriver = '',
     has_mergerequest: {
       short_id: mrShortId = '',
@@ -54,6 +63,9 @@ const BuildCard = ({build, toCollapse}) => {
   } = build || {};
 
   const buildBranchNormed = buildBranch.toUpperCase();
+
+  const timeSinceUpdated = getRelativeTime(buildUpdatedAt);
+  const timeSinceCreated = getRelativeTime(buildCreatedAt);
 
   const COMMIT_LEN = 7;
   const MESSAGE_LEN = 280;
@@ -241,19 +253,22 @@ const BuildCard = ({build, toCollapse}) => {
   );
 
   const BuildDriver = buildDriver && (
-    <div className="detail-icon-label" title={'Build driver: ' + buildDriver}>
+    <div
+      className="btn btn-sm normal-caps details"
+      title={`Build driver: ${buildDriver}`}
+    >
       <FontAwesomeIcon icon={faHammer} color={theme.text.sectionText} />
-      <div>Build driver: {buildDriver}</div>
+      {`Build driver: ${buildDriver}`}
     </div>
   );
 
   const MrDriver = mrDriver && (
     <div
-      className="detail-icon-label"
-      title={'Merge request driver: ' + mrDriver}
+      className="btn btn-sm normal-caps details"
+      title={`Merge request driver: ${mrDriver}`}
     >
       <FontAwesomeIcon icon={faHammer} color={theme.text.sectionText} />
-      <div>{mrDriver}</div>
+      {mrDriver}
     </div>
   );
 
@@ -265,6 +280,26 @@ const BuildCard = ({build, toCollapse}) => {
     >
       {mrState === MR_STATE.Opened ? <AlertCircle /> : <GitPullRequest />}
       {mrState}
+    </div>
+  );
+
+  const BuildUpdatedAt = timeSinceUpdated && (
+    <div
+      className="btn btn-sm normal-caps details"
+      title={getTimeLabel('Build updated', buildUpdatedAt)}
+    >
+      <FontAwesomeIcon icon={faPencilAlt} color={theme.text.sectionText} />
+      {timeSinceUpdated}
+    </div>
+  );
+
+  const BuildCreatedAt = timeSinceCreated && (
+    <div
+      className="btn btn-sm normal-caps details"
+      title={getTimeLabel('Build created', buildCreatedAt)}
+    >
+      <Calendar />
+      {timeSinceCreated}
     </div>
   );
 
@@ -300,7 +335,7 @@ const BuildCard = ({build, toCollapse}) => {
               {(buildCommitId || mrState || mrDriver) && (
                 <div className="card-details-row">
                   {BuildCommit}
-                  {BuildState}
+
                   {MrState}
                   {MrDriver}
                 </div>
@@ -311,7 +346,12 @@ const BuildCard = ({build, toCollapse}) => {
               {buildMessage && (
                 <div className="card-details-row">{BuildMessage}</div>
               )}
-              <div className="card-details-row">{BuildDriver}</div>
+              <div className="card-details-row">
+                {BuildState}
+                {BuildDriver}
+                {BuildUpdatedAt}
+                {BuildCreatedAt}
+              </div>
             </div>
             <div className="card-build-actions">
               {BuildLogs}
@@ -327,8 +367,8 @@ const BuildCard = ({build, toCollapse}) => {
               buildMergeUpdatedAt={buildMergeUpdatedAt}
               mrId={mrId}
               mrShortId={mrShortId}
-              startedAt={startedAt}
-              finishedAt={finishedAt}
+              buildStartedAt={buildStartedAt}
+              buildFinishedAt={buildFinishedAt}
               key={artifact.id}
             />
           ))}

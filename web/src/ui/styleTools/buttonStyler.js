@@ -39,37 +39,21 @@ export const tagStyle = ({name, state, cursor = 'default'}) => {
   return {...style, cursor};
 };
 
-export const actionButtonStyle = ({name, stateNormed}) => {
+export const actionButtonStyle = ({name, state}) => {
   const theme = themes[name] || themes.light;
   const styles = {
-    FINISHED: {
+    [ARTIFACT_STATE.Finished]: {
       backgroundColor: theme.bg.tagGreen,
       color: theme.text.tagGreen,
       boxShadow: '0px 4px 0px ' + theme.shadow.btnDlMaster,
     },
-    BUILDING: {display: 'none'},
-    FAILED: {
+    [ARTIFACT_STATE.Building]: {display: 'none'},
+    [ARTIFACT_STATE.Error]: {
       backgroundColor: theme.bg.tagPink,
       color: theme.text.tagPink,
       cursor: 'default',
     },
     DEFAULT: {display: 'none'},
   };
-  return styles[stateNormed] || styles.DEFAULT;
-};
-
-export const colorMrState = ({name, buildMrStateNormed}) => {
-  const theme = themes[name] || themes.light;
-  const styles = {
-    OPEN: {
-      color: theme.icon.masterGreen,
-    },
-    CLOSED: {
-      color: theme.icon.branchPurple,
-    },
-    DEFAULT: {
-      color: theme.text.sectionText,
-    },
-  };
-  return styles[buildMrStateNormed] || styles.DEFAULT;
+  return styles[state] || styles.DEFAULT;
 };
