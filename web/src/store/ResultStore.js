@@ -27,7 +27,6 @@ export const INITIAL_STATE = {
   filtersApp: {
     chat: true,
     mini: false,
-    maxi: false,
   },
   filtersImplemented: {
     apps: ['chat'],

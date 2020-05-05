@@ -1,6 +1,6 @@
 import React, {useContext, useState} from 'react';
 import {ThemeContext} from '../../../store/ThemeStore';
-import {Check, GitBranch, GitMerge, GitCommit, X} from 'react-feather';
+import {Check, GitBranch, GitMerge, GitCommit, X, LogOut} from 'react-feather';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faAndroid, faApple} from '@fortawesome/free-brands-svg-icons';
 import {faQuestionCircle} from '@fortawesome/free-solid-svg-icons';
@@ -10,6 +10,8 @@ import classNames from 'classnames';
 import {ResultContext} from '../../../store/ResultStore';
 import './FilterModal.scss';
 import {PLATFORMS} from '../../../constants';
+import ThemeToggler from '../ThemeToggler';
+import {removeAuthCookie} from '../../../api/auth';
 
 const FilterModal = ({closeAction, showingFiltersModal}) => {
   const {theme} = useContext(ThemeContext);
@@ -178,14 +180,14 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
   return (
     <React.Fragment>
       <div className="faded" />
-      <div className="FilterModal">
+      <span className="FilterModal">
         <div
-          className="modal modal-blur fade show"
+          className="modal modal-blur fade show modal-open"
           role="dialog"
           aria-modal="true"
         >
           <div
-            className="modal-dialog modal-lg modal-dialog-centered"
+            className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"
             role="document"
           >
             <div className="modal-content" style={colorsModal}>
@@ -210,7 +212,6 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
                 <div className="filter-row">
                   {ProjectFilter({name: 'chat'})}
                   {ProjectFilter({name: 'mini'})}
-                  {ProjectFilter({name: 'maxi'})}
                 </div>
                 <div style={colorsModalTitle} className="subtitle">
                   OS
@@ -261,10 +262,31 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
                   <div className="btn-text">Apply Filters</div>
                 </div>
               </div>
+              <div className="modal-footer settings">
+                <ThemeToggler />
+                {state.apiKey && state.isAuthed && (
+                  <div
+                    className="btn btn-sm"
+                    style={{display: 'flex', alignItems: 'center'}}
+                    onClick={() => {
+                      removeAuthCookie();
+                      updateState({
+                        isAuthed: false,
+                        apiKey: '',
+                        needsProgrammaticQuery: true,
+                      });
+                      closeAction();
+                    }}
+                  >
+                    <LogOut height="14" color={filterSelectedAccent} />
+                    Logout
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </span>
     </React.Fragment>
   );
 };

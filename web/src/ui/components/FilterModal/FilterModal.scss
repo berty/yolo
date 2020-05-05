@@ -1,11 +1,10 @@
 .FilterModal {
+  border: 1px solid red;
   .modal.modal-blur.fade.show {
     padding-right: 15px;
     display: block;
-    top: auto;
-    bottom: 0.75em;
-    left: 0;
-    right: 0;
+    width: 100vw;
+    overflow-y: auto;
   }
 
   .modal-dialog .modal-content {
@@ -21,6 +20,13 @@
   .modal-content .modal-footer {
     border-top: none;
     justify-content: center;
+    // settings buttons
+    &.settings {
+      justify-content: flex-start;
+      div:first-child {
+        margin-left: auto;
+      }
+    }
   }
 
   .modal-title {
