@@ -103,6 +103,20 @@ const Home = () => {
     if (state.needsProgrammaticQuery === true) triggerNewQuery();
   }, [state.needsProgrammaticQuery]);
 
+  useEffect(() => {
+    const triggerNewQuery = () => {
+      updateState({
+        needsRefresh: false,
+      });
+      history.push({
+        path: '/',
+        search: locationSearch,
+      });
+      setNeedsNewFetch(true);
+    };
+    if (state.needsRefresh === true) triggerNewQuery();
+  }, [state.needsRefresh]);
+
   const setDisclaimerAccepted = (accepted) => {
     Cookies.set('disclaimerAccepted', 1, {expires: 7});
     toggleShowDisclaimer(accepted ? false : true);

@@ -15,6 +15,7 @@ export const INITIAL_STATE = {
   builds: [],
   baseURL: `${process.env.API_SERVER}`,
   needsProgrammaticQuery: false,
+  needsRefresh: false,
   filtersPlatform: {
     iOS: true,
     android: false,
