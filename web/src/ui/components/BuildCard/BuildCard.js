@@ -202,7 +202,7 @@ const BuildCard = ({build, toCollapse}) => {
   ) : buildState === BUILD_STATE.Passed ? (
     <div
       title={buildId || 'Build state'}
-      className="btn btn-primary"
+      className="btn btn-primary btn-sm state-tag"
       style={tagStyle({
         name: theme.name,
         state: BUILD_STATE[buildState],
@@ -215,7 +215,7 @@ const BuildCard = ({build, toCollapse}) => {
   ) : (
     <div
       title="Build state"
-      className="btn btn-primary"
+      className="btn btn-primary btn-sm state-tag"
       style={tagStyle({name: theme.name, state: BUILD_STATE[buildState]})}
     >
       {buildState}
@@ -275,7 +275,7 @@ const BuildCard = ({build, toCollapse}) => {
   const MrState = mrState && (
     <div
       title="Merge request state"
-      className="btn btn-primary"
+      className="btn btn-primary btn-sm state-tag"
       style={tagStyle({name: theme.name, state: MR_STATE[mrState]})}
     >
       {mrState === MR_STATE.Opened ? <AlertCircle /> : <GitPullRequest />}
