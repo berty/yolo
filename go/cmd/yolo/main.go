@@ -32,7 +32,7 @@ import (
 	"go.uber.org/zap/zapcore"
 	"golang.org/x/oauth2"
 	"moul.io/godev"
-	hcfilters "moul.io/httpcache-filters"
+	"moul.io/hcfilters"
 )
 
 func main() {

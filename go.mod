@@ -40,6 +40,6 @@ require (
 	howett.net/plist v0.0.0-20200225050739-77e249a2e2ba
 	moul.io/depviz/v3 v3.11.4
 	moul.io/godev v1.6.0
-	moul.io/httpcache-filters v1.2.0
+	moul.io/hcfilters v1.3.0
 	moul.io/zapgorm v1.0.0
 )
