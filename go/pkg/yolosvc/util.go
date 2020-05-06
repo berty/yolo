@@ -3,9 +3,15 @@ package yolosvc
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"path/filepath"
+	"regexp"
 
 	"berty.tech/yolo/v2/go/pkg/yolopb"
+)
+
+var (
+	githubMasterMerge = regexp.MustCompile(`Merge pull request #([0-9]+) from (.*)`)
 )
 
 func artifactKindByPath(path string) yolopb.Artifact_Kind {
@@ -44,4 +50,16 @@ func md5Sum(input string) string {
 	hasher := md5.New()
 	_, _ = hasher.Write([]byte(input))
 	return hex.EncodeToString(hasher.Sum(nil))
+}
+
+func guessMissingBuildInfo(build *yolopb.Build) {
+	// try to guess the PR for GitHub builds based on commit message
+	if build.HasMergerequestID == "" && build.Branch == "master" && build.HasProjectID != "" {
+		// FIXME: check if the build.project.driver is GitHub
+		matches := githubMasterMerge.FindAllStringSubmatch(build.Message, -1)
+		if len(matches) == 1 && len(matches[0]) == 3 {
+			pr := matches[0][1]
+			build.HasMergerequestID = fmt.Sprintf("%s/pull/%s", build.HasProjectID, pr)
+		}
+	}
 }
