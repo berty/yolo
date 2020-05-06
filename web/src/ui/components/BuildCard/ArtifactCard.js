@@ -102,7 +102,7 @@ const ArtifactCard = ({
   const ArtifactStateTag = !artifactState ? (
     <React.Fragment />
   ) : (
-    <div className="btn artifact-tag" style={artifactTagStyle}>
+    <div className="btn artifact-tag btn-sm state-tag" style={artifactTagStyle}>
       {artifactState}
     </div>
   );

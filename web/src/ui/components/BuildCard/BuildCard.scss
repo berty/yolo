@@ -57,22 +57,21 @@
   }
 
   .card div.card-row .card-left-icon {
-    height: 100%;
-    // margin-right: 0.8em;
-    // flex-shrink: 1;
-    margin-top: 0.2rem;
-    // display: none;
-    display: flex;
-    flex-flow: column nowrap;
-    min-width: 0.9rem;
-    margin-right: 0.8rem;
-    flex-shrink: 0;
-    &.icon-top {
-      align-self: flex-start;
-    }
-    &.rotate-merge {
-      transform: rotate(90deg);
-      // margin-left: -3px;
+    display: none;
+    @include xs {
+      height: 100%;
+      display: flex;
+      flex-flow: column nowrap;
+      min-width: 0.9rem;
+      margin-right: 0.8rem;
+      flex-shrink: 0;
+      &.icon-top {
+        align-self: flex-start;
+        margin-bottom: 8px;
+      }
+      &.rotate-merge {
+        transform: rotate(90deg);
+      }
     }
   }
 
@@ -97,6 +96,10 @@
       }
     }
     .card-mr-subtitle {
+      display: none;
+      @include xs {
+        display: block;
+      }
       font-size: 0.9rem;
       margin-top: 0.2rem;
       margin-left: 0px;
@@ -111,13 +114,20 @@
   }
 
   .card div.card-row .card-author {
-    font-size: small;
-    margin-right: 12px;
-    flex-shrink: 0;
+    display: none;
+    @include sm {
+      display: auto;
+      font-size: small;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
   }
 
   .card div.card-row .card-avatar {
-    margin-right: 16px;
+    margin-right: 4px;
+    @include xs {
+      margin-right: 0.75rem;
+    }
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -153,6 +163,7 @@
       min-height: 30px;
       > * {
         margin-right: 10px;
+        margin-bottom: 8px;
       }
       &.artifact-local-path {
         display: none;
@@ -166,39 +177,40 @@
         }
       }
 
-      // small svg + text inside card details
-      // TODO: Merge with btn style below
-      .btn.details {
-        font-size: 0.95rem;
-        letter-spacing: normal;
-        &.normal-caps {
-          text-transform: none;
-        }
-        svg {
-          margin-right: 5px;
-        }
-        &.btn-sm {
+      div.btn {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        margin-bottom: 4px;
+        &.details {
+          font-size: 0.95rem;
+          letter-spacing: normal;
+          padding-left: 0;
+          margin-left: 0;
           svg {
             margin-right: 5px;
           }
         }
-      }
-
-      // colored tags inside card details
-      // can be overriden by tagStyle() inline function
-      // TODO: Merge with above
-      div.btn {
-        cursor: default;
-        display: flex;
-        align-items: center;
+        &.normal-caps {
+          text-transform: none;
+        }
         svg {
-          min-width: 0;
           height: 1rem;
+          width: 1rem;
+          min-width: 1rem;
+          min-height: 1rem;
+          @include xs {
+            height: 1rem;
+            width: auto;
+            min-width: 0;
+            min-height: 0;
+          }
         }
         &.btn-branch-name {
           word-wrap: unset;
           white-space: unset;
           text-align: left;
+          min-height: 0;
         }
       }
       .flex-basis-100 {
