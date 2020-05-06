@@ -17,11 +17,14 @@ import (
 	bearer "github.com/Bearer/bearer-go"
 	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/google/go-github/v31/github"
+	"github.com/gregjones/httpcache"
+	"github.com/gregjones/httpcache/diskcache"
 	_ "github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger/options" // required by protoc
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	circleci "github.com/jszwedko/go-circleci"
 	"github.com/oklog/run"
+	"github.com/peterbourgon/diskv"
 	ff "github.com/peterbourgon/ff/v2"
 	"github.com/peterbourgon/ff/v2/ffcli"
 	"github.com/tevino/abool"
@@ -29,6 +32,7 @@ import (
 	"go.uber.org/zap/zapcore"
 	"golang.org/x/oauth2"
 	"moul.io/godev"
+	hcfilters "moul.io/httpcache-filters"
 )
 
 func main() {
@@ -61,6 +65,7 @@ func yolo(args []string) error {
 		shutdownTimeout    time.Duration
 		basicAuth          string
 		authSalt           string
+		httpCachePath      string
 		realm              string
 		// FIXME: once bool
 	)
@@ -92,6 +97,7 @@ func yolo(args []string) error {
 	serverFlagSet.StringVar(&realm, "realm", "Yolo", "authentication Realm")
 	serverFlagSet.StringVar(&bearerSecretKey, "bearer-secretkey", "", "optional Bearer.sh Secret Key")
 	serverFlagSet.StringVar(&authSalt, "auth-salt", "", "salt used to generate authentication tokens at the end of the URLs")
+	serverFlagSet.StringVar(&httpCachePath, "http-cache-path", "", "if set, will cache http client requests")
 
 	server := &ffcli.Command{
 		Name:      `server`,
@@ -103,9 +109,12 @@ func yolo(args []string) error {
 			if err != nil {
 				return err
 			}
-			if bearerSecretKey != "" {
-				bearer.ReplaceGlobals(bearer.Init(bearerSecretKey))
-			}
+			ctx, cancel := context.WithCancel(ctx)
+			defer cancel()
+
+			roundTripper := roundTripperFromArgs(ctx, bearerSecretKey, httpCachePath, logger)
+			http.DefaultTransport = roundTripper
+
 			db, err := dbFromArgs(dbStorePath, logger)
 			if err != nil {
 				return err
@@ -114,8 +123,6 @@ func yolo(args []string) error {
 
 			gr := run.Group{}
 			gr.Add(run.SignalHandler(ctx, syscall.SIGKILL, syscall.SIGTERM))
-			ctx, cancel := context.WithCancel(ctx)
-			defer cancel()
 
 			cc := abool.New() // clear cache signal
 
@@ -343,4 +350,34 @@ func dbFromArgs(dbPath string, logger *zap.Logger) (*gorm.DB, error) {
 		return nil, err
 	}
 	return db, nil
+}
+
+func roundTripperFromArgs(ctx context.Context, bearerSecretKey, httpCachePath string, logger *zap.Logger) http.RoundTripper {
+	roundTripper := http.DefaultTransport
+
+	if bearerSecretKey != "" {
+		roundTripper = &bearer.Agent{
+			SecretKey: bearerSecretKey,
+			Logger:    logger,
+			Transport: roundTripper,
+			Context:   ctx,
+		}
+	}
+
+	if httpCachePath != "" {
+		d := diskv.New(diskv.Options{
+			BasePath:     httpCachePath,
+			CacheSizeMax: 100 * 1024 * 1024, // 100MB
+		})
+		var cache httpcache.Cache
+		cache = diskcache.NewWithDiskv(d)
+		cache = hcfilters.MaxSize(cache, 2*1024*1024) // 2MB max per cache file
+		roundTripper = &httpcache.Transport{
+			Cache:               cache,
+			MarkCachedResponses: true,
+			Transport:           roundTripper,
+		}
+	}
+
+	return roundTripper
 }

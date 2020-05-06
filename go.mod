@@ -13,6 +13,7 @@ require (
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang/protobuf v1.3.5
 	github.com/google/go-github/v31 v31.0.0
+	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway v1.14.3
 	github.com/jinzhu/gorm v1.9.12
@@ -21,6 +22,7 @@ require (
 	github.com/mr-tron/base58 v1.1.3
 	github.com/oklog/run v1.1.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
+	github.com/peterbourgon/diskv v2.0.1+incompatible
 	github.com/peterbourgon/ff/v2 v2.0.0
 	github.com/rs/cors v1.7.0
 	github.com/stretchr/signature v0.0.0-20160104132143-168b2a1e1b56
@@ -38,5 +40,6 @@ require (
 	howett.net/plist v0.0.0-20200225050739-77e249a2e2ba
 	moul.io/depviz/v3 v3.11.4
 	moul.io/godev v1.6.0
+	moul.io/httpcache-filters v1.2.0
 	moul.io/zapgorm v1.0.0
 )
