@@ -144,8 +144,7 @@ const Filters = () => {
       style={{color: theme.text.sectionTitle}}
       onClick={() => {
         updateState({
-          // Note, won't work for maually inputted URLs
-          needsProgrammaticQuery: true,
+          needsRefresh: true,
         });
       }}
     >
