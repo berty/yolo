@@ -179,6 +179,7 @@ func buildFromBuildkiteBuild(build buildkite.Build, logger *zap.Logger) *yolopb.
 		fmt.Println("unknown state: ", *build.State)
 	}
 
+	guessMissingBuildInfo(&newBuild)
 	return &newBuild
 }
 
@@ -190,7 +191,6 @@ func artifactFromBuildkiteArtifact(artifact buildkite.Artifact, build buildkite.
 		FileSize:    *artifact.FileSize,
 		LocalPath:   *artifact.Path,
 		DownloadURL: *artifact.DownloadURL,
-		HasBuild:    &yolopb.Build{ID: *build.WebURL},
 		HasBuildID:  *build.WebURL,
 		// FIXME: hasRelease
 		Driver:   yolopb.Driver_Buildkite,

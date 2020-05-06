@@ -175,6 +175,8 @@ func circleciBuildToBatch(build *circleci.Build) yolopb.Build {
 	default:
 		fmt.Println("unknown state: ", build.Status)
 	}
+
+	guessMissingBuildInfo(&newBuild)
 	return newBuild
 }
 

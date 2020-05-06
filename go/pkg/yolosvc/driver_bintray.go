@@ -117,6 +117,8 @@ func bintrayVersionToBatch(version bintray.GetVersionResponse) *yolopb.Batch {
 	default:
 		fmt.Println("unknown state")
 	}
+
+	guessMissingBuildInfo(&newBuild)
 	batch.Builds = append(batch.Builds, &newBuild)
 	return batch
 }
