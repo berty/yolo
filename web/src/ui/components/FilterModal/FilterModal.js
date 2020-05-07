@@ -9,7 +9,12 @@ import IconMini from '../../../assets/svg/IconMini';
 import classNames from 'classnames';
 import {ResultContext} from '../../../store/ResultStore';
 import './FilterModal.scss';
-import {PLATFORMS} from '../../../constants';
+import {
+  PLATFORMS,
+  ARTIFACT_KIND_TO_PLATFORM,
+  ARTIFACT_KIND_VALUE,
+  ARTIFACT_KINDS,
+} from '../../../constants';
 import ThemeToggler from '../ThemeToggler';
 import {removeAuthCookie} from '../../../api/auth';
 
@@ -17,12 +22,9 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
   const {theme} = useContext(ThemeContext);
   const {state, updateState} = useContext(ResultContext);
   const [selectedProjects] = useState(['chat']);
-  const [selectedOs, setSelectedOs] = useState([
-    ...Object.keys(state.filtersPlatform).filter(
-      (k) => !!state.filtersPlatform[k]
-    ),
+  const [localArtifactKinds, setLocalArtifactKinds] = useState([
+    ...state.uiFilters.artifact_kinds,
   ]);
-  const [localPlatformId, setLocalPlatformId] = useState(state.platformId);
   const [selectedBranches] = useState(['all']);
   const filterSelectedAccent = theme.icon.filterSelected;
 
@@ -48,6 +50,46 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
 
   const colorsModalTitle = {
     color: theme.text.sectionTitle,
+  };
+
+  const ArtifactFilter = ({artifact_kind}) => {
+    const selected = localArtifactKinds.includes(artifact_kind);
+    const colorIcon = colorsIcon({selected});
+    const colorWidget = colorsWidget({selected});
+    const widgetClass = classNames('modal-filter-widget', {
+      'modal-filter-not-implemented': false,
+      'cannot-unselect': false,
+    });
+    const icon =
+      artifact_kind === ARTIFACT_KIND_VALUE.IPA ||
+      artifact_kind === ARTIFACT_KIND_VALUE.DMG ? (
+        <FontAwesomeIcon icon={faApple} size="lg" color={colorIcon} />
+      ) : artifact_kind === ARTIFACT_KIND_VALUE.APK ? (
+        <FontAwesomeIcon icon={faAndroid} size="lg" color={colorIcon} />
+      ) : (
+        <FontAwesomeIcon icon={faQuestionCircle} size="lg" color={colorIcon} />
+      );
+    const osName = ARTIFACT_KIND_TO_PLATFORM[artifact_kind.toString()];
+    return (
+      <div
+        className={widgetClass}
+        style={colorWidget}
+        onClick={
+          selected && localArtifactKinds.length >= 2
+            ? () =>
+                setLocalArtifactKinds(
+                  localArtifactKinds.filter((kind) => kind !== artifact_kind)
+                )
+            : !selected
+            ? () =>
+                setLocalArtifactKinds([...localArtifactKinds, artifact_kind])
+            : () => setLocalArtifactKinds([...ARTIFACT_KINDS])
+        }
+      >
+        {icon}
+        <p className="filter-text">{osName}</p>
+      </div>
+    );
   };
 
   const colorsWidget = ({selected} = {selected: false}) => {
@@ -101,44 +143,6 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
       <div className={widgetClass} style={colorWidget}>
         {icon}
         <p className="filter-text">{projectName}</p>
-      </div>
-    );
-  };
-
-  const OsFilter = ({name}) => {
-    const selected = selectedOs.includes(name);
-    const implemented = state.filtersImplemented.os.includes(name);
-    const colorIcon = colorsIcon({selected});
-    const colorWidget = colorsWidget({selected});
-    const widgetClass = classNames('modal-filter-widget', {
-      'modal-filter-not-implemented': !implemented,
-    });
-    const icon =
-      name === 'iOS' ? (
-        <FontAwesomeIcon icon={faApple} size="lg" color={colorIcon} />
-      ) : name === 'android' ? (
-        <FontAwesomeIcon icon={faAndroid} size="lg" color={colorIcon} />
-      ) : name === 'macOS' ? (
-        <FontAwesomeIcon icon={faApple} size="lg" color={colorIcon} />
-      ) : (
-        <FontAwesomeIcon icon={faQuestionCircle} size="lg" color={colorIcon} />
-      );
-    const osName =
-      name === 'iOS'
-        ? 'iOS'
-        : name === 'android'
-        ? 'Android'
-        : name === 'macOS'
-        ? 'Mac OS'
-        : '?';
-    return (
-      <div
-        className={widgetClass}
-        style={colorWidget}
-        onClick={implemented ? () => updateLocalOs({name}) : () => {}}
-      >
-        {icon}
-        <p className="filter-text">{osName}</p>
       </div>
     );
   };
@@ -214,12 +218,13 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
                   {ProjectFilter({name: 'mini'})}
                 </div>
                 <div style={colorsModalTitle} className="subtitle">
-                  OS
+                  Artifact Kinds
                 </div>
                 <div className="filter-row">
-                  {OsFilter({name: 'iOS'})}
-                  {OsFilter({name: 'android'})}
-                  {OsFilter({name: 'macOS'})}
+                  {ArtifactFilter({artifact_kind: '0'})}
+                  {ArtifactFilter({artifact_kind: '1'})}
+                  {ArtifactFilter({artifact_kind: '2'})}
+                  {ArtifactFilter({artifact_kind: '3'})}
                 </div>
                 <div style={colorsModalTitle} className="subtitle">
                   Branches
@@ -235,24 +240,16 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
                   type="button"
                   className="btn btn-primary"
                   data-dismiss="modal"
-                  // TODO: Create action instead of doing this work here
                   onClick={() => {
-                    const emptyFilters = {
-                      iOS: false,
-                      android: false,
-                    };
-                    const [localPlatformName] = selectedOs;
-                    localPlatformId === state.platformId
+                    localArtifactKinds.every((kind) =>
+                      state.uiFilters.artifact_kinds.includes(kind)
+                    )
                       ? {}
                       : updateState({
                           needsProgrammaticQuery: true,
-                          platformId: localPlatformId,
                           isLoaded: false,
                           builds: [],
-                          filtersPlatform: {
-                            ...emptyFilters,
-                            [localPlatformName]: true,
-                          },
+                          uiFilters: {artifact_kinds: localArtifactKinds},
                         });
                     closeAction();
                   }}

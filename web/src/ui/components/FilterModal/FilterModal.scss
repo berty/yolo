@@ -63,7 +63,9 @@
     margin-bottom: 0.3rem;
     width: auto;
     cursor: pointer;
-    //   cursor: pointer; // right now there are no filters to toggle
+    &.cannot-unselect {
+      cursor: not-allowed;
+    }
     div {
       flex: 0 0 auto;
     }

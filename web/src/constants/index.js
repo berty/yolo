@@ -7,6 +7,31 @@ export const KIND_TO_PLATFORM = {
   UNKNOWN: 'Unknown OS',
 };
 
+export const ARTIFACT_KIND_VALUE = {
+  UnknownKind: '0',
+  IPA: '1',
+  APK: '2',
+  DMG: '3',
+};
+
+export const ARTIFACT_KIND_TO_PLATFORM = {
+  '0': 'Unknown OS',
+  '1': 'iOS',
+  '2': 'Android',
+  '3': 'Mac OS',
+};
+
+export const ARTIFACT_VALUE_KIND = {
+  '0': 'UnknownKind',
+  '1': 'IPA',
+  '2': 'APK',
+  '3': 'DMG',
+};
+
+export const ARTIFACT_KINDS = Object.values(ARTIFACT_KIND_VALUE).map((kind) =>
+  kind.toString()
+);
+
 export const PLATFORMS = {
   iOS: '1',
   android: '2',
