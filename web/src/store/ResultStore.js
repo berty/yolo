@@ -1,13 +1,12 @@
 import React, {useReducer} from 'react';
 import {cloneDeep} from 'lodash';
 import {retrieveAuthCookie} from '../api/auth';
-import {actions, PLATFORMS} from '../constants';
+import {actions, PLATFORMS, ARTIFACT_KIND_VALUE} from '../constants';
 
 // TODO: Yes, this file needs a new name, and should maybe be split
 export const ResultContext = React.createContext();
 
 export const INITIAL_STATE = {
-  platformId: PLATFORMS.iOS,
   apiKey: retrieveAuthCookie() || null,
   isAuthed: false,
   error: null,
@@ -16,6 +15,9 @@ export const INITIAL_STATE = {
   baseURL: `${process.env.API_SERVER}`,
   needsProgrammaticQuery: false,
   needsRefresh: false,
+  uiFilters: {
+    artifact_kinds: [ARTIFACT_KIND_VALUE.IPA],
+  },
   filtersPlatform: {
     iOS: true,
     android: false,

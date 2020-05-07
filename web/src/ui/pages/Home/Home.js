@@ -16,7 +16,7 @@ import MessageModal from '../../components/MessageModal/MessageModal';
 import {ThemeContext} from '../../../store/ThemeStore';
 import {ResultContext} from '../../../store/ResultStore';
 
-import {PLATFORMS} from '../../../constants';
+import {PLATFORMS, ARTIFACT_KINDS} from '../../../constants';
 import {getBuildList, validateError} from '../../../api';
 
 import './Home.scss';
@@ -44,7 +44,19 @@ const Home = () => {
     if (!locationSearch) {
       history.push({
         pathname: '/',
-        search: queryString.stringify({artifact_kinds: state.platformId}),
+        search: queryString.stringify({
+          artifact_kinds: [state.uiFilters.artifact_kinds],
+        }),
+      });
+    } else {
+      const locationObject = queryString.parse(locationSearch);
+      const {artifact_kinds: kindsInQuery = []} = locationObject;
+      const artifact_kinds = (!Array.isArray(kindsInQuery)
+        ? [kindsInQuery]
+        : kindsInQuery
+      ).filter((kind) => ARTIFACT_KINDS.includes(kind));
+      updateState({
+        uiFilters: {artifact_kinds},
       });
     }
   }, []);
@@ -96,7 +108,7 @@ const Home = () => {
       });
       history.push({
         path: '/',
-        search: queryString.stringify({artifact_kinds: [state.platformId]}),
+        search: queryString.stringify(state.uiFilters),
       });
       setNeedsNewFetch(true);
     };
@@ -130,7 +142,7 @@ const Home = () => {
         {state.error && state.error.status === 401 && (
           <ApiKeyPrompt failedKey={state.apiKey} updateState={updateState} />
         )}
-        {!state.error && state.platformId !== PLATFORMS.none && (
+        {!state.error && (
           <BuildList
             builds={cloneDeep(state.builds)}
             loaded={state.isLoaded}

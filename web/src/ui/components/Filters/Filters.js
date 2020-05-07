@@ -12,6 +12,7 @@ import IconMini from '../../../assets/svg/IconMini';
 
 import './Filters.scss';
 import {removeAuthCookie} from '../../../api/auth';
+import {ARTIFACT_KIND_VALUE, ARTIFACT_VALUE_KIND} from '../../../constants';
 
 const Filters = () => {
   const {state, updateState} = useContext(ResultContext);
@@ -23,6 +24,11 @@ const Filters = () => {
     borderColor: widgetAccentColor,
     backgroundColor: theme.bg.filter,
   };
+
+  const shouldRenderUiFilter = ({key = artifact_kinds}) =>
+    state.uiFilters[key] &&
+    Array.isArray(state.uiFilters[key]) &&
+    state.uiFilters[key].length > 0;
 
   // TODO: Unecessary abstraction
   const HeaderWidgetWrapper = ({children}) => (
@@ -71,40 +77,27 @@ const Filters = () => {
     );
   };
 
-  const FiltersPlatformWidget = () => {
-    const platforms = Object.entries(state.filtersPlatform)
-      .map((e) => ({
-        name: e[0],
-        val: e[1],
-      }))
-      .filter((p) => p.val);
-    return (
-      <React.Fragment>
-        {platforms.length > 0 && (
-          <HeaderWidgetWrapper
-            children={platforms.map((p) => (
-              <HeaderWidget
-                key={p.name}
-                children={
-                  <FontAwesomeIcon
-                    icon={
-                      p.name === 'iOS'
-                        ? faApple
-                        : p.name === 'android'
-                        ? faAndroid
-                        : faQuestionCircle
-                    }
-                    size="lg"
-                    color={widgetAccentColor}
-                  />
-                }
-              />
-            ))}
+  const ArtifactKindsFilter = () =>
+    shouldRenderUiFilter({key: 'artifact_kinds'}) && (
+      <div className="widget-wrapper" style={headerWidgetWrapperColors}>
+        {state.uiFilters.artifact_kinds.map((kind, i) => (
+          <FontAwesomeIcon
+            key={i}
+            size="lg"
+            color={widgetAccentColor}
+            icon={
+              kind == ARTIFACT_KIND_VALUE.IPA ||
+              kind === ARTIFACT_KIND_VALUE.DMG
+                ? faApple
+                : kind === ARTIFACT_KIND_VALUE.APK
+                ? faAndroid
+                : faQuestionCircle
+            }
+            title={ARTIFACT_VALUE_KIND[kind.toString()] || ''}
           />
-        )}
-      </React.Fragment>
+        ))}
+      </div>
     );
-  };
 
   const FiltersBranchWidget = () => {
     const {
@@ -173,7 +166,7 @@ const Filters = () => {
   return (
     <div className="Filters">
       {FiltersAppWidget()}
-      {FiltersPlatformWidget()}
+      {ArtifactKindsFilter()}
       {FiltersBranchWidget()}
       {RefreshActionButton}
       {Logout}
