@@ -105,4 +105,12 @@ export const sharedThemes = {
   marginBottom: {
     block: '20px',
   },
+  colors: {
+    ghMergedPurple: '#6843bd',
+    ghMerged: '#6843bd',
+    ghClosedRed: '#bd3434',
+    ghClosed: '#bd3434',
+    ghOpenedGreen: '#5bbc58',
+    ghOpened: '#5bbc58',
+  },
 };

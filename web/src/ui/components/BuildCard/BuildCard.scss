@@ -72,6 +72,9 @@
       &.rotate-merge {
         transform: rotate(90deg);
       }
+      &.gh-merged {
+        color: $color-gh-merged-purple;
+      }
     }
   }
 

@@ -62,7 +62,8 @@ const BuildCard = ({build, toCollapse}) => {
     has_project: {id: buildProjectUrl = ''} = {},
   } = build || {};
 
-  const buildBranchNormed = buildBranch.toUpperCase();
+  const isMaster = buildBranch && buildBranch.toUpperCase() === 'MASTER';
+  const {has_mergerequest: buildHasMr = false} = build;
 
   const timeSinceUpdated = getRelativeTime(buildUpdatedAt);
   const timeSinceCreated = getRelativeTime(buildCreatedAt);
@@ -78,14 +79,15 @@ const BuildCard = ({build, toCollapse}) => {
     color: theme.text.sectionText,
   };
 
+  const colorSectionText = theme.text.sectionText;
+
   const CardTitle = (
     <div className="card-title">
       <div className="short-card-title">
         {mrShortId
           ? 'Pull ' + mrShortId
           : buildShortId
-          ? (buildBranchNormed === 'MASTER' ? 'Master ' : 'Build ') +
-            buildShortId
+          ? (isMaster ? 'Master ' : 'Build ') + buildShortId
           : ''}
       </div>
       <div className="card-mr-subtitle" style={colorPlainText}>
@@ -94,16 +96,37 @@ const BuildCard = ({build, toCollapse}) => {
     </div>
   );
 
-  const CardIcon =
-    buildBranch.toUpperCase() === 'MASTER' ? (
-      <div className="card-left-icon rotate-merge">
-        <GitCommit color={theme.icon.masterGreen} />
-      </div>
-    ) : (
-      <div className="card-left-icon">
-        <GitMerge color={theme.icon.branchPurple} />
-      </div>
-    );
+  const cardIconColorDefault = colorSectionText;
+
+  // TODO: Original goal:
+  // const cardIconColor = isMaster
+  //   ? theme.icon.masterGreen
+  //   : !buildHasMr
+  //   ? cardIconColorDefault
+  //   : MR_STATE[mrState]
+  //   ? sharedThemes.colors[`gh${mrState}`]
+  //   : cardIconColorDefault;
+
+  const cardIconColor = cardIconColorDefault;
+
+  // TODO: Proposed change
+  const CardIcon = isMaster ? (
+    <div className="card-left-icon rotate-merge">
+      <GitCommit color={cardIconColor} />
+    </div>
+  ) : mrState === MR_STATE.Closed ? (
+    <div className="card-left-icon">
+      <GitPullRequest color={cardIconColor} />
+    </div>
+  ) : mrState === MR_STATE.Opened ? (
+    <div className="card-left-icon">
+      <AlertCircle color={cardIconColor} />
+    </div>
+  ) : (
+    <div className="card-left-icon">
+      <GitCommit color={cardIconColor} />
+    </div>
+  );
 
   const CommitIcon = commitUrl ? (
     <a
