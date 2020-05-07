@@ -45,7 +45,7 @@ export const actionButtonStyle = ({name, state}) => {
     [ARTIFACT_STATE.Finished]: {
       backgroundColor: theme.bg.tagGreen,
       color: theme.text.tagGreen,
-      boxShadow: '0px 4px 0px ' + theme.shadow.btnDlMaster,
+      boxShadow: '0px 0.25rem 0px ' + theme.shadow.btnDlMaster,
     },
     [ARTIFACT_STATE.Building]: {display: 'none'},
     [ARTIFACT_STATE.Error]: {
