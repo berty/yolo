@@ -168,7 +168,7 @@ const BuildCard = ({build, toCollapse}) => {
       }}
       onClick={() => toggleExpanded(!expanded)}
     >
-      {expanded ? <ChevronUp /> : <ChevronDown />}
+      {expanded ? <ChevronUp size="1.25rem" /> : <ChevronDown size="1.25rem" />}
     </div>
   );
 
@@ -181,7 +181,7 @@ const BuildCard = ({build, toCollapse}) => {
       </div>
     ) : (
       <div className="card-avatar" title="Unknown author">
-        <User color={theme.text.sectionText} />
+        <User color={theme.text.sectionText} size="1.5rem" />
       </div>
     );
 

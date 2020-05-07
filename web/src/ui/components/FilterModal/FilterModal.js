@@ -233,7 +233,7 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
               <div className="modal-footer">
                 <div
                   type="button"
-                  className="btn-primary"
+                  className="btn btn-primary"
                   data-dismiss="modal"
                   // TODO: Create action instead of doing this work here
                   onClick={() => {
@@ -259,7 +259,7 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
                   style={applyFilterButtonColors}
                 >
                   <Check />
-                  <div className="btn-text">Apply Filters</div>
+                  Apply Filters
                 </div>
               </div>
               <div className="modal-footer settings">

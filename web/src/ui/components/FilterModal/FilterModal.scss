@@ -1,16 +1,16 @@
 .FilterModal {
   border: 1px solid red;
   .modal.modal-blur.fade.show {
-    padding-right: 15px;
+    padding-right: 1rem;
     display: block;
     width: 100vw;
     overflow-y: auto;
   }
 
   .modal-dialog .modal-content {
-    border-radius: 15px;
+    border-radius: 1rem;
     border: none;
-    padding: 15px;
+    padding: 1rem;
   }
 
   .modal-content .modal-header {
@@ -36,22 +36,17 @@
   .btn-close {
     display: flex;
     justify-content: center;
-    padding: 0.3em;
+    padding: 0.3rem;
     border-radius: 50%;
   }
 
-  // TODO: Hover, active, etc
   .btn-primary {
-    padding: 8px 14px 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-radius: 6px;
-    display: flex;
-    justify-content: center;
+    border-radius: 1rem;
     color: white;
     cursor: pointer;
-    div {
-      margin-left: 0.5em;
+    svg {
+      height: 1rem;
+      vertical-align: sub;
     }
   }
 
@@ -60,11 +55,12 @@
     flex-flow: column nowrap;
     align-items: center;
     justify-content: center;
-    padding: 10px 15px;
+    padding: 0.5rem 1rem;
     border-width: 2px;
     border-style: solid;
-    border-radius: 15px;
-    margin-right: 0.75em;
+    border-radius: 1rem;
+    margin-right: 0.75rem;
+    margin-bottom: 0.3rem;
     width: auto;
     cursor: pointer;
     //   cursor: pointer; // right now there are no filters to toggle
@@ -84,6 +80,7 @@
 
   .filter-row {
     display: flex;
+    flex-flow: row wrap;
     margin-bottom: 1.5em;
   }
 

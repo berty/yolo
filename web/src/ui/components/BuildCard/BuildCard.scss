@@ -39,11 +39,11 @@
   .card div.card-row {
     display: flex;
     margin: 0px;
-    padding: 15px;
+    padding: 1rem;
     width: 100%;
     align-items: center;
     height: 100%;
-    margin-bottom: 16px;
+    margin-bottom: 1rem;
     &.expanded {
       border-bottom: 1px solid gray;
     }
@@ -67,7 +67,7 @@
       flex-shrink: 0;
       &.icon-top {
         align-self: flex-start;
-        margin-bottom: 8px;
+        margin-bottom: 0.5rem;
       }
       &.rotate-merge {
         transform: rotate(90deg);
@@ -108,7 +108,7 @@
         font-size: 1.125rem;
         flex: 0 1 auto;
         margin-top: 0px;
-        margin-left: 8px;
+        margin-left: 0.5rem;
       }
     }
   }
@@ -118,13 +118,13 @@
     @include sm {
       display: auto;
       font-size: small;
-      margin-right: 12px;
+      margin-right: 0.5rem;
       flex-shrink: 0;
     }
   }
 
   .card div.card-row .card-avatar {
-    margin-right: 4px;
+    margin-right: 0.4rem;
     @include xs {
       margin-right: 0.75rem;
     }
@@ -148,7 +148,7 @@
   .card div.card-row .card-details {
     display: flex;
     flex-flow: row wrap;
-    margin-right: 8px;
+    margin-right: 0.5rem;
     flex-basis: 100%;
     font-size: 0.9rem;
     @include md {
@@ -158,12 +158,12 @@
       display: flex;
       flex: 1 1 100%;
       flex-wrap: wrap;
-      margin-bottom: 16px;
+      margin-bottom: 1rem;
       align-items: center;
-      min-height: 30px;
+      min-height: 1.875rem;
       > * {
-        margin-right: 10px;
-        margin-bottom: 8px;
+        margin-right: 0.6rem;
+        margin-bottom: 0.5rem;
       }
       &.artifact-local-path {
         display: none;
@@ -181,7 +181,7 @@
         cursor: default;
         display: flex;
         align-items: center;
-        margin-bottom: 4px;
+        margin-bottom: 0.25rem;
         &.details {
           font-size: 0.95rem;
           letter-spacing: normal;
@@ -189,7 +189,7 @@
           margin-left: 0;
           cursor: default;
           svg {
-            margin-right: 5px;
+            margin-right: 0.3rem;
           }
         }
         &.normal-caps {
@@ -230,7 +230,7 @@
     flex-direction: column;
     div,
     a {
-      margin-bottom: 8px;
+      margin-bottom: 0.5rem;
     }
     .btn {
       // download, alert

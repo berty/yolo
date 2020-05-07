@@ -8,11 +8,11 @@ const ShowFiltersButton = ({clickAction, showingFiltersModal}) => {
 
   const showFiltersButtonStyle = {
     position: 'fixed',
-    right: '1em',
-    bottom: '1em',
+    right: '1rem',
+    bottom: '1rem',
     borderRadius: '50%',
-    padding: '0.8em',
-    margin: '12px',
+    padding: '0.7rem',
+    margin: '0.6rem',
     backgroundColor: theme.bg.btnPrimary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -23,7 +23,7 @@ const ShowFiltersButton = ({clickAction, showingFiltersModal}) => {
 
   return (
     <div style={showFiltersButtonStyle} onClick={clickAction}>
-      <Sliders color="white" />
+      <Sliders color="white" size="1.3rem" />
     </div>
   );
 };
