@@ -47,7 +47,7 @@ const BuildCard = ({build, toCollapse}) => {
     driver: buildDriver = '',
     has_mergerequest: {
       short_id: mrShortId = '',
-      commit_url: commitUrl = '',
+      commit_url: mrCommitUrl = '',
       updated_at: buildMergeUpdatedAt = '',
       id: mrId = '',
       title: mrTitle = '',
@@ -62,7 +62,8 @@ const BuildCard = ({build, toCollapse}) => {
     has_project: {id: buildProjectUrl = ''} = {},
   } = build || {};
 
-  const buildBranchNormed = buildBranch.toUpperCase();
+  const isMaster = buildBranch && buildBranch.toUpperCase() === 'MASTER';
+  const {has_mergerequest: buildHasMr = false} = build;
 
   const timeSinceUpdated = getRelativeTime(buildUpdatedAt);
   const timeSinceCreated = getRelativeTime(buildCreatedAt);
@@ -84,8 +85,7 @@ const BuildCard = ({build, toCollapse}) => {
         {mrShortId
           ? 'Pull ' + mrShortId
           : buildShortId
-          ? (buildBranchNormed === 'MASTER' ? 'Master ' : 'Build ') +
-            buildShortId
+          ? (isMaster ? 'Master ' : 'Build ') + buildShortId
           : ''}
       </div>
       <div className="card-mr-subtitle" style={colorPlainText}>
@@ -94,26 +94,25 @@ const BuildCard = ({build, toCollapse}) => {
     </div>
   );
 
-  const CardIcon =
-    buildBranch.toUpperCase() === 'MASTER' ? (
-      <div className="card-left-icon rotate-merge">
-        <GitCommit color={theme.icon.masterGreen} />
-      </div>
-    ) : (
-      <div className="card-left-icon">
-        <GitMerge color={theme.icon.branchPurple} />
-      </div>
-    );
+  const CardIcon = isMaster ? (
+    <div className="card-left-icon rotate-merge">
+      <GitCommit color={theme.icon.masterGreen} />
+    </div>
+  ) : (
+    <div className="card-left-icon">
+      <GitMerge color={theme.icon.branchPurple} />
+    </div>
+  );
 
-  const CommitIcon = commitUrl ? (
+  const CommitIcon = mrCommitUrl ? (
     <a
-      href={commitUrl}
+      href={mrCommitUrl}
       className={'card-left-icon icon-top'}
       title={buildCommitId || ''}
     >
       <GitCommit color={theme.text.sectionTitle} />
     </a>
-  ) : !(buildCommitId || mrState || mrDriver) ? (
+  ) : !buildHasMr ? (
     <div className="card-left-icon icon-top rotate-merge">
       <GitCommit color={theme.text.sectionText} />
     </div>
@@ -246,9 +245,17 @@ const BuildCard = ({build, toCollapse}) => {
 
   const BuildCommit = buildCommitId && (
     <div title={buildCommitId}>
-      <a href={commitUrl} style={colorPlainText} className="interactive-text">
-        {buildCommitId.slice(0, COMMIT_LEN)}
-      </a>
+      {mrCommitUrl ? (
+        <a
+          href={mrCommitUrl}
+          style={colorPlainText}
+          className="interactive-text"
+        >
+          {buildCommitId.slice(0, COMMIT_LEN)}
+        </a>
+      ) : (
+        buildCommitId.slice(0, COMMIT_LEN)
+      )}
     </div>
   );
 
