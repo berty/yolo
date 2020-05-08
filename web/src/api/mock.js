@@ -1,16 +1,13 @@
-import queryString from 'query-string';
+import axios from 'axios';
 
-const mockResponse = process.env.MOCK_DATA_PATH
-  ? process.env.MOCK_DATA_PATH['JSON']
-  : null;
-
+/**
+ * Serve a JSON document here
+ * e.g. process.env.MOCK_DATA_FILE_ENDPOINT = 'localhost:8000/data.json'
+ * { "JSON": { "builds": [...]}}
+ */
 export const baseMockRequest = ({queryObject = {}, locationQuery = ''}) =>
-  Promise.resolve(mockResponse).then(async (response) => {
-    // Uncomment to check search params
-    // const formattedParams = queryString.stringify({
-    //   ...queryObject,
-    //   ...locationQuery,
-    // });
-    await new Promise((r) => setTimeout(r, 2000));
-    return await response;
+  axios.get(`${process.env.MOCK_DATA_FILE_ENDPOINT}`).then((response) => {
+    const result = response.data.JSON;
+    const {builds} = result;
+    return {data: {builds}};
   });

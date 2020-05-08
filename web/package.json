@@ -11,7 +11,7 @@
     "start-message": "babel-node tools/startMessage.js",
     "prestart": "npm run start-message",
     "start": "npm run open:src",
-    "start-ui-test": "env YOLO_UI_TEST=true npm run open:src",
+    "start-ui-test": "env YOLO_UI_TEST=true env MOCK_DATA_FILE_ENDPOINT=${MOCK_DATA_FILE_ENDPOINT} npm run open:src",
     "open:src": "babel-node tools/srcServer.js",
     "open:dist": "babel-node tools/distServer.js",
     "lint": "esw webpack.config.* src tools --color",
