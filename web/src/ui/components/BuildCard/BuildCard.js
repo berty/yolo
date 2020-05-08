@@ -15,6 +15,7 @@ import {
   faAlignLeft,
   faHammer,
   faPencilAlt,
+  faFile,
 } from '@fortawesome/free-solid-svg-icons';
 
 import {ThemeContext} from '../../../store/ThemeStore';
@@ -62,14 +63,13 @@ const BuildCard = ({build, toCollapse}) => {
     has_project: {id: buildProjectUrl = ''} = {},
   } = build || {};
 
+  const COMMIT_LEN = 7;
+  const MESSAGE_LEN = 280;
   const isMaster = buildBranch && buildBranch.toUpperCase() === 'MASTER';
   const {has_mergerequest: buildHasMr = false} = build;
 
   const timeSinceUpdated = getRelativeTime(buildUpdatedAt);
   const timeSinceCreated = getRelativeTime(buildCreatedAt);
-
-  const COMMIT_LEN = 7;
-  const MESSAGE_LEN = 280;
 
   const colorInteractiveText = {
     color: theme.text.blockTitle,
@@ -79,29 +79,80 @@ const BuildCard = ({build, toCollapse}) => {
     color: theme.text.sectionText,
   };
 
+  const mrDisplayShortId = mrShortId && <>{`#${mrShortId}`}</>;
+  const mrDisplayId = mrDisplayShortId || <>{mrId}</>;
+
+  const buildDisplayShortId = buildShortId && <>{`#${buildShortId}`}</>;
+  const buildDisplayId = buildDisplayShortId || <>{buildId}</>;
+
+  const CardTitleMasterNoMr = isMaster && <>Master - build {buildDisplayId}</>;
+  const CardTitleMasterWithMr = isMaster && buildHasMr && <>Master</>;
+  const CardTitlePullWithMr = !isMaster && mrShortId && (
+    <>
+      Pull{' '}
+      <u>
+        <a href={mrId}>{mrDisplayId}</a>
+      </u>
+    </>
+  );
+  const CardDefaultTitle = <>Build {buildDisplayId}</>;
+
+  const CardSubtitleMasterWithMr = isMaster && buildHasMr && (
+    <>
+      Merge{' '}
+      <u>
+        <a href={mrId}>{mrDisplayId}</a>
+      </u>
+    </>
+  );
+  const CardSubtitlePullWithMr = !isMaster && mrShortId && <>{mrTitle}</>;
+  const CardSubtitleDefault = '';
+
   const CardTitle = (
     <div className="card-title">
       <div className="short-card-title">
-        {mrShortId
-          ? 'Pull ' + mrShortId
-          : buildShortId
-          ? (isMaster ? 'Master ' : 'Build ') + buildShortId
-          : ''}
+        {CardTitleMasterWithMr ||
+          CardTitleMasterNoMr ||
+          CardTitlePullWithMr ||
+          CardDefaultTitle}
       </div>
       <div className="card-mr-subtitle" style={colorPlainText}>
-        {mrTitle ? mrTitle : ''}
+        {CardSubtitleMasterWithMr ||
+          CardSubtitlePullWithMr ||
+          CardSubtitleDefault}
       </div>
     </div>
   );
 
-  const CardIcon = isMaster ? (
+  const CardIconMasterWithMr = isMaster && buildHasMr && (
     <div className="card-left-icon rotate-merge">
       <GitCommit color={theme.icon.masterGreen} />
     </div>
-  ) : (
+  );
+  const CardIconMasterNoMr = isMaster && !buildHasMr && (
+    <div className="card-left-icon rotate-merge">
+      <GitCommit color={theme.text.sectionText} />
+    </div>
+  );
+  const CardIconPullHasMr = !isMaster && buildHasMr && (
     <div className="card-left-icon">
       <GitMerge color={theme.icon.branchPurple} />
     </div>
+  );
+  const CardIconDefault = (
+    <div className="card-left-icon rotate-merge">
+      <GitCommit color={theme.text.sectionText} />
+      {/* <FontAwesomeIcon icon={faFile} color={theme.text.sectionText} /> */}
+    </div>
+  );
+
+  const CardIcon = (
+    <>
+      {CardIconMasterWithMr ||
+        CardIconPullHasMr ||
+        CardIconMasterNoMr ||
+        CardIconDefault}
+    </>
   );
 
   const CommitIcon = mrCommitUrl ? (
@@ -138,6 +189,7 @@ const BuildCard = ({build, toCollapse}) => {
     </div>
   );
 
+  // TODO: Parse line breaks in message
   const BuildMessage = !buildMessage ? (
     ''
   ) : buildMessage.length < MESSAGE_LEN ? (
