@@ -16,7 +16,7 @@ import MessageModal from '../../components/MessageModal/MessageModal';
 import {ThemeContext} from '../../../store/ThemeStore';
 import {ResultContext} from '../../../store/ResultStore';
 
-import {ARTIFACT_KINDS} from '../../../constants';
+import {ARTIFACT_KINDS, BUILD_DRIVERS} from '../../../constants';
 import {getBuildList, validateError} from '../../../api';
 
 import './Home.scss';
@@ -41,22 +41,32 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
+    console.log(' --- Home first render');
     if (!locationSearch) {
       history.push({
         pathname: '/',
         search: queryString.stringify({
           artifact_kinds: [state.uiFilters.artifact_kinds],
+          build_driver: [state.uiFilters.build_driver],
         }),
       });
     } else {
       const locationObject = queryString.parse(locationSearch);
-      const {artifact_kinds: kindsInQuery = []} = locationObject;
+      const {
+        artifact_kinds: kindsInQuery = [],
+        build_driver: buildDriversInQuery = [],
+      } = locationObject;
       const artifact_kinds = (!Array.isArray(kindsInQuery)
         ? [kindsInQuery]
         : kindsInQuery
       ).filter((kind) => ARTIFACT_KINDS.includes(kind));
+      const build_driver = (!Array.isArray(buildDriversInQuery)
+        ? [buildDriversInQuery]
+        : buildDriversInQuery
+      ).filter((bd) => BUILD_DRIVERS.includes(bd));
+
       updateState({
-        uiFilters: {artifact_kinds},
+        uiFilters: {...state.uiFilters, artifact_kinds, build_driver},
       });
     }
   }, []);
@@ -108,7 +118,7 @@ const Home = () => {
       });
       history.push({
         path: '/',
-        search: queryString.stringify(state.uiFilters),
+        search: queryString.stringify(state.uiFilters) || `limit=50`,
       });
       setNeedsNewFetch(true);
     };

@@ -1,18 +1,21 @@
 import React, {useContext} from 'react';
-import {GitMerge, GitBranch, GitCommit, LogOut} from 'react-feather';
+import {GitBranch, LogOut} from 'react-feather';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faAndroid, faApple} from '@fortawesome/free-brands-svg-icons';
-import {faQuestionCircle} from '@fortawesome/free-solid-svg-icons';
+import {faQuestionCircle, faCube} from '@fortawesome/free-solid-svg-icons';
 
 import {ResultContext} from '../../../store/ResultStore.js';
 import {ThemeContext} from '../../../store/ThemeStore.js';
 
 import IconChat from '../../../assets/svg/IconChat';
-import IconMini from '../../../assets/svg/IconMini';
 
 import './Filters.scss';
 import {removeAuthCookie} from '../../../api/auth';
-import {ARTIFACT_KIND_VALUE, ARTIFACT_VALUE_KIND} from '../../../constants';
+import {
+  ARTIFACT_KIND_VALUE,
+  ARTIFACT_VALUE_KIND,
+  PROJECT,
+} from '../../../constants';
 
 const Filters = () => {
   const {state, updateState} = useContext(ResultContext);
@@ -25,110 +28,69 @@ const Filters = () => {
     backgroundColor: theme.bg.filter,
   };
 
-  const shouldRenderUiFilter = ({key = artifact_kinds}) =>
-    state.uiFilters[key] &&
-    Array.isArray(state.uiFilters[key]) &&
-    state.uiFilters[key].length > 0;
-
-  // TODO: Unecessary abstraction
-  const HeaderWidgetWrapper = ({children}) => (
-    <div className="widget-wrapper" style={headerWidgetWrapperColors}>
-      {children}
-    </div>
-  );
-
-  // TODO: Unecessary abstraction
-  const HeaderWidget = ({children, text}) => {
-    return (
-      <React.Fragment>
-        {children}
-        {text && <p className="widget-text">{text}</p>}
-      </React.Fragment>
-    );
-  };
+  const isArrayWithStuff = (val) =>
+    !!val && Array.isArray(val) && val.length > 0;
 
   const FiltersAppWidget = () => {
-    const {
-      filtersApp: {chat, mini},
-    } = state;
     return (
       <React.Fragment>
-        {chat && (
-          <HeaderWidgetWrapper
-            children={
-              <HeaderWidget
-                text="Chat"
-                children={<IconChat stroke={widgetAccentColor} />}
+        {isArrayWithStuff(state.calculatedFilters.projects) &&
+          state.calculatedFilters.projects.includes(PROJECT.chat) && (
+            <div className="widget-wrapper" style={headerWidgetWrapperColors}>
+              <IconChat stroke={widgetAccentColor} />
+              <p className="widget-text">{PROJECT.chat}</p>
+            </div>
+          )}
+        {isArrayWithStuff(state.calculatedFilters.projects) &&
+          state.calculatedFilters.projects.includes(
+            PROJECT['gomobile-ipfs-demo']
+          ) && (
+            <div className="widget-wrapper" style={headerWidgetWrapperColors}>
+              <FontAwesomeIcon
+                icon={faCube}
+                size={'lg'}
+                color={widgetAccentColor}
               />
-            }
-          />
-        )}
-        {mini && (
-          <HeaderWidgetWrapper
-            children={
-              <HeaderWidget
-                text="Mini"
-                children={<IconMini stroke={widgetAccentColor} />}
-              />
-            }
-          />
-        )}
+              <p className="widget-text">{PROJECT['gomobile-ipfs-demo']}</p>
+            </div>
+          )}
       </React.Fragment>
     );
   };
 
-  const ArtifactKindsFilter = () =>
-    shouldRenderUiFilter({key: 'artifact_kinds'}) && (
-      <div className="widget-wrapper" style={headerWidgetWrapperColors}>
-        {state.uiFilters.artifact_kinds.map((kind, i) => (
-          <FontAwesomeIcon
-            key={i}
-            size="lg"
-            color={widgetAccentColor}
-            icon={
-              kind == ARTIFACT_KIND_VALUE.IPA ||
-              kind === ARTIFACT_KIND_VALUE.DMG
-                ? faApple
-                : kind === ARTIFACT_KIND_VALUE.APK
-                ? faAndroid
-                : faQuestionCircle
-            }
-            title={ARTIFACT_VALUE_KIND[kind.toString()] || ''}
-          />
-        ))}
-      </div>
+  const ArtifactKindsFilter = () => {
+    return (
+      isArrayWithStuff(state.uiFilters.artifact_kinds) && (
+        <div className="widget-wrapper" style={headerWidgetWrapperColors}>
+          {state.uiFilters.artifact_kinds.map((kind, i) => (
+            <FontAwesomeIcon
+              key={i}
+              size="lg"
+              color={widgetAccentColor}
+              icon={
+                kind == ARTIFACT_KIND_VALUE.IPA ||
+                kind === ARTIFACT_KIND_VALUE.DMG
+                  ? faApple
+                  : kind === ARTIFACT_KIND_VALUE.APK
+                  ? faAndroid
+                  : faQuestionCircle
+              }
+              title={ARTIFACT_VALUE_KIND[kind.toString()] || ''}
+            />
+          ))}
+        </div>
+      )
     );
+  };
 
   const FiltersBranchWidget = () => {
-    const {
-      filtersBranch: {master, develop, all},
-    } = state;
-    let branchWidget;
-    if (all) {
-      branchWidget = (
-        <HeaderWidget
-          text="All"
-          children={<GitBranch color={widgetAccentColor} />}
-        />
-      );
-    } else if (master) {
-      branchWidget = (
-        <HeaderWidget
-          text="Master"
-          children={<GitCommit color={widgetAccentColor} />}
-        />
-      );
-    } else if (develop) {
-      branchWidget = (
-        <HeaderWidget
-          text="Develop"
-          children={<GitMerge color={widgetAccentColor} />}
-        />
-      );
-    } else {
-      branchWidget = <React.Fragment />;
-    }
-    return <HeaderWidgetWrapper children={branchWidget} />;
+    const BranchFilter = <GitBranch color={widgetAccentColor} />;
+    return (
+      <div className="widget-wrapper" style={headerWidgetWrapperColors}>
+        {BranchFilter}
+        <p className="widget-text">All</p>
+      </div>
+    );
   };
 
   const RefreshActionButton = (
