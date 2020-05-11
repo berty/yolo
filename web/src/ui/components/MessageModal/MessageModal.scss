@@ -33,7 +33,15 @@
     flex-basis: 100%;
   }
 
-  .btn.btn-ghost-dark {
+  button.btn.btn-sm.btn-shadow {
     background-color: transparent;
+    border-width: 1px;
+    border-radius: 15%;
+    border-color: darken(#f7d68e, 20%);
+    box-shadow: 0px 0.25rem 0px darken(#f7d68e, 30%);
+    border-style: solid;
+    &:hover {
+      background-color: darken(#f7d68e, 10%);
+    }
   }
 }
