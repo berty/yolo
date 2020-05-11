@@ -1,6 +1,12 @@
-import React, {useContext} from 'react';
+import React, {useContext, useState, useRef, useEffect} from 'react';
 import {ThemeContext} from '../../../store/ThemeStore';
-import {Clock, Calendar, ArrowDownCircle, AlertTriangle} from 'react-feather';
+import {
+  Clock,
+  Calendar,
+  ArrowDownCircle,
+  AlertTriangle,
+  Link,
+} from 'react-feather';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faAndroid, faApple} from '@fortawesome/free-brands-svg-icons';
 import {
@@ -8,13 +14,18 @@ import {
   faFile,
   faHammer,
 } from '@fortawesome/free-solid-svg-icons';
+import {useLocation} from 'react-router-dom';
 
 import {tagStyle, actionButtonStyle} from '../../styleTools/buttonStyler';
+import AnchorLink from '../AnchorLink';
 
 import {KIND_TO_PLATFORM, ARTIFACT_STATE} from '../../../constants';
 import {getTimeDuration, getRelativeTime} from '../../../util/date';
 
 import './BuildCard.scss';
+
+// TODO: Factor out into DOM util file
+const scrollToRef = (ref) => window.scrollTo(0, ref.current.offsetTop);
 
 const ArtifactCard = ({
   artifact,
@@ -22,8 +33,10 @@ const ArtifactCard = ({
   mrShortId,
   buildStartedAt,
   buildFinishedAt,
+  hashLinkMatch,
 }) => {
   const {theme} = useContext(ThemeContext);
+  const location = useLocation();
   const {
     id: artifactId = '',
     state: artifactState = '',
@@ -34,6 +47,15 @@ const ArtifactCard = ({
     file_size: artifactFileSize = '',
     driver: artifactDriver = '',
   } = artifact;
+  const [tooltipMessage, setTooltipMessage] = useState('');
+  const artifactRef = useRef(null);
+
+  const executeScroll = () => scrollToRef(artifactRef);
+  useEffect(() => {
+    if (hashLinkMatch === true) {
+      executeScroll();
+    }
+  }, []);
 
   const timeSinceBuildUpdated = getRelativeTime(buildMergeUpdatedAt);
   const buildDurationSeconds = getTimeDuration(buildStartedAt, buildFinishedAt);
@@ -148,13 +170,30 @@ const ArtifactCard = ({
     </div>
   );
 
+  const SharableArtifactLink = (
+    <AnchorLink
+      theme={theme}
+      color={theme.text.sectionText}
+      tooltipMessage={tooltipMessage}
+      setTooltipMessage={setTooltipMessage}
+      location={location}
+      children={<Link size={16} />}
+      target={artifactId}
+    />
+  );
+
   return (
     <React.Fragment key={artifactId}>
       <div
+        id={artifactId}
         className="card-row expanded"
         style={{color: theme.text.sectionText}}
+        ref={artifactRef}
       >
-        <div className="card-left-icon icon-top">{PlatformIcon}</div>
+        <div className="card-left-icon icon-top">
+          {SharableArtifactLink}
+          {PlatformIcon}
+        </div>
         <div className="card-details">
           <div className="card-details-row">
             <div className="">

@@ -23,7 +23,7 @@ const ShowFiltersButton = ({clickAction, showingFiltersModal}) => {
 
   return (
     <div style={showFiltersButtonStyle} onClick={clickAction}>
-      <Sliders color="white" size="1.3rem" />
+      <Sliders color="white" size={20} />
     </div>
   );
 };

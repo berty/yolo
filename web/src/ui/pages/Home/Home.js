@@ -16,7 +16,7 @@ import MessageModal from '../../components/MessageModal/MessageModal';
 import {ThemeContext} from '../../../store/ThemeStore';
 import {ResultContext} from '../../../store/ResultStore';
 
-import {PLATFORMS, ARTIFACT_KINDS} from '../../../constants';
+import {ARTIFACT_KINDS} from '../../../constants';
 import {getBuildList, validateError} from '../../../api';
 
 import './Home.scss';

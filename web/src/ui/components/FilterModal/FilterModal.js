@@ -10,7 +10,6 @@ import classNames from 'classnames';
 import {ResultContext} from '../../../store/ResultStore';
 import './FilterModal.scss';
 import {
-  PLATFORMS,
   ARTIFACT_KIND_TO_PLATFORM,
   ARTIFACT_KIND_VALUE,
   ARTIFACT_KINDS,
@@ -27,11 +26,6 @@ const FilterModal = ({closeAction, showingFiltersModal}) => {
   ]);
   const [selectedBranches] = useState(['all']);
   const filterSelectedAccent = theme.icon.filterSelected;
-
-  const updateLocalOs = ({name}) => {
-    setSelectedOs([name]);
-    setLocalPlatformId(PLATFORMS[name]);
-  };
 
   const applyFilterButtonColors = {
     backgroundColor: theme.bg.btnPrimary,

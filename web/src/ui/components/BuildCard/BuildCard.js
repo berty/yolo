@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext, useState, useRef, useEffect} from 'react';
 import {
   GitCommit,
   GitMerge,
@@ -8,6 +8,7 @@ import {
   ChevronDown,
   AlertCircle,
   Calendar,
+  Link,
 } from 'react-feather';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faGithub} from '@fortawesome/free-brands-svg-icons';
@@ -17,6 +18,7 @@ import {
   faPencilAlt,
   faFile,
 } from '@fortawesome/free-solid-svg-icons';
+import {useLocation} from 'react-router-dom';
 
 import {ThemeContext} from '../../../store/ThemeStore';
 import {sharedThemes} from '../../styleTools/themes';
@@ -28,11 +30,23 @@ import {MR_STATE, BUILD_STATE} from '../../../constants';
 import {getRelativeTime, getTimeLabel} from '../../../util/date';
 
 import './BuildCard.scss';
+import AnchorLink from '../AnchorLink';
+
+const scrollToRef = (ref) => window.scrollTo(0, ref.current.offsetTop);
 
 const BuildCard = ({build, toCollapse}) => {
   const [expanded, toggleExpanded] = useState(!toCollapse);
   const [messageExpanded, toggleMessageExpanded] = useState(false);
+  const [tooltipMessage, setTooltipMessage] = useState('');
+  const [artifactHashLinkMatch, setContainsArtifactHashLinkMatch] = useState(
+    ''
+  );
   const {theme} = useContext(ThemeContext);
+  const location = useLocation();
+  const buildRef = useRef(null);
+
+  const executeScroll = () => scrollToRef(buildRef);
+
   const {
     short_id: buildShortId = '',
     id: buildId = '',
@@ -46,6 +60,7 @@ const BuildCard = ({build, toCollapse}) => {
     completed_at: buildCompletedAt = '',
     updated_at: buildUpdatedAt = '',
     driver: buildDriver = '',
+    has_mergerequest: buildHasMr = null,
     has_mergerequest: {
       short_id: mrShortId = '',
       commit_url: mrCommitUrl = '',
@@ -61,12 +76,29 @@ const BuildCard = ({build, toCollapse}) => {
       } = {},
     } = {},
     has_project: {id: buildProjectUrl = ''} = {},
+    has_artifacts: buildHasArtifacts = [],
   } = build || {};
+
+  useEffect(() => {
+    if (location.hash) {
+      if (location.hash.slice(1) === buildId) {
+        executeScroll();
+      } else if (buildHasArtifacts.length) {
+        const artifactMatch = buildHasArtifacts.find(
+          (a) => a.id === location.hash.slice(1)
+        );
+        if (artifactMatch) {
+          setContainsArtifactHashLinkMatch(artifactMatch);
+          toggleExpanded(true);
+        }
+      }
+    }
+  }, []);
 
   const COMMIT_LEN = 7;
   const MESSAGE_LEN = 280;
   const isMaster = buildBranch && buildBranch.toUpperCase() === 'MASTER';
-  const {has_mergerequest: buildHasMr = false} = build;
+  // const {has_mergerequest: buildHasMr = false} = build;
 
   const timeSinceUpdated = getRelativeTime(buildUpdatedAt);
   const timeSinceCreated = getRelativeTime(buildCreatedAt);
@@ -155,6 +187,17 @@ const BuildCard = ({build, toCollapse}) => {
     </>
   );
 
+  const SharableLink = (
+    <AnchorLink
+      color={theme.text.sectionText}
+      tooltipMessage={tooltipMessage}
+      setTooltipMessage={setTooltipMessage}
+      location={location}
+      children={<Link size={16} />}
+      target={buildId}
+    />
+  );
+
   const CommitIcon = mrCommitUrl ? (
     <a
       href={mrCommitUrl}
@@ -220,7 +263,7 @@ const BuildCard = ({build, toCollapse}) => {
       }}
       onClick={() => toggleExpanded(!expanded)}
     >
-      {expanded ? <ChevronUp size="1.25rem" /> : <ChevronDown size="1.25rem" />}
+      {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
     </div>
   );
 
@@ -233,7 +276,7 @@ const BuildCard = ({build, toCollapse}) => {
       </div>
     ) : (
       <div className="card-avatar" title="Unknown author">
-        <User color={theme.text.sectionText} size="1.5rem" />
+        <User color={theme.text.sectionText} size={14} />
       </div>
     );
 
@@ -363,7 +406,7 @@ const BuildCard = ({build, toCollapse}) => {
   );
 
   return (
-    <div className="BuildCard">
+    <div className="BuildCard" id={buildId} ref={buildRef}>
       <div
         className="card"
         style={{
@@ -376,6 +419,7 @@ const BuildCard = ({build, toCollapse}) => {
         key={buildId}
       >
         <div className={'card-row' + (expanded ? ' expanded' : '')}>
+          {SharableLink}
           {CardIcon}
           <h2 className="card-title" style={{color: theme.text.blockTitle}}>
             {CardTitle}
@@ -429,6 +473,7 @@ const BuildCard = ({build, toCollapse}) => {
               buildStartedAt={buildStartedAt}
               buildFinishedAt={buildFinishedAt}
               key={artifact.id}
+              artifactHashLinkMatch={artifactHashLinkMatch === artifact.id}
             />
           ))}
       </div>
