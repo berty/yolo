@@ -26,7 +26,7 @@ const MessageModal = ({closeAction}) => {
               <div className="modal-footer">
                 <button
                   type="button"
-                  className="btn btn-ghost-dark"
+                  className="btn btn-sm btn-shadow"
                   data-dismiss="modal"
                   onClick={closeAction}
                 >
