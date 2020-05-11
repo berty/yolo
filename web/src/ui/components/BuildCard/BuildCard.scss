@@ -23,6 +23,14 @@
     }
   }
 
+  div.confirm-copy {
+    position: absolute;
+    width: auto;
+    white-space: nowrap;
+    opacity: 0.9;
+    padding: 0.2rem;
+  }
+
   pre {
     padding: 0px;
     margin: 0px;
@@ -34,6 +42,29 @@
   div.card {
     max-width: 100vw;
     min-width: 0;
+  }
+
+  .copy-build-to-clipboard-icon {
+    display: none;
+    @include xs {
+      display: block;
+      position: absolute;
+      top: 0.5rem;
+      left: 0.5rem;
+      cursor: pointer;
+    }
+  }
+
+  .copy-artifact-to-clipboard-icon {
+    display: none;
+    @include xs {
+      display: block;
+      position: absolute;
+      left: 0.5rem;
+      //   top: 0.5rem;
+      //   left: 0.5rem;
+      cursor: pointer;
+    }
   }
 
   .card div.card-row {

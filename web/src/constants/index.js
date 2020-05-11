@@ -32,12 +32,6 @@ export const ARTIFACT_KINDS = Object.values(ARTIFACT_KIND_VALUE).map((kind) =>
   kind.toString()
 );
 
-export const PLATFORMS = {
-  iOS: '1',
-  android: '2',
-  none: '3',
-};
-
 export const BRANCH = {
   MASTER: 'MASTER',
 };

@@ -15,7 +15,7 @@ const BuildList = ({loaded, builds, collapseCondition}) => {
     <div className="container">
       {builds.map((build, i) => (
         <BuildCard
-          key={'item.id' + i}
+          key={`${build.id}-${i}`}
           build={build}
           toCollapse={
             useCollapseCondition && collapseCondition.toCollapse(build)
