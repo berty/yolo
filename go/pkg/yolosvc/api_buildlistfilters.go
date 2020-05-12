@@ -11,6 +11,7 @@ func (svc service) BuildListFilters(ctx context.Context, req *yolopb.BuildListFi
 
 	// FIXME: limit most recent entities
 	// FIXME: sort entries by "popularity" or "freshness"
+	// FIXME: add available branches
 
 	err := svc.db.Find(&resp.Entities).Error
 	if err != nil {
