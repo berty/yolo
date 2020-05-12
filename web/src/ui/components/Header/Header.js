@@ -1,4 +1,5 @@
 import React, {useContext} from 'react';
+import qS from 'query-string';
 import Filters from '../Filters/Filters';
 
 import {ThemeContext} from '../../../store/ThemeStore';
@@ -6,17 +7,28 @@ import YoloLogo from '../../../assets/svg/yolo.svg';
 
 import ActionWidgets from '../ActionWidgets';
 
-import {ResultContext} from '../../../store/ResultStore';
+import {ResultContext, INITIAL_STATE} from '../../../store/ResultStore';
 
 import './Header.scss';
+import {Link} from 'react-router-dom';
+import {ARTIFACT_KINDS, ARTIFACT_KIND_VALUE} from '../../../constants';
 
 const Header = () => {
   const {theme} = useContext(ThemeContext);
-  const {state} = useContext(ResultContext);
+  const {state, updateState} = useContext(ResultContext);
 
   return (
     <div className={'Header'} style={{backgroundColor: theme.bg.page}}>
-      <div className="header-logo">
+      <div
+        className="header-logo"
+        style={{cursor: 'pointer'}}
+        onClick={() => {
+          updateState({
+            needsProgrammaticQuery: true,
+            uiFilters: INITIAL_STATE.uiFilters,
+          });
+        }}
+      >
         <img src={YoloLogo}></img>
       </div>
       {state.isAuthed && (
