@@ -2,7 +2,9 @@ package yolosvc
 
 import (
 	"fmt"
+	"math/rand"
 	"net/http"
+	"strings"
 
 	"berty.tech/yolo/v2/go/pkg/plistgen"
 	"berty.tech/yolo/v2/go/pkg/yolopb"
@@ -15,7 +17,12 @@ func (svc service) PlistGenerator(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "artifactID")
 
 	var artifact yolopb.Artifact
-	err := svc.db.First(&artifact, "ID = ?", id).Error
+	err := svc.db.
+		Preload("HasBuild").
+		Preload("HasBuild.HasProject").
+		Preload("HasBuild.HasProject.HasOwner").
+		First(&artifact, "ID = ?", id).
+		Error
 	if err != nil {
 		httpError(w, err, codes.InvalidArgument)
 		return
@@ -27,25 +34,47 @@ func (svc service) PlistGenerator(w http.ResponseWriter, r *http.Request) {
 	}
 	baseURL := fmt.Sprintf("%s://%s", scheme, r.Host)
 	var (
-		bundleID = "tech.berty.ios" // FIXME: change me
-		title    = "YOLO"           // FIXME: use random emojis :)
-		version  = "v0.0.1"         // FIXME: change me
-		url      = "/api/artifact-dl/" + id
+		bundleID      = "tech.berty.yolo"
+		title         = ""
+		subtitle      = ""
+		version       = ""
+		displayImage  = baseURL + "/bundle-57x57.png"
+		fullSizeImage = baseURL + "/bundle-512x512.png"
+		url           = "/api/artifact-dl/" + id
 	)
-
+	if artifact.HasBuild != nil && artifact.HasBuild.HasProject != nil {
+		title = strings.Title(artifact.HasBuild.HasProject.Name)
+		if artifact.HasBuild.HasProject.HasOwner != nil {
+			subtitle = strings.Title(artifact.HasBuild.HasProject.HasOwner.Name)
+		}
+	}
 	url, err = signature.GetSignedURL("GET", url, "", svc.authSalt)
 	if err != nil {
 		httpError(w, err, codes.Internal)
 		return
 	}
+	// FIXME: extract info.plist from the .ipa and update these metadata
 
-	url = baseURL + url // prepend baseURL _after_ computing the signature
+	// append random emojis
+	title = strings.TrimSpace(title + " " + randEmoji())
+	subtitle = strings.TrimSpace(subtitle + " " + randEmoji())
 
-	b, err := plistgen.Release(bundleID, version, title, url)
+	plist := plistgen.Release(bundleID, baseURL+url)
+	plist.SetTitle(title)
+	plist.SetSubtitle(subtitle)
+	plist.SetDisplayImage(displayImage, false)
+	plist.SetFullSizeImage(fullSizeImage, false)
+	plist.SetVersion(version)
+	b, err := plist.Marshal()
 	if err != nil {
 		httpError(w, err, codes.Internal)
 		return
 	}
 	w.Header().Add("Content-Type", "application/x-plist")
 	_, _ = w.Write(b)
+}
+
+func randEmoji() string {
+	list := []string{"😱", "🤡", "🧚‍♀️", "🥰", "🙌"}
+	return list[rand.Intn(len(list))]
 }
