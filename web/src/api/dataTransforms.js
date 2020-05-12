@@ -18,3 +18,47 @@ export const queryHasMaster = {
     );
   },
 };
+
+/**
+ * Breaks if build doesn't have build.id!
+ */
+export const groupBuildsByMr = (builds) => {
+  const buildDict = builds.reduce((acc, build, i) => {
+    const {
+      has_mergerequest,
+      has_mergerequest_id,
+      branch: buildBranch = '',
+    } = build;
+
+    if (!Object.keys(build)?.length) return acc;
+    const isMaster = buildBranch.toUpperCase() === BRANCH.MASTER;
+    if (!has_mergerequest || !has_mergerequest_id) {
+      return {
+        ...acc,
+        [build.id]: {
+          ...build,
+          allBuilds: [i],
+          topLevelMrId: '',
+          hasMaster: !!isMaster,
+        },
+      };
+    }
+    const {has_mergerequest_id: buildMrId} = build;
+    const matchingBuild = acc[buildMrId] || null;
+    if (matchingBuild) {
+      if (!matchingBuild.allBuilds) {
+        acc[buildMrId]['allBuilds'] = [i];
+      } else {
+        acc[buildMrId]['allBuilds'] = [...matchingBuild.allBuilds, i];
+      }
+    } else {
+      acc[buildMrId] = {...build};
+      acc[buildMrId]['topLevelMrId'] = has_mergerequest_id;
+      acc[buildMrId]['allBuilds'] = [i];
+    }
+    acc[buildMrId]['hasMaster'] = acc[buildMrId]['hasMaster'] || isMaster;
+    return acc;
+  }, {});
+  const groupedBuildList = Object.entries(buildDict).map((b) => b[1]);
+  return groupedBuildList;
+};

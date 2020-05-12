@@ -10,8 +10,6 @@ import ActionWidgets from '../ActionWidgets';
 import {ResultContext, INITIAL_STATE} from '../../../store/ResultStore';
 
 import './Header.scss';
-import {Link} from 'react-router-dom';
-import {ARTIFACT_KINDS, ARTIFACT_KIND_VALUE} from '../../../constants';
 
 const Header = () => {
   const {theme} = useContext(ThemeContext);

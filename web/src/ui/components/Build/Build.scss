@@ -1,6 +1,6 @@
 @import '../../../assets/main.scss';
 
-.BuildCard {
+.Build {
   p,
   div,
   .card div,
@@ -147,7 +147,7 @@
   .card div.card-row .card-author {
     display: none;
     @include sm {
-      display: auto;
+      display: block;
       font-size: small;
       margin-right: 0.5rem;
       flex-shrink: 0;

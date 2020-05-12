@@ -2,6 +2,7 @@ import React, {useReducer} from 'react';
 import {cloneDeep} from 'lodash';
 import {retrieveAuthCookie} from '../api/auth';
 import {actions, ARTIFACT_KIND_VALUE} from '../constants';
+import {groupBuildsByMr} from '../api/dataTransforms';
 
 // TODO: Yes, this file needs a new name, and should maybe be split
 export const ResultContext = React.createContext();
@@ -12,6 +13,7 @@ export const INITIAL_STATE = {
   error: null,
   isLoaded: false,
   builds: [],
+  buildsByMr: [],
   baseURL: `${process.env.API_SERVER}`,
   needsProgrammaticQuery: false,
   needsRefresh: false,
@@ -48,6 +50,13 @@ export const ResultStore = ({children}) => {
   // custom actions can go here; for now we just have one
   const updateState = (payload) => {
     dispatch({type: actions.UPDATE_STATE, payload: cloneDeep(payload)});
+    if (payload.builds?.length) {
+      const groupedData = groupBuildsByMr(payload.builds);
+      dispatch({
+        type: actions.UPDATE_STATE,
+        payload: {buildsByMr: groupedData},
+      });
+    }
   };
 
   // pass dispatch if we want to trigger an action without an action creator
