@@ -4,35 +4,85 @@ import (
 	"howett.net/plist"
 )
 
-func Release(bundleID, version, title, url string) ([]byte, error) {
-	release := &ApplePlistRelease{
+const (
+	KindSoftwarePackage = "software-package"
+	KindSoftware        = "software"
+	KindDisplayImage    = "display-image"
+	KindFullSizeImage   = "full-size-image"
+)
+
+func Release(bundleID, ipaURL string) ApplePlistRelease {
+	return ApplePlistRelease{
 		Items: []*ApplePlistItem{
 			{
 				Assets: []*ApplePlistAsset{
 					{
-						Kind: "software-package",
-						URL:  url,
+						Kind: KindSoftwarePackage,
+						URL:  ipaURL,
 					},
 				},
 				Metadata: &ApplePlistMetadata{
 					BundleIdentifier: bundleID,
-					BundleVersion:    version,
-					Kind:             "software",
-					Title:            title,
+					Kind:             KindSoftware,
+					Title:            "YOLO",
+					Subtitle:         "YOLO",
 				},
 			},
 		},
 	}
-	return plist.MarshalIndent(release, plist.XMLFormat, "\t")
 }
 
 type ApplePlistRelease struct {
 	Items []*ApplePlistItem `plist:"items"`
 }
 
+func (r *ApplePlistRelease) SetTitle(title string) {
+	r.Items[0].Metadata.Title = title
+}
+
+func (r *ApplePlistRelease) SetSubtitle(subtitle string) {
+	r.Items[0].Metadata.Subtitle = subtitle
+}
+
+func (r *ApplePlistRelease) SetVersion(version string) {
+	r.Items[0].Metadata.BundleVersion = version
+}
+
+func (r *ApplePlistRelease) SetDisplayImage(url string, needsShine bool) {
+	// FIXME: check if existing
+	r.Items[0].Assets = append(
+		r.Items[0].Assets,
+		&ApplePlistAsset{
+			Kind:       KindDisplayImage,
+			URL:        url,
+			NeedsShine: needsShine,
+		},
+	)
+}
+
+func (r *ApplePlistRelease) SetFullSizeImage(url string, needsShine bool) {
+	// FIXME: check if existing
+	r.Items[0].Assets = append(
+		r.Items[0].Assets,
+		&ApplePlistAsset{
+			Kind:       KindFullSizeImage,
+			URL:        url,
+			NeedsShine: needsShine,
+		},
+	)
+}
+
+func (r *ApplePlistRelease) Marshal() ([]byte, error) {
+	return plist.MarshalIndent(r, plist.XMLFormat, "\t")
+}
+
 type ApplePlistAsset struct {
-	Kind string `plist:"kind"`
-	URL  string `plist:"url"` // kind, url
+	Kind       string   `plist:"kind"`
+	URL        string   `plist:"url"`
+	MD5        string   `plist:"md5,omitempty"`
+	MD5Size    int      `plist:"md5-size,omitempty"`
+	MD5s       []string `plist:"md5s,omitempty"`
+	NeedsShine bool     `plist:"needs-shine,omitempty"`
 }
 
 type ApplePlistMetadata struct {
@@ -40,6 +90,7 @@ type ApplePlistMetadata struct {
 	BundleVersion    string `plist:"bundle-version"`
 	Kind             string `plist:"kind"`
 	Title            string `plist:"title"`
+	Subtitle         string `plist:"subtitle,omitempty"`
 }
 
 type ApplePlistItem struct {
