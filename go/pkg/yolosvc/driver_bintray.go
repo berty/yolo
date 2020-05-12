@@ -3,6 +3,7 @@ package yolosvc
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"berty.tech/yolo/v2/go/pkg/bintray"
@@ -73,17 +74,24 @@ func fetchBintray(btc *bintray.Client, logger *zap.Logger) (*yolopb.Batch, error
 			logger.Debug("bintray.GetPackages", zap.Any("pkgs", pkgs))
 
 			for _, pkg := range pkgs {
+				metadata, err := btc.GetPackage(orgName, repo.Name, pkg.Name)
+				if err != nil {
+					return nil, fmt.Errorf("bintray.GetPackage: %w", err)
+				}
+
 				version, err := btc.GetVersion(orgName, repo.Name, pkg.Name, "_latest")
 				if err != nil {
 					return nil, fmt.Errorf("bintray.GetVersion: %w", err)
 				}
+
 				logger.Debug("bintray.GetVersion", zap.Any("version", version))
-				batch.Merge(bintrayVersionToBatch(version))
+				batch.Merge(bintrayVersionToBatch(version, metadata))
 
 				files, err := btc.GetPackageFiles(orgName, repo.Name, pkg.Name)
 				if err != nil {
 					return nil, fmt.Errorf("bintray.GetPackageFiles: %w", err)
 				}
+
 				logger.Debug("bintray.GetPackageFiles", zap.Any("files", files))
 				batch.Merge(bintrayFilesToBatch(files))
 			}
@@ -95,7 +103,7 @@ func fetchBintray(btc *bintray.Client, logger *zap.Logger) (*yolopb.Batch, error
 	return batch, nil
 }
 
-func bintrayVersionToBatch(version bintray.GetVersionResponse) *yolopb.Batch {
+func bintrayVersionToBatch(version bintray.GetVersionResponse, pkg bintray.GetPackageResponse) *yolopb.Batch {
 	batch := yolopb.NewBatch()
 
 	if version.Owner == "" {
@@ -108,9 +116,17 @@ func bintrayVersionToBatch(version bintray.GetVersionResponse) *yolopb.Batch {
 		ShortID:   version.Name,
 		CreatedAt: &version.Created,
 		UpdatedAt: &version.Updated,
-		Message:   version.GithubReleaseNotesFile,
+		Message:   strings.TrimSpace(version.Desc + "\n\n" + version.GithubReleaseNotesFile),
+		VCSTag:    version.VcsTag,
 		Driver:    yolopb.Driver_Bintray,
 	}
+	if pkg.VcsURL != "" {
+		projectID := pkg.VcsURL
+		projectID = strings.TrimRight(projectID, ".git")
+		newBuild.HasProjectID = projectID
+	}
+	// FIXME: support monorepos with multiple subprojects.
+	//        i.e., take pkg.Repo as sub-project
 	switch {
 	case version.Published:
 		newBuild.State = yolopb.Build_Passed
@@ -120,6 +136,7 @@ func bintrayVersionToBatch(version bintray.GetVersionResponse) *yolopb.Batch {
 
 	guessMissingBuildInfo(&newBuild)
 	batch.Builds = append(batch.Builds, &newBuild)
+
 	return batch
 }
 

@@ -127,6 +127,8 @@ message Build {
   string branch = 11;
   Driver driver = 12;
   string short_id = 13 [(gogoproto.customname) = "ShortID"];
+  string vcs_tag = 14 [(gogoproto.customname) = "VCSTag"];
+  string vcs_tag_url = 15 [(gogoproto.customname) = "VCSTagURL"];
 
   /// relationships
 

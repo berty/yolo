@@ -4,15 +4,20 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+
+	"go.uber.org/zap"
 )
 
-func New(subject, apikey string) *Client {
-
+func New(subject, apikey string, logger *zap.Logger) *Client {
+	if logger == nil {
+		logger = zap.NewNop()
+	}
 	return &Client{
 		subject:    subject,
 		apikey:     apikey,
 		baseAPI:    "https://bintray.com/api/v1",
 		httpClient: &http.Client{},
+		logger:     logger,
 	}
 }
 
@@ -21,6 +26,7 @@ type Client struct {
 	apikey     string
 	baseAPI    string
 	httpClient *http.Client
+	logger     *zap.Logger
 }
 
 func (c Client) Subject() string {
@@ -87,6 +93,7 @@ func DownloadContent(url string, w http.ResponseWriter) error {
 }
 
 func (c Client) doGet(path string, dest interface{}) error {
+	c.logger.Debug("bintray.GET", zap.String("path", path))
 	req, err := http.NewRequest("GET", c.baseAPI+path, nil)
 	if err != nil {
 		return err
