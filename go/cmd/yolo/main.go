@@ -143,7 +143,7 @@ func yolo(args []string) error {
 			}
 			var btc *bintray.Client
 			if bintrayToken != "" && bintrayUsername != "" {
-				btc, err = bintrayClientFromArgs(bintrayUsername, bintrayToken)
+				btc, err = bintrayClientFromArgs(bintrayUsername, bintrayToken, logger)
 				if err != nil {
 					return err
 				}
@@ -297,8 +297,8 @@ func yolo(args []string) error {
 	return root.ParseAndRun(context.Background(), os.Args[1:])
 }
 
-func bintrayClientFromArgs(username, token string) (*bintray.Client, error) {
-	btc := bintray.New(username, token)
+func bintrayClientFromArgs(username, token string, logger *zap.Logger) (*bintray.Client, error) {
+	btc := bintray.New(username, token, logger)
 	return btc, nil
 }
 

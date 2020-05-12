@@ -86,6 +86,7 @@ type GetPackageResponse struct {
 	SystemIds              []interface{} `json:"system_ids"`
 	VcsURL                 string        `json:"vcs_url"`
 	Maturity               string        `json:"maturity"`
+	Permissions            []interface{} `json:"permissions"`
 }
 
 type GetPackageFilesResponse []struct {

@@ -62,4 +62,8 @@ func guessMissingBuildInfo(build *yolopb.Build) {
 			build.HasMergerequestID = fmt.Sprintf("%s/pull/%s", build.HasProjectID, pr)
 		}
 	}
+	if build.VCSTagURL == "" && build.VCSTag != "" && build.HasProjectID != "" {
+		// FIXME: check if the build.project.driver is GitHub
+		build.VCSTagURL = fmt.Sprintf("%s/tree/%s", build.HasProjectID, build.VCSTag)
+	}
 }
