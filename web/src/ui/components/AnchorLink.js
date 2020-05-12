@@ -1,6 +1,9 @@
 import React from 'react';
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 
+/**
+ * TODO: Not currently used; use it for routes, not page locations
+ */
 const AnchorLink = ({
   tooltipMessage,
   setTooltipMessage,
