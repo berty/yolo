@@ -1,7 +1,6 @@
 import React, { useContext, useState } from 'react'
 
 import { ThemeContext } from '../../../store/ThemeStore'
-import { sharedThemes } from '../../styleTools/themes'
 
 import { BRANCH } from '../../../constants'
 
@@ -45,9 +44,6 @@ const BuildContainer = ({ build, toCollapse }) => {
         style={{
           backgroundColor: theme.bg.block,
           boxShadow: theme.shadowStyle.block,
-          borderRadius: sharedThemes.borderRadius.block,
-          marginBottom: sharedThemes.marginBottom.block,
-          padding: sharedThemes.padding.block,
         }}
         key={buildId}
       >
