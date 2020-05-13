@@ -17,7 +17,7 @@ import {
   PROJECT,
 } from '../../../constants'
 
-const Filters = () => {
+const Filters = ({ onFilterClick }) => {
   const { state, updateState } = useContext(ResultContext)
   const { theme } = useContext(ThemeContext)
   const widgetAccentColor = theme.icon.filterSelected
@@ -34,7 +34,7 @@ const Filters = () => {
     <>
       {isArrayWithStuff(state.calculatedFilters.projects)
         && state.calculatedFilters.projects.includes(PROJECT.chat) && (
-          <div className="widget-wrapper" style={headerWidgetWrapperColors}>
+          <div className="widget-wrapper is-interactive" style={headerWidgetWrapperColors} onClick={onFilterClick}>
             <IconChat stroke={widgetAccentColor} />
             <p className="widget-text">{PROJECT.chat}</p>
           </div>
@@ -43,7 +43,7 @@ const Filters = () => {
         && state.calculatedFilters.projects.includes(
           PROJECT['gomobile-ipfs-demo'],
         ) && (
-          <div className="widget-wrapper" style={headerWidgetWrapperColors}>
+          <div className="widget-wrapper is-interactive" style={headerWidgetWrapperColors} onClick={onFilterClick}>
             <FontAwesomeIcon
               icon={faCube}
               size="lg"
@@ -57,7 +57,7 @@ const Filters = () => {
 
   const ArtifactKindsFilter = () => (
     isArrayWithStuff(state.uiFilters.artifact_kinds) && (
-      <div className="widget-wrapper" style={headerWidgetWrapperColors}>
+      <div className="widget-wrapper is-interactive" style={headerWidgetWrapperColors} onClick={onFilterClick}>
         {state.uiFilters.artifact_kinds.map((kind, i) => (
           <FontAwesomeIcon
             key={i}
@@ -81,7 +81,7 @@ const Filters = () => {
   const FiltersBranchWidget = () => {
     const BranchFilter = <GitBranch color={widgetAccentColor} />
     return (
-      <div className="widget-wrapper" style={headerWidgetWrapperColors}>
+      <div className="widget-wrapper is-interactive" style={headerWidgetWrapperColors} onClick={onFilterClick}>
         {BranchFilter}
         <p className="widget-text">All</p>
       </div>
@@ -90,13 +90,14 @@ const Filters = () => {
 
   const RefreshActionButton = (
     <div
-      className="widget-wrapper"
+      className="widget-wrapper is-interactive"
       style={{ color: theme.text.sectionTitle }}
       onClick={() => {
         updateState({
           needsRefresh: true,
         })
       }}
+      title="Refresh the page"
     >
       <div className="widget-text no-svg is-interactive">F5</div>
     </div>

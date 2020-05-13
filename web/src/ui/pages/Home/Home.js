@@ -146,7 +146,7 @@ const Home = () => {
   return (
     <div className="Home">
       <div className="page" style={{ backgroundColor: theme.bg.page }}>
-        <Header />
+        <Header onFilterClick={() => toggleShowFilters(true)} />
         {state.error && <ErrorDisplay error={state.error} />}
         {state.error && state.error.status === 401 && (
           <ApiKeyPrompt failedKey={state.apiKey} updateState={updateState} />
