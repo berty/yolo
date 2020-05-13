@@ -28,3 +28,6 @@ tmp*
 
 # OS
 .DS_Store
+
+# IDE
+.vscode/
