@@ -4,6 +4,7 @@
 //
 // See:
 // https://github.com/facebook/jest/issues/2663#issuecomment-317109798
+//
 //---------------------------------------------------------------------
 const path = require('path')
 
