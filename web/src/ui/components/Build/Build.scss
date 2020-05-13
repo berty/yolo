@@ -42,6 +42,9 @@
   div.card {
     max-width: 100vw;
     min-width: 0;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border-radius: 0.33rem;
   }
 
   .copy-build-to-clipboard-icon {
@@ -70,11 +73,14 @@
   .card div.card-row {
     display: flex;
     margin: 0px;
-    padding: 1rem;
+    padding: 0.5rem;
     width: 100%;
     align-items: center;
     height: 100%;
-    margin-bottom: 1rem;
+    margin-bottom: 0.3rem;
+    &:first-child {
+        padding-bottom: 1rem;
+    }
     &.expanded {
       border-bottom: 1px solid gray;
     }
@@ -182,14 +188,11 @@
     margin-right: 0.5rem;
     flex-basis: 100%;
     font-size: 0.9rem;
-    @include md {
-      font-size: 1rem;
-    }
     .card-details-row {
       display: flex;
       flex: 1 1 100%;
       flex-wrap: wrap;
-      margin-bottom: 1rem;
+      margin-bottom: 0.6rem;
       align-items: center;
       min-height: 1.875rem;
       > * {
@@ -214,7 +217,7 @@
         align-items: center;
         margin-bottom: 0.25rem;
         &.details {
-          font-size: 0.95rem;
+          font-size: 0.9rem;
           letter-spacing: normal;
           padding-left: 0;
           margin-left: 0;
