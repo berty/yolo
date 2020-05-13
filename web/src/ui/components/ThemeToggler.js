@@ -3,7 +3,7 @@ import { ThemeContext } from '../../store/ThemeStore'
 
 const ThemeToggler = () => {
   const { theme, changeTheme } = useContext(ThemeContext)
-  const getOtherThemeName = () => theme.name === 'light' ? 'dark' : 'light'
+  const getOtherThemeName = () => (theme.name === 'light' ? 'dark' : 'light')
 
   return (
     <div
