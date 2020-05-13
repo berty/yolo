@@ -54,11 +54,8 @@ const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
   } = build
 
   const {
-    short_id: mrShortId = '',
     commit_url: mrCommitUrl = '',
     updated_at: buildMergeUpdatedAt = '',
-    id: mrId = '',
-    title: mrTitle = '',
     driver: mrDriver = '',
     state: mrState = '',
   } = mr || {}
@@ -141,7 +138,7 @@ const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
         state: BUILD_STATE[buildState],
         cursor: 'pointer',
       })}
-      onClick={buildId ? () => (window.location = buildId) : () => {}}
+      onClick={buildId ? () => (window.location = buildId) : () => { }}
     >
       {buildState}
     </div>
@@ -284,10 +281,9 @@ const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
           <ArtifactCard
             artifact={artifact}
             buildMergeUpdatedAt={buildMergeUpdatedAt}
-            mrId={mrId}
-            mrShortId={mrShortId}
             buildStartedAt={buildStartedAt}
             buildFinishedAt={buildFinishedAt}
+            buildShortId={buildShortId}
             key={artifact.id}
           />
         ))}
