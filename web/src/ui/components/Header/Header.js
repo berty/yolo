@@ -10,7 +10,7 @@ import { ResultContext, INITIAL_STATE } from '../../../store/ResultStore'
 
 import './Header.scss'
 
-const Header = () => {
+const Header = ({ onFilterClick }) => {
   const { theme } = useContext(ThemeContext)
   const { state, updateState } = useContext(ResultContext)
 
@@ -30,7 +30,7 @@ const Header = () => {
       </div>
       {state.isAuthed && (
         <ActionWidgets>
-          <Filters />
+          <Filters onFilterClick={onFilterClick} />
         </ActionWidgets>
       )}
       {process.env.YOLO_UI_TEST && (

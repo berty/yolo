@@ -17,7 +17,7 @@ import {
   PROJECT,
 } from '../../../constants'
 
-const Filters = () => {
+const Filters = ({ onFilterClick }) => {
   const { state, updateState } = useContext(ResultContext)
   const { theme } = useContext(ThemeContext)
   const widgetAccentColor = theme.icon.filterSelected
@@ -34,7 +34,7 @@ const Filters = () => {
     <>
       {isArrayWithStuff(state.calculatedFilters.projects)
         && state.calculatedFilters.projects.includes(PROJECT.chat) && (
-          <div className="widget-wrapper" style={headerWidgetWrapperColors}>
+          <div className="widget-wrapper is-interactive" style={headerWidgetWrapperColors} onClick={onFilterClick} onKeyDown={onFilterClick} role="button" tabIndex={0}>
             <IconChat stroke={widgetAccentColor} />
             <p className="widget-text">{PROJECT.chat}</p>
           </div>
@@ -43,7 +43,7 @@ const Filters = () => {
         && state.calculatedFilters.projects.includes(
           PROJECT['gomobile-ipfs-demo'],
         ) && (
-          <div className="widget-wrapper" style={headerWidgetWrapperColors}>
+          <div className="widget-wrapper is-interactive" style={headerWidgetWrapperColors} onClick={onFilterClick} onKeyDown={onFilterClick} role="button" tabIndex={0}>
             <FontAwesomeIcon
               icon={faCube}
               size="lg"
@@ -57,7 +57,7 @@ const Filters = () => {
 
   const ArtifactKindsFilter = () => (
     isArrayWithStuff(state.uiFilters.artifact_kinds) && (
-      <div className="widget-wrapper" style={headerWidgetWrapperColors}>
+      <div className="widget-wrapper is-interactive" style={headerWidgetWrapperColors} onClick={onFilterClick} onKeyDown={onFilterClick} role="button" tabIndex={0}>
         {state.uiFilters.artifact_kinds.map((kind, i) => (
           <FontAwesomeIcon
             key={i}
@@ -81,7 +81,7 @@ const Filters = () => {
   const FiltersBranchWidget = () => {
     const BranchFilter = <GitBranch color={widgetAccentColor} />
     return (
-      <div className="widget-wrapper" style={headerWidgetWrapperColors}>
+      <div className="widget-wrapper is-interactive" style={headerWidgetWrapperColors} onClick={onFilterClick} onKeyDown={onFilterClick} role="button" tabIndex={0}>
         {BranchFilter}
         <p className="widget-text">All</p>
       </div>
@@ -90,13 +90,21 @@ const Filters = () => {
 
   const RefreshActionButton = (
     <div
-      className="widget-wrapper"
+      className="widget-wrapper is-interactive"
       style={{ color: theme.text.sectionTitle }}
       onClick={() => {
         updateState({
           needsRefresh: true,
         })
       }}
+      onKeyDown={() => {
+        updateState({
+          needsRefresh: true,
+        })
+      }}
+      role="button"
+      tabIndex={0}
+      title="Refresh the page"
     >
       <div className="widget-text no-svg is-interactive">F5</div>
     </div>
@@ -114,6 +122,16 @@ const Filters = () => {
           needsProgrammaticQuery: true,
         })
       }}
+      onKeyDown={() => {
+        removeAuthCookie()
+        updateState({
+          isAuthed: false,
+          apiKey: '',
+          needsProgrammaticQuery: true,
+        })
+      }}
+      role="button"
+      tabIndex={0}
     >
       <LogOut />
       <p className="widget-text is-interactive">Logout</p>
