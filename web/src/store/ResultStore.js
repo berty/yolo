@@ -1,8 +1,13 @@
 import React, {useReducer} from 'react';
 import {cloneDeep} from 'lodash';
 import {retrieveAuthCookie} from '../api/auth';
-import {actions, ARTIFACT_KIND_VALUE} from '../constants';
 import {groupBuildsByMr} from '../api/dataTransforms';
+import {
+  actions,
+  ARTIFACT_KIND_VALUE,
+  PROJECT,
+  PROJECT_BUILD_DRIVER,
+} from '../constants';
 
 // TODO: Yes, this file needs a new name, and should maybe be split
 export const ResultContext = React.createContext();
@@ -19,19 +24,10 @@ export const INITIAL_STATE = {
   needsRefresh: false,
   uiFilters: {
     artifact_kinds: [ARTIFACT_KIND_VALUE.IPA],
+    build_driver: [PROJECT_BUILD_DRIVER[PROJECT.chat]],
   },
-  filtersBranch: {
-    master: false,
-    develop: false,
-    all: true,
-  },
-  filtersApp: {
-    chat: true,
-    mini: false,
-  },
-  filtersImplemented: {
-    apps: ['chat'],
-    branch: ['all'],
+  calculatedFilters: {
+    projects: [PROJECT.chat],
   },
 };
 

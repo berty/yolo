@@ -72,6 +72,10 @@
       border-style: dotted;
       cursor: default;
     }
+    &.not-interactive {
+      opacity: 0.4;
+      cursor: default;
+    }
   }
 
   .subtitle {
