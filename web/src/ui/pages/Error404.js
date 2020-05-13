@@ -1,19 +1,17 @@
-import React from 'react';
+import React from 'react'
 
-const Error404 = () => {
-  return (
-    <div>
-      <div
-        style={{
-          width: '100%',
-          paddingTop: '4rem',
-          textAlign: 'center',
-        }}
-      >
-        404 Not Found
-      </div>
+const Error404 = () => (
+  <div>
+    <div
+      style={{
+        width: '100%',
+        paddingTop: '4rem',
+        textAlign: 'center',
+      }}
+    >
+      404 Not Found
     </div>
-  );
-};
+  </div>
+)
 
-export default Error404;
+export default Error404

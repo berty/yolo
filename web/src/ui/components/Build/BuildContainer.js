@@ -1,20 +1,20 @@
-import React, {useContext, useState} from 'react';
+import React, { useContext, useState } from 'react'
 
-import {ThemeContext} from '../../../store/ThemeStore';
-import {sharedThemes} from '../../styleTools/themes';
+import { ThemeContext } from '../../../store/ThemeStore'
+import { sharedThemes } from '../../styleTools/themes'
 
-import {BRANCH} from '../../../constants';
+import { BRANCH } from '../../../constants'
 
-import './Build.scss';
-import CardTitle from './CardTitle';
-import CardHeader from './CardHeader';
-import BuildAndMergeRequest from './BuildAndMergeRequest';
-import {ResultContext} from '../../../store/ResultStore';
+import './Build.scss'
+import CardTitle from './CardTitle'
+import CardHeader from './CardHeader'
+import BuildAndMergeRequest from './BuildAndMergeRequest'
+import { ResultContext } from '../../../store/ResultStore'
 
-const BuildContainer = ({build, toCollapse}) => {
-  const {state} = useContext(ResultContext);
-  const [expanded, toggleExpanded] = useState(!toCollapse);
-  const {theme} = useContext(ThemeContext);
+const BuildContainer = ({ build, toCollapse }) => {
+  const { state } = useContext(ResultContext)
+  const [expanded, toggleExpanded] = useState(!toCollapse)
+  const { theme } = useContext(ThemeContext)
 
   const {
     short_id: buildShortId = '',
@@ -34,9 +34,9 @@ const BuildContainer = ({build, toCollapse}) => {
     topLevelMrId = '',
     allBuilds = [],
     hasMaster,
-  } = build || {};
+  } = build || {}
 
-  const isMaster = buildBranch && buildBranch.toUpperCase() === BRANCH.MASTER;
+  const isMaster = buildBranch && buildBranch.toUpperCase() === BRANCH.MASTER
 
   return (
     <div className="Build" id={buildId}>
@@ -78,25 +78,23 @@ const BuildContainer = ({build, toCollapse}) => {
             }}
           />
         </CardHeader>
-        {expanded &&
-          allBuilds.map((b, i) => {
-            return (
-              <BuildAndMergeRequest
-                {...{
-                  build: state.builds[b],
-                  isMaster,
-                  topLevelMrId,
-                  mr: buildHasMr,
-                  toCollapse,
-                  isDetailed: i === 0,
-                }}
-                key={i}
-              />
-            );
-          })}
+        {expanded
+          && allBuilds.map((b, i) => (
+            <BuildAndMergeRequest
+              {...{
+                build: state.builds[b],
+                isMaster,
+                topLevelMrId,
+                mr: buildHasMr,
+                toCollapse,
+                isDetailed: i === 0,
+              }}
+              key={i}
+            />
+          ))}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default BuildContainer;
+export default BuildContainer

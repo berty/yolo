@@ -1,34 +1,38 @@
-import React, {useContext, useState, useRef, useEffect} from 'react';
-import {GitCommit, GitPullRequest, AlertCircle, Calendar} from 'react-feather';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faGithub} from '@fortawesome/free-brands-svg-icons';
+import React, {
+  useContext, useState, useRef, useEffect,
+} from 'react'
+import {
+  GitCommit, GitPullRequest, AlertCircle, Calendar,
+} from 'react-feather'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import {
   faAlignLeft,
   faHammer,
   faPencilAlt,
   faFile,
-} from '@fortawesome/free-solid-svg-icons';
+} from '@fortawesome/free-solid-svg-icons'
 
-import {ThemeContext} from '../../../store/ThemeStore';
+import { ThemeContext } from '../../../store/ThemeStore'
 
-import {tagStyle} from '../../styleTools/buttonStyler';
-import ArtifactCard from './ArtifactCard';
+import { tagStyle } from '../../styleTools/buttonStyler'
+import ArtifactCard from './ArtifactCard'
 
-import {MR_STATE, BUILD_STATE} from '../../../constants';
-import {getRelativeTime, getTimeLabel} from '../../../util/date';
+import { MR_STATE, BUILD_STATE } from '../../../constants'
+import { getRelativeTime, getTimeLabel } from '../../../util/date'
 
-import './Build.scss';
+import './Build.scss'
 
-const BuildAndMergeRequest = ({build, mr, isDetailed}) => {
-  const [messageExpanded, toggleMessageExpanded] = useState(true);
+const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
+  const [messageExpanded, toggleMessageExpanded] = useState(true)
 
   const {
     theme,
     theme: {
-      text: {sectionText, blockTitle},
-      border: {filterUnselected},
+      text: { sectionText, blockTitle },
+      border: { filterUnselected },
     },
-  } = useContext(ThemeContext);
+  } = useContext(ThemeContext)
 
   const {
     id: buildId = '',
@@ -45,9 +49,9 @@ const BuildAndMergeRequest = ({build, mr, isDetailed}) => {
     driver: buildDriver = '',
     has_mergerequest: buildHasMr = null,
     has_project: buildHasProject = null,
-    has_project: {id: buildProjectUrl = ''} = {},
+    has_project: { id: buildProjectUrl = '' } = {},
     has_artifacts: buildHasArtifacts = null,
-  } = build;
+  } = build
 
   const {
     short_id: mrShortId = '',
@@ -57,25 +61,25 @@ const BuildAndMergeRequest = ({build, mr, isDetailed}) => {
     title: mrTitle = '',
     driver: mrDriver = '',
     state: mrState = '',
-  } = mr || {};
+  } = mr || {}
 
-  const COMMIT_LEN = 7;
-  const MESSAGE_LEN = 280;
-  const timeSinceUpdated = getRelativeTime(buildUpdatedAt);
-  const timeSinceCreated = getRelativeTime(buildCreatedAt);
+  const COMMIT_LEN = 7
+  const MESSAGE_LEN = 280
+  const timeSinceUpdated = getRelativeTime(buildUpdatedAt)
+  const timeSinceCreated = getRelativeTime(buildCreatedAt)
 
   const colorInteractiveText = {
     color: blockTitle,
-  };
+  }
 
   const colorPlainText = {
     color: sectionText,
-  };
+  }
 
   const CommitIcon = mrCommitUrl ? (
     <a
       href={mrCommitUrl}
-      className={'card-left-icon icon-top'}
+      className="card-left-icon icon-top"
       title={buildCommitId || ''}
     >
       <GitCommit color={blockTitle} />
@@ -85,10 +89,10 @@ const BuildAndMergeRequest = ({build, mr, isDetailed}) => {
       <GitCommit color={sectionText} />
     </div>
   ) : (
-    <div className={'card-left-icon icon-top'} title={buildCommitId || ''}>
+    <div className="card-left-icon icon-top" title={buildCommitId || ''}>
       <GitCommit color={sectionText} />
     </div>
-  );
+  )
 
   // TODO: Parse line breaks in message
   const BuildMessage = !buildMessage ? (
@@ -100,7 +104,7 @@ const BuildAndMergeRequest = ({build, mr, isDetailed}) => {
       className="interactive-text"
       onClick={() => toggleMessageExpanded(false)}
     >
-      {buildMessage + ' '}
+      {`${buildMessage} `}
       <span style={colorInteractiveText}>[show less]</span>
     </div>
   ) : (
@@ -108,10 +112,12 @@ const BuildAndMergeRequest = ({build, mr, isDetailed}) => {
       className="interactive-text"
       onClick={() => toggleMessageExpanded(true)}
     >
-      {buildMessage.slice(0, MESSAGE_LEN)}...{' '}
+      {buildMessage.slice(0, MESSAGE_LEN)}
+      ...
+      {' '}
       <span style={colorInteractiveText}>[show more]</span>
     </div>
-  );
+  )
 
   const BranchName = buildBranch && (
     <div
@@ -122,7 +128,7 @@ const BuildAndMergeRequest = ({build, mr, isDetailed}) => {
     >
       {buildBranch}
     </div>
-  );
+  )
 
   const BuildState = !buildState ? (
     ''
@@ -143,11 +149,11 @@ const BuildAndMergeRequest = ({build, mr, isDetailed}) => {
     <div
       title="Build state"
       className="btn btn-primary btn-sm state-tag"
-      style={tagStyle({name: theme.name, state: BUILD_STATE[buildState]})}
+      style={tagStyle({ name: theme.name, state: BUILD_STATE[buildState] })}
     >
       {buildState}
     </div>
-  );
+  )
 
   const BuildLogs = (
     <a href={buildId}>
@@ -158,7 +164,7 @@ const BuildAndMergeRequest = ({build, mr, isDetailed}) => {
         title={buildId}
       />
     </a>
-  );
+  )
 
   const GithubLink = buildHasProject && buildProjectUrl && (
     <a href={buildProjectUrl}>
@@ -169,7 +175,7 @@ const BuildAndMergeRequest = ({build, mr, isDetailed}) => {
         title={buildProjectUrl}
       />
     </a>
-  );
+  )
 
   const BuildCommit = buildCommitId && (
     <div title={buildCommitId}>
@@ -185,7 +191,7 @@ const BuildAndMergeRequest = ({build, mr, isDetailed}) => {
         buildCommitId.slice(0, COMMIT_LEN)
       )}
     </div>
-  );
+  )
 
   const BuildDriver = buildDriver && (
     <div
@@ -195,7 +201,7 @@ const BuildAndMergeRequest = ({build, mr, isDetailed}) => {
       <FontAwesomeIcon icon={faHammer} color={sectionText} />
       {`Build driver: ${buildDriver}`}
     </div>
-  );
+  )
 
   const MrDriver = mrDriver && (
     <div
@@ -205,18 +211,18 @@ const BuildAndMergeRequest = ({build, mr, isDetailed}) => {
       <FontAwesomeIcon icon={faHammer} color={sectionText} />
       {mrDriver}
     </div>
-  );
+  )
 
   const MrState = mrState && (
     <div
       title="Merge request state"
       className="btn btn-primary btn-sm state-tag"
-      style={tagStyle({name: theme.name, state: MR_STATE[mrState]})}
+      style={tagStyle({ name: theme.name, state: MR_STATE[mrState] })}
     >
       {mrState === MR_STATE.Opened ? <AlertCircle /> : <GitPullRequest />}
       {mrState}
     </div>
-  );
+  )
 
   const BuildUpdatedAt = timeSinceUpdated && (
     <div
@@ -226,7 +232,7 @@ const BuildAndMergeRequest = ({build, mr, isDetailed}) => {
       <FontAwesomeIcon icon={faPencilAlt} color={sectionText} />
       {timeSinceUpdated}
     </div>
-  );
+  )
 
   const BuildCreatedAt = timeSinceCreated && (
     <div
@@ -236,11 +242,11 @@ const BuildAndMergeRequest = ({build, mr, isDetailed}) => {
       <Calendar />
       {timeSinceCreated}
     </div>
-  );
+  )
 
   return (
     <>
-      <div className={'card-row expanded'} style={{color: sectionText}}>
+      <div className="card-row expanded" style={{ color: sectionText }}>
         {CommitIcon}
         <div className="card-details">
           {isDetailed && (buildCommitId || mrState || mrDriver) && (
@@ -273,8 +279,8 @@ const BuildAndMergeRequest = ({build, mr, isDetailed}) => {
           </div>
         )}
       </div>
-      {buildHasArtifacts &&
-        buildHasArtifacts.map((artifact) => (
+      {buildHasArtifacts
+        && buildHasArtifacts.map((artifact) => (
           <ArtifactCard
             artifact={artifact}
             buildMergeUpdatedAt={buildMergeUpdatedAt}
@@ -286,7 +292,7 @@ const BuildAndMergeRequest = ({build, mr, isDetailed}) => {
           />
         ))}
     </>
-  );
-};
+  )
+}
 
-export default BuildAndMergeRequest;
+export default BuildAndMergeRequest

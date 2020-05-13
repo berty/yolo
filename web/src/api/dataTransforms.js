@@ -1,23 +1,17 @@
-import {BRANCH} from '../constants';
+import { BRANCH } from '../constants'
 
 export const queryHasMaster = {
-  condition: (builds) =>
-    builds &&
-    Array.isArray(builds) &&
-    builds.find(
-      (build) =>
-        build.branch &&
-        typeof build === 'string' &&
-        build.branch.toUpperCase() === BRANCH.MASTER
-    )
-      ? false
-      : true,
-  toCollapse: (build) => {
-    return (
-      build && build.branch && build.branch.toUpperCase() !== BRANCH.MASTER
-    );
-  },
-};
+  condition: (builds) => (!(builds
+    && Array.isArray(builds)
+    && builds.find(
+      (build) => build.branch
+        && typeof build === 'string'
+        && build.branch.toUpperCase() === BRANCH.MASTER,
+    ))),
+  toCollapse: (build) => (
+    build && build.branch && build.branch.toUpperCase() !== BRANCH.MASTER
+  ),
+}
 
 /**
  * Breaks if build doesn't have build.id!
@@ -25,14 +19,14 @@ export const queryHasMaster = {
 export const groupBuildsByMr = (builds) => {
   const buildDict = builds.reduce((acc, build, i) => {
     const {
-      has_mergerequest,
-      has_mergerequest_id,
+      has_mergerequest: hasMergeRequest,
+      has_mergerequest_id: buildMrId,
       branch: buildBranch = '',
-    } = build;
+    } = build
 
-    if (!Object.keys(build)?.length) return acc;
-    const isMaster = buildBranch.toUpperCase() === BRANCH.MASTER;
-    if (!has_mergerequest || !has_mergerequest_id) {
+    if (!Object.keys(build)?.length) return acc
+    const isMaster = buildBranch.toUpperCase() === BRANCH.MASTER
+    if (!hasMergeRequest || !buildMrId) {
       return {
         ...acc,
         [build.id]: {
@@ -41,24 +35,24 @@ export const groupBuildsByMr = (builds) => {
           topLevelMrId: '',
           hasMaster: !!isMaster,
         },
-      };
+      }
     }
-    const {has_mergerequest_id: buildMrId} = build;
-    const matchingBuild = acc[buildMrId] || null;
+
+    const matchingBuild = acc[buildMrId] || null
     if (matchingBuild) {
       if (!matchingBuild.allBuilds) {
-        acc[buildMrId]['allBuilds'] = [i];
+        acc[buildMrId].allBuilds = [i]
       } else {
-        acc[buildMrId]['allBuilds'] = [...matchingBuild.allBuilds, i];
+        acc[buildMrId].allBuilds = [...matchingBuild.allBuilds, i]
       }
     } else {
-      acc[buildMrId] = {...build};
-      acc[buildMrId]['topLevelMrId'] = has_mergerequest_id;
-      acc[buildMrId]['allBuilds'] = [i];
+      acc[buildMrId] = { ...build }
+      acc[buildMrId].topLevelMrId = buildMrId
+      acc[buildMrId].allBuilds = [i]
     }
-    acc[buildMrId]['hasMaster'] = acc[buildMrId]['hasMaster'] || isMaster;
-    return acc;
-  }, {});
-  const groupedBuildList = Object.entries(buildDict).map((b) => b[1]);
-  return groupedBuildList;
-};
+    acc[buildMrId].hasMaster = acc[buildMrId].hasMaster || isMaster
+    return acc
+  }, {})
+  const groupedBuildList = Object.entries(buildDict).map((b) => b[1])
+  return groupedBuildList
+}

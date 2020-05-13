@@ -1,8 +1,8 @@
-import {themes} from './themes';
-import {BUILD_STATE, ARTIFACT_STATE} from '../../constants';
+import { themes } from './themes'
+import { BUILD_STATE, ARTIFACT_STATE } from '../../constants'
 
-export const tagStyle = ({name, state, cursor = 'default'}) => {
-  const theme = themes[name] || themes.dark;
+export const tagStyle = ({ name, state, cursor = 'default' }) => {
+  const theme = themes[name] || themes.dark
 
   const styles = {
     [ARTIFACT_STATE.Finished]: {
@@ -34,26 +34,26 @@ export const tagStyle = ({name, state, cursor = 'default'}) => {
       color: theme.text.sectionText,
       border: '1px solid gray',
     },
-  };
-  const style = styles[state] || styles.DEFAULT;
-  return {...style, cursor};
-};
+  }
+  const style = styles[state] || styles.DEFAULT
+  return { ...style, cursor }
+}
 
-export const actionButtonStyle = ({name, state}) => {
-  const theme = themes[name] || themes.light;
+export const actionButtonStyle = ({ name, state }) => {
+  const theme = themes[name] || themes.light
   const styles = {
     [ARTIFACT_STATE.Finished]: {
       backgroundColor: theme.bg.tagGreen,
       color: theme.text.tagGreen,
-      boxShadow: '0px 0.25rem 0px ' + theme.shadow.btnDlMaster,
+      boxShadow: `0px 0.25rem 0px ${theme.shadow.btnDlMaster}`,
     },
-    [ARTIFACT_STATE.Building]: {display: 'none'},
+    [ARTIFACT_STATE.Building]: { display: 'none' },
     [ARTIFACT_STATE.Error]: {
       backgroundColor: theme.bg.tagPink,
       color: theme.text.tagPink,
       cursor: 'default',
     },
-    DEFAULT: {display: 'none'},
-  };
-  return styles[state] || styles.DEFAULT;
-};
+    DEFAULT: { display: 'none' },
+  }
+  return styles[state] || styles.DEFAULT
+}
