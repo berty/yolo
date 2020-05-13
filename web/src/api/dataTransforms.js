@@ -13,9 +13,6 @@ export const queryHasMaster = {
   ),
 }
 
-/**
- * Breaks if build doesn't have build.id!
- */
 export const groupBuildsByMr = (builds) => {
   const buildDict = builds.reduce((acc, build, i) => {
     const {
