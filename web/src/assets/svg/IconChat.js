@@ -1,6 +1,6 @@
-import * as React from 'react';
+import * as React from 'react'
 
-function IconChat({stroke}) {
+function IconChat({ stroke }) {
   return (
     <svg width="1.75em" height="1.75em" viewBox="0 0 35 27">
       <g
@@ -17,7 +17,7 @@ function IconChat({stroke}) {
         <path d="M13 15.133a9.312 9.312 0 001 4.222 9.444 9.444 0 008.444 5.223 9.311 9.311 0 004.223-1L33 25.688l-2.111-6.333a9.311 9.311 0 001-4.222 9.444 9.444 0 00-5.222-8.444 9.312 9.312 0 00-4.223-1h-.555A9.422 9.422 0 0013 14.578v.555z" />
       </g>
     </svg>
-  );
+  )
 }
 
-export default IconChat;
+export default IconChat

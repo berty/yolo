@@ -1,1 +1,1 @@
-export const UPDATE_STATE = 'updateState';
+export const UPDATE_STATE = 'updateState'

@@ -3,6 +3,7 @@ package.json  // You might want to keep this though, because config prefers sing
 node_modules/
 bower_components/
 .npm/
-build/
+./build/
 packages/
 .git/
+tools/

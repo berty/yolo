@@ -1,7 +1,7 @@
-import React, {useContext} from 'react';
+import React, { useContext } from 'react'
 
-import './Build.scss';
-import {ThemeContext} from '../../../store/ThemeStore';
+import './Build.scss'
+import { ThemeContext } from '../../../store/ThemeStore'
 
 const CardTitle = ({
   isMaster,
@@ -14,64 +14,76 @@ const CardTitle = ({
 }) => {
   const {
     theme: {
-      text: {sectionText, blockTitle},
+      text: { sectionText, blockTitle },
     },
-  } = useContext(ThemeContext);
+  } = useContext(ThemeContext)
 
-  const mrDisplayShortId = mrShortId && <>{`#${mrShortId}`}</>;
-  const mrDisplayId = mrDisplayShortId || <>{mrId}</>;
+  const mrDisplayShortId = mrShortId && <>{`#${mrShortId}`}</>
+  const mrDisplayId = mrDisplayShortId || <>{mrId}</>
 
-  const buildDisplayShortId = buildShortId && <>{`#${buildShortId}`}</>;
-  const buildDisplayId = buildDisplayShortId || <>{buildId}</>;
+  const buildDisplayShortId = buildShortId && <>{`#${buildShortId}`}</>
+  const buildDisplayId = buildDisplayShortId || <>{buildId}</>
 
-  const CardTitleMasterNoMr = isMaster && <>Master - build {buildDisplayId}</>;
-  const CardTitleMasterWithMr = isMaster && buildHasMr && <>Master</>;
+  const CardTitleMasterNoMr = isMaster && (
+  <>
+    Master - build
+    {buildDisplayId}
+  </>
+  )
+  const CardTitleMasterWithMr = isMaster && buildHasMr && <>Master</>
   const CardTitlePullWithMr = !isMaster && mrShortId && (
     <>
-      Pull{' '}
+      Pull
+      {' '}
       <u>
         <a href={mrId}>{mrDisplayId}</a>
       </u>
     </>
-  );
-  const CardDefaultTitle = <>Build {buildDisplayId}</>;
+  )
+  const CardDefaultTitle = (
+    <>
+      Build
+      {buildDisplayId}
+    </>
+  )
 
   const CardSubtitleMasterWithMr = isMaster && buildHasMr && (
     <>
-      Merge{' '}
+      Merge
+      {' '}
       <u>
         <a href={mrId}>{mrDisplayId}</a>
       </u>
     </>
-  );
-  const CardSubtitlePullWithMr = !isMaster && mrShortId && <>{mrTitle}</>;
-  const CardSubtitleDefault = '';
+  )
+  const CardSubtitlePullWithMr = !isMaster && mrShortId && <>{mrTitle}</>
+  const CardSubtitleDefault = ''
 
   const CardMainTitle = (
     <div className="short-card-title">
-      {CardTitleMasterWithMr ||
-        CardTitleMasterNoMr ||
-        CardTitlePullWithMr ||
-        CardDefaultTitle}
+      {CardTitleMasterWithMr
+        || CardTitleMasterNoMr
+        || CardTitlePullWithMr
+        || CardDefaultTitle}
     </div>
-  );
+  )
 
   const CardSubtitle = (
-    <div className="card-mr-subtitle" style={{color: sectionText}}>
-      {CardSubtitleMasterWithMr ||
-        CardSubtitlePullWithMr ||
-        CardSubtitleDefault}
+    <div className="card-mr-subtitle" style={{ color: sectionText }}>
+      {CardSubtitleMasterWithMr
+        || CardSubtitlePullWithMr
+        || CardSubtitleDefault}
     </div>
-  );
+  )
 
   return (
-    <h2 className="card-title" style={{color: blockTitle}}>
+    <h2 className="card-title" style={{ color: blockTitle }}>
       <div className="card-title">
         {CardMainTitle}
         {CardSubtitle}
       </div>
     </h2>
-  );
-};
+  )
+}
 
-export default CardTitle;
+export default CardTitle

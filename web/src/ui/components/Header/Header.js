@@ -1,33 +1,32 @@
-import React, {useContext} from 'react';
-import qS from 'query-string';
-import Filters from '../Filters/Filters';
+import React, { useContext } from 'react'
+import Filters from '../Filters/Filters'
 
-import {ThemeContext} from '../../../store/ThemeStore';
-import YoloLogo from '../../../assets/svg/yolo.svg';
+import { ThemeContext } from '../../../store/ThemeStore'
+import YoloLogo from '../../../assets/svg/yolo.svg'
 
-import ActionWidgets from '../ActionWidgets';
+import ActionWidgets from '../ActionWidgets'
 
-import {ResultContext, INITIAL_STATE} from '../../../store/ResultStore';
+import { ResultContext, INITIAL_STATE } from '../../../store/ResultStore'
 
-import './Header.scss';
+import './Header.scss'
 
 const Header = () => {
-  const {theme} = useContext(ThemeContext);
-  const {state, updateState} = useContext(ResultContext);
+  const { theme } = useContext(ThemeContext)
+  const { state, updateState } = useContext(ResultContext)
 
   return (
-    <div className={'Header'} style={{backgroundColor: theme.bg.page}}>
+    <div className="Header" style={{ backgroundColor: theme.bg.page }}>
       <div
         className="header-logo"
-        style={{cursor: 'pointer'}}
+        style={{ cursor: 'pointer' }}
         onClick={() => {
           updateState({
             needsProgrammaticQuery: true,
             uiFilters: INITIAL_STATE.uiFilters,
-          });
+          })
         }}
       >
-        <img src={YoloLogo}></img>
+        <img src={YoloLogo} alt="Yolo logo" />
       </div>
       {state.isAuthed && (
         <ActionWidgets>
@@ -35,10 +34,10 @@ const Header = () => {
         </ActionWidgets>
       )}
       {process.env.YOLO_UI_TEST && (
-        <pre style={{padding: 0, margin: 0}}>UI Test</pre>
+        <pre style={{ padding: 0, margin: 0 }}>UI Test</pre>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header

@@ -1,26 +1,28 @@
-import React, {useContext, useState, useRef, useEffect} from 'react';
-import {ThemeContext} from '../../../store/ThemeStore';
+import React, {
+  useContext, useState, useRef, useEffect,
+} from 'react'
 import {
   Clock,
   Calendar,
   ArrowDownCircle,
   AlertTriangle,
   Link,
-} from 'react-feather';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faAndroid, faApple} from '@fortawesome/free-brands-svg-icons';
+} from 'react-feather'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faAndroid, faApple } from '@fortawesome/free-brands-svg-icons'
 import {
   faQuestionCircle,
   faFile,
   faHammer,
-} from '@fortawesome/free-solid-svg-icons';
+} from '@fortawesome/free-solid-svg-icons'
+import { ThemeContext } from '../../../store/ThemeStore'
 
-import {tagStyle, actionButtonStyle} from '../../styleTools/buttonStyler';
+import { tagStyle, actionButtonStyle } from '../../styleTools/buttonStyler'
 
-import {KIND_TO_PLATFORM, ARTIFACT_STATE} from '../../../constants';
-import {getTimeDuration, getRelativeTime} from '../../../util/date';
+import { KIND_TO_PLATFORM, ARTIFACT_STATE } from '../../../constants'
+import { getTimeDuration, getRelativeTime } from '../../../util/date'
 
-import './Build.scss';
+import './Build.scss'
 
 const ArtifactCard = ({
   artifact,
@@ -29,7 +31,7 @@ const ArtifactCard = ({
   buildStartedAt,
   buildFinishedAt,
 }) => {
-  const {theme} = useContext(ThemeContext);
+  const { theme } = useContext(ThemeContext)
   const {
     id: artifactId = '',
     state: artifactState = '',
@@ -39,28 +41,27 @@ const ArtifactCard = ({
     local_path: artifactLocalPath = '',
     file_size: artifactFileSize = '',
     driver: artifactDriver = '',
-  } = artifact;
+  } = artifact
 
-  const timeSinceBuildUpdated = getRelativeTime(buildMergeUpdatedAt);
-  const buildDurationSeconds = getTimeDuration(buildStartedAt, buildFinishedAt);
+  const timeSinceBuildUpdated = getRelativeTime(buildMergeUpdatedAt)
+  const buildDurationSeconds = getTimeDuration(buildStartedAt, buildFinishedAt)
   const buildDurationShort = buildDurationSeconds
-    ? `${parseInt(buildDurationSeconds / 60)} minutes`
-    : '';
-  const buildDurationDetails =
-    buildDurationSeconds > 0
-      ? `duration: ${parseInt(buildDurationSeconds / 60)}m${
-          buildDurationSeconds % 60
-        }s`
-      : '';
-  const timeSinceBuildUpdatedString = `updated: ${buildMergeUpdatedAt}`;
-  const ArtifactKindName = KIND_TO_PLATFORM[artifactKind] || 'Unknown OS';
-  const MrShortId = mrShortId || '';
+    ? `${parseInt(buildDurationSeconds / 60, 10)} minutes`
+    : ''
+  const buildDurationDetails = buildDurationSeconds > 0
+    ? `duration: ${parseInt(buildDurationSeconds / 60, 10)}m${
+      buildDurationSeconds % 60
+    }s`
+    : ''
+  const timeSinceBuildUpdatedString = `updated: ${buildMergeUpdatedAt}`
+  const ArtifactKindName = KIND_TO_PLATFORM[artifactKind] || 'Unknown OS'
+  const MrShortId = mrShortId || ''
 
-  const artifactTagStyle = tagStyle({name: theme.name, state: artifactState});
+  const artifactTagStyle = tagStyle({ name: theme.name, state: artifactState })
   const artifactActionButtonStyle = actionButtonStyle({
     name: theme.name,
     state: artifactState,
-  });
+  })
 
   const getArtifactActionButton = () => {
     switch (artifactState) {
@@ -77,19 +78,19 @@ const ArtifactCard = ({
           >
             <ArrowDownCircle />
           </a>
-        );
+        )
       case ARTIFACT_STATE.Error:
         return (
           <div className="btn" style={artifactActionButtonStyle}>
             <AlertTriangle />
           </div>
-        );
+        )
       default:
-        return <React.Fragment />;
+        return <></>
     }
-  };
+  }
 
-  const ArtifactActionButton = getArtifactActionButton();
+  const ArtifactActionButton = getArtifactActionButton()
 
   const PlatformIcon = (
     <FontAwesomeIcon
@@ -97,21 +98,21 @@ const ArtifactCard = ({
         artifactKind === 'APK'
           ? faAndroid
           : artifactKind === 'DMG' || artifactKind === 'IPA'
-          ? faApple
-          : faQuestionCircle
+            ? faApple
+            : faQuestionCircle
       }
       size="lg"
       color={theme.text.sectionText}
     />
-  );
+  )
 
   const ArtifactStateTag = !artifactState ? (
-    <React.Fragment />
+    <></>
   ) : (
     <div className="btn artifact-tag btn-sm state-tag" style={artifactTagStyle}>
       {artifactState}
     </div>
-  );
+  )
 
   const TimeSinceBuildUpdated = timeSinceBuildUpdated && (
     <div
@@ -121,51 +122,55 @@ const ArtifactCard = ({
       <Calendar />
       {timeSinceBuildUpdated}
     </div>
-  );
+  )
 
   const BuildDuration = buildDurationShort && (
     <div className="btn normal-caps details" title={buildDurationDetails || ''}>
       <Clock />
       {buildDurationShort}
     </div>
-  );
+  )
 
-  const ArtifactFileSize = artifactFileSize &&
-    parseInt(artifactFileSize) !== NaN && (
+  const ArtifactFileSize = artifactFileSize
+    && !isNaN(parseInt(artifactFileSize, 10)) && (
       <div className="btn normal-caps details" title="File size">
         <FontAwesomeIcon icon={faFile} size="lg" />
-        {Math.round(artifactFileSize / 1000)} kB
+        {Math.round(artifactFileSize / 1000)}
+        {' '}
+        kB
       </div>
-    );
+  )
 
   const ArtifactLocalPathRow = artifactLocalPath && (
     <div className="card-details-row artifact-local-path">
       {artifactLocalPath}
     </div>
-  );
+  )
 
   const ArtifactDriver = artifactDriver && (
     <div
       className="btn normal-caps details"
-      title={'Artifact driver: ' + artifactDriver}
+      title={`Artifact driver: ${artifactDriver}`}
     >
       <FontAwesomeIcon icon={faHammer} color={theme.text.sectionText} />
       <div>{artifactDriver}</div>
     </div>
-  );
+  )
 
   return (
     <React.Fragment key={artifactId}>
       <div
         id={artifactId}
         className="card-row expanded"
-        style={{color: theme.text.sectionText}}
+        style={{ color: theme.text.sectionText }}
       >
         <div className="card-left-icon icon-top">{PlatformIcon}</div>
         <div className="card-details">
           <div className="card-details-row">
             <div className="">
-              {ArtifactKindName} {MrShortId}
+              {ArtifactKindName}
+              {' '}
+              {MrShortId}
             </div>
             {ArtifactStateTag}
           </div>
@@ -180,7 +185,7 @@ const ArtifactCard = ({
         <div className="card-build-actions">{ArtifactActionButton}</div>
       </div>
     </React.Fragment>
-  );
-};
+  )
+}
 
-export default ArtifactCard;
+export default ArtifactCard

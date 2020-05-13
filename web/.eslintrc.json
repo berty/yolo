@@ -27,7 +27,7 @@
     "expect": false
   },
   "rules": {
-    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/rules-of-hooks": 1,
     "react-hooks/exhaustive-deps": "warn",
     "react/prop-types": 0,
     "react/display-name": 0,
@@ -36,6 +36,18 @@
     "import/no-extraneous-dependencies": 0,
     "import/extensions": 0,
     "import/no-absolute-path": 0,
+    "import/prefer-default-export": 0,
+    "no-nested-ternary": "warn",
+    "jsx-a11y/label-has-associated-control": 1,
+    "no-confusing-arrow": 1,
+    "no-unused-vars": 1,
+    "jsx-a11y/click-events-have-key-events": 1,
+    "jsx-a11y/no-static-element-interactions": 1,
+    "react/jsx-props-no-spreading": 0,
+    "no-unused-expressions": 1,
+    "camelcase": 1,
+    "jsx-a11y/accessible-emoji": 1,
+    "react/no-unescaped-entities": 1,
     "jsx-a11y/anchor-is-valid": [
       "error",
       {
@@ -47,7 +59,10 @@
         ]
       }
     ],
-    "semi": ["error", "never"],
+    "semi": [
+      "error",
+      "never"
+    ],
     "max-len": 0,
     "no-alert": 0,
     "no-console": 0,
@@ -74,6 +89,12 @@
     "react/forbid-prop-types": 0,
     "react/no-array-index-key": 0,
     "array-callback-return": 1,
-    "no-use-before-define": ["error", { "functions": false, "variables": false }]
+    "no-use-before-define": [
+      "error",
+      {
+        "functions": false,
+        "variables": false
+      }
+    ]
   }
 }

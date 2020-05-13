@@ -93,7 +93,7 @@ export const themes = {
       block: 'none',
     },
   },
-};
+}
 
 export const sharedThemes = {
   borderRadius: {
@@ -105,4 +105,4 @@ export const sharedThemes = {
   marginBottom: {
     block: '20px',
   },
-};
+}

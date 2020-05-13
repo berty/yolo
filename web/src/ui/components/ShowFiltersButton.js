@@ -1,10 +1,10 @@
-import React, {useContext} from 'react';
-import {Sliders} from 'react-feather';
+import React, { useContext } from 'react'
+import { Sliders } from 'react-feather'
 
-import {ThemeContext} from '../../store/ThemeStore';
+import { ThemeContext } from '../../store/ThemeStore'
 
-const ShowFiltersButton = ({clickAction, showingFiltersModal}) => {
-  const {theme} = useContext(ThemeContext);
+const ShowFiltersButton = ({ clickAction, showingFiltersModal }) => {
+  const { theme } = useContext(ThemeContext)
 
   const showFiltersButtonStyle = {
     position: 'fixed',
@@ -19,13 +19,13 @@ const ShowFiltersButton = ({clickAction, showingFiltersModal}) => {
     transform: 'rotate(90deg)',
     cursor: 'pointer',
     display: showingFiltersModal ? 'none' : 'flex',
-  };
+  }
 
   return (
-    <div style={showFiltersButtonStyle} onClick={clickAction}>
+    <div style={showFiltersButtonStyle} onClick={clickAction} onKeyDown={clickAction} tabIndex={0} role="button">
       <Sliders color="white" size={20} />
     </div>
-  );
-};
+  )
+}
 
-export default ShowFiltersButton;
+export default ShowFiltersButton
