@@ -27,7 +27,6 @@ import { removeAuthCookie } from '../../../api/auth'
 const FilterModal = ({ closeAction, showingFiltersModal }) => {
   const { theme } = useContext(ThemeContext)
   const { state, updateState } = useContext(ResultContext)
-  const [filterByProject, setFilterByProject] = useState(true)
   const [selectedDrivers, setSelectedDrivers] = useState([
     ...state.uiFilters.build_driver,
   ])
@@ -39,33 +38,6 @@ const FilterModal = ({ closeAction, showingFiltersModal }) => {
   ])
   const [selectedBranches] = useState(['all'])
   const filterSelectedAccent = theme.icon.filterSelected
-
-  const useFilterByProject = () => {
-    setFilterByProject(true)
-    setSelectedDrivers(
-      uniq([
-        ...selectedProjects
-          .map((p) => PROJECT_BUILD_DRIVER[p])
-          .filter((d) => !!d),
-      ]),
-    )
-    setLocalArtifactKinds([
-      ...uniq(
-        flatten(
-          selectedProjects
-            .map((p) => PROJECT_ARTIFACT_KINDS[p])
-            .filter((p) => !!p),
-        ),
-      ),
-    ])
-  }
-
-  const doNotFilterByProject = () => {
-    setFilterByProject(false)
-    setSelectedProjects([])
-    setSelectedDrivers([])
-    setLocalArtifactKinds([])
-  }
 
   const applyFilterButtonColors = {
     backgroundColor: theme.bg.btnPrimary,
@@ -86,8 +58,6 @@ const FilterModal = ({ closeAction, showingFiltersModal }) => {
     color: theme.text.sectionTitle,
   }
 
-  const isArrayWithStuff = (val) => !!val && Array.isArray(val) && val.length > 0
-
   const ArtifactFilter = ({ artifact_kind }) => {
     const selected = localArtifactKinds.includes(artifact_kind)
     const colorIcon = colorsIcon({ selected })
@@ -95,7 +65,6 @@ const FilterModal = ({ closeAction, showingFiltersModal }) => {
     const widgetClass = classNames('modal-filter-widget', {
       'modal-filter-not-implemented': false,
       'cannot-unselect': false,
-      'not-interactive': filterByProject,
     })
     const icon = artifact_kind === ARTIFACT_KIND_VALUE.IPA
       || artifact_kind === ARTIFACT_KIND_VALUE.DMG ? (
@@ -107,15 +76,12 @@ const FilterModal = ({ closeAction, showingFiltersModal }) => {
       )
     const osName = ARTIFACT_KIND_TO_PLATFORM[artifact_kind.toString()]
     const addArtifactFilter = () => {
-      !filterByProject
-        && !localArtifactKinds.includes(artifact_kind)
-        && setLocalArtifactKinds([...localArtifactKinds, artifact_kind])
+      setLocalArtifactKinds([...localArtifactKinds, artifact_kind])
     }
     const removeArtifactFilter = () => {
-      !filterByProject
-        && setLocalArtifactKinds(
-          localArtifactKinds.filter((kind) => kind !== artifact_kind),
-        )
+      setLocalArtifactKinds(
+        localArtifactKinds.filter((kind) => kind !== artifact_kind),
+      )
     }
     return (
       <div
@@ -157,10 +123,12 @@ const FilterModal = ({ closeAction, showingFiltersModal }) => {
     const selected = selectedProjects.includes(project)
     const colorIcon = colorsIcon({ selected })
     const colorWidget = colorsWidget({ selected })
+    const artifactKindsForProject = !!PROJECT_ARTIFACT_KINDS[project]
+    const buildDriverForProject = !!PROJECT_BUILD_DRIVER[project]
+    const projectValue = PROJECT[project] || 'Unknown Project'
     const widgetClass = classNames('modal-filter-widget', {
       'modal-filter-not-implemented': false,
       'cannot-unselect': false,
-      'not-interactive': !filterByProject,
     })
     const icon = project === PROJECT.chat ? (
       <IconChat stroke={colorIcon} />
@@ -169,54 +137,37 @@ const FilterModal = ({ closeAction, showingFiltersModal }) => {
     ) : (
       <FontAwesomeIcon icon={faQuestionCircle} size="lg" color={colorIcon} />
     )
-    const displayText = PROJECT[project] || 'Unknown Project'
 
-    // TODO: Messy
     const addProjectFilter = () => {
-      filterByProject
-        && isArrayWithStuff(PROJECT_ARTIFACT_KINDS[project])
+      artifactKindsForProject
         && setLocalArtifactKinds(
-          uniq([...localArtifactKinds, ...PROJECT_ARTIFACT_KINDS[project]]),
+          uniq([...localArtifactKinds, ...PROJECT_ARTIFACT_KINDS[projectValue]]),
         )
-      filterByProject
+      buildDriverForProject
         && setSelectedDrivers(
-          uniq([...selectedDrivers, PROJECT_BUILD_DRIVER[project]]),
+          uniq([...selectedDrivers, projectValue]),
         )
-      filterByProject
-        && setSelectedProjects(uniq([...selectedProjects, PROJECT[project]]))
+      setSelectedProjects(uniq([...selectedProjects, projectValue]))
     }
+
     const removeProjectFilter = () => {
-      isArrayWithStuff(PROJECT_ARTIFACT_KINDS[project])
-        && setLocalArtifactKinds(
-          localArtifactKinds.filter(
-            (a) => !PROJECT_ARTIFACT_KINDS[project].includes(a),
-          ),
-        )
-      setSelectedDrivers(
-        !!PROJECT_BUILD_DRIVER[project]
-          && selectedDrivers.filter((d) => d !== PROJECT_BUILD_DRIVER[project]),
-      )
       setSelectedProjects(
-        !!PROJECT[project]
-          && selectedProjects.filter((p) => p !== PROJECT[project]),
+        selectedProjects.filter((p) => p !== projectValue),
       )
     }
-    const noOp = () => {}
 
     return (
       <div
         className={widgetClass}
         style={colorWidget}
         onClick={
-          !filterByProject
-            ? noOp
-            : selected
-              ? removeProjectFilter
-              : addProjectFilter
+          selected
+            ? removeProjectFilter
+            : addProjectFilter
         }
       >
         {icon}
-        <p className="filter-text">{displayText}</p>
+        <p className="filter-text">{projectValue}</p>
       </div>
     )
   }
@@ -228,6 +179,7 @@ const FilterModal = ({ closeAction, showingFiltersModal }) => {
     const colorWidget = colorsWidget({ selected })
     const widgetClass = classNames('modal-filter-widget', {
       'modal-filter-not-implemented': !implemented,
+      'cannot-unselect': selected,
     })
     const icon = name === 'all' ? (
       <GitBranch color={colorIcon} />
@@ -276,17 +228,6 @@ const FilterModal = ({ closeAction, showingFiltersModal }) => {
                 </div>
               </div>
               <div className="modal-body">
-                <div style={colorsModalTitle} className="subtitle">
-                  Filter by project
-                </div>
-                <div className="filter-row">
-                  <Form.Switch
-                    checked={filterByProject}
-                    onChange={() => (filterByProject
-                      ? doNotFilterByProject()
-                      : useFilterByProject())}
-                  />
-                </div>
                 <div style={colorsModalTitle} className="subtitle">
                   Projects
                 </div>
