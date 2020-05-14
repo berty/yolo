@@ -15,6 +15,7 @@
     "open:src": "babel-node tools/srcServer.js",
     "open:dist": "babel-node tools/distServer.js",
     "lint": "eslint webpack.config.* src --color",
+    "lintfix": "eslint webpack.config.* src --color --fix --quiet",
     "lint:watch": "npm run lint -- --watch",
     "clean-dist": "npm run remove-dist && mkdir dist",
     "remove-dist": "rimraf ./dist",

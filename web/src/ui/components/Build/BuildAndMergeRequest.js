@@ -91,30 +91,34 @@ const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
     </div>
   )
 
-  // TODO: Parse line breaks in message
+  const SplitMessage = (text) => text
+    .split('\n')
+    .filter((x) => !!x)
+    .map((x, i) => (<p className="build-message-line" key={i}>{x}</p>))
+
   const BuildMessage = !buildMessage ? (
     ''
-  ) : buildMessage.length < MESSAGE_LEN ? (
-    buildMessage
-  ) : messageExpanded ? (
-    <div
-      className="interactive-text"
-      onClick={() => toggleMessageExpanded(false)}
-    >
-      {`${buildMessage} `}
-      <span style={colorInteractiveText}>[show less]</span>
-    </div>
-  ) : (
-    <div
-      className="interactive-text"
-      onClick={() => toggleMessageExpanded(true)}
-    >
-      {buildMessage.slice(0, MESSAGE_LEN)}
-      ...
-      {' '}
-      <span style={colorInteractiveText}>[show more]</span>
-    </div>
-  )
+  ) : buildMessage.length < MESSAGE_LEN
+    ? SplitMessage(buildMessage)
+    : messageExpanded ? (
+      <div
+        className="interactive-text build-message"
+        onClick={() => toggleMessageExpanded(false)}
+      >
+        {SplitMessage(buildMessage)}
+        <span style={colorInteractiveText}>&nbsp;[show less]</span>
+      </div>
+    ) : (
+      <div
+        className="interactive-text build-message"
+        onClick={() => toggleMessageExpanded(true)}
+      >
+        {SplitMessage(buildMessage.slice(0, MESSAGE_LEN))}
+        ...
+
+        <span style={colorInteractiveText}>&nbsp;[show more]</span>
+      </div>
+    )
 
   const BranchName = buildBranch && (
     <div
