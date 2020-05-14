@@ -92,9 +92,10 @@ const Home = () => {
           },
           (error) => {
             const validatedError = validateError({ error })
+            const { status } = validateError
             updateState({
               error: validatedError,
-              isAuthed: validatedError.status !== 401,
+              isAuthed: status !== 401,
             })
           },
         )

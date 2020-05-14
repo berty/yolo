@@ -1,6 +1,8 @@
 /* eslint-disable import/no-named-as-default */
 import React from 'react'
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
+import {
+  BrowserRouter as Router, Switch, Route, Redirect,
+} from 'react-router-dom'
 import { hot } from 'react-hot-loader'
 import Home from './ui/pages/Home/Home'
 import { ThemeStore } from './store/ThemeStore'
@@ -18,8 +20,11 @@ const App = () => (
           <Route exact path="/">
             <Home />
           </Route>
-          <Route>
+          <Route path="/404.html">
             <Error404 />
+          </Route>
+          <Route>
+            <Redirect to="/404.html" />
           </Route>
         </Switch>
       </Router>
