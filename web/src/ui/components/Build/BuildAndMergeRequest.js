@@ -22,6 +22,7 @@ import { MR_STATE, BUILD_STATE } from '../../../constants'
 import { getRelativeTime, getTimeLabel } from '../../../util/date'
 
 import './Build.scss'
+import Tag from '../../Tag/Tag'
 
 const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
   const [messageExpanded, toggleMessageExpanded] = useState(true)
@@ -131,30 +132,30 @@ const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
     </div>
   )
 
-  const BuildState = !buildState ? (
-    ''
-  ) : buildState === BUILD_STATE.Passed ? (
-    <div
-      title={buildId || 'Build state'}
-      className="btn btn-primary btn-sm state-tag"
-      style={tagStyle({
+  const BuildStateTagPassed = buildState === BUILD_STATE.Passed && (
+    <Tag
+      title={buildId}
+      classes={['state-tag']}
+      styles={tagStyle({
         name: theme.name,
         state: BUILD_STATE[buildState],
         cursor: 'pointer',
       })}
-      onClick={buildId ? () => (window.location = buildId) : () => { }}
-    >
-      {buildState}
-    </div>
-  ) : (
-    <div
-      title="Build state"
-      className="btn btn-primary btn-sm state-tag"
-      style={tagStyle({ name: theme.name, state: BUILD_STATE[buildState] })}
-    >
-      {buildState}
-    </div>
+      href={buildId}
+      text={buildState}
+    />
   )
+
+  const BuildStateTagIsNotPassed = buildState && (
+    <Tag
+      text={buildState}
+      title="Build state"
+      classes={['state-tag']}
+      styles={tagStyle({ name: theme.name, state: BUILD_STATE[buildState] })}
+    />
+  )
+
+  const BuildStateTag = BuildStateTagPassed || BuildStateTagIsNotPassed || ''
 
   const BuildLogs = (
     <a href={buildId}>
@@ -195,54 +196,51 @@ const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
   )
 
   const BuildDriver = buildDriver && (
-    <div
-      className="btn btn-sm normal-caps details"
+    <Tag
+      classes={['normal-caps', 'details']}
       title={`Build driver: ${buildDriver}`}
-    >
-      <FontAwesomeIcon icon={faHammer} color={sectionText} />
-      {`Build driver: ${buildDriver}`}
-    </div>
+      icon={<FontAwesomeIcon icon={faHammer} color={sectionText} />}
+      text={`Build driver: ${buildDriver}`}
+    />
   )
 
   const MrDriver = mrDriver && (
-    <div
-      className="btn btn-sm normal-caps details"
+    <Tag
+      classes={['normal-caps', 'details']}
       title={`Merge request driver: ${mrDriver}`}
-    >
-      <FontAwesomeIcon icon={faHammer} color={sectionText} />
-      {mrDriver}
-    </div>
+      icon={<FontAwesomeIcon icon={faHammer} color={sectionText} />}
+      text={mrDriver}
+    />
   )
 
   const MrState = mrState && (
-    <div
+    <Tag
       title="Merge request state"
-      className="btn btn-primary btn-sm state-tag"
-      style={tagStyle({ name: theme.name, state: MR_STATE[mrState] })}
-    >
-      {mrState === MR_STATE.Opened ? <AlertCircle /> : <GitPullRequest />}
-      {mrState}
-    </div>
+      classes={['btn-primary', 'state-tag']}
+      styles={tagStyle({ name: theme.name, state: MR_STATE[mrState] })}
+      icon={mrState === MR_STATE.Opened ? <AlertCircle /> : <GitPullRequest />}
+      text={mrState}
+    />
   )
 
   const BuildUpdatedAt = timeSinceUpdated && (
-    <div
-      className="btn btn-sm normal-caps details"
+    <Tag
+      classes={['normal-caps', 'details']}
       title={getTimeLabel('Build updated', buildUpdatedAt)}
-    >
-      <FontAwesomeIcon icon={faPencilAlt} color={sectionText} />
-      {timeSinceUpdated}
-    </div>
+      icon={<FontAwesomeIcon icon={faPencilAlt} color={sectionText} />}
+      text={timeSinceUpdated}
+
+    />
+
   )
 
   const BuildCreatedAt = timeSinceCreated && (
-    <div
-      className="btn btn-sm normal-caps details"
+    <Tag
+      text={timeSinceCreated}
+      icon={<Calendar />}
+      classes={['normal-caps', 'details']}
       title={getTimeLabel('Build created', buildCreatedAt)}
-    >
-      <Calendar />
-      {timeSinceCreated}
-    </div>
+    />
   )
 
   return (
@@ -267,7 +265,7 @@ const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
 
           <div className="card-details-row">
             {!isDetailed && <div>{`Build ${buildShortId || buildId}`}</div>}
-            {BuildState}
+            {BuildStateTag}
             {BuildDriver}
             {BuildUpdatedAt}
             {BuildCreatedAt}

@@ -1,7 +1,7 @@
 import { themes } from './themes'
 import { BUILD_STATE, ARTIFACT_STATE } from '../../constants'
 
-export const tagStyle = ({ name, state, cursor = 'default' }) => {
+export const tagStyle = ({ name, state = null, cursor = 'default' }) => {
   const theme = themes[name] || themes.dark
 
   const styles = {

@@ -15,7 +15,8 @@ const CardHeader = ({
   buildAuthorName,
   expanded,
   toggleExpanded,
-  children,
+  cardTitle,
+  cardStateTags,
 }) => {
   const { theme } = useContext(ThemeContext)
   const colorInteractiveText = {
@@ -97,11 +98,16 @@ const CardHeader = ({
     <>
       <div className={`card-row${expanded ? ' expanded' : ''}`}>
         {CardIcon}
-        {children}
+        {cardTitle}
         {Author}
         {AuthorImage}
         {ChevronIcon}
       </div>
+      {!expanded && cardStateTags && (
+      <div className={`card-row${expanded ? ' expanded' : ''}`} style={{ display: 'flex', flexWrap: 'wrap' }}>
+        {cardStateTags}
+      </div>
+      )}
     </>
   )
 }

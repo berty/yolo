@@ -72,7 +72,7 @@ const ArtifactCard = ({
                 ? `itms-services://?action=download-manifest&url=${process.env.API_SERVER}${artifactPlistSignedUrl}`
                 : `${process.env.API_SERVER}${artifactDlArtifactSignedUrl}`
             }
-            className="btn"
+            className="btn btn-artifact-action"
             style={artifactActionButtonStyle}
           >
             <ArrowDownCircle />
@@ -80,7 +80,7 @@ const ArtifactCard = ({
         )
       case ARTIFACT_STATE.Error:
         return (
-          <div className="btn" style={artifactActionButtonStyle}>
+          <div className="btn btn-artifact-action" style={artifactActionButtonStyle}>
             <AlertTriangle />
           </div>
         )

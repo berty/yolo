@@ -23,6 +23,15 @@
         }
     }
 
+    div.btn-state-tag,
+    div.btn-info-tag {
+        margin-bottom: 0.6rem;
+        margin-right: 0.6rem;
+        svg {
+            margin-right: 0.2rem;
+        }
+    }
+
     div.confirm-copy {
         position: absolute;
         width: auto;
