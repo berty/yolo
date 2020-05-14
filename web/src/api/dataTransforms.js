@@ -1,6 +1,7 @@
 import { BRANCH } from '../constants'
 
 export const queryHasMaster = {
+  // Check if any builds in list have master branch
   condition: (builds) => (!(builds
     && Array.isArray(builds)
     && builds.find(
@@ -8,6 +9,7 @@ export const queryHasMaster = {
         && typeof build === 'string'
         && build.branch.toUpperCase() === BRANCH.MASTER,
     ))),
+  // check if one build has branch master
   toCollapse: (build) => (
     build && build.branch && build.branch.toUpperCase() !== BRANCH.MASTER
   ),
