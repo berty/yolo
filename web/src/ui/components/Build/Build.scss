@@ -1,281 +1,291 @@
-@import '../../../assets/main.scss';
+@import "../../../assets/main.scss";
 
 .Build {
-  p,
-  div,
-  .card div,
-  .card p {
-    padding: 0px;
-    min-width: 0;
-  }
+    p,
+    div,
+    .card div,
+    .card p {
+        padding: 0px;
+        min-width: 0;
+    }
 
-  .cursor-default {
-    cursor: default;
-  }
+    .cursor-default {
+        cursor: default;
+    }
 
-  .plaintext {
-    text-transform: none;
-    &.light {
-      color: $body-color-light;
+    .plaintext {
+        text-transform: none;
+        &.light {
+            color: $body-color-light;
+        }
+        &.dark {
+            color: $body-color-dark;
+        }
     }
-    &.dark {
-      color: $body-color-dark;
-    }
-  }
 
-  div.confirm-copy {
-    position: absolute;
-    width: auto;
-    white-space: nowrap;
-    opacity: 0.9;
-    padding: 0.2rem;
-  }
+    div.confirm-copy {
+        position: absolute;
+        width: auto;
+        white-space: nowrap;
+        opacity: 0.9;
+        padding: 0.2rem;
+    }
 
-  pre {
-    padding: 0px;
-    margin: 0px;
-    background-color: transparent;
-    display: block;
-    text-shadow: none;
-  }
-
-  div.card {
-    max-width: 100vw;
-    min-width: 0;
-    padding: 0.75rem;
-    margin-bottom: 1rem;
-    border-radius: 0.33rem;
-  }
-
-  .copy-build-to-clipboard-icon {
-    display: none;
-    @include xs {
-      display: block;
-      position: absolute;
-      top: 0.5rem;
-      left: 0.5rem;
-      cursor: pointer;
-    }
-  }
-
-  .copy-artifact-to-clipboard-icon {
-    display: none;
-    @include xs {
-      display: block;
-      position: absolute;
-      left: 0.5rem;
-      //   top: 0.5rem;
-      //   left: 0.5rem;
-      cursor: pointer;
-    }
-  }
-
-  .card div.card-row {
-    display: flex;
-    margin: 0px;
-    padding: 0.5rem;
-    width: 100%;
-    align-items: center;
-    height: 100%;
-    margin-bottom: 0.3rem;
-    &:first-child {
-        padding-bottom: 1rem;
-    }
-    &.expanded {
-      border-bottom: 1px solid gray;
-    }
-    a {
-      cursor: pointer;
-    }
-    .interactive-text {
-      cursor: pointer;
-      text-decoration: none;
-    }
-  }
-
-  .card div.card-row .card-left-icon {
-    display: none;
-    @include xs {
-      height: 100%;
-      display: flex;
-      flex-flow: column nowrap;
-      min-width: 0.9rem;
-      margin-right: 0.8rem;
-      flex-shrink: 0;
-      &.icon-top {
-        align-self: flex-start;
-        margin-bottom: 0.5rem;
-      }
-      &.rotate-merge {
-        transform: rotate(90deg);
-      }
-    }
-  }
-
-  .card div.card-row .card-title {
-    padding: 0px;
-    margin: 0px;
-    flex: 0 1 auto;
-    margin-right: auto;
-    display: flex;
-    flex-flow: row wrap;
-    align-items: center;
-    @include lg {
-      flex-wrap: nowrap;
-      white-space: unset;
-    }
-    .short-card-title {
-      flex: 1 1 100%;
-      white-space: nowrap;
-      @include lg {
-        flex: 1 1 auto;
-        white-space: unset;
-      }
-    }
-    .card-mr-subtitle {
-      display: none;
-      @include xs {
+    pre {
+        padding: 0px;
+        margin: 0px;
+        background-color: transparent;
         display: block;
-      }
-      font-size: 0.9rem;
-      margin-top: 0.2rem;
-      margin-left: 0px;
-      flex: 0 1 100%;
-      @include lg {
-        font-size: 1.125rem;
+        text-shadow: none;
+    }
+
+    div.card {
+        max-width: 100vw;
+        min-width: 0;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        border-radius: 0.33rem;
+    }
+
+    .copy-build-to-clipboard-icon {
+        display: none;
+        @include xs {
+            display: block;
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            cursor: pointer;
+        }
+    }
+
+    .copy-artifact-to-clipboard-icon {
+        display: none;
+        @include xs {
+            display: block;
+            position: absolute;
+            left: 0.5rem;
+            //   top: 0.5rem;
+            //   left: 0.5rem;
+            cursor: pointer;
+        }
+    }
+
+    .card div.card-row {
+        display: flex;
+        margin: 0px;
+        padding: 0.5rem;
+        width: 100%;
+        align-items: center;
+        height: 100%;
+        margin-bottom: 0.3rem;
+        &:first-child {
+            padding-bottom: 1rem;
+        }
+        &.expanded {
+            border-bottom: 1px solid gray;
+        }
+        a {
+            cursor: pointer;
+        }
+        .interactive-text {
+            cursor: pointer;
+            text-decoration: none;
+        }
+    }
+
+    .card div.card-row .card-left-icon {
+        display: none;
+        @include xs {
+            height: 100%;
+            display: flex;
+            flex-flow: column nowrap;
+            min-width: 0.9rem;
+            margin-right: 0.8rem;
+            flex-shrink: 0;
+            &.icon-top {
+                align-self: flex-start;
+                margin-bottom: 0.5rem;
+            }
+            &.rotate-merge {
+                transform: rotate(90deg);
+            }
+        }
+    }
+
+    .card div.card-row .card-title {
+        padding: 0px;
+        margin: 0px;
         flex: 0 1 auto;
-        margin-top: 0px;
-        margin-left: 0.5rem;
-      }
+        margin-right: auto;
+        display: flex;
+        flex-flow: row wrap;
+        align-items: center;
+        @include lg {
+            flex-wrap: nowrap;
+            white-space: unset;
+        }
+        .short-card-title {
+            flex: 1 1 100%;
+            white-space: nowrap;
+            @include lg {
+                flex: 1 1 auto;
+                white-space: unset;
+            }
+        }
+        .card-mr-subtitle {
+            display: none;
+            @include xs {
+                display: block;
+            }
+            font-size: 0.9rem;
+            margin-top: 0.2rem;
+            margin-left: 0px;
+            flex: 0 1 100%;
+            @include lg {
+                font-size: 1.125rem;
+                flex: 0 1 auto;
+                margin-top: 0px;
+                margin-left: 0.5rem;
+            }
+        }
     }
-  }
 
-  .card div.card-row .card-author {
-    display: none;
-    @include sm {
-      display: block;
-      font-size: small;
-      margin-right: 0.5rem;
-      flex-shrink: 0;
-    }
-  }
-
-  .card div.card-row .card-avatar {
-    margin-right: 0.4rem;
-    @include xs {
-      margin-right: 0.75rem;
-    }
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    a {
-      text-decoration: none;
-    }
-    img {
-      margin: 0px;
-      padding: 0px;
-      height: 1.25rem;
-      width: 1.25rem;
-      border-radius: 15%;
-    }
-  }
-
-  // Build body
-
-  .card div.card-row .card-details {
-    display: flex;
-    flex-flow: row wrap;
-    margin-right: 0.5rem;
-    flex-basis: 100%;
-    font-size: 0.9rem;
-    .card-details-row {
-      display: flex;
-      flex: 1 1 100%;
-      flex-wrap: wrap;
-      margin-bottom: 0.6rem;
-      align-items: center;
-      min-height: 1.875rem;
-      > * {
-        margin-right: 0.6rem;
-        margin-bottom: 0.5rem;
-      }
-      &.artifact-local-path {
+    .card div.card-row .card-author {
         display: none;
         @include sm {
-          font-size: 0.9rem;
-          min-width: 0;
-          display: block;
-          word-wrap: unset;
-          white-space: unset;
-          overflow-wrap: anywhere;
+            display: block;
+            font-size: small;
+            margin-right: 0.5rem;
+            flex-shrink: 0;
         }
-      }
+    }
 
-      div.btn {
-        cursor: default;
+    .card div.card-row .card-avatar {
+        margin-right: 0.4rem;
+        @include xs {
+            margin-right: 0.75rem;
+        }
+        flex-shrink: 0;
         display: flex;
         align-items: center;
-        margin-bottom: 0.25rem;
-        &.details {
-          font-size: 0.9rem;
-          letter-spacing: normal;
-          padding-left: 0;
-          margin-left: 0;
-          cursor: default;
-          svg {
-            margin-right: 0.3rem;
-          }
+        a {
+            text-decoration: none;
         }
-        &.normal-caps {
-          text-transform: none;
+        img {
+            margin: 0px;
+            padding: 0px;
+            height: 1.25rem;
+            width: 1.25rem;
+            border-radius: 15%;
         }
-        svg {
-          height: 1rem;
-          width: 1rem;
-          min-width: 1rem;
-          min-height: 1rem;
-          @include xs {
-            height: 1rem;
-            width: auto;
-            min-width: 0;
-            min-height: 0;
-          }
-        }
-        &.btn-branch-name {
-          word-wrap: unset;
-          white-space: unset;
-          text-align: left;
-          min-height: 0;
-          cursor: default;
-        }
-      }
-      .flex-basis-100 {
-        flex-basis: 100%;
-      }
     }
-  }
 
-  .card div.card-row .card-build-actions {
-    height: 100%;
-    align-self: flex-start;
-    display: flex;
-    flex-shrink: 0;
-    flex-grow: 0;
-    flex-direction: column;
-    div,
-    a {
-      margin-bottom: 0.5rem;
+    // Build body
+    .card div.card-row .card-details {
+        display: flex;
+        flex-flow: row wrap;
+        margin-right: 0.5rem;
+        flex-basis: 100%;
+        font-size: 0.9rem;
+        .card-details-row {
+            .build-message {
+                display: flex;
+                flex-flow: row wrap;
+            }
+            .build-message-line {
+                flex-basis: 100%;
+                &:last-of-type {
+                    flex-basis: auto;
+                    max-width: 80%;
+                }
+            }
+            display: flex;
+            flex: 1 1 100%;
+            flex-wrap: wrap;
+            margin-bottom: 0.6rem;
+            align-items: center;
+            min-height: 1.875rem;
+            > * {
+                margin-right: 0.6rem;
+                margin-bottom: 0.5rem;
+            }
+            &.artifact-local-path {
+                display: none;
+                @include sm {
+                    font-size: 0.9rem;
+                    min-width: 0;
+                    display: block;
+                    word-wrap: unset;
+                    white-space: unset;
+                    overflow-wrap: anywhere;
+                }
+            }
+
+            div.btn {
+                cursor: default;
+                display: flex;
+                align-items: center;
+                margin-bottom: 0.25rem;
+                &.details {
+                    font-size: 0.9rem;
+                    letter-spacing: normal;
+                    padding-left: 0;
+                    margin-left: 0;
+                    cursor: default;
+                    svg {
+                        margin-right: 0.3rem;
+                    }
+                }
+                &.normal-caps {
+                    text-transform: none;
+                }
+                svg {
+                    height: 1rem;
+                    width: 1rem;
+                    min-width: 1rem;
+                    min-height: 1rem;
+                    @include xs {
+                        height: 1rem;
+                        width: auto;
+                        min-width: 0;
+                        min-height: 0;
+                    }
+                }
+                &.btn-branch-name {
+                    word-wrap: unset;
+                    white-space: unset;
+                    text-align: left;
+                    min-height: 0;
+                    cursor: default;
+                }
+            }
+            .flex-basis-100 {
+                flex-basis: 100%;
+            }
+        }
     }
-    .btn {
-      // download, alert
-      flex-shrink: 0;
-      flex-grow: 0;
-      box-sizing: border-box;
-      svg,
-      span {
-        margin-top: 0.25rem;
-        margin-bottom: -0.25rem;
-      }
+
+    .card div.card-row .card-build-actions {
+        height: 100%;
+        align-self: flex-start;
+        display: flex;
+        flex-shrink: 0;
+        flex-grow: 0;
+        flex-direction: column;
+        div,
+        a {
+            margin-bottom: 0.5rem;
+        }
+        .btn {
+            // download, alert
+            flex-shrink: 0;
+            flex-grow: 0;
+            box-sizing: border-box;
+            svg,
+            span {
+                margin-top: 0.25rem;
+                margin-bottom: -0.25rem;
+            }
+        }
     }
-  }
 }
