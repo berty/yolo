@@ -1,97 +1,97 @@
 .FilterModal {
-  .modal.modal-blur.fade.show {
-    padding-right: 1rem;
-    display: block;
-    width: 100vw;
-    overflow-y: auto;
-  }
-
-  .modal-dialog .modal-content {
-    border-radius: 1rem;
-    border: none;
-    padding: 1rem;
-  }
-
-  .modal-content .modal-header {
-    border-bottom: none;
-  }
-
-  .modal-content .modal-footer {
-    border-top: none;
-    justify-content: center;
-    // settings buttons
-    &.settings {
-      justify-content: flex-start;
-      div:first-child {
-        margin-left: auto;
-      }
+    .modal.modal-blur.fade.show {
+        padding-right: 1rem;
+        display: block;
+        width: 100vw;
+        overflow-y: auto;
     }
-  }
 
-  .modal-title {
-    font-size: larger;
-  }
-
-  .btn-close {
-    display: flex;
-    justify-content: center;
-    padding: 0.3rem;
-    border-radius: 50%;
-  }
-
-  .btn-primary {
-    border-radius: 1rem;
-    color: white;
-    cursor: pointer;
-    svg {
-      height: 1rem;
-      vertical-align: sub;
+    .modal-dialog .modal-content {
+        border-radius: 1rem;
+        border: none;
+        padding: 1rem;
     }
-  }
 
-  .modal-filter-widget {
-    display: flex;
-    flex-flow: column nowrap;
-    align-items: center;
-    justify-content: center;
-    padding: 0.5rem 1rem;
-    border-width: 2px;
-    border-style: solid;
-    border-radius: 1rem;
-    margin-right: 0.75rem;
-    margin-bottom: 0.3rem;
-    width: auto;
-    cursor: pointer;
-    &.cannot-unselect {
-      cursor: not-allowed;
+    .modal-content .modal-header {
+        border-bottom: none;
     }
-    div {
-      flex: 0 0 auto;
-    }
-    &.modal-filter-not-implemented {
-      border-style: dotted;
-      cursor: default;
-    }
-    &.not-interactive {
-      opacity: 0.4;
-      cursor: default;
-    }
-  }
 
-  .subtitle {
-    font-size: small;
-    margin-bottom: 0.5em;
-  }
+    .modal-content .modal-footer {
+        border-top: none;
+        justify-content: center;
+        // settings buttons
+        &.settings {
+            justify-content: flex-start;
+            div:first-child {
+                margin-left: auto;
+            }
+        }
+    }
 
-  .filter-row {
-    display: flex;
-    flex-flow: row wrap;
-    margin-bottom: 1.5em;
-  }
+    .modal-title {
+        font-size: larger;
+    }
 
-  p.filter-text {
-    font-size: 0.7em;
-    padding: 0px;
-    margin: 0px;
-  }
+    .btn-close {
+        display: flex;
+        justify-content: center;
+        padding: 0.3rem;
+        border-radius: 50%;
+    }
+
+    .btn-primary {
+        border-radius: 1rem;
+        color: white;
+        cursor: pointer;
+        svg {
+            height: 1rem;
+            vertical-align: sub;
+        }
+    }
+
+    .modal-filter-widget {
+        display: flex;
+        flex-flow: column nowrap;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 1rem;
+        border-width: 2px;
+        border-style: solid;
+        border-radius: 1rem;
+        margin-right: 0.75rem;
+        margin-bottom: 0.3rem;
+        width: auto;
+        cursor: pointer;
+        &.cannot-unselect {
+            cursor: default;
+        }
+        div {
+            flex: 0 0 auto;
+        }
+        &.modal-filter-not-implemented {
+            border-style: dotted;
+            cursor: default;
+        }
+        &.not-interactive {
+            opacity: 0.4;
+            cursor: default;
+        }
+    }
+
+    .subtitle {
+        font-size: small;
+        margin-bottom: 0.5em;
+    }
+
+    .filter-row {
+        display: flex;
+        flex-flow: row wrap;
+        margin-bottom: 1.5em;
+    }
+
+    p.filter-text {
+        font-size: 0.7em;
+        padding: 0px;
+        margin: 0px;
+    }
 }
