@@ -6,7 +6,7 @@ import {
   Calendar,
   ArrowDownCircle,
   AlertTriangle,
-  Link,
+  Link as LinkIcon,
 } from 'react-feather'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faAndroid, faApple } from '@fortawesome/free-brands-svg-icons'
@@ -23,6 +23,7 @@ import { KIND_TO_PLATFORM, ARTIFACT_STATE } from '../../../constants'
 import { getTimeDuration, getRelativeTime } from '../../../util/date'
 
 import './Build.scss'
+import AnchorLink from '../AnchorLink'
 
 const ArtifactCard = ({
   artifact,
@@ -32,6 +33,9 @@ const ArtifactCard = ({
   buildShortId,
 }) => {
   const { theme } = useContext(ThemeContext)
+
+  // TODO: Factor out, duplicated in Build
+  const [tooltipMessage, setTooltipMessage] = useState('')
   const {
     id: artifactId = '',
     state: artifactState = '',
@@ -156,6 +160,16 @@ const ArtifactCard = ({
     </div>
   )
 
+  const SharableArtifactLink = (
+    <AnchorLink
+      tooltipMessage={tooltipMessage}
+      setTooltipMessage={setTooltipMessage}
+      target={`?artifact_id=${artifactId}`}
+    >
+      <LinkIcon size={16} />
+    </AnchorLink>
+  )
+
   return (
     <React.Fragment key={artifactId}>
       <div
@@ -163,7 +177,10 @@ const ArtifactCard = ({
         className="card-row expanded"
         style={{ color: theme.text.sectionText }}
       >
-        <div className="card-left-icon icon-top">{PlatformIcon}</div>
+        <div className="card-left-icon icon-top">
+          {PlatformIcon}
+          {/* {SharableArtifactLink} TODO: Add when API working for this */}
+        </div>
         <div className="card-details">
           <div className="card-details-row">
             <div className="">

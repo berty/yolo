@@ -2,7 +2,7 @@ import React, {
   useContext, useState, useRef, useEffect,
 } from 'react'
 import {
-  GitCommit, GitPullRequest, AlertCircle, Calendar,
+  GitCommit, GitPullRequest, AlertCircle, Calendar, Link as LinkIcon,
 } from 'react-feather'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
@@ -12,6 +12,7 @@ import {
   faPencilAlt,
   faFile,
 } from '@fortawesome/free-solid-svg-icons'
+import classNames from 'classnames'
 
 import { ThemeContext } from '../../../store/ThemeStore'
 
@@ -22,9 +23,11 @@ import { MR_STATE, BUILD_STATE } from '../../../constants'
 import { getRelativeTime, getTimeLabel } from '../../../util/date'
 
 import './Build.scss'
+import AnchorLink from '../AnchorLink'
 
 const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
   const [messageExpanded, toggleMessageExpanded] = useState(true)
+  const [tooltipMessage, setTooltipMessage] = useState('')
 
   const {
     theme,
@@ -73,22 +76,18 @@ const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
     color: sectionText,
   }
 
+  const iconLeftClass = (rotate = false) => classNames('card-left-icon', 'icon-top', { 'rotate-merge': !!rotate })
+
   const CommitIcon = mrCommitUrl ? (
     <a
       href={mrCommitUrl}
-      className="card-left-icon icon-top"
-      title={buildCommitId || ''}
     >
-      <GitCommit color={blockTitle} />
+      <GitCommit color={blockTitle} title={buildCommitId || ''} />
     </a>
   ) : !buildHasMr ? (
-    <div className="card-left-icon icon-top rotate-merge">
-      <GitCommit color={sectionText} />
-    </div>
+    <GitCommit color={sectionText} style={{ transform: 'rotate(90deg)' }} />
   ) : (
-    <div className="card-left-icon icon-top" title={buildCommitId || ''}>
-      <GitCommit color={sectionText} />
-    </div>
+    <GitCommit color={sectionText} title={buildCommitId || ''} />
   )
 
   const SplitMessage = (text) => text
@@ -245,10 +244,23 @@ const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
     </div>
   )
 
+  const SharableBuildLink = (
+    <AnchorLink
+      tooltipMessage={tooltipMessage}
+      setTooltipMessage={setTooltipMessage}
+      target={`?build_id=${buildId}`}
+    >
+      <LinkIcon size={16} />
+    </AnchorLink>
+  )
+
   return (
     <>
       <div className="card-row expanded" style={{ color: sectionText }}>
-        {CommitIcon}
+        <div className="card-left-icon icon-top">
+          {CommitIcon}
+          {SharableBuildLink}
+        </div>
         <div className="card-details">
           {isDetailed && (buildCommitId || mrState || mrDriver) && (
             <div className="card-details-row">
@@ -265,7 +277,7 @@ const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
             <div className="card-details-row">{BuildMessage}</div>
           )}
 
-          <div className="card-details-row">
+          <div className="card-details-row" style={{ alignSelf: 'flex-start' }}>
             {!isDetailed && <div>{`Build ${buildShortId || buildId}`}</div>}
             {BuildState}
             {BuildDriver}

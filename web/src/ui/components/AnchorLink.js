@@ -1,25 +1,21 @@
 import React from 'react'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 
-/**
- * TODO: Not currently used; use it for routes, not page locations
- */
 const AnchorLink = ({
   tooltipMessage,
   setTooltipMessage,
-  location,
   children,
   target,
 }) => (
   <>
-    <div className="copy-artifact-to-clipboard-icon">
+    <div className="copy-link-icon">
       {tooltipMessage && (
       <div className="badge badge-secondary confirm-copy">
         {tooltipMessage}
       </div>
       )}
       <CopyToClipboard
-        text={`${window.location.protocol}//${window.location.host}${location.pathname}${location.search}#${target}`}
+        text={`${window.location.protocol}//${window.location.host}${location.pathname}${target}`}
         title="Copy link to clipboard"
         onCopy={() => {
           setTooltipMessage('Link copied')
