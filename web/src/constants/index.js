@@ -28,6 +28,13 @@ export const ARTIFACT_VALUE_KIND = {
   3: 'DMG',
 }
 
+export const ARTIFACT_KIND_NAMES = {
+  UnknownKind: 'UnknownKind',
+  IPA: 'IPA',
+  APK: 'APK',
+  DMG: 'DMG',
+}
+
 export const ARTIFACT_KINDS = Object.values(ARTIFACT_KIND_VALUE).map((kind) => kind.toString())
 
 export const PROJECT = {

@@ -1,0 +1,18 @@
+@import "../../assets/main.scss";
+
+div.confirm-copy {
+    position: absolute;
+    width: auto;
+    white-space: nowrap;
+    opacity: 0.9;
+    padding: 0.2rem;
+}
+
+.copy-link-icon {
+    display: none;
+    @include xs {
+        display: block;
+        margin-top: 0.5rem;
+        cursor: pointer;
+    }
+}

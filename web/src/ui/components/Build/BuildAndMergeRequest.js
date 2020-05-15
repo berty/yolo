@@ -1,5 +1,5 @@
 import React, {
-  useContext, useState, useRef, useEffect,
+  useContext, useState,
 } from 'react'
 import {
   GitCommit, GitPullRequest, AlertCircle, Calendar, Link as LinkIcon,
@@ -24,10 +24,12 @@ import { getRelativeTime, getTimeLabel } from '../../../util/date'
 
 import './Build.scss'
 import AnchorLink from '../AnchorLink'
+import Tag from '../../Tag/Tag'
 
-const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
-  const [messageExpanded, toggleMessageExpanded] = useState(true)
-  const [tooltipMessage, setTooltipMessage] = useState('')
+const BuildAndMergeRequest = ({
+  build, mr, isDetailed,
+}) => {
+  const [messageExpanded, toggleMessageExpanded] = useState(false)
 
   const {
     theme,
@@ -64,7 +66,7 @@ const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
   } = mr || {}
 
   const COMMIT_LEN = 7
-  const MESSAGE_LEN = 280
+  const MESSAGE_LEN = 140
   const timeSinceUpdated = getRelativeTime(buildUpdatedAt)
   const timeSinceCreated = getRelativeTime(buildCreatedAt)
 
@@ -75,8 +77,6 @@ const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
   const colorPlainText = {
     color: sectionText,
   }
-
-  const iconLeftClass = (rotate = false) => classNames('card-left-icon', 'icon-top', { 'rotate-merge': !!rotate })
 
   const CommitIcon = mrCommitUrl ? (
     <a
@@ -130,37 +130,37 @@ const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
     </div>
   )
 
-  const BuildState = !buildState ? (
-    ''
-  ) : buildState === BUILD_STATE.Passed ? (
-    <div
-      title={buildId || 'Build state'}
-      className="btn btn-primary btn-sm state-tag"
-      style={tagStyle({
+  const BuildStateTagPassed = buildState === BUILD_STATE.Passed && (
+    <Tag
+      title={buildId}
+      classes={['state-tag']}
+      styles={tagStyle({
         name: theme.name,
         state: BUILD_STATE[buildState],
         cursor: 'pointer',
       })}
-      onClick={buildId ? () => (window.location = buildId) : () => { }}
-    >
-      {buildState}
-    </div>
-  ) : (
-    <div
-      title="Build state"
-      className="btn btn-primary btn-sm state-tag"
-      style={tagStyle({ name: theme.name, state: BUILD_STATE[buildState] })}
-    >
-      {buildState}
-    </div>
+      href={buildId}
+      text={buildState}
+    />
   )
+
+  const BuildStateTagIsNotPassed = buildState && (
+    <Tag
+      text={buildState}
+      title="Build state"
+      classes={['state-tag']}
+      styles={tagStyle({ name: theme.name, state: BUILD_STATE[buildState] })}
+    />
+  )
+
+  const BuildStateTag = BuildStateTagPassed || BuildStateTagIsNotPassed || ''
 
   const BuildLogs = (
     <a href={buildId}>
       <FontAwesomeIcon
         icon={faAlignLeft}
-        color={sectionText}
-        size="2x"
+        color={blockTitle}
+        size="lg"
         title={buildId}
       />
     </a>
@@ -170,8 +170,8 @@ const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
     <a href={buildProjectUrl}>
       <FontAwesomeIcon
         icon={faGithub}
-        color={sectionText}
-        size="2x"
+        color={blockTitle}
+        size="lg"
         title={buildProjectUrl}
       />
     </a>
@@ -194,60 +194,55 @@ const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
   )
 
   const BuildDriver = buildDriver && (
-    <div
-      className="btn btn-sm normal-caps details"
+    <Tag
+      classes={['normal-caps', 'details']}
       title={`Build driver: ${buildDriver}`}
-    >
-      <FontAwesomeIcon icon={faHammer} color={sectionText} />
-      {`Build driver: ${buildDriver}`}
-    </div>
+      icon={<FontAwesomeIcon icon={faHammer} color={sectionText} />}
+      text={`Build driver: ${buildDriver}`}
+    />
   )
 
   const MrDriver = mrDriver && (
-    <div
-      className="btn btn-sm normal-caps details"
+    <Tag
+      classes={['normal-caps', 'details']}
       title={`Merge request driver: ${mrDriver}`}
-    >
-      <FontAwesomeIcon icon={faHammer} color={sectionText} />
-      {mrDriver}
-    </div>
+      icon={<FontAwesomeIcon icon={faHammer} color={sectionText} />}
+      text={mrDriver}
+    />
   )
 
   const MrState = mrState && (
-    <div
+    <Tag
       title="Merge request state"
-      className="btn btn-primary btn-sm state-tag"
-      style={tagStyle({ name: theme.name, state: MR_STATE[mrState] })}
-    >
-      {mrState === MR_STATE.Opened ? <AlertCircle /> : <GitPullRequest />}
-      {mrState}
-    </div>
+      classes={['btn-primary', 'state-tag']}
+      styles={tagStyle({ name: theme.name, state: MR_STATE[mrState] })}
+      icon={mrState === MR_STATE.Opened ? <AlertCircle /> : <GitPullRequest />}
+      text={mrState}
+    />
   )
 
   const BuildUpdatedAt = timeSinceUpdated && (
-    <div
-      className="btn btn-sm normal-caps details"
+    <Tag
+      classes={['normal-caps', 'details']}
       title={getTimeLabel('Build updated', buildUpdatedAt)}
-    >
-      <FontAwesomeIcon icon={faPencilAlt} color={sectionText} />
-      {timeSinceUpdated}
-    </div>
+      icon={<FontAwesomeIcon icon={faPencilAlt} color={sectionText} />}
+      text={timeSinceUpdated}
+
+    />
+
   )
 
   const BuildCreatedAt = timeSinceCreated && (
-    <div
-      className="btn btn-sm normal-caps details"
+    <Tag
+      text={timeSinceCreated}
+      icon={<Calendar />}
+      classes={['normal-caps', 'details']}
       title={getTimeLabel('Build created', buildCreatedAt)}
-    >
-      <Calendar />
-      {timeSinceCreated}
-    </div>
+    />
   )
 
   const SharableBuildLink = (
     <AnchorLink
-      tooltipMessage={tooltipMessage}
-      setTooltipMessage={setTooltipMessage}
       target={`?build_id=${buildId}`}
     >
       <LinkIcon size={16} />
@@ -279,20 +274,20 @@ const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
 
           <div className="card-details-row" style={{ alignSelf: 'flex-start' }}>
             {!isDetailed && <div>{`Build ${buildShortId || buildId}`}</div>}
-            {BuildState}
+            {BuildStateTag}
             {BuildDriver}
             {BuildUpdatedAt}
             {BuildCreatedAt}
           </div>
         </div>
         {isDetailed && (
-          <div className="card-build-actions">
+          <div className="card-right-container">
             {BuildLogs}
             {GithubLink}
           </div>
         )}
       </div>
-      {buildHasArtifacts
+      {isDetailed && buildHasArtifacts
         && buildHasArtifacts.map((artifact) => (
           <ArtifactCard
             artifact={artifact}

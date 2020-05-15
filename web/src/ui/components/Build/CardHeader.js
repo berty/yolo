@@ -13,9 +13,10 @@ const CardHeader = ({
   buildAuthorAvatarUrl,
   buildAuthorId,
   buildAuthorName,
-  expanded,
-  toggleExpanded,
-  children,
+  collapsed,
+  toggleCollapsed,
+  cardTitle,
+  cardStateTags,
 }) => {
   const { theme } = useContext(ThemeContext)
   const colorInteractiveText = {
@@ -75,9 +76,9 @@ const CardHeader = ({
         color: theme.text.blockTitle,
         cursor: 'pointer',
       }}
-      onClick={() => toggleExpanded(!expanded)}
+      onClick={() => toggleCollapsed(!collapsed)}
     >
-      {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+      {!collapsed ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
     </div>
   )
 
@@ -95,13 +96,18 @@ const CardHeader = ({
 
   return (
     <>
-      <div className={`card-row${expanded ? ' expanded' : ''}`}>
+      <div className={`card-row${!collapsed ? ' expanded' : ''}`}>
         {CardIcon}
-        {children}
+        {cardTitle}
         {Author}
         {AuthorImage}
         {ChevronIcon}
       </div>
+      {collapsed && cardStateTags && (
+        <div className={`card-row${!collapsed ? ' expanded' : ''}`} style={{ display: 'flex', flexWrap: 'wrap' }}>
+          {cardStateTags}
+        </div>
+      )}
     </>
   )
 }

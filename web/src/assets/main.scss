@@ -1,40 +1,39 @@
-@import 'variables';
-@import 'breakpointMixins';
+@import "variables";
+@import "breakpointMixins";
 
 // global tabler css overrides
 
-.btn:not([class^='btn-outline']):not([class*=' btn-outline']),
-.card .btn,
-.btn.btn-primary:not([class^='btn-outline']):not([class*=' btn-outline']):not([class^='btn-ghost']):not([class*=' btn-ghost']):not(:focus):not(.focus),
-.btn.btn-primary:not([class^='btn-outline']):not([class*=' btn-outline']):not([class^='btn-ghost']):not([class*=' btn-ghost']):not(.btn-secondary) {
-  border: none;
-  padding: 0.2rem 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-radius: 1rem;
+.btn:not([class^="btn-outline"]):not([class*=" btn-outline"]),
+.btn.btn-primary:not([class^="btn-outline"]):not([class*=" btn-outline"]):not([class^="btn-ghost"]):not([class*=" btn-ghost"]):not(:focus):not(.focus),
+.btn.btn-primary:not([class^="btn-outline"]):not([class*=" btn-outline"]):not([class^="btn-ghost"]):not([class*=" btn-ghost"]):not(.btn-secondary) {
+    border: none;
+    padding: 0.2rem 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 1rem;
 }
 
 .faded {
-  position: fixed;
-  width: 100vw;
-  height: 100vh;
-  z-index: 1049;
-  background-color: black;
-  opacity: 0.4;
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1049;
+    background-color: black;
+    opacity: 0.4;
 }
 
 html {
-  font-size: 12px;
-  @include xs {
-    font-size: 16px;
-  }
+    font-size: 12px;
+    @include xs {
+        font-size: 16px;
+    }
 }
 
 .github-corner {
-  visibility: hidden;
-  @include xs {
-    svg {
-      visibility: visible;
+    visibility: hidden;
+    @include xs {
+        svg {
+            visibility: visible;
+        }
     }
-  }
 }
