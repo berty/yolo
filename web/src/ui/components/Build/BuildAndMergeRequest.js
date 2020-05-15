@@ -12,7 +12,6 @@ import {
   faPencilAlt,
   faFile,
 } from '@fortawesome/free-solid-svg-icons'
-import classNames from 'classnames'
 
 import { ThemeContext } from '../../../store/ThemeStore'
 
@@ -23,7 +22,7 @@ import { MR_STATE, BUILD_STATE } from '../../../constants'
 import { getRelativeTime, getTimeLabel } from '../../../util/date'
 
 import './Build.scss'
-import AnchorLink from '../AnchorLink'
+import AnchorLink from '../AnchorLink/AnchorLink'
 import Tag from '../../Tag/Tag'
 
 const BuildAndMergeRequest = ({

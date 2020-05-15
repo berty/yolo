@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 
 import './AnchorLink.scss'
-import { ThemeContext } from '../../store/ThemeStore'
+import { ThemeContext } from '../../../store/ThemeStore'
 
 const AnchorLink = ({
   children,
