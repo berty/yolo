@@ -124,7 +124,7 @@ const FilterModal = ({ closeAction, showingFiltersModal }) => {
     const colorIcon = colorsIcon({ selected })
     const colorWidget = colorsWidget({ selected })
     const artifactKindsForProject = !!PROJECT_ARTIFACT_KINDS[project]
-    const buildDriverForProject = !!PROJECT_BUILD_DRIVER[project]
+    const buildDriverForProject = PROJECT_BUILD_DRIVER[project]
     const projectValue = PROJECT[project] || 'Unknown Project'
     const widgetClass = classNames('modal-filter-widget', {
       'modal-filter-not-implemented': false,
@@ -145,7 +145,7 @@ const FilterModal = ({ closeAction, showingFiltersModal }) => {
         )
       buildDriverForProject
         && setSelectedDrivers(
-          uniq([...selectedDrivers, projectValue]),
+          uniq([...selectedDrivers, buildDriverForProject]),
         )
       setSelectedProjects(uniq([...selectedProjects, projectValue]))
     }

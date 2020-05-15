@@ -20,7 +20,7 @@ import { KIND_TO_PLATFORM } from '../../../constants'
 import { getTimeDuration, getRelativeTime } from '../../../util/date'
 
 import './Build.scss'
-import AnchorLink from '../AnchorLink'
+import AnchorLink from '../AnchorLink/AnchorLink'
 import Tag from '../../Tag/Tag'
 import ArtifactActionButton from './ArtifactActionButton'
 

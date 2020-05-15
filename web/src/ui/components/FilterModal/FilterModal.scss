@@ -60,6 +60,7 @@
         border-radius: 1rem;
         margin-right: 0.75rem;
         margin-bottom: 0.3rem;
+        min-height: 0;
         width: auto;
         cursor: pointer;
         &.cannot-unselect {
