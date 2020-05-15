@@ -47,25 +47,11 @@
         border-radius: 0.33rem;
     }
 
-    .copy-build-to-clipboard-icon {
+    .copy-link-icon {
         display: none;
         @include xs {
             display: block;
-            position: absolute;
-            top: 0.5rem;
-            left: 0.5rem;
-            cursor: pointer;
-        }
-    }
-
-    .copy-artifact-to-clipboard-icon {
-        display: none;
-        @include xs {
-            display: block;
-            position: absolute;
-            left: 0.5rem;
-            //   top: 0.5rem;
-            //   left: 0.5rem;
+            margin-top: 0.5rem;
             cursor: pointer;
         }
     }
@@ -75,7 +61,6 @@
         margin: 0px;
         padding: 0.5rem;
         width: 100%;
-        align-items: center;
         height: 100%;
         margin-bottom: 0.3rem;
         &:first-child {
@@ -105,9 +90,6 @@
             &.icon-top {
                 align-self: flex-start;
                 margin-bottom: 0.5rem;
-            }
-            &.rotate-merge {
-                transform: rotate(90deg);
             }
         }
     }
