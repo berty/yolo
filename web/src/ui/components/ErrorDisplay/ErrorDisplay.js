@@ -1,11 +1,12 @@
-import React, { useContext } from 'react'
-import { ThemeContext } from '../../../store/ThemeStore'
+import React, { useContext } from "react";
+import { ThemeContext } from "../../../store/ThemeStore";
 
-import './ErrorDisplay.scss'
+import "./ErrorDisplay.scss";
 
 const ErrorDisplay = ({ error }) => {
-  const { theme } = useContext(ThemeContext)
-  const ErrorStatus = error.status > 0 ? `Error ${error.status}: ${error.statusText}` : 'Error:'
+  const { theme } = useContext(ThemeContext);
+  const ErrorStatus =
+    error.status > 0 ? `Error ${error.status}: ${error.statusText}` : "Error:";
   return (
     <div className="ErrorDisplay">
       <h3 className="title" style={{ color: theme.text.sectionTitle }}>
@@ -15,7 +16,7 @@ const ErrorDisplay = ({ error }) => {
         {error.humanMessage}
       </p>
     </div>
-  )
-}
+  );
+};
 
-export default ErrorDisplay
+export default ErrorDisplay;

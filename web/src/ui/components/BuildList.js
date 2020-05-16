@@ -1,14 +1,16 @@
-import React, { useContext } from 'react'
+import React, { useContext } from "react";
 
-import { ThemeContext } from '../../store/ThemeStore'
-import { ResultContext } from '../../store/ResultStore'
-import BuildContainer from './Build/BuildContainer'
+import { ThemeContext } from "../../store/ThemeStore";
+import { ResultContext } from "../../store/ResultStore";
+import BuildContainer from "./Build/BuildContainer";
 
 const BuildList = ({ loaded, builds, collapseCondition }) => {
-  const { theme } = useContext(ThemeContext)
-  const { state } = useContext(ResultContext)
-  const loading = <div style={{ color: theme.text.sectionText }}>Loading...</div>
-  const useCollapseCondition = collapseCondition.condition(builds)
+  const { theme } = useContext(ThemeContext);
+  const { state } = useContext(ResultContext);
+  const loading = (
+    <div style={{ color: theme.text.sectionText }}>Loading...</div>
+  );
+  const useCollapseCondition = collapseCondition.condition(builds);
   return (
     <>
       {!loaded ? (
@@ -29,7 +31,7 @@ const BuildList = ({ loaded, builds, collapseCondition }) => {
         </div>
       )}
     </>
-  )
-}
+  );
+};
 
-export default BuildList
+export default BuildList;

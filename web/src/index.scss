@@ -1,21 +1,21 @@
-@import './assets/main';
+@import "./assets/main";
 
 #app {
-  min-height: 100vh;
-  height: 100%;
-  font: 100% $font-stack;
+    min-height: 100vh;
+    height: 100%;
+    font: 100% $font-stack;
 }
 
 @media (prefers-color-scheme: dark) {
-  body {
-    background-color: $body-bg-dark;
-    color: $body-color-dark;
-  }
+    body {
+        background-color: $body-bg-dark;
+        color: $body-color-dark;
+    }
 }
 
 @media (prefers-color-scheme: light) {
-  body {
-    background-color: $body-bg-light;
-    color: $body-color-light;
-  }
+    body {
+        background-color: $body-bg-light;
+        color: $body-color-light;
+    }
 }

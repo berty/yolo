@@ -1,45 +1,45 @@
-import React, { useContext, useState } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import React, { useContext, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { ThemeContext } from '../../../store/ThemeStore'
-import { BRANCH, BUILD_STATE, ARTIFACT_KIND_NAMES } from '../../../constants'
+import { ThemeContext } from "../../../store/ThemeStore";
+import { BRANCH, BUILD_STATE, ARTIFACT_KIND_NAMES } from "../../../constants";
 
-import './Build.scss'
-import CardTitle from './CardTitle'
-import CardHeader from './CardHeader'
-import BuildAndMergeRequest from './BuildAndMergeRequest'
-import { ResultContext } from '../../../store/ResultStore'
-import { tagStyle } from '../../styleTools/buttonStyler'
-import Tag from '../../Tag/Tag'
-import { getArtifactKindIcon } from '../../styleTools/brandIcons'
+import "./Build.scss";
+import CardTitle from "./CardTitle";
+import CardHeader from "./CardHeader";
+import BuildAndMergeRequest from "./BuildAndMergeRequest";
+import { ResultContext } from "../../../store/ResultStore";
+import { tagStyle } from "../../styleTools/buttonStyler";
+import Tag from "../../Tag/Tag";
+import { getArtifactKindIcon } from "../../styleTools/brandIcons";
 
 const BuildContainer = ({ build, toCollapse }) => {
-  const { state } = useContext(ResultContext)
-  const [collapsed, toggleCollapsed] = useState(toCollapse)
-  const { theme } = useContext(ThemeContext)
+  const { state } = useContext(ResultContext);
+  const [collapsed, toggleCollapsed] = useState(toCollapse);
+  const { theme } = useContext(ThemeContext);
 
   const {
-    short_id: buildShortId = '',
-    id: buildId = '',
-    branch: buildBranch = '',
-    state: buildState = '',
+    short_id: buildShortId = "",
+    id: buildId = "",
+    branch: buildBranch = "",
+    state: buildState = "",
     has_mergerequest: buildHasMr = null,
     has_artifacts: buildHasArtifacts = null,
     has_mergerequest: {
-      short_id: mrShortId = '',
-      id: mrId = '',
-      title: mrTitle = '',
+      short_id: mrShortId = "",
+      id: mrId = "",
+      title: mrTitle = "",
       has_author: {
-        name: buildAuthorName = '',
-        id: buildAuthorId = '',
-        avatar_url: buildAuthorAvatarUrl = '',
+        name: buildAuthorName = "",
+        id: buildAuthorId = "",
+        avatar_url: buildAuthorAvatarUrl = "",
       } = {},
     } = {},
-    topLevelMrId = '',
+    topLevelMrId = "",
     allBuilds = [],
-  } = build || {}
+  } = build || {};
 
-  const isMaster = buildBranch && buildBranch.toUpperCase() === BRANCH.MASTER
+  const isMaster = buildBranch && buildBranch.toUpperCase() === BRANCH.MASTER;
 
   const cardTitle = (
     <CardTitle
@@ -53,46 +53,61 @@ const BuildContainer = ({ build, toCollapse }) => {
         mrTitle,
       }}
     />
-  )
+  );
 
-  const ArtifactKindIcon = ({ color, kind = '' }) => (
+  const ArtifactKindIcon = ({ color, kind = "" }) => (
     <FontAwesomeIcon
       icon={getArtifactKindIcon(kind)}
       color={color}
       title={`Artifact kind: ${ARTIFACT_KIND_NAMES[kind]}`}
     />
-  )
+  );
 
   const FirstBuildArtifactTags = collapsed && buildHasArtifacts && (
     <>
-      {buildHasArtifacts
-        .map((a, i) => {
-          const { state, kind = 'UnknownKind' } = a
-          const artifactTagStyle = tagStyle({ name: theme.name, state })
-          const iconColor = tagStyle.color
-          return (
-            <Tag key={i} text={state} styles={artifactTagStyle} icon={ArtifactKindIcon({ color: iconColor, kind })} classes={{ 'btn-state-tag': true }} title={`Artifact kind: ${kind}`} />
-          )
-        })}
+      {buildHasArtifacts.map((a, i) => {
+        const { state, kind = "UnknownKind" } = a;
+        const artifactTagStyle = tagStyle({ name: theme.name, state });
+        const iconColor = tagStyle.color;
+        return (
+          <Tag
+            key={i}
+            text={state}
+            styles={artifactTagStyle}
+            icon={ArtifactKindIcon({ color: iconColor, kind })}
+            classes={{ "btn-state-tag": true }}
+            title={`Artifact kind: ${kind}`}
+          />
+        );
+      })}
     </>
-  )
+  );
 
   const FirstBuildStatusTag = collapsed && buildState && (
     <Tag
-      classes={{ 'btn-state-tag': true }}
+      classes={{ "btn-state-tag": true }}
       text={buildState}
       styles={tagStyle({
         name: theme.name,
         state: BUILD_STATE[buildState],
       })}
     />
-  )
+  );
 
-  const otherBuildsMessage = collapsed && allBuilds.length > 1 ? `${allBuilds.length - 1} other build${allBuilds.length - 1 > 1 ? 's' : ''}` : ''
+  const otherBuildsMessage =
+    collapsed && allBuilds.length > 1
+      ? `${allBuilds.length - 1} other build${
+          allBuilds.length - 1 > 1 ? "s" : ""
+        }`
+      : "";
 
   const BuildCountTag = collapsed && otherBuildsMessage && (
-    <Tag classes={{ 'btn-info-tag': true }} styles={tagStyle({ name: theme.name, state: null })} text={otherBuildsMessage} />
-  )
+    <Tag
+      classes={{ "btn-info-tag": true }}
+      styles={tagStyle({ name: theme.name, state: null })}
+      text={otherBuildsMessage}
+    />
+  );
 
   const cardStateTags = collapsed && (
     <>
@@ -100,7 +115,7 @@ const BuildContainer = ({ build, toCollapse }) => {
       {FirstBuildArtifactTags}
       {BuildCountTag}
     </>
-  )
+  );
 
   return (
     <div className="Build" id={buildId}>
@@ -129,8 +144,8 @@ const BuildContainer = ({ build, toCollapse }) => {
             cardStateTags,
           }}
         />
-        {!collapsed
-          && allBuilds.map((b, i) => (
+        {!collapsed &&
+          allBuilds.map((b, i) => (
             <BuildAndMergeRequest
               {...{
                 build: state.builds[b],
@@ -142,7 +157,7 @@ const BuildContainer = ({ build, toCollapse }) => {
           ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default BuildContainer
+export default BuildContainer;

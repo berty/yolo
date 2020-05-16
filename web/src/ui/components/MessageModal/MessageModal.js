@@ -1,5 +1,5 @@
-import React from 'react'
-import './MessageModal.scss'
+import React from "react";
+import "./MessageModal.scss";
 
 const MessageModal = ({ closeAction }) => (
   <>
@@ -19,12 +19,11 @@ const MessageModal = ({ closeAction }) => (
               />
             </div>
             <div className="modal-body">
-              Yolo does NOT use Berty Protocol yet.
-              {' '}
-              <br />
-              Don't send nudes
-              {' '}
-              <span role="img" aria-label="Wink">😉</span>
+              Yolo does NOT use Berty Protocol yet. <br />
+              Don't send nudes{" "}
+              <span role="img" aria-label="Wink">
+                😉
+              </span>
             </div>
             <div className="modal-footer">
               <button
@@ -41,6 +40,6 @@ const MessageModal = ({ closeAction }) => (
       </div>
     </div>
   </>
-)
+);
 
-export default MessageModal
+export default MessageModal;

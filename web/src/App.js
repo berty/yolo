@@ -1,16 +1,19 @@
 /* eslint-disable import/no-named-as-default */
-import React from 'react'
+import React from "react";
 import {
-  BrowserRouter as Router, Switch, Route, Redirect,
-} from 'react-router-dom'
-import { hot } from 'react-hot-loader'
-import Home from './ui/pages/Home/Home'
-import { ThemeStore } from './store/ThemeStore'
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Redirect,
+} from "react-router-dom";
+import { hot } from "react-hot-loader";
+import Home from "./ui/pages/Home/Home";
+import { ThemeStore } from "./store/ThemeStore";
 
-import 'tabler-react/dist/Tabler.css'
-import './assets/main.scss'
-import { ResultStore } from './store/ResultStore'
-import Error404 from './ui/pages/Error404'
+import "tabler-react/dist/Tabler.css";
+import "./assets/main.scss";
+import { ResultStore } from "./store/ResultStore";
+import Error404 from "./ui/pages/Error404";
 
 const App = () => (
   <ThemeStore>
@@ -30,6 +33,6 @@ const App = () => (
       </Router>
     </ResultStore>
   </ThemeStore>
-)
+);
 
-export default hot(module)(App)
+export default hot(module)(App);

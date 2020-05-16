@@ -1,31 +1,37 @@
-import React, { useContext } from 'react'
-import { Sliders } from 'react-feather'
+import React, { useContext } from "react";
+import { Sliders } from "react-feather";
 
-import { ThemeContext } from '../../store/ThemeStore'
+import { ThemeContext } from "../../store/ThemeStore";
 
 const ShowFiltersButton = ({ clickAction, showingFiltersModal }) => {
-  const { theme } = useContext(ThemeContext)
+  const { theme } = useContext(ThemeContext);
 
   const showFiltersButtonStyle = {
-    position: 'fixed',
-    right: '1rem',
-    bottom: '1rem',
-    borderRadius: '50%',
-    padding: '0.7rem',
-    margin: '0.6rem',
+    position: "fixed",
+    right: "1rem",
+    bottom: "1rem",
+    borderRadius: "50%",
+    padding: "0.7rem",
+    margin: "0.6rem",
     backgroundColor: theme.bg.btnPrimary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    transform: 'rotate(90deg)',
-    cursor: 'pointer',
-    display: showingFiltersModal ? 'none' : 'flex',
-  }
+    alignItems: "center",
+    justifyContent: "center",
+    transform: "rotate(90deg)",
+    cursor: "pointer",
+    display: showingFiltersModal ? "none" : "flex",
+  };
 
   return (
-    <div style={showFiltersButtonStyle} onClick={clickAction} onKeyDown={clickAction} tabIndex={0} role="button">
+    <div
+      style={showFiltersButtonStyle}
+      onClick={clickAction}
+      onKeyDown={clickAction}
+      tabIndex={0}
+      role="button"
+    >
       <Sliders color="white" size={20} />
     </div>
-  )
-}
+  );
+};
 
-export default ShowFiltersButton
+export default ShowFiltersButton;

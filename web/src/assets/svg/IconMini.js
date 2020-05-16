@@ -1,4 +1,4 @@
-import * as React from 'react'
+import * as React from "react";
 
 function IconMini({ stroke }) {
   return (
@@ -18,7 +18,7 @@ function IconMini({ stroke }) {
         />
       </g>
     </svg>
-  )
+  );
 }
 
-export default IconMini
+export default IconMini;

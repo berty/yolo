@@ -1,18 +1,23 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState } from "react";
 import {
-  Check, GitBranch, GitMerge, GitCommit, X, LogOut,
-} from 'react-feather'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faAndroid, faApple } from '@fortawesome/free-brands-svg-icons'
-import { faQuestionCircle, faCube } from '@fortawesome/free-solid-svg-icons'
-import classNames from 'classnames'
-import { flatten, uniq } from 'lodash'
-import { Form } from 'tabler-react'
+  Check,
+  GitBranch,
+  GitMerge,
+  GitCommit,
+  X,
+  LogOut,
+} from "react-feather";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faAndroid, faApple } from "@fortawesome/free-brands-svg-icons";
+import { faQuestionCircle, faCube } from "@fortawesome/free-solid-svg-icons";
+import classNames from "classnames";
+import { flatten, uniq } from "lodash";
+import { Form } from "tabler-react";
 
-import './FilterModal.scss'
-import { ThemeContext } from '../../../store/ThemeStore'
-import IconChat from '../../../assets/svg/IconChat'
-import { ResultContext, INITIAL_STATE } from '../../../store/ResultStore'
+import "./FilterModal.scss";
+import { ThemeContext } from "../../../store/ThemeStore";
+import IconChat from "../../../assets/svg/IconChat";
+import { ResultContext, INITIAL_STATE } from "../../../store/ResultStore";
 import {
   ARTIFACT_KIND_TO_PLATFORM,
   ARTIFACT_KIND_VALUE,
@@ -20,69 +25,70 @@ import {
   BRANCH_TO_DISPLAY_NAME,
   PROJECT_ARTIFACT_KINDS,
   PROJECT_BUILD_DRIVER,
-} from '../../../constants'
-import ThemeToggler from '../ThemeToggler'
-import { removeAuthCookie } from '../../../api/auth'
+} from "../../../constants";
+import ThemeToggler from "../ThemeToggler";
+import { removeAuthCookie } from "../../../api/auth";
 
 const FilterModal = ({ closeAction, showingFiltersModal }) => {
-  const { theme } = useContext(ThemeContext)
-  const { state, updateState } = useContext(ResultContext)
+  const { theme } = useContext(ThemeContext);
+  const { state, updateState } = useContext(ResultContext);
   const [selectedDrivers, setSelectedDrivers] = useState([
     ...state.uiFilters.build_driver,
-  ])
+  ]);
   const [selectedProjects, setSelectedProjects] = useState([
     ...state.calculatedFilters.projects,
-  ])
+  ]);
   const [localArtifactKinds, setLocalArtifactKinds] = useState([
     ...state.uiFilters.artifact_kinds,
-  ])
-  const [selectedBranches] = useState(['all'])
-  const filterSelectedAccent = theme.icon.filterSelected
+  ]);
+  const [selectedBranches] = useState(["all"]);
+  const filterSelectedAccent = theme.icon.filterSelected;
 
   const applyFilterButtonColors = {
     backgroundColor: theme.bg.btnPrimary,
     border: `1px solid ${theme.bg.btnPrimary}`,
     boxShadow: `0px 4px 0px ${theme.shadow.btnPrimary}`,
-  }
+  };
 
   const colorsCloseButton = {
     backgroundColor: theme.bg.filter,
-  }
+  };
 
   const colorsModal = {
     backgroundColor: theme.bg.page,
     color: theme.text.sectionText,
-  }
+  };
 
   const colorsModalTitle = {
     color: theme.text.sectionTitle,
-  }
+  };
 
   const ArtifactFilter = ({ artifact_kind }) => {
-    const selected = localArtifactKinds.includes(artifact_kind)
-    const colorIcon = colorsIcon({ selected })
-    const colorWidget = colorsWidget({ selected })
-    const widgetClass = classNames('modal-filter-widget', {
-      'modal-filter-not-implemented': false,
-      'cannot-unselect': false,
-    })
-    const icon = artifact_kind === ARTIFACT_KIND_VALUE.IPA
-      || artifact_kind === ARTIFACT_KIND_VALUE.DMG ? (
+    const selected = localArtifactKinds.includes(artifact_kind);
+    const colorIcon = colorsIcon({ selected });
+    const colorWidget = colorsWidget({ selected });
+    const widgetClass = classNames("modal-filter-widget", {
+      "modal-filter-not-implemented": false,
+      "cannot-unselect": false,
+    });
+    const icon =
+      artifact_kind === ARTIFACT_KIND_VALUE.IPA ||
+      artifact_kind === ARTIFACT_KIND_VALUE.DMG ? (
         <FontAwesomeIcon icon={faApple} size="lg" color={colorIcon} />
       ) : artifact_kind === ARTIFACT_KIND_VALUE.APK ? (
         <FontAwesomeIcon icon={faAndroid} size="lg" color={colorIcon} />
       ) : (
         <FontAwesomeIcon icon={faQuestionCircle} size="lg" color={colorIcon} />
-      )
-    const osName = ARTIFACT_KIND_TO_PLATFORM[artifact_kind.toString()]
+      );
+    const osName = ARTIFACT_KIND_TO_PLATFORM[artifact_kind.toString()];
     const addArtifactFilter = () => {
-      setLocalArtifactKinds([...localArtifactKinds, artifact_kind])
-    }
+      setLocalArtifactKinds([...localArtifactKinds, artifact_kind]);
+    };
     const removeArtifactFilter = () => {
       setLocalArtifactKinds(
-        localArtifactKinds.filter((kind) => kind !== artifact_kind),
-      )
-    }
+        localArtifactKinds.filter((kind) => kind !== artifact_kind)
+      );
+    };
     return (
       <div
         className={widgetClass}
@@ -92,8 +98,8 @@ const FilterModal = ({ closeAction, showingFiltersModal }) => {
         {icon}
         <p className="filter-text">{osName}</p>
       </div>
-    )
-  }
+    );
+  };
 
   const colorsWidget = ({ selected } = { selected: false }) => {
     const {
@@ -103,101 +109,97 @@ const FilterModal = ({ closeAction, showingFiltersModal }) => {
         filterSelected: selectedBorder,
         filterUnselected: unselectedBorder,
       },
-    } = theme
+    } = theme;
     return selected
       ? {
-        color: filterSelectedTitle,
-        borderColor: selectedBorder,
-        backgroundColor: bgFilter,
-      }
+          color: filterSelectedTitle,
+          borderColor: selectedBorder,
+          backgroundColor: bgFilter,
+        }
       : {
-        color: filterUnselectedTitle,
-        borderColor: unselectedBorder,
-        background: 'transparent',
-      }
-  }
+          color: filterUnselectedTitle,
+          borderColor: unselectedBorder,
+          background: "transparent",
+        };
+  };
 
-  const colorsIcon = ({ selected } = { selected: false }) => (selected ? theme.icon.filterSelected : theme.icon.filterUnselected)
+  const colorsIcon = ({ selected } = { selected: false }) =>
+    selected ? theme.icon.filterSelected : theme.icon.filterUnselected;
 
   const ProjectFilter = ({ project }) => {
-    const selected = selectedProjects.includes(project)
-    const colorIcon = colorsIcon({ selected })
-    const colorWidget = colorsWidget({ selected })
-    const artifactKindsForProject = !!PROJECT_ARTIFACT_KINDS[project]
-    const buildDriverForProject = PROJECT_BUILD_DRIVER[project]
-    const projectValue = PROJECT[project] || 'Unknown Project'
-    const widgetClass = classNames('modal-filter-widget', {
-      'modal-filter-not-implemented': false,
-      'cannot-unselect': false,
-    })
-    const icon = project === PROJECT.chat ? (
-      <IconChat stroke={colorIcon} />
-    ) : project === PROJECT['gomobile-ipfs-demo'] ? (
-      <FontAwesomeIcon icon={faCube} size="lg" color={colorIcon} />
-    ) : (
-      <FontAwesomeIcon icon={faQuestionCircle} size="lg" color={colorIcon} />
-    )
+    const selected = selectedProjects.includes(project);
+    const colorIcon = colorsIcon({ selected });
+    const colorWidget = colorsWidget({ selected });
+    const artifactKindsForProject = !!PROJECT_ARTIFACT_KINDS[project];
+    const buildDriverForProject = PROJECT_BUILD_DRIVER[project];
+    const projectValue = PROJECT[project] || "Unknown Project";
+    const widgetClass = classNames("modal-filter-widget", {
+      "modal-filter-not-implemented": false,
+      "cannot-unselect": false,
+    });
+    const icon =
+      project === PROJECT.chat ? (
+        <IconChat stroke={colorIcon} />
+      ) : project === PROJECT["gomobile-ipfs-demo"] ? (
+        <FontAwesomeIcon icon={faCube} size="lg" color={colorIcon} />
+      ) : (
+        <FontAwesomeIcon icon={faQuestionCircle} size="lg" color={colorIcon} />
+      );
 
     const addProjectFilter = () => {
-      artifactKindsForProject
-        && setLocalArtifactKinds(
-          uniq([...localArtifactKinds, ...PROJECT_ARTIFACT_KINDS[projectValue]]),
-        )
-      buildDriverForProject
-        && setSelectedDrivers(
-          uniq([...selectedDrivers, buildDriverForProject]),
-        )
-      setSelectedProjects(uniq([...selectedProjects, projectValue]))
-    }
+      artifactKindsForProject &&
+        setLocalArtifactKinds(
+          uniq([...localArtifactKinds, ...PROJECT_ARTIFACT_KINDS[projectValue]])
+        );
+      buildDriverForProject &&
+        setSelectedDrivers(uniq([...selectedDrivers, buildDriverForProject]));
+      setSelectedProjects(uniq([...selectedProjects, projectValue]));
+    };
 
     const removeProjectFilter = () => {
-      setSelectedProjects(
-        selectedProjects.filter((p) => p !== projectValue),
-      )
-    }
+      setSelectedProjects(selectedProjects.filter((p) => p !== projectValue));
+    };
 
     return (
       <div
         className={widgetClass}
         style={colorWidget}
-        onClick={
-          selected
-            ? removeProjectFilter
-            : addProjectFilter
-        }
+        onClick={selected ? removeProjectFilter : addProjectFilter}
       >
         {icon}
         <p className="filter-text">{projectValue}</p>
       </div>
-    )
-  }
+    );
+  };
 
   const BranchFilter = ({ name }) => {
-    const selected = selectedBranches.includes(name)
-    const implemented = name.toUpperCase() === 'ALL'
-    const colorIcon = colorsIcon({ selected })
-    const colorWidget = colorsWidget({ selected })
-    const widgetClass = classNames('modal-filter-widget', {
-      'modal-filter-not-implemented': !implemented,
-      'cannot-unselect': selected,
-    })
-    const icon = name === 'all' ? (
-      <GitBranch color={colorIcon} />
-    ) : name === 'master' ? (
-      <GitCommit color={colorIcon} />
-    ) : name === 'develop' ? (
-      <GitMerge color={colorIcon} />
-    ) : (
-      <></>
-    )
-    const branchDisplayName = BRANCH_TO_DISPLAY_NAME[name.toUpperCase()] || 'Unknown Branch'
+    const selected = selectedBranches.includes(name);
+    const implemented = name.toUpperCase() === "ALL";
+    const colorIcon = colorsIcon({ selected });
+    const colorWidget = colorsWidget({ selected });
+    const widgetClass = classNames("modal-filter-widget", {
+      "modal-filter-not-implemented": !implemented,
+      "cannot-unselect": selected,
+    });
+    const icon =
+      name === "all" ? (
+        <GitBranch color={colorIcon} />
+      ) : name === "master" ? (
+        <GitCommit color={colorIcon} />
+      ) : name === "develop" ? (
+        <GitMerge color={colorIcon} />
+      ) : (
+        <></>
+      );
+    const branchDisplayName =
+      BRANCH_TO_DISPLAY_NAME[name.toUpperCase()] || "Unknown Branch";
     return (
       <div className={widgetClass} style={colorWidget}>
         {icon}
         <p className="filter-text">{branchDisplayName}</p>
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <>
@@ -233,24 +235,24 @@ const FilterModal = ({ closeAction, showingFiltersModal }) => {
                 </div>
                 <div className="filter-row">
                   {ProjectFilter({ project: PROJECT.chat })}
-                  {ProjectFilter({ project: PROJECT['gomobile-ipfs-demo'] })}
+                  {ProjectFilter({ project: PROJECT["gomobile-ipfs-demo"] })}
                 </div>
                 <div style={colorsModalTitle} className="subtitle">
                   Artifact Kinds
                 </div>
                 <div className="filter-row">
-                  {ArtifactFilter({ artifact_kind: '0' })}
-                  {ArtifactFilter({ artifact_kind: '1' })}
-                  {ArtifactFilter({ artifact_kind: '2' })}
-                  {ArtifactFilter({ artifact_kind: '3' })}
+                  {ArtifactFilter({ artifact_kind: "0" })}
+                  {ArtifactFilter({ artifact_kind: "1" })}
+                  {ArtifactFilter({ artifact_kind: "2" })}
+                  {ArtifactFilter({ artifact_kind: "3" })}
                 </div>
                 <div style={colorsModalTitle} className="subtitle">
                   Branches
                 </div>
                 <div className="filter-row">
-                  {BranchFilter({ name: 'all' })}
-                  {BranchFilter({ name: 'master' })}
-                  {BranchFilter({ name: 'develop' })}
+                  {BranchFilter({ name: "all" })}
+                  {BranchFilter({ name: "master" })}
+                  {BranchFilter({ name: "develop" })}
                 </div>
               </div>
               <div className="modal-footer">
@@ -270,8 +272,8 @@ const FilterModal = ({ closeAction, showingFiltersModal }) => {
                       calculatedFilters: {
                         projects: [...selectedProjects],
                       },
-                    })
-                    closeAction()
+                    });
+                    closeAction();
                   }}
                   style={applyFilterButtonColors}
                 >
@@ -284,17 +286,17 @@ const FilterModal = ({ closeAction, showingFiltersModal }) => {
                 {state.apiKey && state.isAuthed && (
                   <div
                     className="btn btn-sm"
-                    style={{ display: 'flex', alignItems: 'center' }}
+                    style={{ display: "flex", alignItems: "center" }}
                     onClick={() => {
-                      removeAuthCookie()
+                      removeAuthCookie();
                       updateState({
                         isAuthed: false,
-                        apiKey: '',
+                        apiKey: "",
                         needsProgrammaticQuery: true,
                         uiFilters: INITIAL_STATE.uiFilters,
                         calculatedFilters: INITIAL_STATE.calculatedFilters,
-                      })
-                      closeAction()
+                      });
+                      closeAction();
                     }}
                   >
                     <LogOut height="14" color={filterSelectedAccent} />
@@ -307,7 +309,7 @@ const FilterModal = ({ closeAction, showingFiltersModal }) => {
         </div>
       </span>
     </>
-  )
-}
+  );
+};
 
-export default FilterModal
+export default FilterModal;
