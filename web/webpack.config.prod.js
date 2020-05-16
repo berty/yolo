@@ -1,25 +1,23 @@
 /* eslint-disable global-require */
-// For info about this file refer to webpack and webpack-hot-middleware documentation
-// For info on how we're generating bundles with hashed filenames for cache busting: https://medium.com/@okonetchnikov/long-term-caching-of-static-assets-with-webpack-1ecb139adb95#.w99i89nsz
-// import webpack from 'webpack';
+import merge from 'webpack-merge'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import path from 'path'
 import Dotenv from 'dotenv-webpack'
+import common, { commonCSSLoader, commonSassLoader, commonCSSModuleLoader } from './webpack.config.common'
 
-const CopyWebpackPlugin = require('copy-webpack-plugin')
-
-export default {
-  resolve: {
-    extensions: ['*', '.js', '.jsx', '.json'],
-    // To support react-hot-loader
-    alias: {
-      'react-dom': '@hot-loader/react-dom',
-    },
+const postCSSLoader = {
+  loader: 'postcss-loader',
+  options: {
+    ident: 'postcss',
+    sourceMap: true,
+    plugins: () => [require('cssnano'), require('autoprefixer')],
   },
+}
+
+export default merge(common, {
   devtool: 'source-map', // more info:https://webpack.js.org/guides/production/#source-mapping and https://webpack.js.org/configuration/devtool/
   entry: path.resolve(__dirname, 'src/index'),
-  target: 'web',
   mode: 'production',
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -54,10 +52,23 @@ export default {
       scriptLoading: 'defer',
       favicon: 'src/assets/favicon/favicon-32x32.png',
     }),
-    new CopyWebpackPlugin([{ from: 'src/assets/favicon' }]),
   ],
   module: {
     rules: [
+      {
+        test: /(\.css|\.scss|\.sass)$/,
+        exclude: /\.module(\.css|\.scss|\.sass)$/,
+        use: ['style-loader', commonCSSLoader, postCSSLoader, commonSassLoader],
+      },
+      {
+        test: /\.module(\.css|\.scss|\.sass)$/,
+        use: [
+          'style-loader',
+          commonCSSModuleLoader,
+          postCSSLoader,
+          commonSassLoader,
+        ],
+      },
       {
         test: /\.jsx?$/,
         exclude: /node_modules/,
@@ -124,34 +135,6 @@ export default {
           },
         ],
       },
-      {
-        test: /(\.css|\.scss|\.sass)$/,
-        use: [
-          MiniCssExtractPlugin.loader,
-          {
-            loader: 'css-loader',
-            options: {
-              sourceMap: true,
-            },
-          },
-          {
-            loader: 'postcss-loader',
-            options: {
-              plugins: () => [require('cssnano'), require('autoprefixer')],
-              sourceMap: true,
-            },
-          },
-          {
-            loader: 'sass-loader',
-            options: {
-              sassOptions: {
-                includePaths: [path.resolve(__dirname, 'src')],
-              },
-              sourceMap: true,
-            },
-          },
-        ],
-      },
     ],
   },
-}
+})
