@@ -1,7 +1,6 @@
-import React, { useReducer, useMemo } from 'react'
+import React, { useReducer } from 'react'
 import { cloneDeep } from 'lodash'
 import { retrieveAuthCookie } from '../api/auth'
-import { groupBuildsByMr } from '../api/dataTransforms'
 import {
   actions,
   ARTIFACT_KIND_VALUE,
@@ -27,6 +26,7 @@ export const INITIAL_STATE = {
   },
   calculatedFilters: {
     projects: [PROJECT.chat],
+    order: 'created_at',
   },
 }
 
@@ -41,9 +41,6 @@ function reducer(state, action) {
 
 export const ResultStore = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE)
-  const buildsByMr = useMemo(() => groupBuildsByMr(state.builds), [
-    state.builds,
-  ])
 
   // custom actions can go here; for now we just have one
   const updateState = (payload) => {
@@ -54,7 +51,9 @@ export const ResultStore = ({ children }) => {
   return (
     <ResultContext.Provider
       value={{
-        state, dispatch, buildsByMr, updateState,
+        state,
+        dispatch,
+        updateState,
       }}
     >
       {children}

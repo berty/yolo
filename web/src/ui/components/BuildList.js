@@ -1,9 +1,16 @@
 import React from 'react'
 import BuildContainer from './Build/BuildContainer'
+import {
+  groupBuildsByMr,
+  oneBuildResultHasBranchMaster,
+  buildBranchIsMaster,
+} from '../../api/dataTransforms'
 
-const BuildList = ({ buildsByMr, builds = [], collapseCondition }) => {
-  const useCollapseCondition = collapseCondition.condition(builds)
+const BuildList = ({ builds = [] }) => {
+  const useCollapseCondition = oneBuildResultHasBranchMaster(builds)
+  const buildsByMr = groupBuildsByMr(builds)
   const NoBuilds = () => <div>No results match your query.</div>
+
   return !builds.length ? (
     <NoBuilds />
   ) : (
@@ -12,9 +19,7 @@ const BuildList = ({ buildsByMr, builds = [], collapseCondition }) => {
         <BuildContainer
           key={`${build.id}-${i}`}
           build={build}
-          toCollapse={
-            !!(useCollapseCondition && collapseCondition.toCollapse(build))
-          }
+          toCollapse={useCollapseCondition && !buildBranchIsMaster(build)}
         />
       ))}
     </div>

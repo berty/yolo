@@ -17,9 +17,9 @@ import { ResultContext } from '../../../store/ResultStore'
 import { ARTIFACT_KINDS, BUILD_DRIVERS } from '../../../constants'
 import { getBuildList, validateError } from '../../../api'
 
-import './Home.scss'
-import { queryHasMaster } from '../../../api/dataTransforms'
 import BuildListContainer from '../../components/BuildListContainer'
+
+import './Home.scss'
 
 const Home = () => {
   const { theme } = useContext(ThemeContext)
@@ -152,11 +152,7 @@ const Home = () => {
           <ApiKeyPrompt failedKey={state.apiKey} updateState={updateState} />
         )}
         {!state.error && (
-          <BuildListContainer
-            builds={state.builds}
-            loaded={state.isLoaded}
-            collapseCondition={queryHasMaster}
-          />
+          <BuildListContainer builds={state.builds} loaded={state.isLoaded} />
         )}
         <div
           className="footer p-4"
@@ -168,7 +164,6 @@ const Home = () => {
       )}
       {!showingFiltersModal && state.isAuthed && (
         <ShowFiltersButton
-          showingFiltersModal={showingFiltersModal}
           clickAction={() => toggleShowFilters(!showingFiltersModal)}
         />
       )}

@@ -1,8 +1,10 @@
-import React, {
-  useContext, useState,
-} from 'react'
+import React, { useContext, useState } from 'react'
 import {
-  GitCommit, GitPullRequest, AlertCircle, Calendar, Link as LinkIcon,
+  GitCommit,
+  GitPullRequest,
+  AlertCircle,
+  Calendar,
+  Link as LinkIcon,
 } from 'react-feather'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
@@ -10,7 +12,6 @@ import {
   faAlignLeft,
   faHammer,
   faPencilAlt,
-  faFile,
 } from '@fortawesome/free-solid-svg-icons'
 
 import { ThemeContext } from '../../../store/ThemeStore'
@@ -25,9 +26,7 @@ import './Build.scss'
 import AnchorLink from '../AnchorLink/AnchorLink'
 import Tag from '../../Tag/Tag'
 
-const BuildAndMergeRequest = ({
-  build, mr, isDetailed,
-}) => {
+const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
   const [messageExpanded, toggleMessageExpanded] = useState(false)
 
   const {
@@ -48,7 +47,6 @@ const BuildAndMergeRequest = ({
     started_at: buildStartedAt = '',
     finished_at: buildFinishedAt = '',
     created_at: buildCreatedAt = '',
-    completed_at: buildCompletedAt = '',
     updated_at: buildUpdatedAt = '',
     driver: buildDriver = '',
     has_mergerequest: buildHasMr = null,
@@ -78,9 +76,7 @@ const BuildAndMergeRequest = ({
   }
 
   const CommitIcon = mrCommitUrl ? (
-    <a
-      href={mrCommitUrl}
-    >
+    <a href={mrCommitUrl}>
       <GitCommit color={blockTitle} title={buildCommitId || ''} />
     </a>
   ) : !buildHasMr ? (
@@ -92,31 +88,34 @@ const BuildAndMergeRequest = ({
   const SplitMessage = (text) => text
     .split('\n')
     .filter((x) => !!x)
-    .map((x, i) => (<p className="build-message-line" key={i}>{x}</p>))
+    .map((x, i) => (
+      <p className="build-message-line" key={i}>
+        {x}
+      </p>
+    ))
 
   const BuildMessage = !buildMessage ? (
     ''
-  ) : buildMessage.length < MESSAGE_LEN
-    ? SplitMessage(buildMessage)
-    : messageExpanded ? (
-      <div
-        className="interactive-text build-message"
-        onClick={() => toggleMessageExpanded(false)}
-      >
-        {SplitMessage(buildMessage)}
-        <span style={colorInteractiveText}>&nbsp;[show less]</span>
-      </div>
-    ) : (
-      <div
-        className="interactive-text build-message"
-        onClick={() => toggleMessageExpanded(true)}
-      >
-        {SplitMessage(buildMessage.slice(0, MESSAGE_LEN))}
-        ...
-
-        <span style={colorInteractiveText}>&nbsp;[show more]</span>
-      </div>
-    )
+  ) : buildMessage.length < MESSAGE_LEN ? (
+    SplitMessage(buildMessage)
+  ) : messageExpanded ? (
+    <div
+      className="interactive-text build-message"
+      onClick={() => toggleMessageExpanded(false)}
+    >
+      {SplitMessage(buildMessage)}
+      <span style={colorInteractiveText}>&nbsp;[show less]</span>
+    </div>
+  ) : (
+    <div
+      className="interactive-text build-message"
+      onClick={() => toggleMessageExpanded(true)}
+    >
+      {SplitMessage(buildMessage.slice(0, MESSAGE_LEN))}
+      ...
+      <span style={colorInteractiveText}>&nbsp;[show more]</span>
+    </div>
+  )
 
   const BranchName = buildBranch && (
     <div
@@ -226,9 +225,7 @@ const BuildAndMergeRequest = ({
       title={getTimeLabel('Build updated', buildUpdatedAt)}
       icon={<FontAwesomeIcon icon={faPencilAlt} color={sectionText} />}
       text={timeSinceUpdated}
-
     />
-
   )
 
   const BuildCreatedAt = timeSinceCreated && (
@@ -241,9 +238,7 @@ const BuildAndMergeRequest = ({
   )
 
   const SharableBuildLink = (
-    <AnchorLink
-      target={`?build_id=${buildId}`}
-    >
+    <AnchorLink target={`?build_id=${buildId}`}>
       <LinkIcon size={16} />
     </AnchorLink>
   )
@@ -286,7 +281,8 @@ const BuildAndMergeRequest = ({
           </div>
         )}
       </div>
-      {isDetailed && buildHasArtifacts
+      {isDetailed
+        && buildHasArtifacts
         && buildHasArtifacts.map((artifact) => (
           <ArtifactCard
             artifact={artifact}
