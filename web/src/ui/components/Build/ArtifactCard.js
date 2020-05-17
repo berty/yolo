@@ -1,16 +1,7 @@
-import React, {
-  useContext,
-} from 'react'
-import {
-  Clock,
-  Calendar,
-  Link as LinkIcon,
-} from 'react-feather'
+import React, { useContext } from 'react'
+import { Clock, Calendar, Link as LinkIcon } from 'react-feather'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {
-  faFile,
-  faHammer,
-} from '@fortawesome/free-solid-svg-icons'
+import { faFile, faHammer } from '@fortawesome/free-solid-svg-icons'
 import { ThemeContext } from '../../../store/ThemeStore'
 
 import { tagStyle } from '../../styleTools/buttonStyler'
@@ -55,15 +46,26 @@ const ArtifactCard = ({
     : ''
   const timeSinceBuildUpdatedString = `updated: ${buildMergeUpdatedAt}`
 
-
   const ArtifactKindName = KIND_TO_PLATFORM[artifactKind] || 'Unknown OS'
 
   const artifactTagStyle = tagStyle({ name: theme.name, state: artifactState })
   const ArtifactStateTag = artifactState && (
-    <Tag classes={['artifact-tag', 'state-tag']} styles={artifactTagStyle} text={artifactState} />
+    <Tag
+      classes={['artifact-tag', 'state-tag']}
+      styles={artifactTagStyle}
+      text={artifactState}
+    />
   )
 
-  const ArtifactMainButton = (<ArtifactActionButton {...{ artifactState, artifactPlistSignedUrl, artifactDlArtifactSignedUrl }} />)
+  const ArtifactMainButton = (
+    <ArtifactActionButton
+      {...{
+        artifactState,
+        artifactPlistSignedUrl,
+        artifactDlArtifactSignedUrl,
+      }}
+    />
+  )
 
   const PlatformIcon = (
     <FontAwesomeIcon
@@ -77,17 +79,22 @@ const ArtifactCard = ({
     <Tag
       classes={['normal-caps', 'details']}
       title={timeSinceBuildUpdatedString}
-      icon={(<Calendar />)}
+      icon={<Calendar />}
       text={timeSinceBuildUpdated}
     />
   )
 
   const BuildDuration = buildDurationShort && (
-    <Tag classes={['normal-caps', 'details']} title={buildDurationDetails || ''} icon={<Clock />} text={buildDurationShort} />
+    <Tag
+      classes={['normal-caps', 'details']}
+      title={buildDurationDetails || ''}
+      icon={<Clock />}
+      text={buildDurationShort}
+    />
   )
 
   const ArtifactFileSize = artifactFileSize
-    && !isNaN(parseInt(artifactFileSize, 10)) && (
+    && !Number.isNaN(parseInt(artifactFileSize, 10)) && (
       <Tag classes={['normal-caps', 'details']} title="File size">
         <FontAwesomeIcon icon={faFile} size="lg" />
         {Math.round(artifactFileSize / 1000)}
@@ -112,12 +119,10 @@ const ArtifactCard = ({
     </Tag>
   )
 
-  const SharableArtifactLink = (
-    <AnchorLink
-      target={`?artifact_id=${artifactId}`}
-    >
-      <LinkIcon size={16} />
-    </AnchorLink>
+  const SharableArtifactLink = ({ implemented = false }) => implemented && (
+  <AnchorLink target={`?artifact_id=${artifactId}`}>
+    <LinkIcon size={16} />
+  </AnchorLink>
   )
 
   return (
@@ -128,7 +133,7 @@ const ArtifactCard = ({
       >
         <div className="card-left-icon icon-top">
           {PlatformIcon}
-          {/* {SharableArtifactLink} TODO: Add when API working for this */}
+          <SharableArtifactLink implemented={false} />
         </div>
         <div className="card-details">
           <div className="card-details-row">

@@ -10,13 +10,7 @@
     "browser": true,
     "node": true
   },
-  "plugins": [
-    "react",
-    "react-hooks",
-    "node",
-    "promise",
-    "jsx-a11y"
-  ],
+  "plugins": ["react", "react-hooks", "node", "promise", "jsx-a11y"],
   "extends": [
     "airbnb",
     "eslint:recommended",
@@ -40,7 +34,6 @@
     "no-nested-ternary": "warn",
     "jsx-a11y/label-has-associated-control": 1,
     "no-confusing-arrow": 1,
-    "no-unused-vars": 1,
     "jsx-a11y/click-events-have-key-events": 1,
     "jsx-a11y/no-static-element-interactions": 1,
     "react/jsx-props-no-spreading": 0,
@@ -51,27 +44,13 @@
     "jsx-a11y/anchor-is-valid": [
       "error",
       {
-        "components": [
-          "Link"
-        ],
-        "specialLink": [
-          "to"
-        ]
+        "components": ["Link"],
+        "specialLink": ["to"]
       }
     ],
-    "semi": [
-      "error",
-      "never"
-    ],
+    "semi": ["error", "never"],
     "max-len": 0,
-    "no-alert": 0,
-    "no-console": 0,
-    "no-shadow": 0,
-    "no-restricted-globals": 0,
-    "no-return-assign": [
-      "error",
-      "except-parens"
-    ],
+    "no-return-assign": ["error", "except-parens"],
     "no-underscore-dangle": [
       "error",
       {
@@ -84,12 +63,10 @@
         ]
       }
     ],
-    "jsx-a11y/anchor-is-valid": 0,
     "class-methods-use-this": 0,
     "react/jsx-filename-extension": 0,
     "react/forbid-prop-types": 0,
     "react/no-array-index-key": 0,
-    "array-callback-return": 1,
     "no-use-before-define": [
       "error",
       {

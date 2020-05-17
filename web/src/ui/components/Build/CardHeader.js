@@ -1,6 +1,10 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext } from 'react'
 import {
-  GitCommit, GitMerge, User, ChevronUp, ChevronDown,
+  GitCommit,
+  GitMerge,
+  User,
+  ChevronUp,
+  ChevronDown,
 } from 'react-feather'
 
 import { ThemeContext } from '../../../store/ThemeStore'
@@ -104,7 +108,10 @@ const CardHeader = ({
         {ChevronIcon}
       </div>
       {collapsed && cardStateTags && (
-        <div className={`card-row${!collapsed ? ' expanded' : ''}`} style={{ display: 'flex', flexWrap: 'wrap' }}>
+        <div
+          className={`card-row${!collapsed ? ' expanded' : ''}`}
+          style={{ display: 'flex', flexWrap: 'wrap' }}
+        >
           {cardStateTags}
         </div>
       )}

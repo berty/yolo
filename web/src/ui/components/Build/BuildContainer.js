@@ -12,6 +12,7 @@ import { ResultContext } from '../../../store/ResultStore'
 import { tagStyle } from '../../styleTools/buttonStyler'
 import Tag from '../../Tag/Tag'
 import { getArtifactKindIcon } from '../../styleTools/brandIcons'
+import { getStrEquNormalized } from '../../../util/getters'
 
 const BuildContainer = ({ build, toCollapse }) => {
   const { state } = useContext(ResultContext)
@@ -35,11 +36,10 @@ const BuildContainer = ({ build, toCollapse }) => {
         avatar_url: buildAuthorAvatarUrl = '',
       } = {},
     } = {},
-    topLevelMrId = '',
     allBuilds = [],
   } = build || {}
 
-  const isMaster = buildBranch && buildBranch.toUpperCase() === BRANCH.MASTER
+  const isMaster = getStrEquNormalized(buildBranch, BRANCH.MASTER)
 
   const cardTitle = (
     <CardTitle
@@ -65,15 +65,24 @@ const BuildContainer = ({ build, toCollapse }) => {
 
   const FirstBuildArtifactTags = collapsed && buildHasArtifacts && (
     <>
-      {buildHasArtifacts
-        .map((a, i) => {
-          const { state, kind = 'UnknownKind' } = a
-          const artifactTagStyle = tagStyle({ name: theme.name, state })
-          const iconColor = tagStyle.color
-          return (
-            <Tag key={i} text={state} styles={artifactTagStyle} icon={ArtifactKindIcon({ color: iconColor, kind })} classes={{ 'btn-state-tag': true }} title={`Artifact kind: ${kind}`} />
-          )
-        })}
+      {buildHasArtifacts.map((a, i) => {
+        const { state: artifactState, kind = 'UnknownKind' } = a
+        const artifactTagStyle = tagStyle({
+          name: theme.name,
+          state: artifactState,
+        })
+        const iconColor = tagStyle.color
+        return (
+          <Tag
+            key={i}
+            text={artifactState}
+            styles={artifactTagStyle}
+            icon={ArtifactKindIcon({ color: iconColor, kind })}
+            classes={{ 'btn-state-tag': true }}
+            title={`Artifact kind: ${kind}`}
+          />
+        )
+      })}
     </>
   )
 
@@ -88,10 +97,18 @@ const BuildContainer = ({ build, toCollapse }) => {
     />
   )
 
-  const otherBuildsMessage = collapsed && allBuilds.length > 1 ? `${allBuilds.length - 1} other build${allBuilds.length - 1 > 1 ? 's' : ''}` : ''
+  const otherBuildsMessage = collapsed && allBuilds.length > 1
+    ? `${allBuilds.length - 1} other build${
+      allBuilds.length - 1 > 1 ? 's' : ''
+    }`
+    : ''
 
   const BuildCountTag = collapsed && otherBuildsMessage && (
-    <Tag classes={{ 'btn-info-tag': true }} styles={tagStyle({ name: theme.name, state: null })} text={otherBuildsMessage} />
+    <Tag
+      classes={{ 'btn-info-tag': true }}
+      styles={tagStyle({ name: theme.name, state: null })}
+      text={otherBuildsMessage}
+    />
   )
 
   const cardStateTags = collapsed && (

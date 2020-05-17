@@ -1,13 +1,17 @@
 import React, { useContext, useState } from 'react'
 import {
-  Check, GitBranch, GitMerge, GitCommit, X, LogOut,
+  Check,
+  GitBranch,
+  GitMerge,
+  GitCommit,
+  X,
+  LogOut,
 } from 'react-feather'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faAndroid, faApple } from '@fortawesome/free-brands-svg-icons'
 import { faQuestionCircle, faCube } from '@fortawesome/free-solid-svg-icons'
 import classNames from 'classnames'
-import { flatten, uniq } from 'lodash'
-import { Form } from 'tabler-react'
+import { uniq } from 'lodash'
 
 import './FilterModal.scss'
 import { ThemeContext } from '../../../store/ThemeStore'
@@ -24,7 +28,7 @@ import {
 import ThemeToggler from '../ThemeToggler'
 import { removeAuthCookie } from '../../../api/auth'
 
-const FilterModal = ({ closeAction, showingFiltersModal }) => {
+const FilterModal = ({ closeAction }) => {
   const { theme } = useContext(ThemeContext)
   const { state, updateState } = useContext(ResultContext)
   const [selectedDrivers, setSelectedDrivers] = useState([
@@ -117,7 +121,7 @@ const FilterModal = ({ closeAction, showingFiltersModal }) => {
       }
   }
 
-  const colorsIcon = ({ selected } = { selected: false }) => (selected ? theme.icon.filterSelected : theme.icon.filterUnselected)
+  const colorsIcon = ({ selected } = { selected: false }) => selected ? theme.icon.filterSelected : theme.icon.filterUnselected
 
   const ProjectFilter = ({ project }) => {
     const selected = selectedProjects.includes(project)
@@ -144,27 +148,19 @@ const FilterModal = ({ closeAction, showingFiltersModal }) => {
           uniq([...localArtifactKinds, ...PROJECT_ARTIFACT_KINDS[projectValue]]),
         )
       buildDriverForProject
-        && setSelectedDrivers(
-          uniq([...selectedDrivers, buildDriverForProject]),
-        )
+        && setSelectedDrivers(uniq([...selectedDrivers, buildDriverForProject]))
       setSelectedProjects(uniq([...selectedProjects, projectValue]))
     }
 
     const removeProjectFilter = () => {
-      setSelectedProjects(
-        selectedProjects.filter((p) => p !== projectValue),
-      )
+      setSelectedProjects(selectedProjects.filter((p) => p !== projectValue))
     }
 
     return (
       <div
         className={widgetClass}
         style={colorWidget}
-        onClick={
-          selected
-            ? removeProjectFilter
-            : addProjectFilter
-        }
+        onClick={selected ? removeProjectFilter : addProjectFilter}
       >
         {icon}
         <p className="filter-text">{projectValue}</p>
