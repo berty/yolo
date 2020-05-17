@@ -58,9 +58,11 @@ func (svc service) BuildList(ctx context.Context, req *yolopb.BuildList_Request)
 		if len(req.MergeRequestID) > 0 {
 			query = query.Where("build.has_mergerequest_id IN (?)", req.MergeRequestID)
 		}
-		if len(req.MergeRequestAuthorID) > 0 ||
-			len(req.MergerequestState) > 0 ||
-			req.WithMergerequest {
+
+		if len(req.MergeRequestAuthorID) > 0 || len(req.MergerequestState) > 0 {
+			req.WithMergerequest = true
+		}
+		if req.WithMergerequest {
 			query = query.Joins("JOIN merge_request ON merge_request.id = build.has_mergerequest_id")
 		}
 		if len(req.MergeRequestAuthorID) > 0 {
@@ -68,6 +70,13 @@ func (svc service) BuildList(ctx context.Context, req *yolopb.BuildList_Request)
 		}
 		if len(req.MergerequestState) > 0 {
 			query = query.Where("merge_request.state IN (?)", req.MergerequestState)
+		}
+		if len(req.Branch) > 0 {
+			if req.WithMergerequest {
+				query = query.Where("merge_request.branch IN (?) OR build.branch IN (?)", req.Branch, req.Branch)
+			} else {
+				query = query.Where("build.branch IN (?)", req.Branch)
+			}
 		}
 	}
 

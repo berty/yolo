@@ -93,6 +93,9 @@ message BuildList {
 
     // filter on builds with a linked merge request of a specific state
     repeated MergeRequest.State mergerequest_state = 12;
+
+    // filter on branch
+    repeated string branch = 13;
   }
   message Response {
     repeated Build builds = 1;
