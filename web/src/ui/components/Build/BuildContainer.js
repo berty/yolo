@@ -14,7 +14,7 @@ import Tag from '../../Tag/Tag'
 import { getArtifactKindIcon } from '../../styleTools/brandIcons'
 import { getStrEquNormalized } from '../../../util/getters'
 
-const BuildContainer = ({ build, toCollapse }) => {
+const BuildContainer = ({ build, toCollapse, children }) => {
   const { state } = useContext(ResultContext)
   const [collapsed, toggleCollapsed] = useState(toCollapse)
   const { theme } = useContext(ThemeContext)
@@ -121,6 +121,7 @@ const BuildContainer = ({ build, toCollapse }) => {
 
   return (
     <div className="Build" id={buildId}>
+      {children}
       <div
         className="card"
         style={{
