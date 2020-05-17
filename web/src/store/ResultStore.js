@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react'
+import React, { useReducer, useMemo } from 'react'
 import { cloneDeep } from 'lodash'
 import { retrieveAuthCookie } from '../api/auth'
 import { groupBuildsByMr } from '../api/dataTransforms'
@@ -18,7 +18,6 @@ export const INITIAL_STATE = {
   error: null,
   isLoaded: false,
   builds: [],
-  buildsByMr: [],
   baseURL: `${process.env.API_SERVER}`,
   needsProgrammaticQuery: false,
   needsRefresh: false,
@@ -42,22 +41,22 @@ function reducer(state, action) {
 
 export const ResultStore = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE)
+  const buildsByMr = useMemo(() => groupBuildsByMr(state.builds), [
+    state.builds,
+  ])
 
   // custom actions can go here; for now we just have one
   const updateState = (payload) => {
     dispatch({ type: actions.UPDATE_STATE, payload: cloneDeep(payload) })
-    if (payload.builds?.length) {
-      const groupedData = groupBuildsByMr(payload.builds)
-      dispatch({
-        type: actions.UPDATE_STATE,
-        payload: { buildsByMr: groupedData },
-      })
-    }
   }
 
   // pass dispatch if we want to trigger an action without an action creator
   return (
-    <ResultContext.Provider value={{ state, dispatch, updateState }}>
+    <ResultContext.Provider
+      value={{
+        state, dispatch, buildsByMr, updateState,
+      }}
+    >
       {children}
     </ResultContext.Provider>
   )

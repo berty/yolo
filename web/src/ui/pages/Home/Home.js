@@ -1,13 +1,11 @@
 /* eslint-disable import/no-named-as-default */
 import React, { useContext, useState, useEffect } from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
-import { cloneDeep } from 'lodash'
 import queryString from 'query-string'
 import Cookies from 'js-cookie'
 
 import Header from '../../components/Header/Header'
 import ErrorDisplay from '../../components/ErrorDisplay/ErrorDisplay'
-import BuildList from '../../components/BuildList'
 import ApiKeyPrompt from '../../components/ApiKeyPrompt'
 import ShowFiltersButton from '../../components/ShowFiltersButton'
 import FilterModal from '../../components/FilterModal/FilterModal'
@@ -21,6 +19,7 @@ import { getBuildList, validateError } from '../../../api'
 
 import './Home.scss'
 import { queryHasMaster } from '../../../api/dataTransforms'
+import BuildListContainer from '../../components/BuildListContainer'
 
 const Home = () => {
   const { theme } = useContext(ThemeContext)
@@ -153,8 +152,8 @@ const Home = () => {
           <ApiKeyPrompt failedKey={state.apiKey} updateState={updateState} />
         )}
         {!state.error && (
-          <BuildList
-            builds={cloneDeep(state.builds)}
+          <BuildListContainer
+            builds={state.builds}
             loaded={state.isLoaded}
             collapseCondition={queryHasMaster}
           />

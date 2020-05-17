@@ -1,34 +1,23 @@
-import React, { useContext } from 'react'
-
-import { ThemeContext } from '../../store/ThemeStore'
-import { ResultContext } from '../../store/ResultStore'
+import React from 'react'
 import BuildContainer from './Build/BuildContainer'
 
-const BuildList = ({ loaded, builds, collapseCondition }) => {
-  const { theme } = useContext(ThemeContext)
-  const { state } = useContext(ResultContext)
-  const loading = <div style={{ color: theme.text.sectionText }}>Loading...</div>
+const BuildList = ({ buildsByMr, builds = [], collapseCondition }) => {
   const useCollapseCondition = collapseCondition.condition(builds)
-  return (
-    <>
-      {!loaded ? (
-        loading
-      ) : !builds.length ? (
-        <div>No results match your query.</div>
-      ) : (
-        <div className="container">
-          {state.buildsByMr.map((build, i) => (
-            <BuildContainer
-              key={`${build.id}-${i}`}
-              build={build}
-              toCollapse={
-                !!(useCollapseCondition && collapseCondition.toCollapse(build))
-              }
-            />
-          ))}
-        </div>
-      )}
-    </>
+  const NoBuilds = () => <div>No results match your query.</div>
+  return !builds.length ? (
+    <NoBuilds />
+  ) : (
+    <div className="container">
+      {buildsByMr.map((build, i) => (
+        <BuildContainer
+          key={`${build.id}-${i}`}
+          build={build}
+          toCollapse={
+            !!(useCollapseCondition && collapseCondition.toCollapse(build))
+          }
+        />
+      ))}
+    </div>
   )
 }
 
