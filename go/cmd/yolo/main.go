@@ -55,6 +55,7 @@ func yolo(args []string) error {
 		githubToken        string
 		bintrayUsername    string
 		bintrayToken       string
+		artifactsCachePath string
 		circleciToken      string
 		dbStorePath        string
 		withPreloading     bool
@@ -85,8 +86,7 @@ func yolo(args []string) error {
 	serverFlagSet.StringVar(&circleciToken, "circleci-token", "", "CircleCI API Token")
 	serverFlagSet.StringVar(&githubToken, "github-token", "", "GitHub API Token")
 	serverFlagSet.StringVar(&dbStorePath, "db-path", ":memory:", "DB Store path")
-	storeFlagSet.StringVar(&dbStorePath, "db-path", ":memory:", "DB Store path")
-	storeFlagSet.BoolVar(&withPreloading, "with-preloading", false, "with auto DB preloading")
+	serverFlagSet.StringVar(&artifactsCachePath, "artifacts-cache-path", "", "Artifacts caching path")
 	serverFlagSet.IntVar(&maxBuilds, "max-builds", 100, "maximum builds to fetch from external services (pagination)")
 	serverFlagSet.StringVar(&httpBind, "http-bind", ":8000", "HTTP bind address")
 	serverFlagSet.StringVar(&grpcBind, "grpc-bind", ":9000", "gRPC bind address")
@@ -98,6 +98,8 @@ func yolo(args []string) error {
 	serverFlagSet.StringVar(&bearerSecretKey, "bearer-secretkey", "", "optional Bearer.sh Secret Key")
 	serverFlagSet.StringVar(&authSalt, "auth-salt", "", "salt used to generate authentication tokens at the end of the URLs")
 	serverFlagSet.StringVar(&httpCachePath, "http-cache-path", "", "if set, will cache http client requests")
+	storeFlagSet.StringVar(&dbStorePath, "db-path", ":memory:", "DB Store path")
+	storeFlagSet.BoolVar(&withPreloading, "with-preloading", false, "with auto DB preloading")
 
 	server := &ffcli.Command{
 		Name:      `server`,
@@ -157,15 +159,22 @@ func yolo(args []string) error {
 				logger.Warn("--dev-mode: insecure helpers are enabled")
 			}
 
+			if artifactsCachePath != "" {
+				if err := os.MkdirAll(artifactsCachePath, 0755); err != nil {
+					return err
+				}
+			}
+
 			// service
 			svc, err := yolosvc.NewService(db, yolosvc.ServiceOpts{
-				Logger:          logger,
-				BuildkiteClient: bkc,
-				CircleciClient:  ccc,
-				BintrayClient:   btc,
-				GithubClient:    ghc,
-				AuthSalt:        authSalt,
-				DevMode:         devMode,
+				Logger:             logger,
+				BuildkiteClient:    bkc,
+				CircleciClient:     ccc,
+				BintrayClient:      btc,
+				GithubClient:       ghc,
+				AuthSalt:           authSalt,
+				DevMode:            devMode,
+				ArtifactsCachePath: artifactsCachePath,
 			})
 			if err != nil {
 				return err

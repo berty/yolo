@@ -3,6 +3,8 @@ coverage.txt
 packrd/
 *-packr.go
 *.tmp
+cache/
+buildkite_*
 
 # Junk files
 *~

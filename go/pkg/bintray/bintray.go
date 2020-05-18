@@ -81,7 +81,7 @@ func (c Client) GetVersion(subject, repo, pkg, version string) (GetVersionRespon
 	return result, err
 }
 
-func DownloadContent(url string, w http.ResponseWriter) error {
+func DownloadContent(url string, w io.Writer) error {
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
