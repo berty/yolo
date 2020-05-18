@@ -214,7 +214,13 @@ const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
       title="Merge request state"
       classes={['btn-primary', 'state-tag']}
       styles={tagStyle({ name: theme.name, state: MR_STATE[mrState] })}
-      icon={mrState === MR_STATE.Opened ? <AlertCircle /> : <GitPullRequest />}
+      icon={
+        mrState === MR_STATE.Opened ? (
+          <AlertCircle style={{ marginRight: '0.2rem' }} />
+        ) : (
+          <GitPullRequest style={{ marginRight: '0.2rem' }} />
+        )
+      }
       text={mrState}
     />
   )
