@@ -1,13 +1,10 @@
 import React, { useContext } from 'react'
 import {
-  GitCommit,
-  GitMerge,
-  User,
-  ChevronUp,
-  ChevronDown,
+  GitCommit, GitMerge, ChevronUp, ChevronDown,
 } from 'react-feather'
 
 import { ThemeContext } from '../../../store/ThemeStore'
+import Author from '../Author/Author'
 
 import './Build.scss'
 
@@ -23,9 +20,6 @@ const CardHeader = ({
   cardStateTags,
 }) => {
   const { theme } = useContext(ThemeContext)
-  const colorInteractiveText = {
-    color: theme.text.blockTitle,
-  }
 
   const CardIconMasterWithMr = isMaster && buildHasMr && (
     <div className="card-left-icon rotate-merge">
@@ -58,22 +52,6 @@ const CardHeader = ({
     </>
   )
 
-  const Author = buildAuthorName && (
-    <div className="card-author">
-      {buildAuthorName && buildAuthorId ? (
-        <a
-          href={buildAuthorId}
-          style={colorInteractiveText}
-          className="interactive-text"
-        >
-          {buildAuthorName}
-        </a>
-      ) : (
-        buildAuthorName
-      )}
-    </div>
-  )
-
   const ChevronIcon = (
     <div
       style={{
@@ -86,25 +64,16 @@ const CardHeader = ({
     </div>
   )
 
-  const AuthorImage = buildAuthorId && buildAuthorAvatarUrl ? (
-    <div className="card-avatar">
-      <a href={buildAuthorId}>
-        <img src={buildAuthorAvatarUrl} alt={buildAuthorId} />
-      </a>
-    </div>
-  ) : (
-    <div className="card-avatar" title="Unknown author">
-      <User color={theme.text.sectionText} size={14} />
-    </div>
-  )
-
   return (
     <>
       <div className={`card-row${!collapsed ? ' expanded' : ''}`}>
         {CardIcon}
         {cardTitle}
-        {Author}
-        {AuthorImage}
+        <Author
+          authorName={buildAuthorName || undefined}
+          authorUrl={buildAuthorId}
+          avatarUrl={buildAuthorAvatarUrl}
+        />
         {ChevronIcon}
       </div>
       {collapsed && cardStateTags && (

@@ -103,36 +103,6 @@
         }
     }
 
-    .card div.card-row .card-author {
-        display: none;
-        @include sm {
-            display: block;
-            font-size: small;
-            margin-right: 0.5rem;
-            flex-shrink: 0;
-        }
-    }
-
-    .card div.card-row .card-avatar {
-        margin-right: 0.4rem;
-        @include xs {
-            margin-right: 0.75rem;
-        }
-        flex-shrink: 0;
-        display: flex;
-        a {
-            text-decoration: none;
-        }
-        img {
-            margin: 0px;
-            margin-top: -0.25rem;
-            padding: 0px;
-            height: 1.25rem;
-            width: 1.25rem;
-            border-radius: 15%;
-        }
-    }
-
     // Build body
     .card div.card-row .card-details {
         display: flex;
