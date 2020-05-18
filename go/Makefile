@@ -1,4 +1,4 @@
-DEV_RUN_OPTS ?= --dev-mode
+DEV_RUN_OPTS ?= --dev-mode --artifacts-cache-path=./cache/artifacts --http-cache-path=./cache/http
 
 GO_TEST_OPTS ?= -test.timeout=60s
 

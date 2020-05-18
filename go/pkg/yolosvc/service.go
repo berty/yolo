@@ -3,6 +3,7 @@ package yolosvc
 import (
 	"context"
 	"net/http"
+	"sync"
 	"time"
 
 	"berty.tech/yolo/v2/go/pkg/bintray"
@@ -27,27 +28,30 @@ type Service interface {
 }
 
 type service struct {
-	startTime  time.Time
-	db         *gorm.DB
-	logger     *zap.Logger
-	bkc        *buildkite.Client
-	btc        *bintray.Client
-	ccc        *circleci.Client
-	ghc        *github.Client
-	authSalt   string
-	devMode    bool
-	clearCache *abool.AtomicBool
+	startTime           time.Time
+	db                  *gorm.DB
+	logger              *zap.Logger
+	bkc                 *buildkite.Client
+	btc                 *bintray.Client
+	ccc                 *circleci.Client
+	ghc                 *github.Client
+	authSalt            string
+	devMode             bool
+	clearCache          *abool.AtomicBool
+	artifactsCachePath  string
+	artifactsCacheMutex sync.Mutex
 }
 
 type ServiceOpts struct {
-	BuildkiteClient *buildkite.Client
-	CircleciClient  *circleci.Client
-	BintrayClient   *bintray.Client
-	GithubClient    *github.Client
-	Logger          *zap.Logger
-	AuthSalt        string
-	DevMode         bool
-	ClearCache      *abool.AtomicBool
+	BuildkiteClient    *buildkite.Client
+	CircleciClient     *circleci.Client
+	BintrayClient      *bintray.Client
+	GithubClient       *github.Client
+	Logger             *zap.Logger
+	AuthSalt           string
+	DevMode            bool
+	ClearCache         *abool.AtomicBool
+	ArtifactsCachePath string
 }
 
 func NewService(db *gorm.DB, opts ServiceOpts) (Service, error) {
@@ -59,16 +63,17 @@ func NewService(db *gorm.DB, opts ServiceOpts) (Service, error) {
 	}
 
 	return &service{
-		startTime:  time.Now(),
-		db:         db,
-		logger:     opts.Logger,
-		bkc:        opts.BuildkiteClient,
-		btc:        opts.BintrayClient,
-		ccc:        opts.CircleciClient,
-		ghc:        opts.GithubClient,
-		authSalt:   opts.AuthSalt,
-		devMode:    opts.DevMode,
-		clearCache: opts.ClearCache,
+		startTime:          time.Now(),
+		db:                 db,
+		logger:             opts.Logger,
+		bkc:                opts.BuildkiteClient,
+		btc:                opts.BintrayClient,
+		ccc:                opts.CircleciClient,
+		ghc:                opts.GithubClient,
+		authSalt:           opts.AuthSalt,
+		devMode:            opts.DevMode,
+		clearCache:         opts.ClearCache,
+		artifactsCachePath: opts.ArtifactsCachePath,
 	}, nil
 }
 
