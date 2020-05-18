@@ -1,0 +1,15 @@
+.hr {
+    position: relative;
+    width: 90%;
+    margin: 1rem auto;
+    height: 1px;
+}
+
+.hr-text {
+    position: absolute;
+    left: 50%;
+    margin-left: -50px;
+    top: -0.5rem;
+    width: min-content;
+    white-space: nowrap;
+}

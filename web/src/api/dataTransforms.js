@@ -1,23 +1,38 @@
-import { BRANCH } from '../constants'
-import {
-  getHasKey,
-  getStrUpperCase,
-  getStrEquNormalized,
-} from '../util/getters'
+import { getHasKey } from '../util/getters'
+import { getIsNextDay } from '../util/date'
 
-export const buildBranchIsMaster = (build) => getStrUpperCase(build.branch) === BRANCH.MASTER
-
-export const oneBuildResultHasBranchMaster = (builds) => !!Array.isArray(builds) && builds.find((build) => buildBranchIsMaster(build))
+/**
+ * Adds entry {buildIsFirstOfDay: boolean} to each build
+ *   that has its own block in build list
+ *
+ * Assumes builds are sorted in descending order by build.created_at
+ *
+ * @param  {Array<BuildObject>} sortedTopLevelBuilds
+ * @return {Array<BuildObject>}
+ */
+export const flagBuildsFirstOfDay = (sortedTopLevelBuilds) => Array.isArray(sortedTopLevelBuilds)
+  && sortedTopLevelBuilds.reduce((acc, build, i) => {
+    const isFirstBuild = i === 0
+    const { created_at: buildCreatedAt = null } = build
+    const { created_at: laterBuildCreatedAt = null } = acc[i - 1] || {}
+    acc[i] = {
+      ...build,
+      buildIsFirstOfDay:
+        isFirstBuild || !!getIsNextDay(buildCreatedAt, laterBuildCreatedAt),
+    }
+    return acc
+  }, [])
 
 /**
  * Returns a new copy of builds[],
  * keeping only the first build from each unique merge request.
  *
- * Appends key 'allbuilds'
- *
- * build.allBuilds is an array of ints,
- * each corresponds to other builds in state.builds
+ * Adds entry {allBuilds: Array<int>} to each build,
+ * each int corresponds to builds indices in state.builds
  *   with the same merge request ID
+ *
+ * @param  {Array<BuildObject>} builds
+ * @return {Array<BuildObject>}
  */
 export const groupBuildsByMr = (builds) => {
   const buildDict = builds
@@ -26,17 +41,14 @@ export const groupBuildsByMr = (builds) => {
       const {
         has_mergerequest: hasMergeRequest,
         has_mergerequest_id: buildMrId,
-        branch: buildBranch = '',
       } = build
 
-      const isMaster = getStrEquNormalized(buildBranch, BRANCH.MASTER)
       if (!hasMergeRequest || !buildMrId) {
         return {
           ...acc,
           [build.id]: {
             ...build,
             allBuilds: [i],
-            hasMaster: !!isMaster,
           },
         }
       }
@@ -52,7 +64,6 @@ export const groupBuildsByMr = (builds) => {
         acc[buildMrId] = { ...build }
         acc[buildMrId].allBuilds = [i]
       }
-      acc[buildMrId].hasMaster = acc[buildMrId].hasMaster || isMaster
       return acc
     }, {})
   const groupedBuildList = Object.entries(buildDict).map((b) => b[1])
