@@ -14,7 +14,9 @@ import { removeAuthCookie } from '../../../api/auth'
 import {
   ARTIFACT_KIND_VALUE,
   ARTIFACT_VALUE_KIND,
+  BUILD_DRIVERS,
   PROJECT,
+  BUILD_DRIVER_TO_NAME,
 } from '../../../constants'
 
 const Filters = ({ onFilterClick }) => {
@@ -32,9 +34,16 @@ const Filters = ({ onFilterClick }) => {
 
   const FiltersAppWidget = () => (
     <>
-      {isArrayWithStuff(state.calculatedFilters.projects)
+      {isArrayWithStuff(state.calculatedFilters?.projects)
         && state.calculatedFilters.projects.includes(PROJECT.chat) && (
-          <div className="widget-wrapper is-interactive" style={headerWidgetWrapperColors} onClick={onFilterClick} onKeyDown={onFilterClick} role="button" tabIndex={0}>
+          <div
+            className="widget-wrapper is-interactive"
+            style={headerWidgetWrapperColors}
+            onClick={onFilterClick}
+            onKeyDown={onFilterClick}
+            role="button"
+            tabIndex={0}
+          >
             <IconChat stroke={widgetAccentColor} />
             <p className="widget-text">{PROJECT.chat}</p>
           </div>
@@ -43,7 +52,14 @@ const Filters = ({ onFilterClick }) => {
         && state.calculatedFilters.projects.includes(
           PROJECT['gomobile-ipfs-demo'],
         ) && (
-          <div className="widget-wrapper is-interactive" style={headerWidgetWrapperColors} onClick={onFilterClick} onKeyDown={onFilterClick} role="button" tabIndex={0}>
+          <div
+            className="widget-wrapper is-interactive"
+            style={headerWidgetWrapperColors}
+            onClick={onFilterClick}
+            onKeyDown={onFilterClick}
+            role="button"
+            tabIndex={0}
+          >
             <FontAwesomeIcon
               icon={faCube}
               size="lg"
@@ -55,38 +71,69 @@ const Filters = ({ onFilterClick }) => {
     </>
   )
 
-  const ArtifactKindsFilter = () => (
-    isArrayWithStuff(state.uiFilters.artifact_kinds) && (
-      <div className="widget-wrapper is-interactive" style={headerWidgetWrapperColors} onClick={onFilterClick} onKeyDown={onFilterClick} role="button" tabIndex={0}>
-        {state.uiFilters.artifact_kinds.map((kind, i) => (
-          <FontAwesomeIcon
-            key={i}
-            size="lg"
-            color={widgetAccentColor}
-            icon={
+  const ArtifactKindsFilter = () => isArrayWithStuff(state.uiFilters.artifact_kinds) && (
+  <div
+    className="widget-wrapper is-interactive"
+    style={headerWidgetWrapperColors}
+    onClick={onFilterClick}
+    onKeyDown={onFilterClick}
+    role="button"
+    tabIndex={0}
+  >
+    {state.uiFilters.artifact_kinds.map((kind, i) => (
+      <FontAwesomeIcon
+        key={i}
+        size="lg"
+        color={widgetAccentColor}
+        icon={
               kind === ARTIFACT_KIND_VALUE.IPA
-                || kind === ARTIFACT_KIND_VALUE.DMG
+              || kind === ARTIFACT_KIND_VALUE.DMG
                 ? faApple
                 : kind === ARTIFACT_KIND_VALUE.APK
                   ? faAndroid
                   : faQuestionCircle
             }
-            title={ARTIFACT_VALUE_KIND[kind.toString()] || ''}
-          />
-        ))}
-      </div>
-    )
+        title={ARTIFACT_VALUE_KIND[kind.toString()] || ''}
+      />
+    ))}
+  </div>
   )
 
   const FiltersBranchWidget = () => {
     const BranchFilter = <GitBranch color={widgetAccentColor} />
     return (
-      <div className="widget-wrapper is-interactive" style={headerWidgetWrapperColors} onClick={onFilterClick} onKeyDown={onFilterClick} role="button" tabIndex={0}>
+      <div
+        className="widget-wrapper is-interactive"
+        style={headerWidgetWrapperColors}
+        onClick={onFilterClick}
+        onKeyDown={onFilterClick}
+        role="button"
+        tabIndex={0}
+      >
         {BranchFilter}
         <p className="widget-text">All</p>
       </div>
     )
   }
+
+  const FiltersBuildDriver = () => (
+    <>
+      {BUILD_DRIVERS.filter((driver) => state.uiFilters.build_driver.includes(driver.toString())).map((build, i) => (
+        <div
+          className="widget-wrapper is-interactive"
+          style={headerWidgetWrapperColors}
+          onClick={onFilterClick}
+          onKeyDown={onFilterClick}
+          role="button"
+          title={BUILD_DRIVER_TO_NAME[build]}
+          tabIndex={0}
+          key={i}
+        >
+          <p className="widget-text no-svg">{BUILD_DRIVER_TO_NAME[build]}</p>
+        </div>
+      ))}
+    </>
+  )
 
   const RefreshActionButton = (
     <div
@@ -143,6 +190,7 @@ const Filters = ({ onFilterClick }) => {
       {FiltersAppWidget()}
       {ArtifactKindsFilter()}
       {FiltersBranchWidget()}
+      <FiltersBuildDriver />
       {RefreshActionButton}
       {Logout}
     </div>

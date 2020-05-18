@@ -60,6 +60,14 @@ export const BUILD_DRIVER_TO_NAME = {
   4: 'GitHub',
 }
 
+export const BUILD_DRIVER_NAMES = {
+  UnknownDriver: 'UnknownDriver',
+  Buildkite: 'Buildkite',
+  CircleCI: 'CircleCI',
+  Bintray: 'Bintray',
+  GitHub: 'GitHub',
+}
+
 export const BUILD_DRIVERS = Object.values(BUILD_DRIVER_VALUE)
 
 export const PROJECT_BUILD_DRIVER = {

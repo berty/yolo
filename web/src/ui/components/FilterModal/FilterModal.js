@@ -24,6 +24,8 @@ import {
   BRANCH_TO_DISPLAY_NAME,
   PROJECT_ARTIFACT_KINDS,
   PROJECT_BUILD_DRIVER,
+  BUILD_DRIVERS,
+  BUILD_DRIVER_TO_NAME,
 } from '../../../constants'
 import ThemeToggler from '../ThemeToggler'
 import { removeAuthCookie } from '../../../api/auth'
@@ -195,6 +197,42 @@ const FilterModal = ({ closeAction }) => {
     )
   }
 
+  const BuildDriverFilter = ({ buildDriverValue }) => {
+    const selected = selectedDrivers.includes(buildDriverValue)
+    const colorWidget = colorsWidget({ selected })
+    const buildDriverDisplayName = BUILD_DRIVER_TO_NAME[buildDriverValue]
+      || `Unknown Driver :${buildDriverValue}`
+    const widgetClass = classNames('modal-filter-widget', {
+      'modal-filter-not-implemented': false,
+      'cannot-unselect': false,
+    })
+    const toggleBuildDriver = () => {
+      setSelectedDrivers(
+        selected
+          ? selectedDrivers.filter((d) => d !== buildDriverValue)
+          : [...selectedDrivers, buildDriverValue],
+      )
+    }
+
+    return (
+      <div
+        className={widgetClass}
+        style={colorWidget}
+        onClick={toggleBuildDriver}
+        onKeyDown={toggleBuildDriver}
+        tabIndex={0}
+        role="button"
+        title={
+          selected
+            ? `Remove build driver ${buildDriverDisplayName}`
+            : `Add build driver ${buildDriverDisplayName}`
+        }
+      >
+        <p className="filter-text">{buildDriverDisplayName}</p>
+      </div>
+    )
+  }
+
   return (
     <>
       <div className="faded" />
@@ -239,6 +277,17 @@ const FilterModal = ({ closeAction }) => {
                   {ArtifactFilter({ artifact_kind: '1' })}
                   {ArtifactFilter({ artifact_kind: '2' })}
                   {ArtifactFilter({ artifact_kind: '3' })}
+                </div>
+                <div style={colorsModalTitle} className="subtitle">
+                  Build Drivers
+                </div>
+                <div className="filter-row">
+                  {BUILD_DRIVERS.map((buildDriverValue, i) => (
+                    <BuildDriverFilter
+                      buildDriverValue={buildDriverValue}
+                      key={i}
+                    />
+                  ))}
                 </div>
                 <div style={colorsModalTitle} className="subtitle">
                   Branches

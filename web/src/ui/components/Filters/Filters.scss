@@ -1,41 +1,41 @@
-@import '../../../assets/main.scss';
+@import "../../../assets/main.scss";
 
 .Filters {
-  display: flex;
-  flex-wrap: wrap;
-  align-content: space-around;
-  @include md {
-    flex-wrap: nowrap;
-  }
-
-  .widget-wrapper {
     display: flex;
-    align-items: center;
-    justify-content: space-around;
-    padding: 0.6rem 1rem;
-    border-width: 2px;
-    border-style: solid;
-    border-radius: 1rem;
-    margin-right: 0.75rem;
-    margin-top: 0.4rem;
-    svg {
-      margin-left: 0.6rem;
+    flex-wrap: wrap;
+    align-content: space-around;
+    @include md {
+        flex-wrap: nowrap;
     }
-    svg:first-child {
-      margin-left: 0px;
-    }
-    &.is-interactive {
-      cursor: pointer;
-    }
-  }
 
-  p.widget-text {
-    font-size: 0.8rem;
-    padding: 0px;
-    margin: 0px;
-    margin-left: 1rem;
-    &.no-svg {
-      margin-left: 0rem;
+    .widget-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        padding: 0.6rem 1rem;
+        border-width: 2px;
+        border-style: solid;
+        border-radius: 1rem;
+        margin-right: 0.75rem;
+        margin-top: 0.4rem;
+        svg {
+            margin-left: 0.6rem;
+        }
+        svg:first-child {
+            margin-left: 0px;
+        }
+        &.is-interactive {
+            cursor: pointer;
+        }
     }
-  }
+
+    p.widget-text {
+        font-size: 0.8rem;
+        padding: 0px;
+        margin: 0px;
+        margin-left: 1rem;
+        &.no-svg {
+            margin-left: 0rem;
+        }
+    }
 }
