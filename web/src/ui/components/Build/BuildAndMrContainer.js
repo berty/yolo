@@ -5,6 +5,8 @@ import {
   AlertCircle,
   Calendar,
   Link as LinkIcon,
+  ChevronDown,
+  ChevronUp,
 } from 'react-feather'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
@@ -21,14 +23,19 @@ import ArtifactRow from './ArtifactRow'
 import AnchorLink from '../AnchorLink/AnchorLink'
 import Tag from '../../Tag/Tag'
 
-import { MR_STATE, BUILD_STATE, BRANCH } from '../../../constants'
+import { MR_STATE, BUILD_STATE } from '../../../constants'
 import { getRelativeTime, getTimeLabel } from '../../../util/date'
-import { getIsArr, getStrEquNormalized } from '../../../util/getters'
+import { getIsArr } from '../../../util/getters'
 
 import './Build.scss'
 
-const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
+const BuildAndMergeRequest = ({
+  build, mr, isDetailed, isMaster,
+}) => {
   const [messageExpanded, toggleMessageExpanded] = useState(false)
+  const [showingArtifacts, toggleShowingArtifacts] = useState(
+    isDetailed || isMaster,
+  )
 
   const {
     theme,
@@ -246,6 +253,35 @@ const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
     />
   )
 
+  const artifactsMessagePrefix = showingArtifacts ? 'hide' : 'show'
+
+  const artifactsMessage = getIsArr(buildHasArtifacts)
+    ? `${artifactsMessagePrefix} ${buildHasArtifacts.length} artifact${
+      buildHasArtifacts.length > 1 ? 's' : ''
+    }`
+    : ''
+
+  const ArtifactsCount = () => getIsArr(buildHasArtifacts) && (
+  <Tag
+    text={artifactsMessage}
+    classes={['btn-info-tag']}
+    title={artifactsMessage}
+    icon={
+          showingArtifacts ? (
+            <ChevronUp color={blockTitle} />
+          ) : (
+            <ChevronDown color={blockTitle} />
+          )
+        }
+    styles={tagStyle({
+      name: theme.name,
+      state: null,
+      cursor: 'pointer',
+    })}
+    onClick={() => toggleShowingArtifacts(!showingArtifacts)}
+  />
+  )
+
   const SharableBuildLink = (
     <AnchorLink target={`?build_id=${buildId}`}>
       <LinkIcon size={16} />
@@ -281,6 +317,7 @@ const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
             {BuildDriver}
             {BuildUpdatedAt}
             {BuildCreatedAt}
+            {buildHasArtifacts && <ArtifactsCount />}
           </div>
         </div>
         {isDetailed && (
@@ -290,9 +327,7 @@ const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
           </div>
         )}
       </div>
-      {isDetailed
-        && getIsArr(buildHasArtifacts)
-        && getStrEquNormalized(buildBranch, BRANCH.MASTER)
+      {showingArtifacts
         && buildHasArtifacts.map((artifact) => (
           <ArtifactRow
             artifact={artifact}
