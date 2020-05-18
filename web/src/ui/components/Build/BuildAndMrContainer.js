@@ -17,14 +17,15 @@ import {
 import { ThemeContext } from '../../../store/ThemeStore'
 
 import { tagStyle } from '../../styleTools/buttonStyler'
-import ArtifactCard from './ArtifactCard'
-
-import { MR_STATE, BUILD_STATE } from '../../../constants'
-import { getRelativeTime, getTimeLabel } from '../../../util/date'
-
-import './Build.scss'
+import ArtifactRow from './ArtifactRow'
 import AnchorLink from '../AnchorLink/AnchorLink'
 import Tag from '../../Tag/Tag'
+
+import { MR_STATE, BUILD_STATE, BRANCH } from '../../../constants'
+import { getRelativeTime, getTimeLabel } from '../../../util/date'
+import { getIsArr, getStrEquNormalized } from '../../../util/getters'
+
+import './Build.scss'
 
 const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
   const [messageExpanded, toggleMessageExpanded] = useState(false)
@@ -177,6 +178,8 @@ const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
 
   const BuildCommit = buildCommitId && (
     <div title={buildCommitId}>
+      Commit
+      {' '}
       {mrCommitUrl ? (
         <a
           href={mrCommitUrl}
@@ -273,7 +276,7 @@ const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
           )}
 
           <div className="card-details-row" style={{ alignSelf: 'flex-start' }}>
-            {!isDetailed && <div>{`Build ${buildShortId || buildId}`}</div>}
+            <div>{`Build ${buildShortId || buildId}`}</div>
             {BuildStateTag}
             {BuildDriver}
             {BuildUpdatedAt}
@@ -288,9 +291,10 @@ const BuildAndMergeRequest = ({ build, mr, isDetailed }) => {
         )}
       </div>
       {isDetailed
-        && buildHasArtifacts
+        && getIsArr(buildHasArtifacts)
+        && getStrEquNormalized(buildBranch, BRANCH.MASTER)
         && buildHasArtifacts.map((artifact) => (
-          <ArtifactCard
+          <ArtifactRow
             artifact={artifact}
             buildMergeUpdatedAt={buildMergeUpdatedAt}
             buildStartedAt={buildStartedAt}

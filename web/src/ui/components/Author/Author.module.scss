@@ -1,0 +1,36 @@
+@import "../../../assets/main.scss";
+
+.author-wrapper {
+    display: flex;
+    align-self: flex-start;
+    margin-top: -0.25rem;
+}
+
+.author-url-name,
+.author-url-name:hover,
+.author-url-name:active {
+    text-decoration: none;
+}
+
+.author-avatar-wrapper {
+    margin-right: 0.4rem;
+    @include xs {
+        margin-right: 0.75rem;
+    }
+    flex-shrink: 0;
+    img,
+    svg {
+        height: 1.25rem;
+        width: 1.25rem;
+        border-radius: 15%;
+    }
+}
+
+.author-name-wrapper {
+    display: none;
+    @include sm {
+        display: block;
+        margin-right: 0.5rem;
+        flex-shrink: 0;
+    }
+}

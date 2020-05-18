@@ -7,7 +7,7 @@ import { BRANCH, BUILD_STATE, ARTIFACT_KIND_NAMES } from '../../../constants'
 import './Build.scss'
 import CardTitle from './CardTitle'
 import CardHeader from './CardHeader'
-import BuildAndMergeRequest from './BuildAndMergeRequest'
+import BuildAndMrContainer from './BuildAndMrContainer'
 import { ResultContext } from '../../../store/ResultStore'
 import { tagStyle } from '../../styleTools/buttonStyler'
 import Tag from '../../Tag/Tag'
@@ -149,7 +149,7 @@ const BuildContainer = ({ build, toCollapse, children }) => {
         />
         {!collapsed
           && allBuilds.map((b, i) => (
-            <BuildAndMergeRequest
+            <BuildAndMrContainer
               {...{
                 build: state.builds[b],
                 mr: buildHasMr,

@@ -5,3 +5,5 @@ export const getHasKey = (val, key) => val && typeof val === 'object' && typeof 
 export const getStrEquNormalized = (str1, str2) => getStrUpperCase(str1)
   && getStrUpperCase(str2)
   && getStrUpperCase(str1) === getStrUpperCase(str2)
+
+export const getIsArr = (val) => val && Array.isArray(val)
