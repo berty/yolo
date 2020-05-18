@@ -154,6 +154,7 @@ const BuildContainer = ({ build, toCollapse, children }) => {
                 build: state.builds[b],
                 mr: buildHasMr,
                 isDetailed: i === 0,
+                isMaster,
               }}
               key={i}
             />
