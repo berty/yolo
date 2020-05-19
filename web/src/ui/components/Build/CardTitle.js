@@ -25,10 +25,10 @@ const CardTitle = ({
   const buildDisplayId = buildDisplayShortId || <>{buildId}</>
 
   const CardTitleMasterNoMr = isMaster && (
-  <>
-    Master - build
-    {buildDisplayId}
-  </>
+    <>
+      Master - build
+      {buildDisplayId}
+    </>
   )
   const CardTitleMasterWithMr = isMaster && buildHasMr && <>Master</>
   const CardTitlePullWithMr = !isMaster && mrShortId && (
