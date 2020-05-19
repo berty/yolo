@@ -27,6 +27,7 @@ const Home = () => {
   const [showingFiltersModal, toggleShowFilters] = useState(false)
   const [showingDisclaimerModal, toggleShowDisclaimer] = useState(false)
   const [needsNewFetch, setNeedsNewFetch] = useState(true)
+  const [autoRefreshOn, setAutoRefreshOn] = useState(false)
   const { search: locationSearch } = useLocation()
   const history = useHistory()
 
@@ -74,6 +75,7 @@ const Home = () => {
       updateState({
         error: null,
         isLoaded: false,
+        builds: [],
       })
       getBuildList({
         apiKey: state.apiKey,
@@ -91,17 +93,19 @@ const Home = () => {
           },
           (error) => {
             const validatedError = validateError({ error })
-            const { status } = validateError
+            const { status } = validatedError
             updateState({
               error: validatedError,
               isAuthed: status !== 401,
             })
+            setAutoRefreshOn(false)
           },
         )
         .finally(() => {
           setNeedsNewFetch(false)
           updateState({
             isLoaded: true,
+            needsQuietRefresh: false,
           })
         })
     }
@@ -138,6 +142,33 @@ const Home = () => {
     if (state.needsRefresh === true) triggerNewQuery()
   }, [state.needsRefresh])
 
+  useEffect(() => {
+    let timer
+    if (
+      !showingDisclaimerModal
+      && !showingFiltersModal
+      && autoRefreshOn
+    ) {
+      clearInterval(timer)
+      timer = setInterval(() => {
+        updateState({
+          needsQuietRefresh: true,
+          needsRefresh: true,
+        })
+      }, 10000)
+    } else {
+      clearInterval(timer)
+    }
+    return () => {
+      clearInterval(timer)
+    }
+  }, [
+    showingDisclaimerModal,
+    showingFiltersModal,
+    autoRefreshOn,
+    updateState,
+  ])
+
   const setDisclaimerAccepted = (accepted) => {
     Cookies.set('disclaimerAccepted', 1, { expires: 7 })
     toggleShowDisclaimer(!accepted)
@@ -146,7 +177,7 @@ const Home = () => {
   return (
     <div className="Home">
       <div className="page" style={{ backgroundColor: theme.bg.page }}>
-        <Header onFilterClick={() => toggleShowFilters(true)} />
+        <Header autoRefreshOn={autoRefreshOn} setAutoRefreshOn={setAutoRefreshOn} onFilterClick={() => toggleShowFilters(true)} />
         {state.error && <ErrorDisplay error={state.error} />}
         {state.error && state.error.status === 401 && (
           <ApiKeyPrompt failedKey={state.apiKey} updateState={updateState} />

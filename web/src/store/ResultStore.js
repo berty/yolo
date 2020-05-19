@@ -13,13 +13,15 @@ export const ResultContext = React.createContext()
 
 export const INITIAL_STATE = {
   apiKey: retrieveAuthCookie() || null,
-  isAuthed: false,
-  error: null,
-  isLoaded: false,
-  builds: [],
+  autoRefreshOn: false,
   baseURL: `${process.env.API_SERVER}`,
+  builds: [],
+  error: null,
+  isAuthed: false,
+  isLoaded: false,
   needsProgrammaticQuery: false,
   needsRefresh: false,
+  needsQuietRefresh: false,
   uiFilters: {
     artifact_kinds: [ARTIFACT_KIND_VALUE.IPA],
     build_driver: [PROJECT_BUILD_DRIVER[PROJECT.chat]],

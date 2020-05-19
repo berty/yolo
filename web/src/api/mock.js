@@ -6,8 +6,13 @@ import axios from 'axios'
  * e.g. process.env.MOCK_DATA_FILE_ENDPOINT = 'localhost:8000/data.json'
  * { "JSON": { "builds": [...]}}
  */
-export const baseMockRequest = () => axios.get(`${process.env.MOCK_DATA_FILE_ENDPOINT}`).then((response) => {
-  const result = response.data.JSON
-  const { builds } = result
-  return { data: { builds } }
-})
+export const baseMockRequest = () => axios.get(`${process.env.MOCK_DATA_FILE_ENDPOINT}`)
+  .then(async (response) => {
+    await new Promise((r) => setTimeout(r, 600))
+    return response
+  })
+  .then((response) => {
+    const result = response.data.JSON
+    const { builds } = result
+    return { data: { builds } }
+  })
