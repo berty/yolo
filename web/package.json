@@ -37,6 +37,7 @@
     "core-js": "3.6.4",
     "dayjs": "^1.8.25",
     "js-cookie": "^2.2.1",
+    "qrcode.react": "^1.0.0",
     "react": "16.13.1",
     "react-copy-to-clipboard": "^5.0.2",
     "react-dom": "16.13.1",

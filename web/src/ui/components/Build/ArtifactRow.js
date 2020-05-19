@@ -1,7 +1,9 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { Clock, Calendar, Link as LinkIcon } from 'react-feather'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faFile, faHammer } from '@fortawesome/free-solid-svg-icons'
+import { faFile, faHammer, faQrcode } from '@fortawesome/free-solid-svg-icons'
+import QRCode from 'qrcode.react'
+
 import { ThemeContext } from '../../../store/ThemeStore'
 
 import { tagStyle } from '../../styleTools/buttonStyler'
@@ -14,6 +16,7 @@ import './Build.scss'
 import AnchorLink from '../AnchorLink/AnchorLink'
 import Tag from '../../Tag/Tag'
 import ArtifactActionButton from './ArtifactActionButton'
+import QRCodeModal from '../QRCodeModal'
 
 const ArtifactCard = ({
   artifact,
@@ -23,6 +26,7 @@ const ArtifactCard = ({
   buildShortId,
 }) => {
   const { theme } = useContext(ThemeContext)
+  const [showingQrModal, toggleShowQrModal] = useState(false)
   const {
     id: artifactId = '',
     state: artifactState = '',
@@ -57,7 +61,7 @@ const ArtifactCard = ({
     />
   )
 
-  const ArtifactMainButton = (
+  const ArtifactMainButton = () => (
     <ArtifactActionButton
       {...{
         artifactState,
@@ -120,13 +124,36 @@ const ArtifactCard = ({
   )
 
   const SharableArtifactLink = ({ implemented = false }) => implemented && (
-  <AnchorLink target={`?artifact_id=${artifactId}`}>
-    <LinkIcon size={16} />
-  </AnchorLink>
+    <AnchorLink target={`?artifact_id=${artifactId}`}>
+      <LinkIcon size={16} />
+    </AnchorLink>
+  )
+
+  const QrCode = () => (
+    <QRCodeModal closeAction={() => toggleShowQrModal(false)}>
+      <QRCode
+        value={`itms-services://?action=download-manifest&url=${process.env.API_SERVER}${artifactPlistSignedUrl}`}
+        renderAs="svg"
+      />
+    </QRCodeModal>
+  )
+
+  const ArtifactQrButton = () => (
+    <div
+      onClick={() => toggleShowQrModal(true)}
+      className="btn btn-large-icon"
+      title="Show QR code"
+    >
+      <FontAwesomeIcon icon={faQrcode} size="2x" color={theme.text.blockTitle} />
+    </div>
   )
 
   return (
     <React.Fragment key={artifactId}>
+      {showingQrModal && artifactPlistSignedUrl && (
+        <QrCode />
+      )}
+
       <div
         className="card-row expanded"
         style={{ color: theme.text.sectionText }}
@@ -152,7 +179,11 @@ const ArtifactCard = ({
             {ArtifactDriver}
           </div>
         </div>
-        <div>{ArtifactMainButton}</div>
+        <div className="card-right-container">
+          {/* TODO: Factor out */}
+          <ArtifactMainButton />
+          {artifactPlistSignedUrl && <ArtifactQrButton />}
+        </div>
       </div>
     </React.Fragment>
   )

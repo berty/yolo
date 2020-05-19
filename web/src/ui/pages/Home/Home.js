@@ -9,7 +9,6 @@ import ErrorDisplay from '../../components/ErrorDisplay/ErrorDisplay'
 import ApiKeyPrompt from '../../components/ApiKeyPrompt'
 import ShowFiltersButton from '../../components/ShowFiltersButton'
 import FilterModal from '../../components/FilterModal/FilterModal'
-import MessageModal from '../../components/MessageModal/MessageModal'
 
 import { ThemeContext } from '../../../store/ThemeStore'
 import { ResultContext } from '../../../store/ResultStore'
@@ -20,6 +19,7 @@ import { getBuildList, validateError } from '../../../api'
 import BuildListContainer from '../../components/BuildListContainer'
 
 import './Home.scss'
+import ProtocolDisclaimer from '../../components/ProtocolDisclaimer'
 
 const Home = () => {
   const { theme } = useContext(ThemeContext)
@@ -160,7 +160,7 @@ const Home = () => {
         />
       </div>
       {showingDisclaimerModal && (
-        <MessageModal closeAction={() => setDisclaimerAccepted(true)} />
+        <ProtocolDisclaimer closeAction={() => setDisclaimerAccepted(true)} />
       )}
       {!showingFiltersModal && state.isAuthed && (
         <ShowFiltersButton
