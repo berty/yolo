@@ -10,4 +10,6 @@ logs:
 
 down:
 	docker-compose down
+	
+flushdb: down
 	rm -f data/yolo.sqlite || sudo rm -f data/yolo.sqlite
