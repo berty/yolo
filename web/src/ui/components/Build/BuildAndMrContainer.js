@@ -29,7 +29,7 @@ import { getIsArr } from '../../../util/getters'
 
 import './Build.scss'
 
-const BuildAndMergeRequest = ({
+const BuildAndMrContainer = ({
   build, mr, isDetailed, isMaster,
 }) => {
   const [messageExpanded, toggleMessageExpanded] = useState(false)
@@ -262,24 +262,24 @@ const BuildAndMergeRequest = ({
     : ''
 
   const ArtifactsCount = () => getIsArr(buildHasArtifacts) && (
-  <Tag
-    text={artifactsMessage}
-    classes={['btn-info-tag']}
-    title={artifactsMessage}
-    icon={
-          showingArtifacts ? (
-            <ChevronUp color={blockTitle} />
-          ) : (
-            <ChevronDown color={blockTitle} />
-          )
-        }
-    styles={tagStyle({
-      name: theme.name,
-      state: null,
-      cursor: 'pointer',
-    })}
-    onClick={() => toggleShowingArtifacts(!showingArtifacts)}
-  />
+    <Tag
+      text={artifactsMessage}
+      classes={['btn-info-tag']}
+      title={artifactsMessage}
+      icon={
+        showingArtifacts ? (
+          <ChevronUp color={blockTitle} />
+        ) : (
+          <ChevronDown color={blockTitle} />
+        )
+      }
+      styles={tagStyle({
+        name: theme.name,
+        state: null,
+        cursor: 'pointer',
+      })}
+      onClick={() => toggleShowingArtifacts(!showingArtifacts)}
+    />
   )
 
   const SharableBuildLink = (
@@ -328,6 +328,7 @@ const BuildAndMergeRequest = ({
         )}
       </div>
       {showingArtifacts
+        && getIsArr(buildHasArtifacts)
         && buildHasArtifacts.map((artifact) => (
           <ArtifactRow
             artifact={artifact}
@@ -342,4 +343,4 @@ const BuildAndMergeRequest = ({
   )
 }
 
-export default BuildAndMergeRequest
+export default BuildAndMrContainer
