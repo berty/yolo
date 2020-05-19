@@ -52,9 +52,12 @@ Using the same credentials you can make direct calls to the API, available here:
 
 The API is described in protobuf-format here: https://github.com/berty/yolo/blob/master/api/yolopb.proto.
 
-```console
+```sh
 # last build for the berty app for iOS
-$ curl -su :TOKEN "https://yolo.berty.io/api/build-list?project_id=https://github.com/berty/berty&artifact_kinds=1" | jq '.builds[0]'
+curl -su :TOKEN "https://yolo.berty.io/api/build-list?project_id=https://github.com/berty/berty&artifact_kinds=1" | jq '.builds[0]'
+```
+
+```yaml
 {
   "id": "https://buildkite.com/berty/berty-open/builds/535",
   "created_at": "2020-04-29T15:06:33.796Z",
@@ -190,7 +193,7 @@ FLAGS
 
 ### Troubleshooting
 
-[TODO] _(please use [issues](https://github.com/berty/yolo))_
+_(please use [issues](https://github.com/berty/yolo))_
 
 ## Development
 
