@@ -1,5 +1,7 @@
 import React, { useContext } from 'react'
-import { GitBranch, LogOut } from 'react-feather'
+import {
+  GitBranch, LogOut, Check, X,
+} from 'react-feather'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faAndroid, faApple } from '@fortawesome/free-brands-svg-icons'
 import { faQuestionCircle, faCube } from '@fortawesome/free-solid-svg-icons'
@@ -19,7 +21,7 @@ import {
   BUILD_DRIVER_TO_NAME,
 } from '../../../constants'
 
-const Filters = ({ onFilterClick }) => {
+const Filters = ({ autoRefreshOn, onFilterClick, setAutoRefreshOn }) => {
   const { state, updateState } = useContext(ResultContext)
   const { theme } = useContext(ThemeContext)
   const widgetAccentColor = theme.icon.filterSelected
@@ -28,6 +30,28 @@ const Filters = ({ onFilterClick }) => {
     color: widgetAccentColor,
     borderColor: widgetAccentColor,
     backgroundColor: theme.bg.filter,
+  }
+
+  const colorsWidget = ({ selected } = { selected: false }) => {
+    const {
+      text: { filterSelectedTitle, filterUnselectedTitle },
+      bg: { filter: bgFilter },
+      border: {
+        filterSelected: selectedBorder,
+        filterUnselected: unselectedBorder,
+      },
+    } = theme
+    return selected
+      ? {
+        color: filterSelectedTitle,
+        borderColor: selectedBorder,
+        backgroundColor: bgFilter,
+      }
+      : {
+        color: filterUnselectedTitle,
+        borderColor: unselectedBorder,
+        background: 'transparent',
+      }
   }
 
   const isArrayWithStuff = (val) => !!val && Array.isArray(val) && val.length > 0
@@ -72,31 +96,31 @@ const Filters = ({ onFilterClick }) => {
   )
 
   const ArtifactKindsFilter = () => isArrayWithStuff(state.uiFilters.artifact_kinds) && (
-  <div
-    className="widget-wrapper is-interactive"
-    style={headerWidgetWrapperColors}
-    onClick={onFilterClick}
-    onKeyDown={onFilterClick}
-    role="button"
-    tabIndex={0}
-  >
-    {state.uiFilters.artifact_kinds.map((kind, i) => (
-      <FontAwesomeIcon
-        key={i}
-        size="lg"
-        color={widgetAccentColor}
-        icon={
-              kind === ARTIFACT_KIND_VALUE.IPA
+    <div
+      className="widget-wrapper is-interactive"
+      style={headerWidgetWrapperColors}
+      onClick={onFilterClick}
+      onKeyDown={onFilterClick}
+      role="button"
+      tabIndex={0}
+    >
+      {state.uiFilters.artifact_kinds.map((kind, i) => (
+        <FontAwesomeIcon
+          key={i}
+          size="lg"
+          color={widgetAccentColor}
+          icon={
+            kind === ARTIFACT_KIND_VALUE.IPA
               || kind === ARTIFACT_KIND_VALUE.DMG
-                ? faApple
-                : kind === ARTIFACT_KIND_VALUE.APK
-                  ? faAndroid
-                  : faQuestionCircle
-            }
-        title={ARTIFACT_VALUE_KIND[kind.toString()] || ''}
-      />
-    ))}
-  </div>
+              ? faApple
+              : kind === ARTIFACT_KIND_VALUE.APK
+                ? faAndroid
+                : faQuestionCircle
+          }
+          title={ARTIFACT_VALUE_KIND[kind.toString()] || ''}
+        />
+      ))}
+    </div>
   )
 
   const FiltersBranchWidget = () => {
@@ -153,9 +177,32 @@ const Filters = ({ onFilterClick }) => {
       tabIndex={0}
       title="Refresh the page"
     >
-      <div className="widget-text no-svg is-interactive">F5</div>
+      <p className="widget-text no-svg is-interactive">F5</p>
     </div>
   )
+
+  const SetAutoRefreshActionButton = () => {
+    const selected = !!autoRefreshOn
+    const colorWidget = colorsWidget({ selected })
+    return (
+      <div
+        className="widget-wrapper is-interactive"
+        style={colorWidget}
+        onClick={() => {
+          setAutoRefreshOn(!autoRefreshOn)
+        }}
+        onKeyDown={() => {
+          setAutoRefreshOn(!autoRefreshOn)
+        }}
+        role="button"
+        tabIndex={0}
+        title="Toggle auto refresh every 10 sec"
+      >
+        {selected ? <Check /> : <X />}
+        <p className="widget-text is-interactive">Auto Reload</p>
+      </div>
+    )
+  }
 
   const Logout = (
     <div
@@ -191,6 +238,7 @@ const Filters = ({ onFilterClick }) => {
       {ArtifactKindsFilter()}
       {FiltersBranchWidget()}
       <FiltersBuildDriver />
+      <SetAutoRefreshActionButton />
       {RefreshActionButton}
       {Logout}
     </div>

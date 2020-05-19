@@ -9,7 +9,7 @@ import { ResultContext, INITIAL_STATE } from '../../../store/ResultStore'
 
 import './Header.scss'
 
-const Header = ({ onFilterClick = () => { } }) => {
+const Header = ({ autoRefreshOn, setAutoRefreshOn, onFilterClick = () => { } }) => {
   const { theme } = useContext(ThemeContext)
   const { state, updateState } = useContext(ResultContext)
   const history = useHistory()
@@ -30,8 +30,10 @@ const Header = ({ onFilterClick = () => { } }) => {
         <img src={YoloLogo} alt="Yolo logo" />
       </div>
       {state.isAuthed && (
+        // TODO: Unecessary nesting
         <ActionWidgets>
-          <Filters onFilterClick={onFilterClick} />
+          {/* TODO: Logout, refresh, autoRefresh should not be in Filters */}
+          <Filters {...{ autoRefreshOn, setAutoRefreshOn, onFilterClick }} />
         </ActionWidgets>
       )}
       {process.env.YOLO_UI_TEST && (
