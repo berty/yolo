@@ -5,7 +5,7 @@ import {
 } from 'react-feather'
 
 import { ThemeContext } from '../../../store/ThemeStore'
-import { actionButtonStyle } from '../../styleTools/buttonStyler'
+import { actionButtonColorsShadow } from '../../styleTools/buttonStyler'
 import { ARTIFACT_STATE } from '../../../constants'
 
 const ArtifactActionButton = ({
@@ -14,7 +14,7 @@ const ArtifactActionButton = ({
   artifactDlArtifactSignedUrl = '',
 }) => {
   const { theme } = useContext(ThemeContext)
-  const artifactActionButtonStyle = actionButtonStyle({
+  const artifactActionButtonStyle = actionButtonColorsShadow({
     name: theme.name,
     state: artifactState,
   })
@@ -23,7 +23,7 @@ const ArtifactActionButton = ({
   const fullDlArtifactSignedUrl = artifactDlArtifactSignedUrl && `${process.env.API_SERVER}${artifactDlArtifactSignedUrl}`
   const hasDlUrl = fullPlistSignedUrl || fullDlArtifactSignedUrl
 
-  const actionButtonClasses = classNames('btn', 'btn-artifact-action')
+  const actionButtonClasses = classNames('btn', 'btn-large-icon')
 
   const DownloadButton = artifactState === ARTIFACT_STATE.Finished && hasDlUrl
     && (

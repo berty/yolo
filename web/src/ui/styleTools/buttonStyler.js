@@ -39,7 +39,7 @@ export const tagStyle = ({ name, state = null, cursor = 'default' }) => {
   return { ...style, cursor }
 }
 
-export const actionButtonStyle = ({ name, state }) => {
+export const actionButtonColorsShadow = ({ name, state }) => {
   const theme = themes[name] || themes.light
   const styles = {
     [ARTIFACT_STATE.Finished]: {
