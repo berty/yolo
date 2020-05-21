@@ -5,8 +5,6 @@ import {
   AlertCircle,
   Calendar,
   Link as LinkIcon,
-  ChevronDown,
-  ChevronUp,
 } from 'react-feather'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
@@ -21,21 +19,20 @@ import { ThemeContext } from '../../../store/ThemeStore'
 import { tagStyle } from '../../styleTools/buttonStyler'
 import ArtifactRow from './ArtifactRow'
 import AnchorLink from '../AnchorLink/AnchorLink'
-import Tag from '../../Tag/Tag'
+import Tag from '../Tag/Tag'
 
 import { MR_STATE, BUILD_STATE } from '../../../constants'
 import { getRelativeTime, getTimeLabel } from '../../../util/date'
 import { getIsArr } from '../../../util/getters'
 
 import './Build.scss'
+import ShownBuildsButton from '../ShownBuildsButton'
 
 const BuildAndMrContainer = ({
-  build, mr, isDetailed, isMaster,
+  build, buildHasMr, isLatestBuild, nOlderBuilds, showingAllBuilds, toggleShowingAllBuilds,
 }) => {
   const [messageExpanded, toggleMessageExpanded] = useState(false)
-  const [showingArtifacts, toggleShowingArtifacts] = useState(
-    isDetailed || isMaster,
-  )
+  const showingArtifacts = isLatestBuild || showingAllBuilds
 
   const {
     theme,
@@ -57,7 +54,6 @@ const BuildAndMrContainer = ({
     created_at: buildCreatedAt = '',
     updated_at: buildUpdatedAt = '',
     driver: buildDriver = '',
-    has_mergerequest: buildHasMr = null,
     has_project: buildHasProject = null,
     has_project: { id: buildProjectUrl = '' } = {},
     has_artifacts: buildHasArtifacts = null,
@@ -68,7 +64,7 @@ const BuildAndMrContainer = ({
     updated_at: buildMergeUpdatedAt = '',
     driver: mrDriver = '',
     state: mrState = '',
-  } = mr || {}
+  } = buildHasMr || {}
 
   const COMMIT_LEN = 7
   const MESSAGE_LEN = 140
@@ -83,15 +79,16 @@ const BuildAndMrContainer = ({
     color: sectionText,
   }
 
-  const CommitIcon = mrCommitUrl ? (
+  const CommitIconWithMrUrl = () => (
     <a href={mrCommitUrl}>
       <GitCommit color={blockTitle} title={buildCommitId || ''} />
     </a>
-  ) : !buildHasMr ? (
-    <GitCommit color={sectionText} style={{ transform: 'rotate(90deg)' }} />
-  ) : (
-    <GitCommit color={sectionText} title={buildCommitId || ''} />
   )
+
+  const CommitIconWithNoMrUrl = () => (
+    <GitCommit color={sectionText} title={buildCommitId || ''} style={buildHasMr ? {} : { transform: 'rotate(90deg)' }} />)
+
+  const CommitIcon = () => (mrCommitUrl ? <CommitIconWithMrUrl /> : <CommitIconWithNoMrUrl />)
 
   const SplitMessage = (text) => text
     .split('\n')
@@ -253,37 +250,8 @@ const BuildAndMrContainer = ({
     />
   )
 
-  const artifactsMessagePrefix = showingArtifacts ? 'hide' : 'show'
-
-  const artifactsMessage = getIsArr(buildHasArtifacts)
-    ? `${artifactsMessagePrefix} ${buildHasArtifacts.length} artifact${
-      buildHasArtifacts.length > 1 ? 's' : ''
-    }`
-    : ''
-
-  const ArtifactsCount = () => getIsArr(buildHasArtifacts) && (
-    <Tag
-      text={artifactsMessage}
-      classes={['btn-info-tag']}
-      title={artifactsMessage}
-      icon={
-        showingArtifacts ? (
-          <ChevronUp color={blockTitle} />
-        ) : (
-          <ChevronDown color={blockTitle} />
-        )
-      }
-      styles={tagStyle({
-        name: theme.name,
-        state: null,
-        cursor: 'pointer',
-      })}
-      onClick={() => toggleShowingArtifacts(!showingArtifacts)}
-    />
-  )
-
-  const SharableBuildLink = (
-    <AnchorLink target={`?build_id=${buildId}`}>
+  const SharableBuildLink = ({ isBlock }) => (
+    <AnchorLink target={`?build_id=${buildId}`} isBlock={isBlock}>
       <LinkIcon size={16} />
     </AnchorLink>
   )
@@ -292,11 +260,11 @@ const BuildAndMrContainer = ({
     <>
       <div className="card-row expanded" style={{ color: sectionText }}>
         <div className="card-left-icon icon-top">
-          {CommitIcon}
-          {SharableBuildLink}
+          <CommitIcon />
+          {isLatestBuild && <SharableBuildLink isBlock />}
         </div>
         <div className="card-details">
-          {isDetailed && (buildCommitId || mrState || mrDriver) && (
+          {isLatestBuild && (buildCommitId || mrState || mrDriver) && (
             <div className="card-details-row">
               {BuildCommit}
 
@@ -304,29 +272,32 @@ const BuildAndMrContainer = ({
               {MrDriver}
             </div>
           )}
-          {isDetailed && buildBranch && (
+          {isLatestBuild && buildBranch && (
             <div className="card-details-row">{BranchName}</div>
           )}
-          {isDetailed && buildMessage && (
+          {isLatestBuild && buildMessage && (
             <div className="card-details-row">{BuildMessage}</div>
           )}
 
           <div className="card-details-row" style={{ alignSelf: 'flex-start' }}>
+            {!isLatestBuild && <SharableBuildLink isBlock={false} />}
             <div>{`Build ${buildShortId || buildId}`}</div>
+
             {BuildStateTag}
             {BuildDriver}
             {BuildUpdatedAt}
             {BuildCreatedAt}
-            {buildHasArtifacts && <ArtifactsCount />}
+            {isLatestBuild && nOlderBuilds > 0 && <ShownBuildsButton showingAllBuilds={showingAllBuilds} toggleShowingAllBuilds={toggleShowingAllBuilds} nOlderBuilds={nOlderBuilds} />}
           </div>
         </div>
-        {isDetailed && (
+        {isLatestBuild && (
           <div className="card-right-container">
             {BuildLogs}
             {GithubLink}
           </div>
         )}
       </div>
+      {/* TODO: Condition to show artifacts of older builds */}
       {showingArtifacts
         && getIsArr(buildHasArtifacts)
         && buildHasArtifacts.map((artifact) => (

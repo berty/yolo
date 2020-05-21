@@ -1,22 +1,22 @@
-import React, { useContext, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-
+import React, { useContext, useState } from 'react'
+import { ARTIFACT_KIND_NAMES, BRANCH, BUILD_STATE } from '../../../constants'
 import { ThemeContext } from '../../../store/ThemeStore'
-import { BRANCH, BUILD_STATE, ARTIFACT_KIND_NAMES } from '../../../constants'
-
-import './Build.scss'
-import CardTitle from './CardTitle'
-import CardHeader from './CardHeader'
-import BuildAndMrContainer from './BuildAndMrContainer'
 import { ResultContext } from '../../../store/ResultStore'
-import { tagStyle } from '../../styleTools/buttonStyler'
-import Tag from '../../Tag/Tag'
+import { getStrEquNormalized, getIsArr, getIsArrayWithN } from '../../../util/getters'
 import { getArtifactKindIcon } from '../../styleTools/brandIcons'
-import { getStrEquNormalized } from '../../../util/getters'
+import { tagStyle } from '../../styleTools/buttonStyler'
+import Tag from '../Tag/Tag'
+import './Build.scss'
+import BuildAndMrContainer from './BuildAndMrContainer'
+import CardHeader from './CardHeader'
+import CardTitle from './CardTitle'
+import ShownBuildsButton from '../ShownBuildsButton'
 
 const BuildContainer = ({ build, toCollapse, children }) => {
   const { state } = useContext(ResultContext)
   const [collapsed, toggleCollapsed] = useState(toCollapse)
+  const [showingAllBuilds, toggleShowingAllBuilds] = useState(false)
   const { theme } = useContext(ThemeContext)
 
   const {
@@ -39,7 +39,7 @@ const BuildContainer = ({ build, toCollapse, children }) => {
     allBuilds = [],
   } = build || {}
 
-  const isMaster = getStrEquNormalized(buildBranch, BRANCH.MASTER)
+  const isMasterBuildBranch = getStrEquNormalized(buildBranch, BRANCH.MASTER)
 
   const cardTitle = (
     <CardTitle
@@ -47,7 +47,7 @@ const BuildContainer = ({ build, toCollapse, children }) => {
         buildHasMr,
         buildId,
         buildShortId,
-        isMaster,
+        isMasterBuildBranch,
         mrId,
         mrShortId,
         mrTitle,
@@ -97,25 +97,11 @@ const BuildContainer = ({ build, toCollapse, children }) => {
     />
   )
 
-  const otherBuildsMessage = collapsed && allBuilds.length > 1
-    ? `${allBuilds.length - 1} other build${
-      allBuilds.length - 1 > 1 ? 's' : ''
-    }`
-    : ''
-
-  const BuildCountTag = collapsed && otherBuildsMessage && (
-    <Tag
-      classes={{ 'btn-info-tag': true }}
-      styles={tagStyle({ name: theme.name, state: null })}
-      text={otherBuildsMessage}
-    />
-  )
-
   const cardStateTags = collapsed && (
     <>
       {FirstBuildStatusTag}
       {FirstBuildArtifactTags}
-      {BuildCountTag}
+      {allBuilds.length > 1 && <ShownBuildsButton nOlderBuilds={allBuilds.length - 1} />}
     </>
   )
 
@@ -139,7 +125,7 @@ const BuildContainer = ({ build, toCollapse, children }) => {
             buildId,
             buildShortId,
             collapsed,
-            isMaster,
+            isMasterBuildBranch,
             mrId,
             mrShortId,
             toggleCollapsed,
@@ -148,14 +134,15 @@ const BuildContainer = ({ build, toCollapse, children }) => {
           }}
         />
         {!collapsed
-          && allBuilds.map((b, i) => (
+          && getIsArr(allBuilds)
+          && allBuilds.slice(0, showingAllBuilds ? undefined : 1).map((b, i) => (
             <BuildAndMrContainer
-              {...{
-                build: state.builds[b],
-                mr: buildHasMr,
-                isDetailed: i === 0,
-                isMaster,
-              }}
+              build={state.builds[b]}
+              buildHasMr={buildHasMr}
+              isLatestBuild={i === 0}
+              nOlderBuilds={i === 0 && getIsArrayWithN(allBuilds, 2) ? allBuilds.length - 1 : 0}
+              showingAllBuilds={showingAllBuilds}
+              toggleShowingAllBuilds={toggleShowingAllBuilds}
               key={i}
             />
           ))}

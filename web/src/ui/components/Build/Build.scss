@@ -45,7 +45,7 @@
         display: none;
 
         @include xs {
-            min-width: 0.5rem;
+            min-width: 1.5rem;
             margin-right: 0.5rem;
             height: 100%;
             display: flex;
@@ -60,7 +60,7 @@
             }
         }
         @include sm {
-            min-width: 0.9rem;
+            min-width: 1.5rem;
             margin-right: 0.8rem;
         }
     }
@@ -149,9 +149,12 @@
             // TODO: Clean this out
             div.btn {
                 cursor: default;
-                display: flex;
-                align-items: center;
-                margin-bottom: 0.25rem;
+                display: flex; // needs move to Tag
+                align-items: center; // needs move to Tag
+                &.normal-caps {
+                    // can't find another non-inline way to do this for now
+                    text-transform: none;
+                }
                 &.details {
                     font-size: 0.9rem;
                     letter-spacing: normal;
@@ -162,9 +165,7 @@
                         margin-right: 0.3rem;
                     }
                 }
-                &.normal-caps {
-                    text-transform: none;
-                }
+
                 svg {
                     height: 1rem;
                     width: 1rem;
