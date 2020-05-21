@@ -4,7 +4,7 @@ import './Build.scss'
 import { ThemeContext } from '../../../store/ThemeStore'
 
 const CardTitle = ({
-  isMaster,
+  isMasterBuildBranch,
   buildShortId,
   mrShortId,
   buildId,
@@ -24,14 +24,14 @@ const CardTitle = ({
   const buildDisplayShortId = buildShortId && <>{`#${buildShortId}`}</>
   const buildDisplayId = buildDisplayShortId || <>{buildId}</>
 
-  const CardTitleMasterNoMr = isMaster && (
+  const CardTitleMasterNoMr = isMasterBuildBranch && (
     <>
       Master - build
-      {buildDisplayId}
+      {` ${buildDisplayId}`}
     </>
   )
-  const CardTitleMasterWithMr = isMaster && buildHasMr && <>Master</>
-  const CardTitlePullWithMr = !isMaster && mrShortId && (
+  const CardTitleMasterWithMr = isMasterBuildBranch && buildHasMr && <>Master</>
+  const CardTitlePullWithMr = !isMasterBuildBranch && mrShortId && (
     <>
       Pull
       {' '}
@@ -43,11 +43,11 @@ const CardTitle = ({
   const CardDefaultTitle = (
     <>
       Build
-      {buildDisplayId}
+      {` ${buildDisplayId}`}
     </>
   )
 
-  const CardSubtitleMasterWithMr = isMaster && buildHasMr && (
+  const CardSubtitleMasterWithMr = isMasterBuildBranch && buildHasMr && (
     <>
       Merge
       {' '}
@@ -56,7 +56,7 @@ const CardTitle = ({
       </u>
     </>
   )
-  const CardSubtitlePullWithMr = !isMaster && mrShortId && <>{mrTitle}</>
+  const CardSubtitlePullWithMr = !isMasterBuildBranch && mrShortId && <>{mrTitle}</>
   const CardSubtitleDefault = ''
 
   const CardMainTitle = (

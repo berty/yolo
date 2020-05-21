@@ -14,7 +14,7 @@ import { getTimeDuration, getRelativeTime } from '../../../util/date'
 
 import './Build.scss'
 import AnchorLink from '../AnchorLink/AnchorLink'
-import Tag from '../../Tag/Tag'
+import Tag from '../Tag/Tag'
 import ArtifactActionButton from './ArtifactActionButton'
 import QRCodeModal from '../QRCodeModal'
 
@@ -50,10 +50,10 @@ const ArtifactCard = ({
     : ''
   const timeSinceBuildUpdatedString = `updated: ${buildMergeUpdatedAt}`
 
-  const ArtifactKindName = KIND_TO_PLATFORM[artifactKind] || 'Unknown OS'
+  const ArtifactKindName = () => <div>{KIND_TO_PLATFORM[artifactKind] || 'Unknown OS'}</div>
 
   const artifactTagStyle = tagStyle({ name: theme.name, state: artifactState })
-  const ArtifactStateTag = artifactState && (
+  const ArtifactStateTag = () => artifactState && (
     <Tag
       classes={['artifact-tag', 'state-tag']}
       styles={artifactTagStyle}
@@ -71,13 +71,15 @@ const ArtifactCard = ({
     />
   )
 
-  const PlatformIcon = (
+  const PlatformIcon = () => (
     <FontAwesomeIcon
       icon={getArtifactKindIcon(artifactKind.toString())}
       size="lg"
       color={theme.text.sectionText}
     />
   )
+
+  const BuildIdentifier = () => <div>{buildShortId || ''}</div>
 
   const TimeSinceBuildUpdated = timeSinceBuildUpdated && (
     <Tag
@@ -159,17 +161,14 @@ const ArtifactCard = ({
         style={{ color: theme.text.sectionText }}
       >
         <div className="card-left-icon icon-top">
-          {PlatformIcon}
           <SharableArtifactLink implemented={false} />
         </div>
         <div className="card-details">
           <div className="card-details-row">
-            <div className="">
-              {ArtifactKindName}
-              {' '}
-              {buildShortId || ''}
-            </div>
-            {ArtifactStateTag}
+            <PlatformIcon />
+            <ArtifactKindName />
+            <BuildIdentifier />
+            <ArtifactStateTag />
           </div>
           {ArtifactLocalPathRow}
           <div className="card-details-row">

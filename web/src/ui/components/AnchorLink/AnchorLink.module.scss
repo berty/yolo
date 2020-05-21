@@ -7,10 +7,14 @@
 .copy-link-icon {
     display: none;
     @include xs {
-        display: flex;
-        width: 100%;
-        justify-content: center;
-        margin-top: 0.5rem;
         cursor: pointer;
+        display: block;
+        height: 1rem;
+        &.block {
+            display: flex;
+            width: 100%;
+            justify-content: center;
+            margin-top: 0.5rem;
+        }
     }
 }
