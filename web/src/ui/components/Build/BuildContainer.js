@@ -9,8 +9,8 @@ import { tagStyle } from '../../styleTools/buttonStyler'
 import Tag from '../Tag/Tag'
 import './Build.scss'
 import BuildAndMrContainer from './BuildAndMrContainer'
-import CardHeader from './CardHeader'
-import CardTitle from './CardTitle'
+import BuildBlockHeader from './BuildBlockHeader'
+import BuildBlockTitle from './BuildBlockTitle'
 import ShownBuildsButton from '../ShownBuildsButton'
 
 const BuildContainer = ({ build, toCollapse, children }) => {
@@ -41,8 +41,8 @@ const BuildContainer = ({ build, toCollapse, children }) => {
 
   const isMasterBuildBranch = getStrEquNormalized(buildBranch, BRANCH.MASTER)
 
-  const cardTitle = (
-    <CardTitle
+  const blockTitle = (
+    <BuildBlockTitle
       {...{
         buildHasMr,
         buildId,
@@ -97,11 +97,11 @@ const BuildContainer = ({ build, toCollapse, children }) => {
     />
   )
 
-  const cardStateTags = collapsed && (
+  const latestBuildStateTags = collapsed && (
     <>
       {FirstBuildStatusTag}
       {FirstBuildArtifactTags}
-      {allBuilds.length > 1 && <ShownBuildsButton nOlderBuilds={allBuilds.length - 1} />}
+      {getIsArr(allBuilds) && allBuilds.length > 1 && <ShownBuildsButton nOlderBuilds={allBuilds.length - 1} />}
     </>
   )
 
@@ -116,7 +116,7 @@ const BuildContainer = ({ build, toCollapse, children }) => {
         }}
         key={buildId}
       >
-        <CardHeader
+        <BuildBlockHeader
           {...{
             buildAuthorAvatarUrl,
             buildAuthorId,
@@ -129,8 +129,8 @@ const BuildContainer = ({ build, toCollapse, children }) => {
             mrId,
             mrShortId,
             toggleCollapsed,
-            cardTitle,
-            cardStateTags,
+            blockTitle,
+            latestBuildStateTags,
           }}
         />
         {!collapsed
