@@ -258,14 +258,14 @@ const BuildAndMrContainer = ({
 
   return (
     <>
-      <div className="card-row expanded" style={{ color: sectionText }}>
-        <div className="card-left-icon icon-top">
+      <div className="block-row expanded" style={{ color: sectionText }}>
+        <div className="block-left-icon icon-top">
           <CommitIcon />
           {isLatestBuild && <SharableBuildLink isBlock />}
         </div>
-        <div className="card-details">
+        <div className="block-details">
           {isLatestBuild && (buildCommitId || mrState || mrDriver) && (
-            <div className="card-details-row">
+            <div className="block-details-row">
               {BuildCommit}
 
               {MrState}
@@ -273,13 +273,13 @@ const BuildAndMrContainer = ({
             </div>
           )}
           {isLatestBuild && buildBranch && (
-            <div className="card-details-row">{BranchName}</div>
+            <div className="block-details-row">{BranchName}</div>
           )}
           {isLatestBuild && buildMessage && (
-            <div className="card-details-row">{BuildMessage}</div>
+            <div className="block-details-row">{BuildMessage}</div>
           )}
 
-          <div className="card-details-row" style={{ alignSelf: 'flex-start' }}>
+          <div className="block-details-row" style={{ alignSelf: 'flex-start' }}>
             {!isLatestBuild && <SharableBuildLink isBlock={false} />}
             <div>{`Build ${buildShortId || buildId}`}</div>
 
@@ -291,7 +291,7 @@ const BuildAndMrContainer = ({
           </div>
         </div>
         {isLatestBuild && (
-          <div className="card-right-container">
+          <div className="block-right-container">
             {BuildLogs}
             {GithubLink}
           </div>

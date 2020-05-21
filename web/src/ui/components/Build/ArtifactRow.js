@@ -18,7 +18,7 @@ import Tag from '../Tag/Tag'
 import ArtifactActionButton from './ArtifactActionButton'
 import QRCodeModal from '../QRCodeModal'
 
-const ArtifactCard = ({
+const ArtifactRow = ({
   artifact,
   buildMergeUpdatedAt,
   buildStartedAt,
@@ -110,7 +110,7 @@ const ArtifactCard = ({
   )
 
   const ArtifactLocalPathRow = artifactLocalPath && (
-    <div className="card-details-row artifact-local-path">
+    <div className="block-details-row artifact-local-path">
       {artifactLocalPath}
     </div>
   )
@@ -157,28 +157,28 @@ const ArtifactCard = ({
       )}
 
       <div
-        className="card-row expanded"
+        className="block-row expanded"
         style={{ color: theme.text.sectionText }}
       >
-        <div className="card-left-icon icon-top">
+        <div className="block-left-icon icon-top">
           <SharableArtifactLink implemented={false} />
         </div>
-        <div className="card-details">
-          <div className="card-details-row">
+        <div className="block-details">
+          <div className="block-details-row">
             <PlatformIcon />
             <ArtifactKindName />
             <BuildIdentifier />
             <ArtifactStateTag />
           </div>
           {ArtifactLocalPathRow}
-          <div className="card-details-row">
+          <div className="block-details-row">
             {TimeSinceBuildUpdated}
             {BuildDuration}
             {ArtifactFileSize}
             {ArtifactDriver}
           </div>
         </div>
-        <div className="card-right-container">
+        <div className="block-right-container">
           {/* TODO: Factor out */}
           <ArtifactMainButton />
           {artifactPlistSignedUrl && <ArtifactQrButton />}
@@ -188,4 +188,4 @@ const ArtifactCard = ({
   )
 }
 
-export default ArtifactCard
+export default ArtifactRow

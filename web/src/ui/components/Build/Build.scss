@@ -22,7 +22,7 @@
         border-radius: 0.5rem;
     }
 
-    .card div.card-row {
+    .card div.block-row {
         display: flex;
         margin: 0px;
         padding: 0.5rem 0rem;
@@ -41,7 +41,7 @@
         }
     }
 
-    .card div.card-row .card-left-icon {
+    .card div.block-row .block-left-icon {
         display: none;
 
         @include xs {
@@ -65,7 +65,7 @@
         }
     }
 
-    .card div.card-row .card-title {
+    .card div.block-row .block-title {
         padding: 0px;
         margin: 0px;
         flex: 0 1 auto;
@@ -77,34 +77,41 @@
             flex-wrap: nowrap;
             white-space: unset;
         }
-        .short-card-title {
-            flex: 1 1 100%;
+        h2.short-block-title {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            font-size: 1rem;
+            flex: 0 1 100%;
             white-space: nowrap;
+            margin: 0;
+            padding: 0;
             @include lg {
+                font-size: 1.125rem;
                 flex: 1 1 auto;
                 white-space: unset;
             }
         }
-        .card-mr-subtitle {
+        h3.block-mr-subtitle {
             display: none;
+            margin: 0px;
             @include xs {
                 display: block;
+                font-size: 0.85rem;
+                margin-top: 0.4rem;
+                flex: 0 1 100%;
             }
-            font-size: 0.9rem;
-            margin-top: 0.2rem;
-            margin-left: 0px;
-            flex: 0 1 100%;
             @include lg {
                 font-size: 1.125rem;
                 flex: 0 1 auto;
-                margin-top: 0px;
+                margin-top: 0rem;
                 margin-left: 0.5rem;
             }
         }
     }
 
     // Build body
-    .card div.card-row .card-details {
+    .card div.block-row .block-details {
         display: flex;
         flex-flow: row wrap;
         margin-right: 0.5rem;
@@ -112,7 +119,7 @@
         font-size: 0.9rem;
 
         // TODO: Clean this out
-        .card-details-row {
+        .block-details-row {
             .build-message {
                 display: flex;
                 flex-flow: row wrap;
@@ -193,7 +200,7 @@
         }
     }
 
-    .card div.card-row .card-right-container {
+    .card div.block-row .block-right-container {
         // github and logs icon links
         // artifact DL and QR buttons
         display: flex;
