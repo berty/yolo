@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import React, { useReducer } from 'react'
 import { cloneDeep } from 'lodash'
 import { retrieveAuthCookie } from '../api/auth'
@@ -22,6 +23,7 @@ export const INITIAL_STATE = {
   needsProgrammaticQuery: false,
   needsRefresh: false,
   needsQuietRefresh: false,
+  userAgent: '',
   uiFilters: {
     artifact_kinds: [ARTIFACT_KIND_VALUE.IPA],
     build_driver: [PROJECT_BUILD_DRIVER[PROJECT.chat]],

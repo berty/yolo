@@ -7,6 +7,13 @@ export const KIND_TO_PLATFORM = {
   UNKNOWN: 'Unknown OS',
 }
 
+export const PLATFORM_TO_ARTIFACT_KIND = {
+  'Unknown OS': '0',
+  iOS: '1',
+  Android: '2',
+  'Mac OS': '3',
+}
+
 export const ARTIFACT_KIND_VALUE = {
   UnknownKind: '0',
   IPA: '1',
