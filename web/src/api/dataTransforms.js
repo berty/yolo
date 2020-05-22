@@ -27,7 +27,7 @@ export const flagBuildsFirstOfDay = (sortedTopLevelBuilds) => Array.isArray(sort
  * Returns a new copy of builds[],
  * keeping only the first build from each unique merge request.
  *
- * Adds entry {allBuilds: Array<int>} to each build,
+ * Adds entry {allBuildsForMr: Array<int>} to each build,
  * each int corresponds to builds indices in state.builds
  *   with the same merge request ID
  *
@@ -48,21 +48,21 @@ export const groupBuildsByMr = (builds) => {
           ...acc,
           [build.id]: {
             ...build,
-            allBuilds: [i],
+            allBuildsForMr: [i],
           },
         }
       }
 
       const matchingBuild = acc[buildMrId] || null
       if (matchingBuild) {
-        if (!matchingBuild.allBuilds) {
-          acc[buildMrId].allBuilds = [i]
+        if (!matchingBuild.allBuildsForMr) {
+          acc[buildMrId].allBuildsForMr = [i]
         } else {
-          acc[buildMrId].allBuilds = [...matchingBuild.allBuilds, i]
+          acc[buildMrId].allBuildsForMr = [...matchingBuild.allBuildsForMr, i]
         }
       } else {
         acc[buildMrId] = { ...build }
-        acc[buildMrId].allBuilds = [i]
+        acc[buildMrId].allBuildsForMr = [i]
       }
       return acc
     }, {})

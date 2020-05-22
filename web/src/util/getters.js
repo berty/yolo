@@ -6,14 +6,14 @@ export const getStrEquNormalized = (str1, str2) => (getStrUpperCase(str1)
   && getStrUpperCase(str2)
   && getStrUpperCase(str1) === getStrUpperCase(str2))
 
-export const getIsArr = (val) => (val && Array.isArray(val))
+export const getIsArray = (val) => (val && Array.isArray(val))
 
-export const getIsArrayWithN = (val, n) => (getIsArr(val) && val.length >= n)
+export const getIsArrayWithN = (val, n = 1) => (getIsArray(val) && val.length >= n)
 
-export const getIsEmptyArr = (val) => (getIsArr(val) && val.length === 0)
+export const getIsEmptyArr = (val) => (getIsArray(val) && val.length === 0)
 
 const getIsObject = (val) => (val && typeof val === 'object')
 
-export const getIsEmpty = (val) => (!val || (getIsArr(val) && !val.length) || (getIsObject(val) && !Object.keys(val).length))
+export const getIsEmpty = (val) => (!val || (getIsArray(val) && !val.length) || (getIsObject(val) && !Object.keys(val).length))
 
-export const singleItemToArray = (val) => !Array.isArray(val) ? [val] : val
+export const singleItemToArray = (val) => !getIsArray(val) ? [val] : val

@@ -3,7 +3,7 @@ import React, { useContext, useState } from 'react'
 import { ARTIFACT_KIND_NAMES, BRANCH, BUILD_STATE } from '../../../constants'
 import { ThemeContext } from '../../../store/ThemeStore'
 import { ResultContext } from '../../../store/ResultStore'
-import { getStrEquNormalized, getIsArr, getIsArrayWithN } from '../../../util/getters'
+import { getStrEquNormalized, getIsArray, getIsArrayWithN } from '../../../util/getters'
 import { getArtifactKindIcon } from '../../styleTools/brandIcons'
 import { tagStyle } from '../../styleTools/buttonStyler'
 import Tag from '../Tag/Tag'
@@ -13,10 +13,14 @@ import BuildBlockHeader from './BuildBlockHeader'
 import BuildBlockTitle from './BuildBlockTitle'
 import ShownBuildsButton from '../ShownBuildsButton'
 
-const BuildContainer = ({ build, toCollapse, children }) => {
+const BuildContainer = ({
+  build, toCollapse, children, hasRunningBuilds,
+}) => {
   const { state } = useContext(ResultContext)
   const [collapsed, toggleCollapsed] = useState(toCollapse)
   const [showingAllBuilds, toggleShowingAllBuilds] = useState(false)
+
+
   const { theme } = useContext(ThemeContext)
 
   const {
@@ -36,7 +40,7 @@ const BuildContainer = ({ build, toCollapse, children }) => {
         avatar_url: buildAuthorAvatarUrl = '',
       } = {},
     } = {},
-    allBuilds = [],
+    allBuildsForMr = [],
   } = build || {}
 
   const isMasterBuildBranch = getStrEquNormalized(buildBranch, BRANCH.MASTER)
@@ -97,13 +101,31 @@ const BuildContainer = ({ build, toCollapse, children }) => {
     />
   )
 
+  const AnyRunningBuildTags = () => (hasRunningBuilds && getIsArrayWithN(hasRunningBuilds) && getIsArrayWithN(allBuildsForMr, 2)
+    && (
+      <Tag
+        title={`${hasRunningBuilds.length} build${hasRunningBuilds.length > 1 ? 's' : ''} running`}
+        classes={['btn-state-tag']}
+        styles={tagStyle({
+          name: theme.name,
+          state: BUILD_STATE.Running,
+          cursor: 'auto',
+        })}
+      >
+        {`${hasRunningBuilds.length} build${hasRunningBuilds.length > 1 ? 's' : ''} running`}
+      </Tag>
+    )
+  )
+
   const latestBuildStateTags = collapsed && (
     <>
       {FirstBuildStatusTag}
       {FirstBuildArtifactTags}
-      {getIsArr(allBuilds) && allBuilds.length > 1 && <ShownBuildsButton nOlderBuilds={allBuilds.length - 1} />}
+      {getIsArray(allBuildsForMr) && allBuildsForMr.length > 1 && <ShownBuildsButton nOlderBuilds={allBuildsForMr.length - 1} />}
+      <AnyRunningBuildTags />
     </>
   )
+
 
   return (
     <div className="Build" id={buildId}>
@@ -131,21 +153,25 @@ const BuildContainer = ({ build, toCollapse, children }) => {
             toggleCollapsed,
             blockTitle,
             latestBuildStateTags,
+            AnyRunningBuildTags,
           }}
         />
         {!collapsed
-          && getIsArr(allBuilds)
-          && allBuilds.slice(0, showingAllBuilds ? undefined : 1).map((b, i) => (
-            <BuildAndMrContainer
-              build={state.builds[b]}
-              buildHasMr={buildHasMr}
-              isLatestBuild={i === 0}
-              nOlderBuilds={i === 0 && getIsArrayWithN(allBuilds, 2) ? allBuilds.length - 1 : 0}
-              showingAllBuilds={showingAllBuilds}
-              toggleShowingAllBuilds={toggleShowingAllBuilds}
-              key={i}
-            />
-          ))}
+          && getIsArray(allBuildsForMr)
+          && allBuildsForMr
+            .filter((bIdx, i) => showingAllBuilds ? (!!bIdx) : i === 0)
+            .map((buildidx, i) => (
+              <BuildAndMrContainer
+                build={state.builds[buildidx]}
+                buildHasMr={buildHasMr}
+                isLatestBuild={i === 0}
+                nOlderBuilds={i === 0 && getIsArrayWithN(allBuildsForMr, 2) ? allBuildsForMr.length - 1 : 0}
+                showingAllBuilds={showingAllBuilds}
+                toggleShowingAllBuilds={toggleShowingAllBuilds}
+                key={i}
+                AnyRunningBuildTags={AnyRunningBuildTags}
+              />
+            ))}
       </div>
     </div>
   )
