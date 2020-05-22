@@ -96,6 +96,7 @@ export const MR_STATE = {
   UnknownState: 'UnknownState',
   Opened: 'Opened',
   Closed: 'Closed',
+  Merged: 'Merged',
 }
 
 export const BUILD_STATE = {

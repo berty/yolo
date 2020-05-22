@@ -174,6 +174,7 @@ func batchFromGitHubPR(pr *github.PullRequest, logger *zap.Logger) *yolopb.Batch
 func mrFromGitHubPR(pr *github.PullRequest, logger *zap.Logger) *yolopb.MergeRequest {
 	createdAt := pr.GetCreatedAt()
 	updatedAt := pr.GetUpdatedAt()
+	mergedAt := pr.GetMergedAt()
 	commitURL := pr.GetBase().GetRepo().GetHTMLURL() + "/commit/" + pr.GetBase().GetSHA()
 	branchURL := ""
 	mr := yolopb.MergeRequest{
@@ -203,6 +204,10 @@ func mrFromGitHubPR(pr *github.PullRequest, logger *zap.Logger) *yolopb.MergeReq
 		mr.State = yolopb.MergeRequest_Closed
 	default:
 		logger.Warn("unknown PR state", zap.String("state", state))
+	}
+	if !mergedAt.IsZero() {
+		mr.State = yolopb.MergeRequest_Merged
+		mr.MergedAt = &mergedAt
 	}
 
 	if user := pr.GetUser(); user != nil {

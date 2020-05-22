@@ -205,14 +205,15 @@ message MergeRequest {
   string yolo_id = 2 [(gogoproto.customname) = "YoloID"]; // hash
   google.protobuf.Timestamp created_at = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
   google.protobuf.Timestamp updated_at = 4 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
-  string title = 5;
-  string message = 6;
-  Driver driver = 7;
-  string branch = 8;
-  State state = 9;
-  string commit_url = 10 [(gogoproto.customname) = "CommitURL"];
-  string branch_url = 11 [(gogoproto.customname) = "BranchURL"];
-  string short_id = 12 [(gogoproto.customname) = "ShortID"];
+  google.protobuf.Timestamp merged_at = 5 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+  string title = 6;
+  string message = 7;
+  Driver driver = 8;
+  string branch = 9;
+  State state = 10;
+  string commit_url = 11 [(gogoproto.customname) = "CommitURL"];
+  string branch_url = 12 [(gogoproto.customname) = "BranchURL"];
+  string short_id = 13 [(gogoproto.customname) = "ShortID"];
   // labels
   // bool is_wip
 
@@ -235,6 +236,7 @@ message MergeRequest {
     UnknownState = 0;
     Opened = 1;
     Closed = 2;
+    Merged = 3;
   }
 }
 
