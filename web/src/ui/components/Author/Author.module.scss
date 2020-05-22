@@ -4,6 +4,7 @@
     display: flex;
     align-self: flex-start;
     margin-top: -0.25rem;
+    flex-shrink: 0;
 }
 
 .author-url-name,
