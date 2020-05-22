@@ -36,6 +36,7 @@ message DevDumpObjects {
   }
   message Response {
     Batch batch = 1;
+    repeated Download downloads = 2;
   }
 }
 
@@ -315,6 +316,8 @@ message Artifact {
   string has_build_id = 102 [(gogoproto.customname) = "HasBuildID"];
   Release has_release = 103;
   string has_release_id = 104 [(gogoproto.customname) = "HasReleaseID"];
+  repeated Download downloads = 105;
+  int64 downloads_count = 106 [(gogoproto.moretags) = "sql:\"-\""];
 
   /// non-stored fields
 
@@ -336,6 +339,18 @@ message Artifact {
     APK = 2;
     DMG = 3;
   }
+}
+
+//
+// Internal objects
+//
+
+message Download {
+  int64 id = 1 [(gogoproto.moretags) = "gorm:\"PRIMARY_KEY;AUTO_INCREMENT\"", (gogoproto.customname) = "ID"];
+  google.protobuf.Timestamp created_at = 2 [(gogoproto.stdtime) = true, (gogoproto.nullable) = true];
+
+  Artifact has_artifact = 101;
+  string has_artifact_id = 102 [(gogoproto.customname) = "HasArtifactID"];
 }
 
 //

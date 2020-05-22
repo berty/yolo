@@ -2,6 +2,7 @@ package yolopb
 
 func AllModels() []interface{} {
 	return []interface{}{
+		// remote data
 		&MergeRequest{},
 		&Commit{},
 		&Build{},
@@ -9,5 +10,8 @@ func AllModels() []interface{} {
 		&Release{},
 		&Entity{},
 		&Project{},
+
+		// internal
+		&Download{},
 	}
 }

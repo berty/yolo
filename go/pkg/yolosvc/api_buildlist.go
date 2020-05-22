@@ -96,9 +96,50 @@ func (svc service) BuildList(ctx context.Context, req *yolopb.BuildList_Request)
 		return nil, err
 	}
 
+	// compute download stats
+	artifactMap := map[string]int64{}
+	for _, build := range resp.Builds {
+		for _, artifact := range build.HasArtifacts {
+			artifactMap[artifact.ID] = 0
+		}
+	}
+	if len(artifactMap) > 0 {
+		artifactIDs := make([]string, len(artifactMap))
+		idx := 0
+		for id := range artifactMap {
+			artifactIDs[idx] = id
+			idx++
+		}
+		rows, err := svc.db.
+			Model(&yolopb.Download{}).
+			Group("has_artifact_id").
+			Select("has_artifact_id, count(id)").
+			Where("has_artifact_id IN (?)", artifactIDs).
+			Rows()
+		if err != nil {
+			return nil, err
+		}
+		for rows.Next() {
+			var (
+				artifactID string
+				count      int64
+			)
+			if err := rows.Scan(&artifactID, &count); err != nil {
+				return nil, err
+			}
+			artifactMap[artifactID] = count
+		}
+	}
+
+	// prepare response
 	for _, build := range resp.Builds {
 		if err := build.AddSignedURLs(svc.authSalt); err != nil {
 			return nil, fmt.Errorf("sign URLs")
+		}
+		for _, artifact := range build.HasArtifacts {
+			if count, found := artifactMap[artifact.ID]; found {
+				artifact.DownloadsCount = count
+			}
 		}
 	}
 

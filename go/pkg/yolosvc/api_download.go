@@ -7,15 +7,16 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"time"
 
 	"berty.tech/yolo/v2/go/pkg/bintray"
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"github.com/go-chi/chi"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 )
 
 func (svc *service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
-
 	id := chi.URLParam(r, "artifactID")
 	var artifact yolopb.Artifact
 	err := svc.db.First(&artifact, "ID = ?", id).Error
@@ -46,6 +47,18 @@ func (svc *service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
 	}
 	if artifact.MimeType != "" {
 		w.Header().Add("Content-Type", artifact.MimeType)
+	}
+
+	// save download
+	now := time.Now()
+	download := yolopb.Download{
+		HasArtifactID: artifact.ID,
+		CreatedAt:     &now,
+		// FIXME: user agent for analytics?
+	}
+	err = svc.db.Create(&download).Error
+	if err != nil {
+		svc.logger.Warn("add download entry", zap.Error(err))
 	}
 
 	if svc.artifactsCachePath != "" {
