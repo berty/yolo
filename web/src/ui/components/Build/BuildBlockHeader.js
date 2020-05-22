@@ -1,38 +1,42 @@
+import classNames from 'classnames'
 import React, { useContext } from 'react'
 import {
-  GitCommit, GitMerge, ChevronUp, ChevronDown,
+  ChevronDown, ChevronUp, GitCommit, GitPullRequest,
 } from 'react-feather'
-import classNames from 'classnames'
-
+import { MR_STATE } from '../../../constants'
 import { ThemeContext } from '../../../store/ThemeStore'
+import { colors } from '../../styleTools/themes'
 import Author from '../Author/Author'
-
 import './Build.scss'
 
 const BuildBlockHeader = ({
-  isMasterBuildBranch,
-  buildHasMr,
+  blockTitle,
   buildAuthorAvatarUrl,
   buildAuthorId,
   buildAuthorName,
+  buildHasMr,
   collapsed,
-  toggleCollapsed,
-  blockTitle,
+  isMasterBuildBranch,
   latestBuildStateTags,
+  mrState,
+  toggleCollapsed,
 }) => {
   const { theme } = useContext(ThemeContext)
   const blockRowClassNames = classNames('block-row', { expanded: !collapsed })
-  const blockHeaderIconClassNames = classNames('block-left-icon', { 'rotate-merge': isMasterBuildBranch })
-  const blockHeaderIconColor = isMasterBuildBranch && buildHasMr ? theme.icon.masterGreen : theme.text.sectionText
+  const blockHeaderIconClassNames = classNames('block-left-icon')
+  const blockHeaderIconColorWithMr = mrState === MR_STATE.Merged ? colors.gitHub.ghMergedPurpleLighter : colors.gitHub.ghOpenGreen
+  const blockHeaderIconColor = buildHasMr && (mrState === MR_STATE.Merged || mrState === MR_STATE.Opened) ? blockHeaderIconColorWithMr : theme.text.sectionText
+  const BlockHeaderIcon = ({ color }) => mrState ? <GitPullRequest color={color} /> : <GitCommit color={color} />
 
   const BlockIconPullHasMr = () => (
     <div className={blockHeaderIconClassNames}>
-      <GitMerge color={blockHeaderIconColor} />
+      <BlockHeaderIcon color={blockHeaderIconColor} />
     </div>
   )
+
   const BlockIconDefault = () => (
     <div className={blockHeaderIconClassNames}>
-      <GitCommit color={blockHeaderIconColor} />
+      <BlockHeaderIcon color={blockHeaderIconColor} />
     </div>
   )
 

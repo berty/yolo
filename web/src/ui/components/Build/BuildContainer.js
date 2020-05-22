@@ -34,6 +34,7 @@ const BuildContainer = ({
       short_id: mrShortId = '',
       id: mrId = '',
       title: mrTitle = '',
+      state: mrState = '',
       has_author: {
         name: buildAuthorName = '',
         id: buildAuthorId = '',
@@ -149,11 +150,11 @@ const BuildContainer = ({
             collapsed,
             isMasterBuildBranch,
             mrId,
+            mrState,
             mrShortId,
             toggleCollapsed,
             blockTitle,
             latestBuildStateTags,
-            AnyRunningBuildTags,
           }}
         />
         {!collapsed

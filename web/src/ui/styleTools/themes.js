@@ -106,3 +106,12 @@ export const sharedThemes = {
     block: '20px',
   },
 }
+
+export const colors = {
+  gitHub: {
+    ghMergedPurple: '#6843bd', // too dark for our dark mode
+    ghMergedPurpleLighter: '#7c5dc3',
+    ghClosedRed: '#bd3434',
+    ghOpenGreen: '#5bbc58',
+  },
+}

@@ -1,22 +1,18 @@
-import React, { useContext, useState } from 'react'
-import { Clock, Calendar, Link as LinkIcon } from 'react-feather'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFile, faHammer, faQrcode } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import QRCode from 'qrcode.react'
-
-import { ThemeContext } from '../../../store/ThemeStore'
-
-import { tagStyle } from '../../styleTools/buttonStyler'
-import { getArtifactKindIcon } from '../../styleTools/brandIcons'
-
+import React, { useContext, useState } from 'react'
+import { Calendar, Clock, Link as LinkIcon } from 'react-feather'
 import { KIND_TO_PLATFORM } from '../../../constants'
-import { getTimeDuration, getRelativeTime } from '../../../util/date'
-
-import './Build.scss'
+import { ThemeContext } from '../../../store/ThemeStore'
+import { getRelativeTime, getTimeDuration } from '../../../util/date'
+import { getArtifactKindIcon } from '../../styleTools/brandIcons'
 import AnchorLink from '../AnchorLink/AnchorLink'
+import QRCodeModal from '../QRCodeModal'
 import Tag from '../Tag/Tag'
 import ArtifactActionButton from './ArtifactActionButton'
-import QRCodeModal from '../QRCodeModal'
+import './Build.scss'
+
 
 const ArtifactRow = ({
   artifact,
@@ -52,14 +48,14 @@ const ArtifactRow = ({
 
   const ArtifactKindName = () => <div>{KIND_TO_PLATFORM[artifactKind] || 'Unknown OS'}</div>
 
-  const artifactTagStyle = tagStyle({ name: theme.name, state: artifactState })
-  const ArtifactStateTag = () => artifactState && (
-    <Tag
-      classes={['artifact-tag', 'state-tag']}
-      styles={artifactTagStyle}
-      text={artifactState}
-    />
-  )
+  // const artifactTagStyle = tagStyle({ name: theme.name, state: artifactState })
+  // const ArtifactStateTag = () => artifactState && (
+  //   <Tag
+  //     classes={['artifact-tag', 'state-tag']}
+  //     styles={artifactTagStyle}
+  //     text={artifactState}
+  //   />
+  // )
 
   const ArtifactMainButton = () => (
     <ArtifactActionButton
@@ -168,7 +164,7 @@ const ArtifactRow = ({
             <PlatformIcon />
             <ArtifactKindName />
             <BuildIdentifier />
-            <ArtifactStateTag />
+            {/* <ArtifactStateTag /> */}
           </div>
           {ArtifactLocalPathRow}
           <div className="block-details-row">
