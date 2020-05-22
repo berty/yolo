@@ -17,6 +17,7 @@ func (svc service) DevDumpObjects(ctx context.Context, req *yolopb.DevDumpObject
 	}
 
 	batch := yolopb.NewBatch()
+	resp := yolopb.DevDumpObjects_Response{}
 
 	if req.WithPreloading {
 		if err := svc.db.
@@ -91,9 +92,10 @@ func (svc service) DevDumpObjects(ctx context.Context, req *yolopb.DevDumpObject
 			return nil, err
 		}
 	}
-
-	resp := yolopb.DevDumpObjects_Response{
-		Batch: batch,
+	if err := svc.db.Find(&resp.Downloads).Error; err != nil {
+		return nil, err
 	}
+
+	resp.Batch = batch
 	return &resp, nil
 }
