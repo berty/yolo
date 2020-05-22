@@ -26,6 +26,8 @@ import {
   PROJECT_BUILD_DRIVER,
   BUILD_DRIVERS,
   BUILD_DRIVER_TO_NAME,
+  BUILD_STATE_VALUE_TO_NAME,
+  BUILD_STATE_VALUE,
 } from '../../../constants'
 import ThemeToggler from '../ThemeToggler'
 import { removeAuthCookie } from '../../../api/auth'
@@ -41,6 +43,10 @@ const FilterModal = ({ closeAction }) => {
   ])
   const [localArtifactKinds, setLocalArtifactKinds] = useState([
     ...state.uiFilters.artifact_kinds,
+  ])
+
+  const [selectedBuildStates, setSelectedBuildStates] = useState([
+    ...state.uiFilters.build_state,
   ])
   const [selectedBranches] = useState(['all'])
   const filterSelectedAccent = theme.icon.filterSelected
@@ -233,6 +239,46 @@ const FilterModal = ({ closeAction }) => {
     )
   }
 
+  const BuildStateFilter = ({ buildStateValue, all }) => {
+    if (all) {
+      return null
+    }
+    const selected = selectedBuildStates.includes(buildStateValue)
+    const colorWidget = colorsWidget({ selected })
+    const buildStateDisplayName = all ? 'all' : BUILD_STATE_VALUE_TO_NAME[buildStateValue]
+      || `Unknown State :${buildStateValue}`
+    const widgetClass = classNames('modal-filter-widget', {
+      'modal-filter-not-implemented': false,
+      'cannot-unselect': false,
+    })
+    const toggleBuildDriver = () => {
+      setSelectedBuildStates(
+        selected
+          ? selectedBuildStates.filter((d) => d !== buildStateValue)
+          : [...selectedBuildStates, buildStateValue],
+      )
+    }
+
+    return (
+      <div
+        className={widgetClass}
+        style={colorWidget}
+        onClick={toggleBuildDriver}
+        onKeyDown={toggleBuildDriver}
+        tabIndex={0}
+        role="button"
+        title={
+          selected
+            ? `Remove build state ${buildStateDisplayName}`
+            : `Add build driver ${buildStateDisplayName}`
+        }
+      >
+        <p className="filter-text">{buildStateDisplayName}</p>
+      </div>
+    )
+  }
+
+  // TODO: Refactor
   return (
     <>
       <div className="faded" />
@@ -298,6 +344,13 @@ const FilterModal = ({ closeAction }) => {
                   {BranchFilter({ name: 'develop' })}
                 </div>
               </div>
+              <div style={colorsModalTitle} className="subtitle">
+                Build State
+              </div>
+              <div className="filter-row">
+                {BuildStateFilter({ buildStateValue: BUILD_STATE_VALUE.Running })}
+                {BuildStateFilter({ buildStateValue: BUILD_STATE_VALUE.Passed })}
+              </div>
               <div className="modal-footer">
                 <div
                   type="button"
@@ -311,6 +364,7 @@ const FilterModal = ({ closeAction }) => {
                       uiFilters: {
                         build_driver: [...selectedDrivers],
                         artifact_kinds: [...localArtifactKinds],
+                        build_state: [...selectedBuildStates],
                       },
                       calculatedFilters: {
                         projects: [...selectedProjects],

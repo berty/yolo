@@ -4,7 +4,6 @@ import { useHistory, useLocation } from 'react-router-dom'
 import Filters from '../Filters/Filters'
 import { ThemeContext } from '../../../store/ThemeStore'
 import YoloLogo from '../../../assets/svg/yolo.svg'
-import ActionWidgets from '../ActionWidgets'
 import { ResultContext, INITIAL_STATE } from '../../../store/ResultStore'
 
 import './Header.scss'
@@ -30,11 +29,9 @@ const Header = ({ autoRefreshOn, setAutoRefreshOn, onFilterClick = () => { } }) 
         <img src={YoloLogo} alt="Yolo logo" />
       </div>
       {state.isAuthed && (
-        // TODO: Unecessary nesting
-        <ActionWidgets>
-          {/* TODO: Logout, refresh, autoRefresh should not be in Filters */}
+        <div style={{ height: '100%', display: 'flex', alignItems: 'center' }}>
           <Filters {...{ autoRefreshOn, setAutoRefreshOn, onFilterClick }} />
-        </ActionWidgets>
+        </div>
       )}
       {process.env.YOLO_UI_TEST && (
         <pre style={{ padding: 0, margin: 0 }}>UI Test</pre>
