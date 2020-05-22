@@ -25,6 +25,7 @@ export const INITIAL_STATE = {
   uiFilters: {
     artifact_kinds: [ARTIFACT_KIND_VALUE.IPA],
     build_driver: [PROJECT_BUILD_DRIVER[PROJECT.chat]],
+    build_state: [],
   },
   calculatedFilters: {
     projects: [PROJECT.chat],

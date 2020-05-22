@@ -19,7 +19,10 @@ import {
   BUILD_DRIVERS,
   PROJECT,
   BUILD_DRIVER_TO_NAME,
+  BUILD_STATES,
+  BUILD_STATE_VALUE_TO_NAME,
 } from '../../../constants'
+import { getIsArrayWithN, getIsEmptyArr } from '../../../util/getters.js'
 
 const Filters = ({ autoRefreshOn, onFilterClick, setAutoRefreshOn }) => {
   const { state, updateState } = useContext(ResultContext)
@@ -32,7 +35,7 @@ const Filters = ({ autoRefreshOn, onFilterClick, setAutoRefreshOn }) => {
     backgroundColor: theme.bg.filter,
   }
 
-  const colorsWidget = ({ selected } = { selected: false }) => {
+  const colorsWidget = ({ selected = false }) => {
     const {
       text: { filterSelectedTitle, filterUnselectedTitle },
       bg: { filter: bgFilter },
@@ -54,11 +57,9 @@ const Filters = ({ autoRefreshOn, onFilterClick, setAutoRefreshOn }) => {
       }
   }
 
-  const isArrayWithStuff = (val) => !!val && Array.isArray(val) && val.length > 0
-
   const FiltersAppWidget = () => (
     <>
-      {isArrayWithStuff(state.calculatedFilters?.projects)
+      {getIsArrayWithN(state.calculatedFilters?.projects, 1)
         && state.calculatedFilters.projects.includes(PROJECT.chat) && (
           <div
             className="widget-wrapper is-interactive"
@@ -72,7 +73,7 @@ const Filters = ({ autoRefreshOn, onFilterClick, setAutoRefreshOn }) => {
             <p className="widget-text">{PROJECT.chat}</p>
           </div>
       )}
-      {isArrayWithStuff(state.calculatedFilters.projects)
+      {getIsArrayWithN(state.calculatedFilters.projects, 1)
         && state.calculatedFilters.projects.includes(
           PROJECT['gomobile-ipfs-demo'],
         ) && (
@@ -95,7 +96,7 @@ const Filters = ({ autoRefreshOn, onFilterClick, setAutoRefreshOn }) => {
     </>
   )
 
-  const ArtifactKindsFilter = () => isArrayWithStuff(state.uiFilters.artifact_kinds) && (
+  const ArtifactKindsFilter = () => getIsArrayWithN(state.uiFilters.artifact_kinds, 1) && (
     <div
       className="widget-wrapper is-interactive"
       style={headerWidgetWrapperColors}
@@ -157,6 +158,28 @@ const Filters = ({ autoRefreshOn, onFilterClick, setAutoRefreshOn }) => {
         </div>
       ))}
     </>
+  )
+
+  const ShowRunningBuilds = () => (getIsEmptyArr(state.uiFilters.build_state) ? null
+    : (
+      <>
+        {BUILD_STATES.filter((buildState) => state.uiFilters.build_state.includes(buildState.toString()))
+          .map((buildsState, i) => (
+            <div
+              className="widget-wrapper is-interactive"
+              style={headerWidgetWrapperColors}
+              onClick={onFilterClick}
+              onKeyDown={onFilterClick}
+              role="button"
+              title={BUILD_STATE_VALUE_TO_NAME[buildsState]}
+              tabIndex={0}
+              key={i}
+            >
+              <p className="widget-text no-svg">{BUILD_STATE_VALUE_TO_NAME[buildsState]}</p>
+            </div>
+          ))}
+      </>
+    )
   )
 
   const RefreshActionButton = (
@@ -239,6 +262,7 @@ const Filters = ({ autoRefreshOn, onFilterClick, setAutoRefreshOn }) => {
       {FiltersBranchWidget()}
       <FiltersBuildDriver />
       <SetAutoRefreshActionButton />
+      <ShowRunningBuilds />
       {RefreshActionButton}
       {Logout}
     </div>

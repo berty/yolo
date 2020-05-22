@@ -110,6 +110,32 @@ export const BUILD_STATE = {
   Timedout: 'Timedout',
 }
 
+export const BUILD_STATE_VALUE = {
+  UnknownState: '0',
+  Running: '1',
+  Failed: '2',
+  Passed: '3',
+  Canceled: '4',
+  Scheduled: '5',
+  Skipped: '6',
+  NotRun: '7',
+  Timedout: '8',
+}
+
+export const BUILD_STATE_VALUE_TO_NAME = {
+  0: 'UnknownState',
+  1: 'Running',
+  2: 'Failed',
+  3: 'Passed',
+  4: 'Canceled',
+  5: 'Scheduled',
+  6: 'Skipped',
+  7: 'NotRun',
+  8: 'Timedout',
+}
+
+export const BUILD_STATES = Object.values(BUILD_STATE_VALUE)
+
 export const ARTIFACT_STATE = {
   UnknownState: 'UnknownState',
   Finished: 'Finished',

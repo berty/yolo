@@ -13,13 +13,14 @@ import FilterModal from '../../components/FilterModal/FilterModal'
 import { ThemeContext } from '../../../store/ThemeStore'
 import { ResultContext } from '../../../store/ResultStore'
 
-import { ARTIFACT_KINDS, BUILD_DRIVERS } from '../../../constants'
+import { ARTIFACT_KINDS, BUILD_DRIVERS, BUILD_STATES } from '../../../constants'
 import { getBuildList, validateError } from '../../../api'
 
 import BuildListContainer from '../../components/BuildListContainer'
 
 import './Home.scss'
 import ProtocolDisclaimer from '../../components/ProtocolDisclaimer'
+import { singleItemToArray } from '../../../util/getters'
 
 const Home = () => {
   const { theme } = useContext(ThemeContext)
@@ -42,30 +43,40 @@ const Home = () => {
 
   useEffect(() => {
     if (!locationSearch) {
+      const { artifact_kinds: artifactKinds = '', build_driver: buildDriver = '' } = state.uiFilters
+      // TODO: qS 'options' field doesn't seem to work
+      // (e.g. if artifact_kinds === null)
+      const initialLocationSearch = queryString.stringify({
+        artifact_kinds: singleItemToArray(artifactKinds),
+        build_driver: singleItemToArray(buildDriver),
+      }, { skipNull: true, skipEmptyString: true })
       history.push({
         pathname: '/',
-        search: queryString.stringify({
-          artifact_kinds: [state.uiFilters.artifact_kinds],
-          build_driver: [state.uiFilters.build_driver],
-        }),
+        search: initialLocationSearch,
       })
     } else {
       const locationObject = queryString.parse(locationSearch)
       const {
-        artifact_kinds: kindsInQuery = [],
-        build_driver: buildDriversInQuery = [],
+        artifact_kinds: queryArtifactKinds = [],
+        build_driver: queryBuildDrivers = [],
+        build_state: queryBuildState = [],
       } = locationObject
-      const artifact_kinds = (!Array.isArray(kindsInQuery)
-        ? [kindsInQuery]
-        : kindsInQuery
-      ).filter((kind) => ARTIFACT_KINDS.includes(kind))
-      const build_driver = (!Array.isArray(buildDriversInQuery)
-        ? [buildDriversInQuery]
-        : buildDriversInQuery
-      ).filter((bd) => BUILD_DRIVERS.includes(bd))
+      const artifactKinds = (!Array.isArray(queryArtifactKinds)
+        ? [queryArtifactKinds]
+        : queryArtifactKinds
+      ).filter((aK) => ARTIFACT_KINDS.includes(aK))
+      const buildDriver = (!Array.isArray(queryBuildDrivers)
+        ? [queryBuildDrivers]
+        : queryBuildDrivers
+      ).filter((bD) => BUILD_DRIVERS.includes(bD))
+
+      const buildState = queryBuildState ? singleItemToArray(queryBuildState.toString())
+        .filter((bS) => BUILD_STATES.includes(bS)) : []
 
       updateState({
-        uiFilters: { ...state.uiFilters, artifact_kinds, build_driver },
+        uiFilters: {
+          ...state.uiFilters, artifact_kinds: artifactKinds, build_driver: buildDriver, build_state: buildState,
+        },
       })
     }
   }, [])
