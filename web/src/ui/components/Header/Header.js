@@ -4,9 +4,11 @@ import { useHistory, useLocation } from 'react-router-dom'
 import Filters from '../Filters/Filters'
 import { ThemeContext } from '../../../store/ThemeStore'
 import YoloLogo from '../../../assets/svg/yolo.svg'
+import YoloLogoSquare from '../../../assets/svg/yolo-logo-square.svg'
 import ActionWidgets from '../ActionWidgets'
 import { ResultContext, INITIAL_STATE } from '../../../store/ResultStore'
 
+import styles from './Header.module.scss'
 import './Header.scss'
 
 const Header = ({ autoRefreshOn, setAutoRefreshOn, onFilterClick = () => { } }) => {
@@ -16,9 +18,9 @@ const Header = ({ autoRefreshOn, setAutoRefreshOn, onFilterClick = () => { } }) 
   const location = useLocation()
 
   return (
-    <div className="Header" style={{ backgroundColor: theme.bg.page }}>
+    <div className={styles.header} style={{ backgroundColor: theme.bg.page }}>
       <div
-        className="header-logo"
+        className={styles['header-logo-lg']}
         style={{ cursor: 'pointer' }}
         onClick={location.pathname !== '/404' ? () => {
           updateState({
@@ -28,6 +30,18 @@ const Header = ({ autoRefreshOn, setAutoRefreshOn, onFilterClick = () => { } }) 
         } : () => history.push('/')}
       >
         <img src={YoloLogo} alt="Yolo logo" />
+      </div>
+      <div
+        className={styles['header-logo-sm']}
+        style={{ cursor: 'pointer' }}
+        onClick={location.pathname !== '/404' ? () => {
+          updateState({
+            needsProgrammaticQuery: true,
+            uiFilters: INITIAL_STATE.uiFilters,
+          })
+        } : () => history.push('/')}
+      >
+        <img src={YoloLogoSquare} alt="Yolo logo" />
       </div>
       {state.isAuthed && (
         // TODO: Unecessary nesting
