@@ -43,6 +43,7 @@ const BuildBlockHeader = ({
       style={{
         color: theme.text.blockTitle,
         cursor: 'pointer',
+        flexShrink: 0,
       }}
       onClick={() => toggleCollapsed(!collapsed)}
     >
