@@ -23,16 +23,22 @@ import Tag from '../Tag/Tag'
 
 import { MR_STATE, BUILD_STATE } from '../../../constants'
 import { getRelativeTime, getTimeLabel } from '../../../util/date'
-import { getIsArr } from '../../../util/getters'
+import { getIsArray } from '../../../util/getters'
 
 import './Build.scss'
 import ShownBuildsButton from '../ShownBuildsButton'
 
 const BuildAndMrContainer = ({
-  build, buildHasMr, isLatestBuild, nOlderBuilds, showingAllBuilds, toggleShowingAllBuilds,
+  build,
+  buildHasMr,
+  isLatestBuild,
+  nOlderBuilds,
+  showingAllBuilds,
+  toggleShowingAllBuilds,
+  hasRunningBuilds,
 }) => {
   const [messageExpanded, toggleMessageExpanded] = useState(false)
-  const showingArtifacts = isLatestBuild || showingAllBuilds
+  const showingArtifacts = isLatestBuild || showingAllBuilds || hasRunningBuilds
 
   const {
     theme,
@@ -299,7 +305,7 @@ const BuildAndMrContainer = ({
       </div>
       {/* TODO: Condition to show artifacts of older builds */}
       {showingArtifacts
-        && getIsArr(buildHasArtifacts)
+        && getIsArray(buildHasArtifacts)
         && buildHasArtifacts.map((artifact) => (
           <ArtifactRow
             artifact={artifact}

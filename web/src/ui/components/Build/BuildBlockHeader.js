@@ -56,6 +56,7 @@ const BuildBlockHeader = ({
       <div className={blockRowClassNames}>
         <BlockIcon />
         {blockTitle}
+
         <Author
           authorName={buildAuthorName || undefined}
           authorUrl={buildAuthorId}

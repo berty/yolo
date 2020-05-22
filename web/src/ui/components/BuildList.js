@@ -3,6 +3,7 @@ import BuildContainer from './Build/BuildContainer'
 import {
   oneBuildResultHasBranchMaster,
   buildBranchIsMaster,
+  buildsStateIsRunning,
 } from '../../api/dataGetters'
 import {
   groupBuildsByMr,
@@ -12,24 +13,27 @@ import Divider from './Divider'
 import { getDayFormat } from '../../util/date'
 
 const BuildList = ({ builds = [] }) => {
-  const useCollapseCondition = oneBuildResultHasBranchMaster(builds)
+  const oneBuildInResultsHasMaster = oneBuildResultHasBranchMaster(builds)
   const buildsByMr = groupBuildsByMr(builds)
-  const buildsFlaggedWithFirstDay = flagBuildsFirstOfDay(buildsByMr)
+
+  const buildsByMrWithDateFlag = flagBuildsFirstOfDay(buildsByMr)
   const NoBuilds = () => <div>No results match your query.</div>
 
   return !builds.length ? (
     <NoBuilds />
   ) : (
     <div className="container">
-      {buildsFlaggedWithFirstDay.map((build, i) => (
+      {buildsByMrWithDateFlag.map((build, i) => (
         <BuildContainer
           key={`${build.id}-${i}`}
           build={build}
-          toCollapse={useCollapseCondition && !buildBranchIsMaster(build)}
+          toCollapse={oneBuildInResultsHasMaster && !buildBranchIsMaster(build)}
+          hasRunningBuilds={buildsStateIsRunning(build.allBuildsForMr, builds)}
         >
           {build.buildIsFirstOfDay && (
-            <Divider dividerText={getDayFormat(build.created_at)} />
+          <Divider dividerText={getDayFormat(build.created_at)} />
           )}
+
         </BuildContainer>
       ))}
     </div>
