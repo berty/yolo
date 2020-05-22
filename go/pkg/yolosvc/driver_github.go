@@ -3,6 +3,7 @@ package yolosvc
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"berty.tech/yolo/v2/go/pkg/yolopb"
@@ -188,6 +189,7 @@ func mrFromGitHubPR(pr *github.PullRequest, logger *zap.Logger) *yolopb.MergeReq
 		Branch:       pr.GetHead().GetLabel(),
 		CommitURL:    commitURL,
 		BranchURL:    branchURL,
+		IsWIP:        pr.GetDraft(),
 		HasAssignees: []*yolopb.Entity{},
 		HasReviewers: []*yolopb.Entity{},
 		HasProjectID: pr.GetBase().GetRepo().GetHTMLURL(),
@@ -209,6 +211,13 @@ func mrFromGitHubPR(pr *github.PullRequest, logger *zap.Logger) *yolopb.MergeReq
 		mr.State = yolopb.MergeRequest_Merged
 		mr.MergedAt = &mergedAt
 	}
+	if !mr.IsWIP && strings.HasPrefix(strings.ToLower(mr.Title), "wip") {
+		mr.IsWIP = true
+	}
+	if !mr.IsWIP && strings.HasPrefix(strings.ToLower(mr.Title), "draft") {
+		mr.IsWIP = true
+	}
+	// FIXME: also check if a label is "WIP" or "Work in progress"
 
 	if user := pr.GetUser(); user != nil {
 		entity := entityFromGitHubUser(user, logger)
