@@ -1,5 +1,7 @@
 /* eslint-disable import/no-named-as-default */
-import React, { useContext, useState, useEffect } from 'react'
+import React, {
+  useContext, useState, useEffect, useCallback,
+} from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
 import queryString from 'query-string'
 import Cookies from 'js-cookie'
@@ -11,9 +13,11 @@ import ShowFiltersButton from '../../components/ShowFiltersButton'
 import FilterModal from '../../components/FilterModal/FilterModal'
 
 import { ThemeContext } from '../../../store/ThemeStore'
-import { ResultContext } from '../../../store/ResultStore'
+import { ResultContext, INITIAL_STATE } from '../../../store/ResultStore'
 
-import { ARTIFACT_KINDS, BUILD_DRIVERS, BUILD_STATES } from '../../../constants'
+import {
+  ARTIFACT_KINDS, BUILD_DRIVERS, BUILD_STATES, PLATFORM_TO_ARTIFACT_KIND,
+} from '../../../constants'
 import { getBuildList, validateError } from '../../../api'
 
 import BuildListContainer from '../../components/BuildListContainer'
@@ -21,6 +25,7 @@ import BuildListContainer from '../../components/BuildListContainer'
 import './Home.scss'
 import ProtocolDisclaimer from '../../components/ProtocolDisclaimer'
 import { singleItemToArray } from '../../../util/getters'
+import { getMobileOperatingSystem } from '../../../util/browser'
 
 const Home = () => {
   const { theme } = useContext(ThemeContext)
@@ -41,8 +46,24 @@ const Home = () => {
     toggleShowDisclaimer(!disclaimerAccepted)
   }, [])
 
+  const setDefaultArtifactKinds = useCallback(() => {
+    const userAgent = getMobileOperatingSystem()
+    const defaultKind = PLATFORM_TO_ARTIFACT_KIND[userAgent]
+    const { uiFilters: { artifact_kinds: initialArtifactKinds } } = INITIAL_STATE
+    updateState({
+      userAgent,
+      uiFilters: {
+        ...state.uiFilters,
+        artifact_kinds: userAgent === 'Unknown OS'
+          ? initialArtifactKinds
+          : [defaultKind],
+      },
+    })
+  }, [state.uiFilters, updateState])
+
   useEffect(() => {
     if (!locationSearch) {
+      setDefaultArtifactKinds()
       const { artifact_kinds: artifactKinds = '', build_driver: buildDriver = '' } = state.uiFilters
       // TODO: qS 'options' field doesn't seem to work
       // (e.g. if artifact_kinds === null)
