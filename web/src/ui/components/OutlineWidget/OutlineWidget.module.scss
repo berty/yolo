@@ -1,0 +1,41 @@
+.widget-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0.6rem 1rem;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 1rem;
+    margin-right: 0.75rem;
+    margin-top: 0.4rem;
+    min-height: 0;
+    svg {
+        margin-left: 0.6rem;
+    }
+    svg:first-child {
+        margin-left: 0px;
+    }
+    &.is-interactive {
+        cursor: pointer;
+    }
+    &.not-implemented {
+        border-style: dotted;
+    }
+    &.text-underneath {
+        flex-flow: column nowrap;
+        justify-content: center;
+        .widget-text {
+            margin-left: 0rem;
+        }
+    }
+}
+
+.widget-text {
+    font-size: 0.75rem;
+    padding: 0px;
+    margin: 0px;
+    margin-left: 1rem;
+    &.no-svg {
+        margin-left: 0rem;
+    }
+}

@@ -1,21 +1,22 @@
 
-import React, { useContext } from 'react'
+import React from 'react'
 import { ChevronDown, ChevronUp } from 'react-feather'
-import { ThemeContext } from '../../store/ThemeStore'
 import { tagStyle } from '../styleTools/buttonStyler'
 import Tag from './Tag/Tag'
+import withTheme from '../helpers/withTheme'
 
 const ShownBuildsButton = ({
   nOlderBuilds,
   showingAllBuilds = null,
   toggleShowingAllBuilds = null,
+  ...injectedProps
 }) => {
   const {
     theme: {
       name,
       text: { blockTitle },
     },
-  } = useContext(ThemeContext)
+  } = injectedProps
 
   const multipleOlderBuilds = nOlderBuilds > 1
   const isInteractive = !!toggleShowingAllBuilds
@@ -55,4 +56,4 @@ const ShownBuildsButton = ({
   )
 }
 
-export default ShownBuildsButton
+export default withTheme(ShownBuildsButton)

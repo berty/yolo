@@ -1,6 +1,7 @@
 import React from 'react'
 import classNames from 'classnames'
 import stylers from './Tag.module.scss'
+import { getIsArrayWithN } from '../../../util/getters'
 
 const Tag = ({
   title = null,
@@ -13,7 +14,7 @@ const Tag = ({
   children = null,
   normalCaps = false,
 }) => {
-  const validClasses = classes && Array.isArray(classes) ? classes.reduce((acc, curr) => { acc[curr] = true; return acc }, {}) : { ...classes }
+  const validClasses = getIsArrayWithN(classes, 1) ? classes.reduce((acc, curr) => { acc[curr] = true; return acc }, {}) : { ...classes }
   const tagClass = classNames('btn', 'btn-sm', { ...validClasses, [stylers['normal-caps']]: normalCaps })
   const contents = (
     children ? <>{children}</> : (

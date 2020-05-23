@@ -1,11 +1,11 @@
 import React, {
-  useState, useRef, useEffect, useContext,
+  useState, useRef, useEffect,
 } from 'react'
-import { ThemeContext } from '../../store/ThemeStore'
 import { setAuthCookie } from '../../api/auth'
+import withTheme from '../helpers/withTheme'
 
-const ApiKeyPrompt = ({ failedKey, updateState }) => {
-  const { theme } = useContext(ThemeContext)
+const ApiKeyPrompt = ({ failedKey, updateState, ...injectedProps }) => {
+  const { theme: { text: { sectionTitle } } } = injectedProps
   const [formApiKey, updateFormApiKey] = useState(failedKey)
   const inputEl = useRef(null)
   useEffect(() => inputEl.current.focus())
@@ -17,7 +17,7 @@ const ApiKeyPrompt = ({ failedKey, updateState }) => {
           Enter an API key in the form of
           {' '}
           <strong
-            style={{ fontFamily: 'monospace', color: theme.text.sectionTitle }}
+            style={{ fontFamily: 'monospace', color: sectionTitle }}
           >
             :password
           </strong>
@@ -53,4 +53,4 @@ const ApiKeyPrompt = ({ failedKey, updateState }) => {
   )
 }
 
-export default ApiKeyPrompt
+export default withTheme(ApiKeyPrompt)

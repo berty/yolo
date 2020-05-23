@@ -1,39 +1,27 @@
-import React, { useContext, useState } from 'react'
-import {
-  Check,
-  GitBranch,
-  GitMerge,
-  GitCommit,
-  X,
-  LogOut,
-} from 'react-feather'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faAndroid, faApple } from '@fortawesome/free-brands-svg-icons'
-import { faQuestionCircle, faCube } from '@fortawesome/free-solid-svg-icons'
-import classNames from 'classnames'
 import { uniq } from 'lodash'
-
-import './FilterModal.scss'
-import { ThemeContext } from '../../../store/ThemeStore'
-import IconChat from '../../../assets/svg/IconChat'
-import { ResultContext, INITIAL_STATE } from '../../../store/ResultStore'
-import {
-  ARTIFACT_KIND_TO_PLATFORM,
-  ARTIFACT_KIND_VALUE,
-  PROJECT,
-  BRANCH_TO_DISPLAY_NAME,
-  PROJECT_ARTIFACT_KINDS,
-  PROJECT_BUILD_DRIVER,
-  BUILD_DRIVERS,
-  BUILD_DRIVER_TO_NAME,
-  BUILD_STATE_VALUE_TO_NAME,
-  BUILD_STATE_VALUE,
-} from '../../../constants'
-import ThemeToggler from '../ThemeToggler'
+import React, { useContext, useState } from 'react'
+import { Check, LogOut, X } from 'react-feather'
 import { removeAuthCookie } from '../../../api/auth'
+import {
+  ARTIFACT_KIND_TO_PLATFORM, BRANCH_TO_DISPLAY_NAME, BUILD_DRIVERS, BUILD_DRIVER_TO_NAME, BUILD_STATES, BUILD_STATE_VALUE_TO_NAME, PROJECT, PROJECT_ARTIFACT_KINDS, PROJECT_BUILD_DRIVER,
+} from '../../../constants'
+import { INITIAL_STATE, ResultContext } from '../../../store/ResultStore'
+import { addOrRemoveFromArray } from '../../../util/getters'
+import withButtonStyles from '../../helpers/withButtonStyles'
+import withTheme from '../../helpers/withTheme'
+import { getArtifactKindIcon } from '../../styleTools/brandIcons'
+import { getProjectIcon } from '../../styleTools/projectIcons'
+import { getVcsIcon } from '../../styleTools/vcsIcons'
+import OutlineWidget from '../OutlineWidget/OutlineWidget'
+import ThemeToggler from '../ThemeToggler'
+import './FilterModal.scss'
+import Tag from '../Tag/Tag'
 
-const FilterModal = ({ closeAction }) => {
-  const { theme } = useContext(ThemeContext)
+const FilterModal = ({
+  closeAction, ...injectedProps
+}) => {
+  const { theme, themeStyles } = injectedProps
   const { state, updateState } = useContext(ResultContext)
   const [selectedDrivers, setSelectedDrivers] = useState([
     ...state.uiFilters.build_driver,
@@ -41,119 +29,40 @@ const FilterModal = ({ closeAction }) => {
   const [selectedProjects, setSelectedProjects] = useState([
     ...state.calculatedFilters.projects,
   ])
-  const [localArtifactKinds, setLocalArtifactKinds] = useState([
+  const [selectedArtifactKinds, setSelectedArtifactKinds] = useState([
     ...state.uiFilters.artifact_kinds,
   ])
-
   const [selectedBuildStates, setSelectedBuildStates] = useState([
     ...state.uiFilters.build_state,
   ])
   const [selectedBranches] = useState(['all'])
   const filterSelectedAccent = theme.icon.filterSelected
 
-  const applyFilterButtonColors = {
-    backgroundColor: theme.bg.btnPrimary,
-    border: `1px solid ${theme.bg.btnPrimary}`,
-    boxShadow: `0px 4px 0px ${theme.shadow.btnPrimary}`,
-  }
-
-  const colorsCloseButton = {
-    backgroundColor: theme.bg.filter,
-  }
-
-  const colorsModal = {
-    backgroundColor: theme.bg.page,
-    color: theme.text.sectionText,
-  }
-
-  const colorsModalTitle = {
-    color: theme.text.sectionTitle,
-  }
-
-  const ArtifactFilter = ({ artifact_kind }) => {
-    const selected = localArtifactKinds.includes(artifact_kind)
-    const colorIcon = colorsIcon({ selected })
-    const colorWidget = colorsWidget({ selected })
-    const widgetClass = classNames('modal-filter-widget', {
-      'modal-filter-not-implemented': false,
-      'cannot-unselect': false,
-    })
-    const icon = artifact_kind === ARTIFACT_KIND_VALUE.IPA
-      || artifact_kind === ARTIFACT_KIND_VALUE.DMG ? (
-        <FontAwesomeIcon icon={faApple} size="lg" color={colorIcon} />
-      ) : artifact_kind === ARTIFACT_KIND_VALUE.APK ? (
-        <FontAwesomeIcon icon={faAndroid} size="lg" color={colorIcon} />
-      ) : (
-        <FontAwesomeIcon icon={faQuestionCircle} size="lg" color={colorIcon} />
-      )
-    const osName = ARTIFACT_KIND_TO_PLATFORM[artifact_kind.toString()]
-    const addArtifactFilter = () => {
-      setLocalArtifactKinds([...localArtifactKinds, artifact_kind])
-    }
-    const removeArtifactFilter = () => {
-      setLocalArtifactKinds(
-        localArtifactKinds.filter((kind) => kind !== artifact_kind),
-      )
-    }
+  const ArtifactFilter = ({ artifact_kind: artifactKind }) => {
+    const selected = (selectedArtifactKinds.includes(artifactKind))
     return (
-      <div
-        className={widgetClass}
-        style={colorWidget}
-        onClick={selected ? removeArtifactFilter : addArtifactFilter}
-      >
-        {icon}
-        <p className="filter-text">{osName}</p>
-      </div>
+      <OutlineWidget
+        onClick={() => setSelectedArtifactKinds(addOrRemoveFromArray(artifactKind, selectedArtifactKinds))}
+        selected={selected}
+        textUnderneath
+        interactive
+        iconComponent={<FontAwesomeIcon icon={getArtifactKindIcon(artifactKind)} size="lg" />}
+        text={ARTIFACT_KIND_TO_PLATFORM[artifactKind]}
+      />
     )
   }
-
-  const colorsWidget = ({ selected } = { selected: false }) => {
-    const {
-      text: { filterSelectedTitle, filterUnselectedTitle },
-      bg: { filter: bgFilter },
-      border: {
-        filterSelected: selectedBorder,
-        filterUnselected: unselectedBorder,
-      },
-    } = theme
-    return selected
-      ? {
-        color: filterSelectedTitle,
-        borderColor: selectedBorder,
-        backgroundColor: bgFilter,
-      }
-      : {
-        color: filterUnselectedTitle,
-        borderColor: unselectedBorder,
-        background: 'transparent',
-      }
-  }
-
-  const colorsIcon = ({ selected } = { selected: false }) => selected ? theme.icon.filterSelected : theme.icon.filterUnselected
 
   const ProjectFilter = ({ project }) => {
-    const selected = selectedProjects.includes(project)
-    const colorIcon = colorsIcon({ selected })
-    const colorWidget = colorsWidget({ selected })
-    const artifactKindsForProject = !!PROJECT_ARTIFACT_KINDS[project]
+    const selected = (selectedProjects.includes(project))
+    const artifactKindsForProject = (!!PROJECT_ARTIFACT_KINDS[project])
     const buildDriverForProject = PROJECT_BUILD_DRIVER[project]
     const projectValue = PROJECT[project] || 'Unknown Project'
-    const widgetClass = classNames('modal-filter-widget', {
-      'modal-filter-not-implemented': false,
-      'cannot-unselect': false,
-    })
-    const icon = project === PROJECT.chat ? (
-      <IconChat stroke={colorIcon} />
-    ) : project === PROJECT['gomobile-ipfs-demo'] ? (
-      <FontAwesomeIcon icon={faCube} size="lg" color={colorIcon} />
-    ) : (
-      <FontAwesomeIcon icon={faQuestionCircle} size="lg" color={colorIcon} />
-    )
+    const projectIcon = getProjectIcon(projectValue)
 
     const addProjectFilter = () => {
       artifactKindsForProject
-        && setLocalArtifactKinds(
-          uniq([...localArtifactKinds, ...PROJECT_ARTIFACT_KINDS[projectValue]]),
+        && setSelectedArtifactKinds(
+          uniq([...selectedArtifactKinds, ...PROJECT_ARTIFACT_KINDS[projectValue]]),
         )
       buildDriverForProject
         && setSelectedDrivers(uniq([...selectedDrivers, buildDriverForProject]))
@@ -165,120 +74,58 @@ const FilterModal = ({ closeAction }) => {
     }
 
     return (
-      <div
-        className={widgetClass}
-        style={colorWidget}
+      <OutlineWidget
+        text={projectValue}
+        iconComponent={projectIcon()}
         onClick={selected ? removeProjectFilter : addProjectFilter}
-      >
-        {icon}
-        <p className="filter-text">{projectValue}</p>
-      </div>
+        selected={selected}
+        interactive
+        textUnderneath
+      />
     )
   }
 
-  const BranchFilter = ({ name }) => {
-    const selected = selectedBranches.includes(name)
-    const implemented = name.toUpperCase() === 'ALL'
-    const colorIcon = colorsIcon({ selected })
-    const colorWidget = colorsWidget({ selected })
-    const widgetClass = classNames('modal-filter-widget', {
-      'modal-filter-not-implemented': !implemented,
-      'cannot-unselect': selected,
-    })
-    const icon = name === 'all' ? (
-      <GitBranch color={colorIcon} />
-    ) : name === 'master' ? (
-      <GitCommit color={colorIcon} />
-    ) : name === 'develop' ? (
-      <GitMerge color={colorIcon} />
-    ) : (
-      <></>
-    )
-    const branchDisplayName = BRANCH_TO_DISPLAY_NAME[name.toUpperCase()] || 'Unknown Branch'
+  const BranchFilter = ({ branchName }) => {
+    const selected = (selectedBranches.includes(branchName))
+    const implemented = (branchName.toUpperCase() === 'ALL')
+    const branchIcon = getVcsIcon(branchName)
+
     return (
-      <div className={widgetClass} style={colorWidget}>
-        {icon}
-        <p className="filter-text">{branchDisplayName}</p>
-      </div>
+      <OutlineWidget
+        iconComponent={branchIcon()}
+        text={BRANCH_TO_DISPLAY_NAME[branchName.toUpperCase()] || 'Unknown Branch'}
+        selected={selected}
+        notImplemented={!implemented}
+        textUnderneath
+        interactive={false}
+      />
     )
   }
 
   const BuildDriverFilter = ({ buildDriverValue }) => {
-    const selected = selectedDrivers.includes(buildDriverValue)
-    const colorWidget = colorsWidget({ selected })
-    const buildDriverDisplayName = BUILD_DRIVER_TO_NAME[buildDriverValue]
-      || `Unknown Driver :${buildDriverValue}`
-    const widgetClass = classNames('modal-filter-widget', {
-      'modal-filter-not-implemented': false,
-      'cannot-unselect': false,
-    })
-    const toggleBuildDriver = () => {
-      setSelectedDrivers(
-        selected
-          ? selectedDrivers.filter((d) => d !== buildDriverValue)
-          : [...selectedDrivers, buildDriverValue],
-      )
-    }
-
+    const selected = (selectedDrivers.includes(buildDriverValue))
     return (
-      <div
-        className={widgetClass}
-        style={colorWidget}
-        onClick={toggleBuildDriver}
-        onKeyDown={toggleBuildDriver}
-        tabIndex={0}
-        role="button"
-        title={
-          selected
-            ? `Remove build driver ${buildDriverDisplayName}`
-            : `Add build driver ${buildDriverDisplayName}`
-        }
-      >
-        <p className="filter-text">{buildDriverDisplayName}</p>
-      </div>
+      <OutlineWidget
+        textUnderneath
+        selected={selected}
+        text={BUILD_DRIVER_TO_NAME[buildDriverValue] || `Unknown Driver :${buildDriverValue}`}
+        onClick={() => setSelectedDrivers(addOrRemoveFromArray(buildDriverValue, selectedDrivers))}
+      />
     )
   }
 
-  const BuildStateFilter = ({ buildStateValue, all }) => {
-    if (all) {
-      return null
-    }
-    const selected = selectedBuildStates.includes(buildStateValue)
-    const colorWidget = colorsWidget({ selected })
-    const buildStateDisplayName = all ? 'all' : BUILD_STATE_VALUE_TO_NAME[buildStateValue]
-      || `Unknown State :${buildStateValue}`
-    const widgetClass = classNames('modal-filter-widget', {
-      'modal-filter-not-implemented': false,
-      'cannot-unselect': false,
-    })
-    const toggleBuildDriver = () => {
-      setSelectedBuildStates(
-        selected
-          ? selectedBuildStates.filter((d) => d !== buildStateValue)
-          : [...selectedBuildStates, buildStateValue],
-      )
-    }
-
+  const BuildStateFilter = ({ buildStateValue }) => {
+    const selected = (selectedBuildStates.includes(buildStateValue))
     return (
-      <div
-        className={widgetClass}
-        style={colorWidget}
-        onClick={toggleBuildDriver}
-        onKeyDown={toggleBuildDriver}
-        tabIndex={0}
-        role="button"
-        title={
-          selected
-            ? `Remove build state ${buildStateDisplayName}`
-            : `Add build driver ${buildStateDisplayName}`
-        }
-      >
-        <p className="filter-text">{buildStateDisplayName}</p>
-      </div>
+      <OutlineWidget
+        textUnderneath
+        selected={selected}
+        text={BUILD_STATE_VALUE_TO_NAME[buildStateValue] || `Unknown Driver :${buildStateValue}`}
+        onClick={() => setSelectedBuildStates(addOrRemoveFromArray(buildStateValue, selectedBuildStates))}
+      />
     )
   }
 
-  // TODO: Refactor
   return (
     <>
       <div className="faded" />
@@ -292,9 +139,9 @@ const FilterModal = ({ closeAction }) => {
             className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"
             role="document"
           >
-            <div className="modal-content" style={colorsModal}>
+            <div className="modal-content" style={{ ...themeStyles.pageBg, ...themeStyles.textPlain }}>
               <div className="modal-header">
-                <h5 className="modal-title" style={colorsModalTitle}>
+                <h5 className="modal-title" style={themeStyles.textSectionTitle}>
                   Filter the builds
                 </h5>
                 <div
@@ -302,20 +149,24 @@ const FilterModal = ({ closeAction }) => {
                   data-dismiss="modal"
                   aria-label="Close"
                   onClick={closeAction}
-                  style={colorsCloseButton}
+                  style={themeStyles.widgetBg}
                 >
-                  <X size={14} strokeWidth={3} color={filterSelectedAccent} />
+                  <X
+                    size={14}
+                    strokeWidth={3}
+                    color={filterSelectedAccent}
+                  />
                 </div>
               </div>
               <div className="modal-body">
-                <div style={colorsModalTitle} className="subtitle">
+                <div style={themeStyles.textSectionTitle} className="subtitle">
                   Projects
                 </div>
                 <div className="filter-row">
                   {ProjectFilter({ project: PROJECT.chat })}
                   {ProjectFilter({ project: PROJECT['gomobile-ipfs-demo'] })}
                 </div>
-                <div style={colorsModalTitle} className="subtitle">
+                <div style={themeStyles.textSectionTitle} className="subtitle">
                   Artifact Kinds
                 </div>
                 <div className="filter-row">
@@ -324,7 +175,7 @@ const FilterModal = ({ closeAction }) => {
                   {ArtifactFilter({ artifact_kind: '2' })}
                   {ArtifactFilter({ artifact_kind: '3' })}
                 </div>
-                <div style={colorsModalTitle} className="subtitle">
+                <div style={themeStyles.textSectionTitle} className="subtitle">
                   Build Drivers
                 </div>
                 <div className="filter-row">
@@ -335,21 +186,26 @@ const FilterModal = ({ closeAction }) => {
                     />
                   ))}
                 </div>
-                <div style={colorsModalTitle} className="subtitle">
+                <div style={themeStyles.textSectionTitle} className="subtitle">
                   Branches
                 </div>
                 <div className="filter-row">
-                  {BranchFilter({ name: 'all' })}
-                  {BranchFilter({ name: 'master' })}
-                  {BranchFilter({ name: 'develop' })}
+                  <BranchFilter branchName="all" />
+                  <BranchFilter branchName="master" />
+                  <BranchFilter branchName="develop" />
                 </div>
-              </div>
-              <div style={colorsModalTitle} className="subtitle">
-                Build State
-              </div>
-              <div className="filter-row">
-                {BuildStateFilter({ buildStateValue: BUILD_STATE_VALUE.Running })}
-                {BuildStateFilter({ buildStateValue: BUILD_STATE_VALUE.Passed })}
+
+                <div style={themeStyles.textSectionTitle} className="subtitle">
+                  Build State
+                </div>
+                <div className="filter-row">
+                  {BUILD_STATES.map((buildStateValue, i) => (
+                    <BuildStateFilter
+                      key={i}
+                      buildStateValue={buildStateValue}
+                    />
+                  ))}
+                </div>
               </div>
               <div className="modal-footer">
                 <div
@@ -363,7 +219,7 @@ const FilterModal = ({ closeAction }) => {
                       builds: [],
                       uiFilters: {
                         build_driver: [...selectedDrivers],
-                        artifact_kinds: [...localArtifactKinds],
+                        artifact_kinds: [...selectedArtifactKinds],
                         build_state: [...selectedBuildStates],
                       },
                       calculatedFilters: {
@@ -372,7 +228,7 @@ const FilterModal = ({ closeAction }) => {
                     })
                     closeAction()
                   }}
-                  style={applyFilterButtonColors}
+                  style={injectedProps.themedBtnStyles.primaryButtonColors}
                 >
                   <Check />
                   Apply Filters
@@ -381,9 +237,8 @@ const FilterModal = ({ closeAction }) => {
               <div className="modal-footer settings">
                 <ThemeToggler />
                 {state.apiKey && state.isAuthed && (
-                  <div
-                    className="btn btn-sm"
-                    style={{ display: 'flex', alignItems: 'center' }}
+                  <Tag
+                    styles={{ display: 'flex', alignItems: 'center' }}
                     onClick={() => {
                       removeAuthCookie()
                       updateState({
@@ -396,9 +251,9 @@ const FilterModal = ({ closeAction }) => {
                       closeAction()
                     }}
                   >
-                    <LogOut height="14" color={filterSelectedAccent} />
-                    Logout
-                  </div>
+                    <LogOut height="14" color={theme.icon.filterSelected} />
+                    <div>Logout</div>
+                  </Tag>
                 )}
               </div>
             </div>
@@ -409,4 +264,4 @@ const FilterModal = ({ closeAction }) => {
   )
 }
 
-export default FilterModal
+export default withButtonStyles(withTheme(FilterModal))

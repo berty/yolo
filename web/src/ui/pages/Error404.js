@@ -1,16 +1,12 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import { useHistory } from 'react-router-dom'
 
 import Header from '../components/Header/Header'
-import { ThemeContext } from '../../store/ThemeStore'
+import withButtonStyles from '../helpers/withButtonStyles'
 
-const Error404 = () => {
+const Error404 = ({ ...injectedProps }) => {
   const history = useHistory()
-  const { theme } = useContext(ThemeContext)
-
-  const colorsBackButton = {
-    backgroundColor: theme.bg.btnPrimary,
-  }
+  const { themedBtnStyles: { primaryButtonColors } } = injectedProps
 
   return (
     <div>
@@ -27,7 +23,7 @@ const Error404 = () => {
         }}
       >
         <p>404 Not Found</p>
-        <div className="btn btn-primary" style={colorsBackButton} onClick={() => history.goBack()} onKeyDown={() => history.goBack()} role="button" tabIndex={0}>
+        <div className="btn btn-primary" style={primaryButtonColors} onClick={() => history.goBack()} onKeyDown={() => history.goBack()} role="button" tabIndex={0}>
           Back
         </div>
       </div>
@@ -35,4 +31,4 @@ const Error404 = () => {
   )
 }
 
-export default Error404
+export default withButtonStyles(Error404)

@@ -1,34 +1,28 @@
 /* eslint-disable import/no-named-as-default */
-import React, {
-  useContext, useState, useEffect, useCallback,
-} from 'react'
-import { useLocation, useHistory } from 'react-router-dom'
-import queryString from 'query-string'
 import Cookies from 'js-cookie'
-
-import Header from '../../components/Header/Header'
-import ErrorDisplay from '../../components/ErrorDisplay/ErrorDisplay'
-import ApiKeyPrompt from '../../components/ApiKeyPrompt'
-import ShowFiltersButton from '../../components/ShowFiltersButton'
-import FilterModal from '../../components/FilterModal/FilterModal'
-
-import { ThemeContext } from '../../../store/ThemeStore'
-import { ResultContext, INITIAL_STATE } from '../../../store/ResultStore'
-
+import queryString from 'query-string'
+import React, {
+  useCallback, useContext, useEffect, useState,
+} from 'react'
+import { useHistory, useLocation } from 'react-router-dom'
+import { getBuildList, validateError } from '../../../api'
 import {
   ARTIFACT_KINDS, BUILD_DRIVERS, BUILD_STATES, PLATFORM_TO_ARTIFACT_KIND,
 } from '../../../constants'
-import { getBuildList, validateError } from '../../../api'
-
-import BuildListContainer from '../../components/BuildListContainer'
-
-import './Home.scss'
-import ProtocolDisclaimer from '../../components/ProtocolDisclaimer'
-import { singleItemToArray } from '../../../util/getters'
+import { INITIAL_STATE, ResultContext } from '../../../store/ResultStore'
 import { getMobileOperatingSystem } from '../../../util/browser'
+import { singleItemToArray } from '../../../util/getters'
+import ApiKeyPrompt from '../../components/ApiKeyPrompt'
+import BuildListContainer from '../../components/BuildListContainer'
+import ErrorDisplay from '../../components/ErrorDisplay/ErrorDisplay'
+import FilterModal from '../../components/FilterModal/FilterModal'
+import Header from '../../components/Header/Header'
+import ProtocolDisclaimer from '../../components/ProtocolDisclaimer'
+import ShowFiltersButton from '../../components/ShowFiltersButton'
+import withTheme from '../../helpers/withTheme'
+import './Home.scss'
 
-const Home = () => {
-  const { theme } = useContext(ThemeContext)
+const Home = ({ theme }) => {
   const { state, updateState } = useContext(ResultContext)
   const [showingFiltersModal, toggleShowFilters] = useState(false)
   const [showingDisclaimerModal, toggleShowDisclaimer] = useState(false)
@@ -231,10 +225,10 @@ const Home = () => {
         />
       )}
       {showingFiltersModal && state.isAuthed && (
-        <FilterModal closeAction={() => toggleShowFilters(false)} />
+        <FilterModal closeAction={() => toggleShowFilters(false)} needsFilterColors />
       )}
     </div>
   )
 }
 
-export default Home
+export default withTheme(Home)
