@@ -1,7 +1,16 @@
-/* eslint-disable no-nested-ternary */
+/**
+ * BEWARE ⚠️
+ *
+ * This is a container for ALL (almost) the app state.
+ * It is mutated uniquely via action updateState()
+ * throughout the entire app
+ *
+ * Tell ekelen to refactor me
+ */
+
 import React, { useReducer } from 'react'
 import { cloneDeep } from 'lodash'
-import { retrieveAuthCookie } from '../api/auth'
+import { retrieveAuthCookie } from '../api/cookies'
 import {
   actions,
   ARTIFACT_KIND_VALUE,
@@ -9,20 +18,19 @@ import {
   PROJECT_BUILD_DRIVER,
 } from '../constants'
 
-// TODO: Yes, this file needs a new name, and should maybe be split
 export const ResultContext = React.createContext()
 
 export const INITIAL_STATE = {
   apiKey: retrieveAuthCookie() || null,
+  authIsPending: false,
   autoRefreshOn: false,
-  baseURL: `${process.env.API_SERVER}`,
   builds: [],
   error: null,
   isAuthed: false,
   isLoaded: false,
   needsProgrammaticQuery: false,
-  needsRefresh: false,
   needsQuietRefresh: false,
+  needsRefresh: false,
   userAgent: '',
   uiFilters: {
     artifact_kinds: [ARTIFACT_KIND_VALUE.IPA],
@@ -52,12 +60,10 @@ export const ResultStore = ({ children }) => {
     dispatch({ type: actions.UPDATE_STATE, payload: cloneDeep(payload) })
   }
 
-  // pass dispatch if we want to trigger an action without an action creator
   return (
     <ResultContext.Provider
       value={{
         state,
-        dispatch,
         updateState,
       }}
     >

@@ -141,6 +141,7 @@ const BuildContainer = ({
       >
         <BuildBlockHeader
           {...{
+            blockTitle,
             buildAuthorAvatarUrl,
             buildAuthorId,
             buildAuthorName,
@@ -149,12 +150,11 @@ const BuildContainer = ({
             buildShortId,
             collapsed,
             isMasterBuildBranch,
-            mrId,
-            mrState,
-            mrShortId,
-            toggleCollapsed,
-            blockTitle,
             latestBuildStateTags,
+            mrId,
+            mrShortId,
+            mrState,
+            toggleCollapsed,
           }}
         />
         {!collapsed
@@ -163,14 +163,14 @@ const BuildContainer = ({
             .filter((bIdx, i) => showingAllBuilds ? (!!bIdx) : i === 0)
             .map((buildidx, i) => (
               <BuildAndMrContainer
+                AnyRunningBuildTags={AnyRunningBuildTags}
                 build={state.builds[buildidx]}
                 buildHasMr={buildHasMr}
                 isLatestBuild={i === 0}
+                key={i}
                 nOlderBuilds={i === 0 && getIsArrayWithN(allBuildsForMr, 2) ? allBuildsForMr.length - 1 : 0}
                 showingAllBuilds={showingAllBuilds}
                 toggleShowingAllBuilds={toggleShowingAllBuilds}
-                key={i}
-                AnyRunningBuildTags={AnyRunningBuildTags}
               />
             ))}
       </div>

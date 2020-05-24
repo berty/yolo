@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { uniq } from 'lodash'
 import React, { useContext, useState } from 'react'
 import { Check, LogOut, X } from 'react-feather'
-import { removeAuthCookie } from '../../../api/auth'
+import { removeAuthCookie } from '../../../api/cookies'
 import {
   ARTIFACT_KIND_TO_PLATFORM, BRANCH_TO_DISPLAY_NAME, BUILD_DRIVERS, BUILD_DRIVER_TO_NAME, BUILD_STATES, BUILD_STATE_VALUE_TO_NAME, PROJECT, PROJECT_ARTIFACT_KINDS, PROJECT_BUILD_DRIVER,
 } from '../../../constants'

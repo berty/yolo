@@ -4,11 +4,11 @@ import {
   oneBuildResultHasBranchMaster,
   buildBranchIsMaster,
   buildsStateIsRunning,
-} from '../../api/dataGetters'
+} from '../../api/apiResponseGetters'
 import {
   groupBuildsByMr,
   flagBuildsFirstOfDay,
-} from '../../api/dataTransforms'
+} from '../../api/apiResponseTransforms'
 import Divider from './Divider/Divider'
 import { getDayFormat } from '../../util/date'
 

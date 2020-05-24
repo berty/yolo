@@ -1,4 +1,4 @@
-import { getHasKey } from '../util/getters'
+import { getHasKey, getSafeStr } from '../util/getters'
 import { getIsNextDay } from '../util/date'
 
 /**
@@ -68,4 +68,29 @@ export const groupBuildsByMr = (builds) => {
     }, {})
   const groupedBuildList = Object.entries(buildDict).map((b) => b[1])
   return groupedBuildList
+}
+
+/**
+ * Takes axios HTTP error and formats it
+ * @param {axios-flavored HTTP error} error
+ * @return {Object<{humanMessage: string, status: number, statusText: string}>}
+ */
+export const validateError = ({ error }) => {
+  const { message: axiosMessage } = error.toJSON()
+  const {
+    response: { data: customTopLevelMessage = '', status, statusText } = {
+      data: '',
+      status: 0,
+      statusText: '',
+    },
+  } = error || {}
+  const {
+    response: { data: { message: customNestedMessage } = { data: { message: '' } } },
+  } = error || {}
+  const humanMessage = getSafeStr(customTopLevelMessage) || getSafeStr(customNestedMessage) || axiosMessage
+  return {
+    humanMessage,
+    status,
+    statusText,
+  }
 }

@@ -4,7 +4,7 @@ import React, { useContext } from 'react'
 import {
   Check, GitBranch, LogOut, MessageCircle, X,
 } from 'react-feather'
-import { removeAuthCookie } from '../../../api/auth'
+import { removeAuthCookie } from '../../../api/cookies'
 import {
   ARTIFACT_VALUE_KIND, BUILD_DRIVERS, BUILD_DRIVER_TO_NAME, BUILD_STATES, BUILD_STATE_VALUE_TO_NAME, PROJECT,
 } from '../../../constants'
@@ -97,18 +97,18 @@ const Filters = ({ autoRefreshOn, onFilterClick, setAutoRefreshOn }) => {
 
   const ShowRunningBuilds = () => (getIsArrayWithN(buildStates, 1)
     && (
-    <>
-      {BUILD_STATES.filter((buildState) => buildStates.includes(buildState))
-        .map((buildsState, i) => (
-          <OutlineWidget
-            interactive
-            selected
-            text={BUILD_STATE_VALUE_TO_NAME[buildsState]}
-            onClick={onFilterClick}
-            key={i}
-          />
-        ))}
-    </>
+      <>
+        {BUILD_STATES.filter((buildState) => buildStates.includes(buildState))
+          .map((buildsState, i) => (
+            <OutlineWidget
+              interactive
+              selected
+              text={BUILD_STATE_VALUE_TO_NAME[buildsState]}
+              onClick={onFilterClick}
+              key={i}
+            />
+          ))}
+      </>
     )
   )
 

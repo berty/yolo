@@ -1,18 +1,35 @@
 import React, {
   useState, useRef, useEffect,
 } from 'react'
-import { setAuthCookie } from '../../api/auth'
+import classNames from 'classnames'
+import { setAuthCookie } from '../../api/cookies'
 import withTheme from '../helpers/withTheme'
+import { getSafeStr } from '../../util/getters'
 
-const ApiKeyPrompt = ({ failedKey, updateState, ...injectedProps }) => {
+const ApiKeyPrompt = ({
+  failedKey, authIsPending, updateState, ...injectedProps
+}) => {
   const { theme: { text: { sectionTitle } } } = injectedProps
-  const [formApiKey, updateFormApiKey] = useState(failedKey)
+  const [formApiKey, updateFormApiKey] = useState('')
+  const submitBtnClass = classNames('btn', 'btn-primary', { disabled: authIsPending || !formApiKey })
   const inputEl = useRef(null)
   useEffect(() => inputEl.current.focus())
 
+  const onFormSubmit = (e) => {
+    e.preventDefault()
+    setAuthCookie({ apiKey: `${btoa(getSafeStr(formApiKey))}` })
+    updateState({
+      apiKey: btoa(getSafeStr(formApiKey)),
+      needsProgrammaticQuery: true,
+      authIsPending: true,
+    })
+    inputEl.current.value = ''
+  }
+  useEffect(() => { inputEl.current.focus() })
+
   return (
     <section>
-      <div className="form-group">
+      <form className="form-group" onSubmit={onFormSubmit}>
         <label className="mt-3 form-label mb-2">
           Enter an API key in the form of
           {' '}
@@ -27,28 +44,22 @@ const ApiKeyPrompt = ({ failedKey, updateState, ...injectedProps }) => {
             ref={inputEl}
             type="text"
             className="form-control"
-            placeholder={
-              `Current key: ${(failedKey && atob(failedKey)) || 'no key set'}`
-            }
+            placeholder={`Current key: ${(getSafeStr(atob(failedKey))) || 'no key set'}`}
             onChange={(e) => {
               updateFormApiKey(e.target.value)
             }}
+            disabled={authIsPending}
           />
         </div>
         <button
-          className="btn"
-          onClick={() => {
-            setAuthCookie({ apiKey: `${formApiKey}` })
-            updateState({
-              apiKey: btoa(formApiKey),
-              needsProgrammaticQuery: true,
-            })
-          }}
-          disabled={!formApiKey}
+          type="submit"
+          className={submitBtnClass}
+          onClick={onFormSubmit}
+          disabled={!formApiKey || authIsPending}
         >
           Update
         </button>
-      </div>
+      </form>
     </section>
   )
 }
