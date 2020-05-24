@@ -47,9 +47,10 @@ export const ARTIFACT_KINDS = Object.values(ARTIFACT_KIND_VALUE).map((kind) => k
 export const PROJECT = {
   chat: 'chat',
   'gomobile-ipfs-demo': 'gomobile-ipfs-demo',
+  UnknownProject: 'Unknown Project',
 }
 
-export const PROJECTS = Object.values(PROJECT)
+export const PROJECTS = Object.values(PROJECT).slice(0, Object.values(PROJECT).length - 2)
 
 export const BUILD_DRIVER_VALUE = {
   UnknownDriver: '0',

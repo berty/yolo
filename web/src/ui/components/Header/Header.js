@@ -1,21 +1,21 @@
 import React, { useContext } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
-
-import Filters from '../Filters/Filters'
-import { ThemeContext } from '../../../store/ThemeStore'
 import YoloLogo from '../../../assets/svg/yolo.svg'
-import { ResultContext, INITIAL_STATE } from '../../../store/ResultStore'
-
+import { INITIAL_STATE, ResultContext } from '../../../store/ResultStore'
+import Filters from '../Filters/Filters'
 import './Header.scss'
 
-const Header = ({ autoRefreshOn, setAutoRefreshOn, onFilterClick = () => { } }) => {
-  const { theme } = useContext(ThemeContext)
+const Header = ({
+  autoRefreshOn,
+  setAutoRefreshOn,
+  onFilterClick = () => { },
+}) => {
   const { state, updateState } = useContext(ResultContext)
   const history = useHistory()
   const location = useLocation()
 
   return (
-    <div className="Header" style={{ backgroundColor: theme.bg.page }}>
+    <div className="Header">
       <div
         className="header-logo"
         style={{ cursor: 'pointer' }}
@@ -34,7 +34,7 @@ const Header = ({ autoRefreshOn, setAutoRefreshOn, onFilterClick = () => { } }) 
         </div>
       )}
       {process.env.YOLO_UI_TEST && (
-        <pre style={{ padding: 0, margin: 0 }}>UI Test</pre>
+        <small>UI Test</small>
       )}
     </div>
   )

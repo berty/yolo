@@ -1,39 +1,39 @@
-@import '../../../assets/main.scss';
+@import "../../../assets/main.scss";
 
 .Header {
-  box-sizing: border-box;
-  margin: 0;
-  margin-bottom: 0.5rem;
-  padding-top: 0.75rem;
-  padding-bottom: 0.6rem;
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-  overflow-x: hidden;
-  flex-shrink: 0;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  overflow: hidden;
-  flex-wrap: wrap;
-  @include xs {
-    padding-right: 2.5rem;
-  }
-  @include sm {
-    flex-wrap: nowrap;
-  }
-
-  .header-logo {
-    display: none;
+    box-sizing: border-box;
+    margin: 0;
+    margin-bottom: 0.5rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.6rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    overflow-x: hidden;
+    flex-shrink: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: hidden;
+    flex-wrap: wrap;
+    @include xs {
+        padding-right: 2.5rem;
+    }
     @include sm {
-      margin-left: 1rem;
-      margin-right: 3rem;
-      display: block;
+        flex-wrap: nowrap;
     }
-    img {
-      @include sm {
-        height: 2.75rem;
-      }
+
+    .header-logo {
+        display: none;
+        @include sm {
+            margin-left: 1rem;
+            margin-right: 3rem;
+            display: block;
+        }
+        img {
+            @include sm {
+                height: 2.75rem;
+            }
+        }
     }
-  }
 }

@@ -1,6 +1,6 @@
 import React from 'react'
 import BuildList from './BuildList'
-import Spinner from './Spinner'
+import Spinner from './Spinner/Spinner'
 
 const BuildListContainer = ({ loaded, builds }) => {
   // TODO: Dim stale builds instead of hiding them on quiet refresh

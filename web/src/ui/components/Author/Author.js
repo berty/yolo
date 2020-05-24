@@ -1,17 +1,19 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import { User } from 'react-feather'
 import styles from './Author.module.scss'
-import { ThemeContext } from '../../../store/ThemeStore'
+import withTheme from '../../helpers/withTheme'
 
-const Author = ({ authorName = '', authorUrl = '', avatarUrl = '' }) => {
-  const { theme } = useContext(ThemeContext)
+const Author = ({
+  authorName = '', authorUrl = '', avatarUrl = '', ...injectedProps
+}) => {
+  const { theme: { text: { sectionText } }, themeStyles } = injectedProps
   const Avatar = () => authorUrl && avatarUrl ? (
     <a href={authorUrl} title={authorUrl}>
       <img src={avatarUrl} alt={authorUrl} />
     </a>
   ) : (
     <User
-      color={theme.text.sectionText}
+      color={sectionText}
       title={authorName || 'Unknown author'}
     />
   )
@@ -20,7 +22,7 @@ const Author = ({ authorName = '', authorUrl = '', avatarUrl = '' }) => {
     <a
       href={authorUrl}
       className={styles['author-url-name']}
-      style={{ color: theme.text.sectionTitle }}
+      style={themeStyles.textSectionTitle}
     >
       <small>{authorName}</small>
     </a>
@@ -40,4 +42,4 @@ const Author = ({ authorName = '', authorUrl = '', avatarUrl = '' }) => {
   )
 }
 
-export default Author
+export default withTheme(Author)

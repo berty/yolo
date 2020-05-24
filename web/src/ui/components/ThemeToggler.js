@@ -1,8 +1,10 @@
 import React, { useContext } from 'react'
 import { ThemeContext } from '../../store/ThemeStore'
+import withTheme from '../helpers/withTheme'
 
-const ThemeToggler = () => {
-  const { theme, changeTheme } = useContext(ThemeContext)
+const ThemeToggler = ({ ...injectedProps }) => {
+  const { theme } = injectedProps
+  const { changeTheme } = useContext(ThemeContext)
   const getOtherThemeName = () => (theme.name === 'light' ? 'dark' : 'light')
 
   return (
@@ -21,4 +23,4 @@ const ThemeToggler = () => {
   )
 }
 
-export default ThemeToggler
+export default withTheme(ThemeToggler)

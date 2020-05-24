@@ -9,13 +9,12 @@ import {
   groupBuildsByMr,
   flagBuildsFirstOfDay,
 } from '../../api/dataTransforms'
-import Divider from './Divider'
+import Divider from './Divider/Divider'
 import { getDayFormat } from '../../util/date'
 
 const BuildList = ({ builds = [] }) => {
   const oneBuildInResultsHasMaster = oneBuildResultHasBranchMaster(builds)
   const buildsByMr = groupBuildsByMr(builds)
-
   const buildsByMrWithDateFlag = flagBuildsFirstOfDay(buildsByMr)
   const NoBuilds = () => <div>No results match your query.</div>
 

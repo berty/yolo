@@ -21,10 +21,8 @@
         justify-content: center;
         // settings buttons
         &.settings {
-            justify-content: flex-start;
-            div:first-child {
-                margin-left: auto;
-            }
+            flex-wrap: wrap;
+            justify-content: flex-end;
         }
     }
 
@@ -49,36 +47,6 @@
         }
     }
 
-    .modal-filter-widget {
-        display: flex;
-        flex-flow: column nowrap;
-        align-items: center;
-        justify-content: center;
-        padding: 0.5rem 1rem;
-        border-width: 2px;
-        border-style: solid;
-        border-radius: 1rem;
-        margin-right: 0.75rem;
-        margin-bottom: 0.3rem;
-        min-height: 0;
-        width: auto;
-        cursor: pointer;
-        &.cannot-unselect {
-            cursor: default;
-        }
-        div {
-            flex: 0 0 auto;
-        }
-        &.modal-filter-not-implemented {
-            border-style: dotted;
-            cursor: default;
-        }
-        &.not-interactive {
-            opacity: 0.4;
-            cursor: default;
-        }
-    }
-
     .subtitle {
         font-size: small;
         margin-bottom: 0.5em;
@@ -88,11 +56,5 @@
         display: flex;
         flex-flow: row wrap;
         margin-bottom: 1.5em;
-    }
-
-    p.filter-text {
-        font-size: 0.7em;
-        padding: 0px;
-        margin: 0px;
     }
 }

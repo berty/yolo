@@ -17,3 +17,5 @@ const getIsObject = (val) => (val && typeof val === 'object')
 export const getIsEmpty = (val) => (!val || (getIsArray(val) && !val.length) || (getIsObject(val) && !Object.keys(val).length))
 
 export const singleItemToArray = (val) => !getIsArray(val) ? [val] : val
+
+export const addOrRemoveFromArray = (val, array) => array.includes(val) ? array.filter((el) => el !== val) : [...array, val]

@@ -1,236 +1,150 @@
+import { faCube } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useContext } from 'react'
 import {
-  GitBranch, LogOut, Check, X,
+  Check, GitBranch, LogOut, MessageCircle, X,
 } from 'react-feather'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faAndroid, faApple } from '@fortawesome/free-brands-svg-icons'
-import { faQuestionCircle, faCube } from '@fortawesome/free-solid-svg-icons'
-
-import { ResultContext } from '../../../store/ResultStore.js'
-import { ThemeContext } from '../../../store/ThemeStore.js'
-
-import IconChat from '../../../assets/svg/IconChat'
-
-import './Filters.scss'
 import { removeAuthCookie } from '../../../api/auth'
 import {
-  ARTIFACT_KIND_VALUE,
-  ARTIFACT_VALUE_KIND,
-  BUILD_DRIVERS,
-  PROJECT,
-  BUILD_DRIVER_TO_NAME,
-  BUILD_STATES,
-  BUILD_STATE_VALUE_TO_NAME,
+  ARTIFACT_VALUE_KIND, BUILD_DRIVERS, BUILD_DRIVER_TO_NAME, BUILD_STATES, BUILD_STATE_VALUE_TO_NAME, PROJECT,
 } from '../../../constants'
-import { getIsArrayWithN, getIsEmptyArr } from '../../../util/getters.js'
+import { ResultContext } from '../../../store/ResultStore.js'
+import { getIsArrayWithN } from '../../../util/getters.js'
+import { getArtifactKindIcon } from '../../styleTools/brandIcons.js'
+import OutlineWidget from '../OutlineWidget/OutlineWidget.js'
+import './Filters.scss'
 
 const Filters = ({ autoRefreshOn, onFilterClick, setAutoRefreshOn }) => {
-  const { state, updateState } = useContext(ResultContext)
-  const { theme } = useContext(ThemeContext)
-  const widgetAccentColor = theme.icon.filterSelected
-
-  const headerWidgetWrapperColors = {
-    color: widgetAccentColor,
-    borderColor: widgetAccentColor,
-    backgroundColor: theme.bg.filter,
-  }
-
-  const colorsWidget = ({ selected = false }) => {
-    const {
-      text: { filterSelectedTitle, filterUnselectedTitle },
-      bg: { filter: bgFilter },
-      border: {
-        filterSelected: selectedBorder,
-        filterUnselected: unselectedBorder,
+  const {
+    state: {
+      uiFilters: {
+        artifact_kinds: artifactKinds, build_driver: buildDrivers, build_state: buildStates,
       },
-    } = theme
-    return selected
-      ? {
-        color: filterSelectedTitle,
-        borderColor: selectedBorder,
-        backgroundColor: bgFilter,
-      }
-      : {
-        color: filterUnselectedTitle,
-        borderColor: unselectedBorder,
-        background: 'transparent',
-      }
-  }
+      calculatedFilters: {
+        projects,
+      },
+    }, updateState,
+  } = useContext(ResultContext)
+
+  const FilterChat = () => (projects.includes(PROJECT.chat) && (
+    <OutlineWidget
+      interactive
+      selected
+      onClick={onFilterClick}
+      iconComponent={<MessageCircle />}
+      text={PROJECT.chat}
+    />
+  ))
+
+  const FilterGoIpfs = () => (projects.includes(PROJECT['gomobile-ipfs-demo']) && (
+    <OutlineWidget
+      interactive
+      selected
+      onClick={onFilterClick}
+      iconComponent={<FontAwesomeIcon icon={faCube} size="lg" />}
+      text={PROJECT['gomobile-ipfs-demo']}
+    />
+  ))
 
   const FiltersAppWidget = () => (
     <>
-      {getIsArrayWithN(state.calculatedFilters?.projects, 1)
-        && state.calculatedFilters.projects.includes(PROJECT.chat) && (
-          <div
-            className="widget-wrapper is-interactive"
-            style={headerWidgetWrapperColors}
-            onClick={onFilterClick}
-            onKeyDown={onFilterClick}
-            role="button"
-            tabIndex={0}
-          >
-            <IconChat stroke={widgetAccentColor} />
-            <p className="widget-text">{PROJECT.chat}</p>
-          </div>
-      )}
-      {getIsArrayWithN(state.calculatedFilters.projects, 1)
-        && state.calculatedFilters.projects.includes(
-          PROJECT['gomobile-ipfs-demo'],
-        ) && (
-          <div
-            className="widget-wrapper is-interactive"
-            style={headerWidgetWrapperColors}
-            onClick={onFilterClick}
-            onKeyDown={onFilterClick}
-            role="button"
-            tabIndex={0}
-          >
-            <FontAwesomeIcon
-              icon={faCube}
-              size="lg"
-              color={widgetAccentColor}
-            />
-            <p className="widget-text">{PROJECT['gomobile-ipfs-demo']}</p>
-          </div>
-      )}
+      <FilterChat />
+      <FilterGoIpfs />
     </>
   )
 
-  const ArtifactKindsFilter = () => getIsArrayWithN(state.uiFilters.artifact_kinds, 1) && (
-    <div
-      className="widget-wrapper is-interactive"
-      style={headerWidgetWrapperColors}
+  const ArtifactKindsFilter = () => (getIsArrayWithN(artifactKinds, 1) && (
+    <OutlineWidget
+      interactive
+      selected
       onClick={onFilterClick}
-      onKeyDown={onFilterClick}
-      role="button"
-      tabIndex={0}
-    >
-      {state.uiFilters.artifact_kinds.map((kind, i) => (
-        <FontAwesomeIcon
-          key={i}
-          size="lg"
-          color={widgetAccentColor}
-          icon={
-            kind === ARTIFACT_KIND_VALUE.IPA
-              || kind === ARTIFACT_KIND_VALUE.DMG
-              ? faApple
-              : kind === ARTIFACT_KIND_VALUE.APK
-                ? faAndroid
-                : faQuestionCircle
-          }
-          title={ARTIFACT_VALUE_KIND[kind.toString()] || ''}
-        />
-      ))}
-    </div>
-  )
+      icons={artifactKinds
+        .map((artifactKind, i) => (
+          <FontAwesomeIcon
+            key={i}
+            icon={getArtifactKindIcon(artifactKind)}
+            size="lg"
+            title={ARTIFACT_VALUE_KIND[artifactKind] || ''}
+          />
+        ))}
+    />
+  ))
 
-  const FiltersBranchWidget = () => {
-    const BranchFilter = <GitBranch color={widgetAccentColor} />
-    return (
-      <div
-        className="widget-wrapper is-interactive"
-        style={headerWidgetWrapperColors}
-        onClick={onFilterClick}
-        onKeyDown={onFilterClick}
-        role="button"
-        tabIndex={0}
-      >
-        {BranchFilter}
-        <p className="widget-text">All</p>
-      </div>
-    )
-  }
+  const FiltersBranchWidget = () => (
+    <OutlineWidget
+      text="All"
+      selected
+      interactive
+      iconComponent={<GitBranch />}
+      onClick={onFilterClick}
+    />
+  )
 
   const FiltersBuildDriver = () => (
     <>
-      {BUILD_DRIVERS.filter((driver) => state.uiFilters.build_driver.includes(driver.toString())).map((build, i) => (
-        <div
-          className="widget-wrapper is-interactive"
-          style={headerWidgetWrapperColors}
+      {BUILD_DRIVERS.filter((driver) => buildDrivers.includes(driver.toString())).map((build, i) => (
+        <OutlineWidget
+          text={BUILD_DRIVER_TO_NAME[build]}
+          interactive
+          selected
           onClick={onFilterClick}
-          onKeyDown={onFilterClick}
-          role="button"
-          title={BUILD_DRIVER_TO_NAME[build]}
-          tabIndex={0}
           key={i}
-        >
-          <p className="widget-text no-svg">{BUILD_DRIVER_TO_NAME[build]}</p>
-        </div>
+        />
+
       ))}
     </>
   )
 
-  const ShowRunningBuilds = () => (getIsEmptyArr(state.uiFilters.build_state) ? null
-    : (
-      <>
-        {BUILD_STATES.filter((buildState) => state.uiFilters.build_state.includes(buildState.toString()))
-          .map((buildsState, i) => (
-            <div
-              className="widget-wrapper is-interactive"
-              style={headerWidgetWrapperColors}
-              onClick={onFilterClick}
-              onKeyDown={onFilterClick}
-              role="button"
-              title={BUILD_STATE_VALUE_TO_NAME[buildsState]}
-              tabIndex={0}
-              key={i}
-            >
-              <p className="widget-text no-svg">{BUILD_STATE_VALUE_TO_NAME[buildsState]}</p>
-            </div>
-          ))}
-      </>
+  const ShowRunningBuilds = () => (getIsArrayWithN(buildStates, 1)
+    && (
+    <>
+      {BUILD_STATES.filter((buildState) => buildStates.includes(buildState))
+        .map((buildsState, i) => (
+          <OutlineWidget
+            interactive
+            selected
+            text={BUILD_STATE_VALUE_TO_NAME[buildsState]}
+            onClick={onFilterClick}
+            key={i}
+          />
+        ))}
+    </>
     )
   )
 
-  const RefreshActionButton = (
-    <div
-      className="widget-wrapper is-interactive"
-      style={{ color: theme.text.sectionTitle }}
+  const RefreshActionButton = () => (
+    <OutlineWidget
+      interactive
+      hasSelectedState={false}
       onClick={() => {
         updateState({
           needsRefresh: true,
         })
       }}
-      onKeyDown={() => {
-        updateState({
-          needsRefresh: true,
-        })
-      }}
-      role="button"
-      tabIndex={0}
-      title="Refresh the page"
-    >
-      <p className="widget-text no-svg is-interactive">F5</p>
-    </div>
+      text="F5"
+    />
   )
 
   const SetAutoRefreshActionButton = () => {
     const selected = !!autoRefreshOn
-    const colorWidget = colorsWidget({ selected })
     return (
-      <div
-        className="widget-wrapper is-interactive"
-        style={colorWidget}
+      <OutlineWidget
+        interactive
+        selected={selected}
         onClick={() => {
           setAutoRefreshOn(!autoRefreshOn)
         }}
-        onKeyDown={() => {
-          setAutoRefreshOn(!autoRefreshOn)
-        }}
-        role="button"
-        tabIndex={0}
         title="Toggle auto refresh every 10 sec"
-      >
-        {selected ? <Check /> : <X />}
-        <p className="widget-text is-interactive">Auto Reload</p>
-      </div>
+        iconComponent={selected ? <Check /> : <X />}
+        text="Auto Reload"
+      />
     )
   }
 
-  const Logout = (
-    <div
-      className="widget-wrapper"
-      style={{ color: theme.text.sectionTitle }}
+  const Logout = () => (
+    <OutlineWidget
+      interactive
+      hasSelectedState={false}
       onClick={() => {
         removeAuthCookie()
         updateState({
@@ -239,32 +153,21 @@ const Filters = ({ autoRefreshOn, onFilterClick, setAutoRefreshOn }) => {
           needsProgrammaticQuery: true,
         })
       }}
-      onKeyDown={() => {
-        removeAuthCookie()
-        updateState({
-          isAuthed: false,
-          apiKey: '',
-          needsProgrammaticQuery: true,
-        })
-      }}
-      role="button"
-      tabIndex={0}
-    >
-      <LogOut />
-      <p className="widget-text is-interactive">Logout</p>
-    </div>
+      iconComponent={<LogOut />}
+      text="Logout"
+    />
   )
 
   return (
     <div className="Filters">
-      {FiltersAppWidget()}
-      {ArtifactKindsFilter()}
-      {FiltersBranchWidget()}
+      <FiltersAppWidget />
+      <ArtifactKindsFilter />
+      <FiltersBranchWidget />
       <FiltersBuildDriver />
       <SetAutoRefreshActionButton />
       <ShowRunningBuilds />
-      {RefreshActionButton}
-      {Logout}
+      <RefreshActionButton />
+      <Logout />
     </div>
   )
 }
