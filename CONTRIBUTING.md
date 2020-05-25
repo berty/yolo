@@ -1,6 +1,5 @@
-# Contributing
+This repo follows the [standard Berty Community contributing guidelines](https://github.com/berty/community/blob/master/CONTRIBUTING.md).
 
-When contributing to this repository, you can first discuss the change you wish to make via issue,
-email, or any other method with the maintainers of this repository before making a change.
+We appreciate your time and attention for going over these. Please open an issue on berty/community if you have any questions.
 
-Please note we have a code of conduct, please follow it in all your interactions with the project.
+Thank you.
