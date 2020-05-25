@@ -21,7 +21,7 @@ import { useHistory, useLocation } from 'react-router-dom'
 import { getBuildList } from '../../../api'
 import { validateError } from '../../../api/apiResponseTransforms'
 import {
-  ARTIFACT_KINDS, BUILD_DRIVERS, BUILD_STATES, PLATFORM_TO_ARTIFACT_KIND,
+  ARTIFACT_KINDS, BUILD_DRIVERS, BUILD_STATES, PLATFORM_TO_ARTIFACT_KIND, DEFAULT_RESULT_REQUEST_LIMIT,
 } from '../../../constants'
 import { INITIAL_STATE, ResultContext } from '../../../store/ResultStore'
 import { getMobileOperatingSystem } from '../../../util/browser'
@@ -158,7 +158,7 @@ const Home = ({ theme }) => {
       })
       history.push({
         path: '/',
-        search: queryString.stringify(state.uiFilters) || 'limit=15',
+        search: queryString.stringify(state.uiFilters) || `limit=${DEFAULT_RESULT_REQUEST_LIMIT}`,
       })
       setNeedsNewFetch(true)
     }
