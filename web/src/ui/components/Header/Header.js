@@ -19,7 +19,7 @@ const Header = ({
       <div
         className="header-logo"
         style={{ cursor: 'pointer' }}
-        onClick={location.pathname !== '/404' ? () => {
+        onClick={location.pathname !== '/404.html' ? () => {
           updateState({
             needsProgrammaticQuery: true,
             uiFilters: INITIAL_STATE.uiFilters,

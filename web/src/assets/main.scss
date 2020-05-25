@@ -1,6 +1,13 @@
 @import "variables";
 @import "breakpointMixins";
 
+html {
+    font-size: 12px;
+    @include xs {
+        font-size: 16px;
+    }
+}
+
 // global tabler css overrides
 
 .btn:not([class^="btn-outline"]):not([class*=" btn-outline"]),
@@ -10,8 +17,15 @@
     padding: 0.2rem 0.5rem;
     letter-spacing: 0.05em;
     border-radius: 1rem;
-    text-transform: uppercase; // TODO: this is overriding normal-caps
+    text-transform: uppercase;
 }
+
+.btn.btn-primary.disabled,
+.btn.btn-primary:disabled {
+    cursor: auto;
+}
+
+// my global stuff
 
 .faded {
     top: 0;
@@ -22,13 +36,6 @@
     z-index: 1049;
     background-color: black;
     opacity: 0.4;
-}
-
-html {
-    font-size: 12px;
-    @include xs {
-        font-size: 16px;
-    }
 }
 
 .github-corner {

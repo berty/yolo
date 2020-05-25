@@ -1,11 +1,25 @@
 /* eslint-disable import/no-named-as-default */
+
+/**
+ * BEWARE ⚠️
+ *
+ * A container for many side effects
+ * - URL query param changes
+ * - authentication handling
+ * - triggering and handling API requests
+ * - ... other stuff
+ *
+ * Tell ekelen to refactor me
+ */
+
 import Cookies from 'js-cookie'
 import queryString from 'query-string'
 import React, {
   useCallback, useContext, useEffect, useState,
 } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
-import { getBuildList, validateError } from '../../../api'
+import { getBuildList } from '../../../api'
+import { validateError } from '../../../api/apiResponseTransforms'
 import {
   ARTIFACT_KINDS, BUILD_DRIVERS, BUILD_STATES, PLATFORM_TO_ARTIFACT_KIND,
 } from '../../../constants'
@@ -31,16 +45,8 @@ const Home = ({ theme }) => {
   const { search: locationSearch } = useLocation()
   const history = useHistory()
 
-  useEffect(() => {
-    document.body.style.backgroundColor = theme.bg.page
-  }, [theme.name])
-
-  useEffect(() => {
-    const disclaimerAccepted = Cookies.get('disclaimerAccepted')
-    toggleShowDisclaimer(!disclaimerAccepted)
-  }, [])
-
-  const setDefaultArtifactKinds = useCallback(() => {
+  // Detect useragent and set default artifact results accordingly
+  const setArtifactKindsFromUserAgent = useCallback(() => {
     const userAgent = getMobileOperatingSystem()
     const defaultKind = PLATFORM_TO_ARTIFACT_KIND[userAgent]
     const { uiFilters: { artifact_kinds: initialArtifactKinds } } = INITIAL_STATE
@@ -55,9 +61,10 @@ const Home = ({ theme }) => {
     })
   }, [state.uiFilters, updateState])
 
+  // 🚧 On render, set/get query params based on URL bar or state.uiFilters
   useEffect(() => {
     if (!locationSearch) {
-      setDefaultArtifactKinds()
+      setArtifactKindsFromUserAgent()
       const { artifact_kinds: artifactKinds = '', build_driver: buildDriver = '' } = state.uiFilters
       // TODO: qS 'options' field doesn't seem to work
       // (e.g. if artifact_kinds === null)
@@ -96,6 +103,7 @@ const Home = ({ theme }) => {
     }
   }, [])
 
+  // 🚧 If URL query or state uiFilters change, call/handle API request
   useEffect(() => {
     const getNewFetch = () => {
       updateState({
@@ -123,6 +131,7 @@ const Home = ({ theme }) => {
             updateState({
               error: validatedError,
               isAuthed: status !== 401,
+
             })
             setAutoRefreshOn(false)
           },
@@ -132,6 +141,7 @@ const Home = ({ theme }) => {
           updateState({
             isLoaded: true,
             needsQuietRefresh: false,
+            authIsPending: false,
           })
         })
     }
@@ -140,6 +150,7 @@ const Home = ({ theme }) => {
     }
   }, [locationSearch, needsNewFetch])
 
+  // 🚧 Trigger API call any time state.needsProgrammaticQuery is true
   useEffect(() => {
     const triggerNewQuery = () => {
       updateState({
@@ -147,13 +158,14 @@ const Home = ({ theme }) => {
       })
       history.push({
         path: '/',
-        search: queryString.stringify(state.uiFilters) || 'limit=50',
+        search: queryString.stringify(state.uiFilters) || 'limit=15',
       })
       setNeedsNewFetch(true)
     }
     if (state.needsProgrammaticQuery === true) triggerNewQuery()
   }, [state.needsProgrammaticQuery])
 
+  // 🚧 Trigger API call using current URL bar params
   useEffect(() => {
     const triggerNewQuery = () => {
       updateState({
@@ -168,6 +180,7 @@ const Home = ({ theme }) => {
     if (state.needsRefresh === true) triggerNewQuery()
   }, [state.needsRefresh])
 
+  // 🚧 If autoRefresh is enabled, trigger API call every 10 sec
   useEffect(() => {
     let timer
     if (
@@ -195,6 +208,13 @@ const Home = ({ theme }) => {
     updateState,
   ])
 
+  // Show protocol warning modal + agreement on component render
+  useEffect(() => {
+    const disclaimerAccepted = Cookies.get('disclaimerAccepted')
+    toggleShowDisclaimer(!disclaimerAccepted)
+  }, [])
+
+  // Hide protocol warning modal on Okay click
   const setDisclaimerAccepted = (accepted) => {
     Cookies.set('disclaimerAccepted', 1, { expires: 7 })
     toggleShowDisclaimer(!accepted)
@@ -206,7 +226,7 @@ const Home = ({ theme }) => {
         <Header autoRefreshOn={autoRefreshOn} setAutoRefreshOn={setAutoRefreshOn} onFilterClick={() => toggleShowFilters(true)} />
         {state.error && <ErrorDisplay error={state.error} />}
         {state.error && state.error.status === 401 && (
-          <ApiKeyPrompt failedKey={state.apiKey} updateState={updateState} />
+          <ApiKeyPrompt failedKey={state.apiKey} updateState={updateState} authIsPending={state.authIsPending} />
         )}
         {!state.error && (
           <BuildListContainer builds={state.builds} loaded={state.isLoaded} />

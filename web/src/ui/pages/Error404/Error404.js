@@ -1,8 +1,7 @@
 import React from 'react'
 import { useHistory } from 'react-router-dom'
-
-import Header from '../components/Header/Header'
-import withButtonStyles from '../helpers/withButtonStyles'
+import Header from '../../components/Header/Header'
+import withButtonStyles from '../../helpers/withButtonStyles'
 
 const Error404 = ({ ...injectedProps }) => {
   const history = useHistory()
