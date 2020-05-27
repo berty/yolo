@@ -10,6 +10,28 @@ html {
 
 // global tabler css overrides
 
+.btn:focus {
+    box-shadow: none;
+}
+
+.btn-loading {
+    color: currentColor !important;
+    opacity: 0.4;
+}
+
+.btn-loading:after {
+    border: 2px solid var(--blue);
+}
+
+.btn.btn-primary.disabled,
+.btn.btn-sm.disabled,
+.btn.btn-sm.disabled:hover,
+.btn.btn-primary:disabled {
+    cursor: auto;
+    border: none;
+    transition: all 0.15s ease-in-out;
+}
+
 .btn:not([class^="btn-outline"]):not([class*=" btn-outline"]),
 .btn.btn-primary:not([class^="btn-outline"]):not([class*=" btn-outline"]):not([class^="btn-ghost"]):not([class*=" btn-ghost"]):not(:focus):not(.focus),
 .btn.btn-primary:not([class^="btn-outline"]):not([class*=" btn-outline"]):not([class^="btn-ghost"]):not([class*=" btn-ghost"]):not(.btn-secondary) {
@@ -18,11 +40,7 @@ html {
     letter-spacing: 0.05em;
     border-radius: 1rem;
     text-transform: uppercase;
-}
-
-.btn.btn-primary.disabled,
-.btn.btn-primary:disabled {
-    cursor: auto;
+    box-shadow: none;
 }
 
 // my global stuff
