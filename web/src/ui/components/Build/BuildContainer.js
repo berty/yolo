@@ -160,7 +160,7 @@ const BuildContainer = ({
         {!collapsed
           && getIsArray(allBuildsForMr)
           && allBuildsForMr
-            .filter((bIdx, i) => showingAllBuilds ? (!!bIdx) : i === 0)
+            .filter((bIdx, i) => showingAllBuilds ? Number.isInteger(bIdx) : i === 0)
             .map((buildidx, i) => (
               <BuildAndMrContainer
                 AnyRunningBuildTags={AnyRunningBuildTags}
