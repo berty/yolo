@@ -12,7 +12,7 @@ import Error404 from './ui/pages/Error404/Error404'
 import Home from './ui/pages/Home/Home'
 
 const AppRouter = () => {
-  const { theme: { bg: { pageBgColor } } } = useContext(ThemeContext)
+  const { theme: { bg: { page: pageBgColor } } } = useContext(ThemeContext)
   useEffect(() => {
     document.body.style.backgroundColor = pageBgColor
   }, [pageBgColor])
