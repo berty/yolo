@@ -1,4 +1,5 @@
-import { getHasKey, getSafeStr } from '../util/getters'
+import { values } from 'lodash'
+import { getSafeStr } from '../util/getters'
 import { getIsNextDay } from '../util/date'
 
 /**
@@ -23,52 +24,50 @@ export const flagBuildsFirstOfDay = (sortedTopLevelBuilds) => Array.isArray(sort
     return acc
   }, [])
 
+
+/**
+ * Adds entry {allBuildsForMr: Array<int>} to each build,
+ * each int corresponds to builds indices in state.builds
+ * with the same merge request ID
+ */
+const groupByMr = (acc = {}, build, i) => {
+  const {
+    has_mergerequest: hasMergeRequest,
+    has_mergerequest_id: buildMrId,
+  } = build || {}
+
+  if (!hasMergeRequest || !buildMrId) {
+    return {
+      ...acc,
+      [build.id]: {
+        ...build,
+        allBuildsForMr: [i],
+      },
+    }
+  }
+
+  const matchingBuild = acc[buildMrId] || null
+  if (matchingBuild) {
+    if (!matchingBuild.allBuildsForMr) {
+      acc[buildMrId].allBuildsForMr = [i]
+    } else {
+      acc[buildMrId].allBuildsForMr = [...matchingBuild.allBuildsForMr, i]
+    }
+  } else {
+    acc[buildMrId] = { ...build }
+    acc[buildMrId].allBuildsForMr = [i]
+  }
+  return acc
+}
+
 /**
  * Returns a new copy of builds[],
  * keeping only the first build from each unique merge request.
  *
- * Adds entry {allBuildsForMr: Array<int>} to each build,
- * each int corresponds to builds indices in state.builds
- *   with the same merge request ID
- *
  * @param  {Array<BuildObject>} builds
  * @return {Array<BuildObject>}
  */
-export const groupBuildsByMr = (builds) => {
-  const buildDict = builds
-    .filter((build) => getHasKey(build, 'id'))
-    .reduce((acc, build, i) => {
-      const {
-        has_mergerequest: hasMergeRequest,
-        has_mergerequest_id: buildMrId,
-      } = build
-
-      if (!hasMergeRequest || !buildMrId) {
-        return {
-          ...acc,
-          [build.id]: {
-            ...build,
-            allBuildsForMr: [i],
-          },
-        }
-      }
-
-      const matchingBuild = acc[buildMrId] || null
-      if (matchingBuild) {
-        if (!matchingBuild.allBuildsForMr) {
-          acc[buildMrId].allBuildsForMr = [i]
-        } else {
-          acc[buildMrId].allBuildsForMr = [...matchingBuild.allBuildsForMr, i]
-        }
-      } else {
-        acc[buildMrId] = { ...build }
-        acc[buildMrId].allBuildsForMr = [i]
-      }
-      return acc
-    }, {})
-  const groupedBuildList = Object.entries(buildDict).map((b) => b[1])
-  return groupedBuildList
-}
+export const groupBuildsByMr = (builds) => values(builds.reduce(groupByMr, {}))
 
 /**
  * Takes axios HTTP error and formats it
