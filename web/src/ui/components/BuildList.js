@@ -13,7 +13,11 @@ import Divider from './Divider/Divider'
 import { getDayFormat } from '../../util/date'
 
 const BuildList = ({ builds = [] }) => {
+<<<<<<< HEAD
   const oneBuildInResultsHasMaster = useMemo(() => oneBuildResultHasBranchMaster(builds), [builds])
+=======
+  const oneBuildInResultsHasMaster = oneBuildResultHasBranchMaster(builds)
+>>>>>>> split out and memoize group builds by MR
   const buildsByMr = useMemo(() => flagBuildsFirstOfDay(groupBuildsByMr(builds)), [builds])
   const NoBuilds = () => <div>No results match your query.</div>
 
