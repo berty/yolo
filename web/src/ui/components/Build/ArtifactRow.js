@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import QRCode from 'qrcode.react'
 import React, { useContext, useState } from 'react'
 import { Calendar, Clock, Link as LinkIcon } from 'react-feather'
-import { KIND_TO_PLATFORM } from '../../../constants'
+import { KIND_TO_PLATFORM, ARTIFACT_KIND_NAMES } from '../../../constants'
 import { ThemeContext } from '../../../store/ThemeStore'
 import { getRelativeTime, getTimeDuration } from '../../../util/date'
 import { getArtifactKindIcon } from '../../styleTools/brandIcons'
@@ -13,6 +13,15 @@ import Tag from '../Tag/Tag'
 import ArtifactActionButton from './ArtifactActionButton'
 import './Build.scss'
 
+const ArtifactRowKindIcon = ({ color, kind = '' }) => (
+  <FontAwesomeIcon
+    icon={getArtifactKindIcon(kind)}
+    color={color}
+    title={`Artifact kind: ${ARTIFACT_KIND_NAMES[kind]}`}
+    size="lg"
+    style={{ marginRight: '1rem', marginTop: kind === ARTIFACT_KIND_NAMES.APK && '0.1rem' }}
+  />
+)
 
 const ArtifactRow = ({
   artifact,
@@ -48,15 +57,6 @@ const ArtifactRow = ({
 
   const ArtifactKindName = () => <div>{KIND_TO_PLATFORM[artifactKind] || 'Unknown OS'}</div>
 
-  // const artifactTagStyle = tagStyle({ name: theme.name, state: artifactState })
-  // const ArtifactStateTag = () => artifactState && (
-  //   <Tag
-  //     classes={['artifact-tag', 'state-tag']}
-  //     styles={artifactTagStyle}
-  //     text={artifactState}
-  //   />
-  // )
-
   const ArtifactMainButton = () => (
     <ArtifactActionButton
       {...{
@@ -67,13 +67,13 @@ const ArtifactRow = ({
     />
   )
 
-  const PlatformIcon = () => (
-    <FontAwesomeIcon
-      icon={getArtifactKindIcon(artifactKind.toString())}
-      size="lg"
-      color={theme.text.sectionText}
-    />
-  )
+  // const PlatformIcon = () => (
+  //   <FontAwesomeIcon
+  //     icon={getArtifactKindIcon(artifactKind.toString())}
+  //     size="lg"
+  //     color={theme.text.sectionText}
+  //   />
+  // )
 
   const BuildIdentifier = () => <div>{buildShortId || ''}</div>
 
@@ -161,7 +161,7 @@ const ArtifactRow = ({
         </div>
         <div className="block-details">
           <div className="block-details-row">
-            <PlatformIcon />
+            <ArtifactRowKindIcon color={theme.bg.tagGreen} kind={artifactKind} />
             <ArtifactKindName />
             <BuildIdentifier />
             {/* <ArtifactStateTag /> */}

@@ -42,10 +42,17 @@ export const tagStyle = ({ name, state = null, cursor = 'default' }) => {
 export const actionButtonColorsShadow = ({ name, state }) => {
   const theme = themes[name] || themes.light
   const styles = {
+    // [ARTIFACT_STATE.Finished]: {
+    //   backgroundColor: theme.bg.tagGreen,
+    //   color: theme.text.tagGreen,
+    //   boxShadow: `0px 0.25rem 0px ${theme.shadow.btnDlMaster}`,
+    // },
     [ARTIFACT_STATE.Finished]: {
-      backgroundColor: theme.bg.tagGreen,
-      color: theme.text.tagGreen,
-      boxShadow: `0px 0.25rem 0px ${theme.shadow.btnDlMaster}`,
+      backgroundColor: theme.bg.btnPrimary,
+      // color: theme.text.tagGreen,
+      color: theme.text.blockTitle,
+      border: `1px solid ${theme.bg.btnPrimary}`,
+      boxShadow: `0px 0.25rem 0px ${theme.shadow.btnPrimary}`,
     },
     [ARTIFACT_STATE.Building]: { display: 'none' },
     [ARTIFACT_STATE.Error]: {

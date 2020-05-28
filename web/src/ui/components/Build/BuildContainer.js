@@ -20,7 +20,7 @@ const ArtifactKindIcon = ({ color, kind = '', isFirst }) => (
     color={color}
     title={`Artifact kind: ${ARTIFACT_KIND_NAMES[kind]}`}
     size="lg"
-    style={{ marginRight: '1rem', marginLeft: isFirst && '0.5rem' }}
+    style={{ marginRight: '1rem', marginLeft: isFirst && '0.5rem', marginTop: kind === ARTIFACT_KIND_NAMES.APK && '0.1rem' }}
   />
 )
 
