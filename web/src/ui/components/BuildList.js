@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import BuildContainer from './Build/BuildContainer'
 import {
   oneBuildResultHasBranchMaster,
@@ -13,16 +13,15 @@ import Divider from './Divider/Divider'
 import { getDayFormat } from '../../util/date'
 
 const BuildList = ({ builds = [] }) => {
-  const oneBuildInResultsHasMaster = oneBuildResultHasBranchMaster(builds)
-  const buildsByMr = groupBuildsByMr(builds)
-  const buildsByMrWithDateFlag = flagBuildsFirstOfDay(buildsByMr)
+  const oneBuildInResultsHasMaster = useMemo(() => oneBuildResultHasBranchMaster(builds), [builds])
+  const buildsByMr = useMemo(() => flagBuildsFirstOfDay(groupBuildsByMr(builds)), [builds])
   const NoBuilds = () => <div>No results match your query.</div>
 
   return !builds.length ? (
     <NoBuilds />
   ) : (
     <div className="container">
-      {buildsByMrWithDateFlag.map((build, i) => (
+      {buildsByMr.map((build, i) => (
         <BuildContainer
           key={`${build.id}-${i}`}
           build={build}
