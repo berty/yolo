@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useContext, useState } from 'react'
+import { get } from 'lodash'
 import { ARTIFACT_KIND_NAMES, BRANCH, BUILD_STATE } from '../../../constants'
 import { ThemeContext } from '../../../store/ThemeStore'
 import { ResultContext } from '../../../store/ResultStore'
@@ -12,6 +13,16 @@ import BuildAndMrContainer from './BuildAndMrContainer'
 import BuildBlockHeader from './BuildBlockHeader'
 import BuildBlockTitle from './BuildBlockTitle'
 import ShownBuildsButton from '../ShownBuildsButton'
+
+const ArtifactKindIcon = ({ color, kind = '', isFirst }) => (
+  <FontAwesomeIcon
+    icon={getArtifactKindIcon(kind)}
+    color={color}
+    title={`Artifact kind: ${ARTIFACT_KIND_NAMES[kind]}`}
+    size="lg"
+    style={{ marginRight: '1rem', marginLeft: isFirst && '0.5rem', marginTop: kind === ARTIFACT_KIND_NAMES.APK && '0.1rem' }}
+  />
+)
 
 const BuildContainer = ({
   build, toCollapse, children, hasRunningBuilds,
@@ -60,34 +71,9 @@ const BuildContainer = ({
     />
   )
 
-  const ArtifactKindIcon = ({ color, kind = '' }) => (
-    <FontAwesomeIcon
-      icon={getArtifactKindIcon(kind)}
-      color={color}
-      title={`Artifact kind: ${ARTIFACT_KIND_NAMES[kind]}`}
-    />
-  )
-
   const FirstBuildArtifactTags = collapsed && buildHasArtifacts && (
     <>
-      {buildHasArtifacts.map((a, i) => {
-        const { state: artifactState, kind = 'UnknownKind' } = a
-        const artifactTagStyle = tagStyle({
-          name: theme.name,
-          state: artifactState,
-        })
-        const iconColor = tagStyle.color
-        return (
-          <Tag
-            key={i}
-            text={artifactState}
-            styles={artifactTagStyle}
-            icon={ArtifactKindIcon({ color: iconColor, kind })}
-            classes={{ 'btn-state-tag': true }}
-            title={`Artifact kind: ${kind}`}
-          />
-        )
-      })}
+      {buildHasArtifacts.map((a, i) => <ArtifactKindIcon kind={get(a, 'kind', ARTIFACT_KIND_NAMES.UnknownKind)} color={theme.bg.tagGreen} isFirst={(i === 0)} key={i} />)}
     </>
   )
 

@@ -171,6 +171,7 @@ const BuildAndMrContainer = ({
         color={blockTitle}
         size="lg"
         title={buildId}
+        style={{ marginBottom: '0.7rem' }}
       />
     </a>
   )
