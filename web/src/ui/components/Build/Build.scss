@@ -206,19 +206,5 @@
         display: flex;
         flex: 0 0 auto;
         flex-direction: column;
-        a {
-            margin-bottom: 0.6rem;
-        }
-    }
-
-    .btn.btn-large-icon {
-        // download, alert
-        flex-shrink: 0;
-        flex-grow: 0;
-        box-sizing: border-box;
-        svg {
-            margin-top: 0.25rem;
-            margin-bottom: -0.25rem;
-        }
     }
 }

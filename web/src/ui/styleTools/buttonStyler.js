@@ -68,5 +68,6 @@ export const actionButtonColorsShadow = ({ name, state }) => {
 export const primaryButtonColors = (theme) => ({
   backgroundColor: theme.bg.btnPrimary,
   border: `1px solid ${theme.bg.btnPrimary}`,
+  color: theme.text.blockTitle,
   boxShadow: `0px 4px 0px ${theme.shadow.btnPrimary}`,
 })

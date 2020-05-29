@@ -20,22 +20,22 @@ const BuildList = ({ builds = [] }) => {
   return !builds.length ? (
     <NoBuilds />
   ) : (
-      <div className="container">
-        {buildsByMr.map((build, i) => (
-          <BuildContainer
-            key={`${build.id}-${i}`}
-            build={build}
-            toCollapse={oneBuildInResultsHasMaster && !buildBranchIsMaster(build)}
-            hasRunningBuilds={buildsStateIsRunning(build.allBuildsForMr, builds)}
-          >
-            {build.buildIsFirstOfDay && (
-              <Divider dividerText={getDayFormat(build.created_at)} />
-            )}
+    <div className="container">
+      {buildsByMr.map((build, i) => (
+        <BuildContainer
+          key={`${build.id}-${i}`}
+          build={build}
+          toCollapse={oneBuildInResultsHasMaster && !buildBranchIsMaster(build)}
+          hasRunningBuilds={buildsStateIsRunning(build.allBuildsForMr, builds)}
+        >
+          {build.buildIsFirstOfDay && (
+          <Divider dividerText={getDayFormat(build.created_at)} />
+          )}
 
-          </BuildContainer>
-        ))}
-      </div>
-    )
+        </BuildContainer>
+      ))}
+    </div>
+  )
 }
 
 export default BuildList

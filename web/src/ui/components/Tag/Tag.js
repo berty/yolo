@@ -16,6 +16,7 @@ const Tag = ({
 }) => {
   const validClasses = getIsArrayWithN(classes, 1) ? classes.reduce((acc, curr) => { acc[curr] = true; return acc }, {}) : { ...classes }
   const tagClass = classNames('btn', 'btn-sm', { ...validClasses, [stylers['normal-caps']]: normalCaps })
+
   const contents = (
     children ? <>{children}</> : (
       <>
