@@ -7,7 +7,7 @@ import (
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 )
 
-func (svc service) Status(ctx context.Context, req *yolopb.Status_Request) (*yolopb.Status_Response, error) {
+func (svc *service) Status(ctx context.Context, req *yolopb.Status_Request) (*yolopb.Status_Response, error) {
 	ret := yolopb.Status_Response{
 		Uptime: int32(time.Since(svc.startTime).Seconds()),
 	}

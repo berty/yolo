@@ -21,7 +21,7 @@ type GithubWorkerOpts struct {
 }
 
 // GithubWorker goals is to manage the github update routine, it should try to support as much errors as possible by itself
-func (svc service) GitHubWorker(ctx context.Context, opts GithubWorkerOpts) error {
+func (svc *service) GitHubWorker(ctx context.Context, opts GithubWorkerOpts) error {
 	opts.applyDefaults()
 
 	logger := opts.Logger
@@ -60,7 +60,7 @@ func (svc service) GitHubWorker(ctx context.Context, opts GithubWorkerOpts) erro
 		if err != nil {
 			logger.Warn("get rate limits", zap.Error(err))
 		} else {
-			reset := limits.Core.Reset.Time.Sub(time.Now())
+			reset := time.Until(limits.Core.Reset.Time)
 			remaining := limits.Core.Remaining
 			logger.Debug("github: rate limits", zap.Int("remaining", remaining), zap.Duration("reset", reset))
 		}
@@ -162,13 +162,8 @@ func batchFromGitHubPR(pr *github.PullRequest, logger *zap.Logger) *yolopb.Batch
 		batch.Entities = append(batch.Entities, mr.HasAuthor)
 		mr.HasAuthor = nil
 	}
-	for _, entity := range mr.HasAssignees {
-		batch.Entities = append(batch.Entities, entity)
-	}
-	for _, entity := range mr.HasReviewers {
-		batch.Entities = append(batch.Entities, entity)
-	}
-
+	batch.Entities = append(batch.Entities, mr.HasAssignees...)
+	batch.Entities = append(batch.Entities, mr.HasReviewers...)
 	return batch
 }
 
