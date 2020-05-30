@@ -200,7 +200,7 @@ func auth(basicAuth, realm, salt string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ret, _ := signature.ValidateSignature(r.Method, r.URL.String(), "", salt)
-			if ret == true {
+			if ret {
 				next.ServeHTTP(w, r)
 				return
 			}

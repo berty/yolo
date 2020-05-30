@@ -7,7 +7,7 @@ import (
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 )
 
-func (svc service) BuildList(ctx context.Context, req *yolopb.BuildList_Request) (*yolopb.BuildList_Response, error) {
+func (svc *service) BuildList(ctx context.Context, req *yolopb.BuildList_Request) (*yolopb.BuildList_Response, error) {
 	if req == nil {
 		req = &yolopb.BuildList_Request{}
 	}

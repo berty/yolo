@@ -6,7 +6,7 @@ import (
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 )
 
-func (svc service) BuildListFilters(ctx context.Context, req *yolopb.BuildListFilters_Request) (*yolopb.BuildListFilters_Response, error) {
+func (svc *service) BuildListFilters(ctx context.Context, req *yolopb.BuildListFilters_Request) (*yolopb.BuildListFilters_Response, error) {
 	resp := yolopb.BuildListFilters_Response{}
 
 	// FIXME: limit most recent entities

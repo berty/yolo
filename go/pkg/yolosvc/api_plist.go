@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/codes"
 )
 
-func (svc service) PlistGenerator(w http.ResponseWriter, r *http.Request) {
+func (svc *service) PlistGenerator(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "artifactID")
 
 	var artifact yolopb.Artifact
