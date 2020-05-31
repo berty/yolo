@@ -1,32 +1,22 @@
 import React, { useContext, useState } from 'react'
-import {
-  GitCommit,
-  GitPullRequest,
-  AlertCircle,
-  Calendar,
-  Link as LinkIcon,
-} from 'react-feather'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faGithub } from '@fortawesome/free-brands-svg-icons'
-import {
-  faAlignLeft,
-  faHammer,
-  faPencilAlt,
-} from '@fortawesome/free-solid-svg-icons'
+import { Link as LinkIcon } from 'react-feather'
 
 import { ThemeContext } from '../../../store/ThemeStore'
 
-import { tagStyle } from '../../styleTools/buttonStyler'
+import { tagColorStyles } from '../../styleTools/buttonStyler'
 import ArtifactRow from './ArtifactRow'
 import AnchorLink from '../AnchorLink/AnchorLink'
 import Tag from '../Tag/Tag'
 
-import { MR_STATE, BUILD_STATE } from '../../../constants'
-import { getRelativeTime, getTimeLabel } from '../../../util/date'
+import { BUILD_STATE } from '../../../constants'
 import { getIsArray } from '../../../util/getters'
 
 import './Build.scss'
-import ShownBuildsButton from '../ShownBuildsButton'
+import ShowingOlderBuildsTag from '../ShowingOlderBuildsTag'
+import BuildMessage from './BuildMessage'
+import {
+  CommitIcon, BuildCommit, MrState, MrDriver, BuildDriver, BuildUpdatedAt, BuildCreatedAt, BuildLogs, GithubLink,
+} from './BuildAndMrContainerWidgets'
 
 const BuildAndMrContainer = ({
   build,
@@ -60,7 +50,6 @@ const BuildAndMrContainer = ({
     created_at: buildCreatedAt = '',
     updated_at: buildUpdatedAt = '',
     driver: buildDriver = '',
-    has_project: buildHasProject = null,
     has_project: { id: buildProjectUrl = '' } = {},
     has_artifacts: buildHasArtifacts = null,
   } = build
@@ -72,61 +61,11 @@ const BuildAndMrContainer = ({
     state: mrState = '',
   } = buildHasMr || {}
 
-  const COMMIT_LEN = 7
-  const MESSAGE_LEN = 140
-  const timeSinceUpdated = getRelativeTime(buildUpdatedAt)
-  const timeSinceCreated = getRelativeTime(buildCreatedAt)
 
   const colorInteractiveText = {
     color: blockTitle,
   }
 
-  const colorPlainText = {
-    color: sectionText,
-  }
-
-  const CommitIconWithMrUrl = () => (
-    <a href={mrCommitUrl}>
-      <GitCommit color={blockTitle} title={buildCommitId || ''} />
-    </a>
-  )
-
-  const CommitIconWithNoMrUrl = () => (
-    <GitCommit color={sectionText} title={buildCommitId || ''} style={buildHasMr ? {} : { transform: 'rotate(90deg)' }} />)
-
-  const CommitIcon = () => (mrCommitUrl ? <CommitIconWithMrUrl /> : <CommitIconWithNoMrUrl />)
-
-  const SplitMessage = (text) => text
-    .split('\n')
-    .filter((x) => !!x)
-    .map((x, i) => (
-      <p className="build-message-line" key={i}>
-        {x}
-      </p>
-    ))
-
-  const BuildMessage = !buildMessage ? (
-    ''
-  ) : buildMessage.length < MESSAGE_LEN ? (
-    SplitMessage(buildMessage)
-  ) : messageExpanded ? (
-    <div
-      className="interactive-text build-message"
-      onClick={() => toggleMessageExpanded(false)}
-    >
-      {SplitMessage(buildMessage)}
-      <span style={colorInteractiveText}>&nbsp;[show less]</span>
-    </div>
-  ) : (
-    <div
-      className="interactive-text build-message"
-      onClick={() => toggleMessageExpanded(true)}
-    >
-      {SplitMessage(buildMessage.slice(0, MESSAGE_LEN))}
-      ...
-      <span style={colorInteractiveText}>&nbsp;[show more]</span>
-    </div>
-  )
 
   const BranchName = buildBranch && (
     <div
@@ -143,11 +82,14 @@ const BuildAndMrContainer = ({
     <Tag
       title={buildId}
       classes={['state-tag']}
-      styles={tagStyle({
-        name: theme.name,
-        state: BUILD_STATE[buildState],
+      styles={{
+        ...tagColorStyles({
+          theme,
+          state: BUILD_STATE[buildState],
+
+        }),
         cursor: 'pointer',
-      })}
+      }}
       href={buildId}
       text={buildState}
     />
@@ -158,104 +100,12 @@ const BuildAndMrContainer = ({
       text={buildState}
       title="Build state"
       classes={['state-tag']}
-      styles={tagStyle({ name: theme.name, state: BUILD_STATE[buildState] })}
+      styles={tagColorStyles({ theme, state: BUILD_STATE[buildState] })}
     />
   )
 
   const BuildStateTag = BuildStateTagPassed || BuildStateTagIsNotPassed || ''
 
-  const BuildLogs = (
-    <a href={buildId}>
-      <FontAwesomeIcon
-        icon={faAlignLeft}
-        color={blockTitle}
-        size="lg"
-        title={buildId}
-        style={{ marginBottom: '0.7rem' }}
-      />
-    </a>
-  )
-
-  const GithubLink = buildHasProject && buildProjectUrl && (
-    <a href={buildProjectUrl}>
-      <FontAwesomeIcon
-        icon={faGithub}
-        color={blockTitle}
-        size="lg"
-        title={buildProjectUrl}
-      />
-    </a>
-  )
-
-  const BuildCommit = buildCommitId && (
-    <div title={buildCommitId}>
-      Commit
-      {' '}
-      {mrCommitUrl ? (
-        <a
-          href={mrCommitUrl}
-          style={colorPlainText}
-          className="interactive-text"
-        >
-          {buildCommitId.slice(0, COMMIT_LEN)}
-        </a>
-      ) : (
-        buildCommitId.slice(0, COMMIT_LEN)
-      )}
-    </div>
-  )
-
-  const BuildDriver = buildDriver && (
-    <Tag
-      classes={['normal-caps', 'details']}
-      title={`Build driver: ${buildDriver}`}
-      icon={<FontAwesomeIcon icon={faHammer} color={sectionText} />}
-      text={`Build driver: ${buildDriver}`}
-    />
-  )
-
-  const MrDriver = mrDriver && (
-    <Tag
-      classes={['normal-caps', 'details']}
-      title={`Merge request driver: ${mrDriver}`}
-      icon={<FontAwesomeIcon icon={faHammer} color={sectionText} />}
-      text={mrDriver}
-    />
-  )
-
-  const MrState = mrState && (
-    <Tag
-      title="Merge request state"
-      classes={['btn-primary', 'state-tag']}
-      styles={tagStyle({ name: theme.name, state: MR_STATE[mrState] })}
-      icon={
-        mrState === MR_STATE.Opened ? (
-          <AlertCircle style={{ marginRight: '0.2rem' }} />
-        ) : (
-          <GitPullRequest style={{ marginRight: '0.2rem' }} />
-        )
-      }
-      text={mrState}
-    />
-  )
-
-  const BuildUpdatedAt = timeSinceUpdated && (
-    <Tag
-      classes={['normal-caps', 'details']}
-      title={getTimeLabel('Build updated', buildUpdatedAt)}
-      icon={<FontAwesomeIcon icon={faPencilAlt} color={sectionText} />}
-      text={timeSinceUpdated}
-    />
-  )
-
-  const BuildCreatedAt = timeSinceCreated && (
-    <Tag
-      text={timeSinceCreated}
-      icon={<Calendar />}
-      classes={['normal-caps', 'details']}
-      title={getTimeLabel('Build created', buildCreatedAt)}
-    />
-  )
 
   const SharableBuildLink = ({ isBlock }) => (
     <AnchorLink target={`?build_id=${buildId}`} isBlock={isBlock}>
@@ -267,23 +117,30 @@ const BuildAndMrContainer = ({
     <>
       <div className="block-row expanded" style={{ color: sectionText }}>
         <div className="block-left-icon icon-top">
-          <CommitIcon />
+          <CommitIcon {...{
+            colorInteractiveText, buildCommitId, mrCommitUrl, buildHasMr,
+          }}
+          />
           {isLatestBuild && <SharableBuildLink isBlock />}
         </div>
         <div className="block-details">
           {isLatestBuild && (buildCommitId || mrState || mrDriver) && (
             <div className="block-details-row">
-              {BuildCommit}
-
-              {MrState}
-              {MrDriver}
+              <BuildCommit {...{ buildCommitId, mrCommitUrl, colorInteractiveText }} />
+              <MrState {...{ theme, mrState }} />
+              <MrDriver {...{ sectionText, mrDriver }} />
             </div>
           )}
           {isLatestBuild && buildBranch && (
             <div className="block-details-row">{BranchName}</div>
           )}
           {isLatestBuild && buildMessage && (
-            <div className="block-details-row">{BuildMessage}</div>
+            <div className="block-details-row">
+              <BuildMessage {...{
+                buildMessage, colorInteractiveText, messageExpanded, toggleMessageExpanded,
+              }}
+              />
+            </div>
           )}
 
           <div className="block-details-row" style={{ alignSelf: 'flex-start' }}>
@@ -291,20 +148,19 @@ const BuildAndMrContainer = ({
             <div>{`Build ${buildShortId || buildId}`}</div>
 
             {BuildStateTag}
-            {BuildDriver}
-            {BuildUpdatedAt}
-            {BuildCreatedAt}
-            {isLatestBuild && nOlderBuilds > 0 && <ShownBuildsButton showingAllBuilds={showingAllBuilds} toggleShowingAllBuilds={toggleShowingAllBuilds} nOlderBuilds={nOlderBuilds} />}
+            <BuildDriver {...{ buildDriver, sectionText }} />
+            <BuildUpdatedAt {...{ buildUpdatedAt, sectionText }} />
+            <BuildCreatedAt {...{ buildCreatedAt, sectionText }} />
+            {isLatestBuild && nOlderBuilds > 0 && <ShowingOlderBuildsTag showingAllBuilds={showingAllBuilds} toggleShowingAllBuilds={toggleShowingAllBuilds} nOlderBuilds={nOlderBuilds} />}
           </div>
         </div>
         {isLatestBuild && (
           <div className="block-right-container">
-            {BuildLogs}
-            {GithubLink}
+            <BuildLogs {...{ buildId, blockTitle }} />
+            <GithubLink {...{ buildProjectUrl, blockTitle }} />
           </div>
         )}
       </div>
-      {/* TODO: Condition to show artifacts of older builds */}
       {showingArtifacts
         && getIsArray(buildHasArtifacts)
         && buildHasArtifacts.map((artifact) => (

@@ -6,13 +6,12 @@ import { ThemeContext } from '../../../store/ThemeStore'
 import { ResultContext } from '../../../store/ResultStore'
 import { getStrEquNormalized, getIsArray, getIsArrayWithN } from '../../../util/getters'
 import { getArtifactKindIcon } from '../../styleTools/brandIcons'
-import { tagStyle } from '../../styleTools/buttonStyler'
+import { tagColorStyles } from '../../styleTools/buttonStyler'
 import Tag from '../Tag/Tag'
 import './Build.scss'
 import BuildAndMrContainer from './BuildAndMrContainer'
 import BuildBlockHeader from './BuildBlockHeader'
-import BuildBlockTitle from './BuildBlockTitle'
-import ShownBuildsButton from '../ShownBuildsButton'
+import ShowingOlderBuildsTag from '../ShowingOlderBuildsTag'
 
 const ArtifactKindIcon = ({ color, kind = '', isFirst }) => (
   <FontAwesomeIcon
@@ -24,14 +23,44 @@ const ArtifactKindIcon = ({ color, kind = '', isFirst }) => (
   />
 )
 
+const LatestBuildStatusTag = ({ theme, buildState }) => buildState && (
+  <Tag
+    classes={['btn-state-tag']}
+    text={buildState}
+    styles={tagColorStyles({
+      theme,
+      state: BUILD_STATE[buildState],
+    })}
+  />
+)
+
+const LatestBuildArtifactsIcons = ({ buildHasArtifacts, theme }) => getIsArray(buildHasArtifacts) && (
+  <>
+    {buildHasArtifacts.map((a, i) => <ArtifactKindIcon kind={get(a, 'kind', ARTIFACT_KIND_NAMES.UnknownKind)} color={theme.bg.tagGreen} isFirst={(i === 0)} key={i} />)}
+  </>
+)
+
+const AnyRunningBuildTags = ({ hasRunningBuilds, allBuildsForMr, theme }) => (hasRunningBuilds && getIsArrayWithN(hasRunningBuilds) && getIsArrayWithN(allBuildsForMr, 2)
+  && (
+    <Tag
+      title={`${hasRunningBuilds.length} build${hasRunningBuilds.length > 1 ? 's' : ''} running`}
+      classes={['btn-state-tag']}
+      styles={tagColorStyles({
+        theme,
+        state: BUILD_STATE.Running,
+      })}
+    >
+      {`${hasRunningBuilds.length} build${hasRunningBuilds.length > 1 ? 's' : ''} running`}
+    </Tag>
+  )
+)
+
 const BuildContainer = ({
   build, toCollapse, children, hasRunningBuilds,
 }) => {
   const { state } = useContext(ResultContext)
   const [collapsed, toggleCollapsed] = useState(toCollapse)
   const [showingAllBuilds, toggleShowingAllBuilds] = useState(false)
-
-
   const { theme } = useContext(ThemeContext)
 
   const {
@@ -57,62 +86,14 @@ const BuildContainer = ({
 
   const isMasterBuildBranch = getStrEquNormalized(buildBranch, BRANCH.MASTER)
 
-  const blockTitle = (
-    <BuildBlockTitle
-      {...{
-        buildHasMr,
-        buildId,
-        buildShortId,
-        isMasterBuildBranch,
-        mrId,
-        mrShortId,
-        mrTitle,
-      }}
-    />
-  )
-
-  const FirstBuildArtifactTags = collapsed && buildHasArtifacts && (
+  const LatestBuildStateTags = () => collapsed && (
     <>
-      {buildHasArtifacts.map((a, i) => <ArtifactKindIcon kind={get(a, 'kind', ARTIFACT_KIND_NAMES.UnknownKind)} color={theme.bg.tagGreen} isFirst={(i === 0)} key={i} />)}
+      <LatestBuildStatusTag {...{ theme, buildState }} />
+      <LatestBuildArtifactsIcons {...{ theme, buildHasArtifacts }} />
+      <ShowingOlderBuildsTag nOlderBuilds={allBuildsForMr.length - 1} />
+      <AnyRunningBuildTags {...{ hasRunningBuilds, allBuildsForMr, theme }} />
     </>
   )
-
-  const FirstBuildStatusTag = collapsed && buildState && (
-    <Tag
-      classes={{ 'btn-state-tag': true }}
-      text={buildState}
-      styles={tagStyle({
-        name: theme.name,
-        state: BUILD_STATE[buildState],
-      })}
-    />
-  )
-
-  const AnyRunningBuildTags = () => (hasRunningBuilds && getIsArrayWithN(hasRunningBuilds) && getIsArrayWithN(allBuildsForMr, 2)
-    && (
-      <Tag
-        title={`${hasRunningBuilds.length} build${hasRunningBuilds.length > 1 ? 's' : ''} running`}
-        classes={['btn-state-tag']}
-        styles={tagStyle({
-          name: theme.name,
-          state: BUILD_STATE.Running,
-          cursor: 'auto',
-        })}
-      >
-        {`${hasRunningBuilds.length} build${hasRunningBuilds.length > 1 ? 's' : ''} running`}
-      </Tag>
-    )
-  )
-
-  const latestBuildStateTags = collapsed && (
-    <>
-      {FirstBuildStatusTag}
-      {FirstBuildArtifactTags}
-      {getIsArray(allBuildsForMr) && allBuildsForMr.length > 1 && <ShownBuildsButton nOlderBuilds={allBuildsForMr.length - 1} />}
-      <AnyRunningBuildTags />
-    </>
-  )
-
 
   return (
     <div className="Build" id={buildId}>
@@ -125,33 +106,31 @@ const BuildContainer = ({
         }}
         key={buildId}
       >
-        <BuildBlockHeader
-          {...{
-            blockTitle,
-            buildAuthorAvatarUrl,
-            buildAuthorId,
-            buildAuthorName,
-            buildHasMr,
-            buildId,
-            buildShortId,
-            collapsed,
-            isMasterBuildBranch,
-            latestBuildStateTags,
-            mrId,
-            mrShortId,
-            mrState,
-            toggleCollapsed,
-          }}
+        <BuildBlockHeader {...{
+          buildAuthorName,
+          buildAuthorAvatarUrl,
+          buildAuthorId,
+          buildHasMr,
+          buildId,
+          buildShortId,
+          collapsed,
+          isMasterBuildBranch,
+          mrId,
+          mrTitle,
+          mrShortId,
+          mrState,
+          toggleCollapsed,
+          ...{ childrenLatestBuildTags: <LatestBuildStateTags /> },
+        }}
         />
         {!collapsed
-          && getIsArray(allBuildsForMr)
           && allBuildsForMr
             .filter((bIdx, i) => showingAllBuilds ? Number.isInteger(bIdx) : i === 0)
             .map((buildidx, i) => (
               <BuildAndMrContainer
-                AnyRunningBuildTags={AnyRunningBuildTags}
                 build={state.builds[buildidx]}
                 buildHasMr={buildHasMr}
+                hasRunningBuilds={hasRunningBuilds}
                 isLatestBuild={i === 0}
                 key={i}
                 nOlderBuilds={i === 0 && getIsArrayWithN(allBuildsForMr, 2) ? allBuildsForMr.length - 1 : 0}

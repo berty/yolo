@@ -21,6 +21,7 @@ export const themes = {
       tagGreen: '#20d6b5',
       tagPink: '#fe497f',
       tagOrange: '#ffae3a',
+      btnPrimary: '#fcfcff', // not from spec
       filterUnselectedTitle: '#888aa1',
       filterSelectedTitle: '#3f49ea',
     },
@@ -68,6 +69,7 @@ export const themes = {
       tagGreen: '#23928e',
       tagPink: '#d23064',
       tagOrange: '#ff9a0b',
+      btnPrimary: '#cdcfed', // not from spec
       filterUnselectedTitle: '#7c7ea1',
       filterSelectedTitle: '#7373f6',
     },
@@ -92,18 +94,6 @@ export const themes = {
     shadowStyle: {
       block: 'none',
     },
-  },
-}
-
-export const sharedThemes = {
-  borderRadius: {
-    block: '15px',
-  },
-  padding: {
-    block: '15px',
-  },
-  marginBottom: {
-    block: '20px',
   },
 }
 
