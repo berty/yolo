@@ -71,7 +71,7 @@ const ArtifactQrButton = ({ onClick, theme }) => (
     }}
     title="Show QR code"
   >
-    <FontAwesomeIcon icon={faQrcode} size="2x" color={theme.text.blockTitle} style={{ marginTop: 0, marginBottom: 0, transform: 'scale(90%)' }} />
+    <FontAwesomeIcon icon={faQrcode} size="2x" color={theme.text.btnPrimary} style={{ marginTop: 0, marginBottom: 0, transform: 'scale(90%)' }} />
   </div>
 )
 
