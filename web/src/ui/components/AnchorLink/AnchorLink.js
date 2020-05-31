@@ -1,18 +1,16 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 import classNames from 'classnames'
 
 import { useLocation } from 'react-router-dom'
 import styles from './AnchorLink.module.scss'
-import withTheme from '../../helpers/withTheme'
+import { ThemeContext } from '../../../store/ThemeStore'
 
 const AnchorLink = ({
-  children, target, isBlock = true, ...injectedProps
+  children, target, isBlock = true,
 }) => {
   const [confirmCopyMessage, setConfirmCopyMessage] = useState('')
-  const {
-    themeStyles,
-  } = injectedProps
+  const { theme } = useContext(ThemeContext)
   const confirmationPopupClass = classNames(
     'badge',
     'badge-secondary',
@@ -22,7 +20,7 @@ const AnchorLink = ({
   const location = useLocation()
 
   return (
-    <div className={iconClasses} style={themeStyles.textBlockTitle}>
+    <div className={iconClasses} style={{ color: theme.text.blockTitle }}>
       {confirmCopyMessage && (
         <div className={confirmationPopupClass}>{confirmCopyMessage}</div>
       )}
@@ -40,4 +38,4 @@ const AnchorLink = ({
   )
 }
 
-export default withTheme(AnchorLink)
+export default AnchorLink

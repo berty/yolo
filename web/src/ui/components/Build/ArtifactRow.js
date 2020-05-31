@@ -3,19 +3,17 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import QRCode from 'qrcode.react'
 import React, { useContext, useState } from 'react'
 import {
-  Calendar, Clock, Link as LinkIcon, ArrowDownCircle,
+  ArrowDownCircle, Calendar, Clock, Link as LinkIcon,
 } from 'react-feather'
-import {
-  ARTIFACT_KIND_NAMES, ARTIFACT_KIND_TO_PLATFORM, ARTIFACT_KIND_VALUE,
-} from '../../../constants'
+import { ARTIFACT_KIND_NAMES, ARTIFACT_KIND_TO_PLATFORM, ARTIFACT_KIND_VALUE } from '../../../constants'
 import { ThemeContext } from '../../../store/ThemeStore'
 import { getRelativeTime, getTimeDuration } from '../../../util/date'
 import { getArtifactKindIcon } from '../../styleTools/brandIcons'
+import { primaryButtonColors } from '../../styleTools/buttonStyler'
 import AnchorLink from '../AnchorLink/AnchorLink'
 import QRCodeModal from '../QRCodeModal'
 import Tag from '../Tag/Tag'
-import './Build.scss'
-import { primaryButtonColors } from '../../styleTools/buttonStyler'
+import styles from './Build.module.scss'
 
 const ArtifactRowKindIcon = ({ color, kind = '' }) => (
   <FontAwesomeIcon
@@ -23,7 +21,6 @@ const ArtifactRowKindIcon = ({ color, kind = '' }) => (
     color={color}
     title={`Artifact kind: ${ARTIFACT_KIND_NAMES[kind]}`}
     size="lg"
-    style={{ marginRight: '0.5rem', marginTop: kind === ARTIFACT_KIND_NAMES.APK && '0.1rem' }}
   />
 )
 
@@ -83,10 +80,10 @@ const TimeSinceBuildUpdated = ({ buildMergeUpdatedAt }) => {
   const timeSinceBuildUpdated = getRelativeTime(buildMergeUpdatedAt)
   return (timeSinceBuildUpdated && (
     <Tag
-      classes={['normal-caps', 'details']}
       title={buildMergeUpdatedAt && `updated: ${buildMergeUpdatedAt}`}
       icon={<Calendar />}
       text={timeSinceBuildUpdated}
+      plainDisplay
     />
   ))
 }
@@ -104,17 +101,17 @@ const BuildDuration = ({ buildStartedAt, buildFinishedAt }) => {
     : ''
   return buildDurationShort && (
     <Tag
-      classes={['normal-caps', 'details']}
       title={buildDurationDetails || ''}
       icon={<Clock />}
       text={buildDurationShort}
+      plainDisplay
     />
   )
 }
 
 const ArtifactFileSize = ({ artifactFileSize }) => artifactFileSize
   && !Number.isNaN(parseInt(artifactFileSize, 10)) && (
-    <Tag classes={['normal-caps', 'details']} title="File size">
+    <Tag title="File size" plainDisplay>
       <FontAwesomeIcon icon={faFile} size="lg" />
       {Math.round(artifactFileSize / 1000)}
       {' '}
@@ -123,15 +120,15 @@ const ArtifactFileSize = ({ artifactFileSize }) => artifactFileSize
 )
 
 const ArtifactLocalPathRow = ({ artifactLocalPath }) => artifactLocalPath && (
-  <div className="block-details-row artifact-local-path">
-    <small>{artifactLocalPath}</small>
+  <div className={styles.blockSectionDetailRow}>
+    <small className={styles.artifactLocalPath}>{artifactLocalPath}</small>
   </div>
 )
 
 const ArtifactDriver = ({ artifactDriver, theme }) => artifactDriver && (
   <Tag
-    classes={['normal-caps', 'details']}
     title={`Artifact driver: ${artifactDriver}`}
+    plainDisplay
   >
     <FontAwesomeIcon icon={faHammer} color={theme.text.sectionText} />
     <div>{artifactDriver}</div>
@@ -150,6 +147,7 @@ const ArtifactRow = ({
   buildStartedAt,
   buildFinishedAt,
   buildShortId,
+  isLastArtifactOfLatestBuild,
 }) => {
   const { theme } = useContext(ThemeContext)
   const [showingQrModal, toggleShowQrModal] = useState(false)
@@ -163,41 +161,43 @@ const ArtifactRow = ({
     driver: artifactDriver = '',
   } = artifact
 
+  const containerBorderBottomStyle = isLastArtifactOfLatestBuild ? { borderBottom: 'none' } : {}
+
   return (
-    <React.Fragment key={artifactId}>
+    <>
       {showingQrModal && artifactPlistSignedUrl && (
         <QrCode artifactPlistSignedUrl={artifactPlistSignedUrl} closeAction={() => toggleShowQrModal(false)} />
       )}
 
       <div
-        className="block-row expanded"
-        style={{ color: theme.text.sectionText }}
+        className={styles.blockSectionContainer}
+        style={{ color: theme.text.sectionText, ...containerBorderBottomStyle }}
       >
-        <div className="block-left-icon icon-top">
+        <div className={styles.blockSectionLeftColumn}>
           <SharableArtifactLink {...{ artifactId }} implemented={false} />
         </div>
-        <div className="block-details">
-          <div className="block-details-row">
+        <div className={styles.blockSectionDetailContainer}>
+          <div className={styles.blockSectionDetailRow}>
             <ArtifactRowKindIcon color={theme.bg.tagGreen} kind={artifactKind} />
             <ArtifactKindName {...{ artifactKind }} />
             <BuildIdentifier {...{ buildShortId }} />
           </div>
           <ArtifactLocalPathRow {...{ artifactLocalPath }} />
-          <div className="block-details-row">
+          <div className={styles.blockSectionDetailRow}>
             <TimeSinceBuildUpdated {...{ buildMergeUpdatedAt }} />
             <BuildDuration {...{ buildStartedAt, buildFinishedAt }} />
             <ArtifactFileSize {...{ artifactFileSize }} />
             <ArtifactDriver {...{ artifactDriver, theme }} />
           </div>
         </div>
-        <div className="block-right-container">
+        <div className={styles.blockRightContainer}>
           <ArtifactDownloadButton
             {...{ artifactPlistSignedUrl, artifactDlArtifactSignedUrl }}
           />
           {artifactPlistSignedUrl && <ArtifactQrButton theme={theme} onClick={() => toggleShowQrModal(true)} />}
         </div>
       </div>
-    </React.Fragment>
+    </>
   )
 }
 

@@ -3,7 +3,7 @@ import { useHistory, useLocation } from 'react-router-dom'
 import YoloLogo from '../../../assets/svg/yolo.svg'
 import { INITIAL_STATE, ResultContext } from '../../../store/ResultStore'
 import Filters from '../Filters/Filters'
-import './Header.scss'
+import styles from './Header.module.scss'
 
 const Header = ({
   autoRefreshOn,
@@ -15,9 +15,9 @@ const Header = ({
   const location = useLocation()
 
   return (
-    <div className="Header">
+    <div className={styles.container}>
       <div
-        className="header-logo"
+        className={styles.logo}
         style={{ cursor: 'pointer' }}
         onClick={location.pathname !== '/404.html' ? () => {
           updateState({
@@ -28,14 +28,18 @@ const Header = ({
       >
         <img src={YoloLogo} alt="Yolo logo" />
       </div>
-      {state.isAuthed && (
-        <div style={{ height: '100%', display: 'flex', alignItems: 'center' }}>
-          <Filters {...{ autoRefreshOn, setAutoRefreshOn, onFilterClick }} />
-        </div>
-      )}
-      {process.env.YOLO_UI_TEST && (
-        <small>UI Test</small>
-      )}
+      {
+        state.isAuthed && (
+          <div style={{ height: '100%', display: 'flex', alignItems: 'center' }}>
+            <Filters {...{ autoRefreshOn, setAutoRefreshOn, onFilterClick }} />
+          </div>
+        )
+      }
+      {
+        process.env.YOLO_UI_TEST && (
+          <small>UI Test</small>
+        )
+      }
     </div>
   )
 }

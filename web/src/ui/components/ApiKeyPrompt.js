@@ -1,15 +1,15 @@
 import React, {
-  useState, useRef, useEffect,
+  useState, useRef, useEffect, useContext,
 } from 'react'
 import classNames from 'classnames'
 import { setAuthCookie } from '../../api/cookies'
-import withTheme from '../helpers/withTheme'
 import { getSafeStr } from '../../util/getters'
+import { ThemeContext } from '../../store/ThemeStore'
 
 const ApiKeyPrompt = ({
-  failedKey, authIsPending, updateState, ...injectedProps
+  failedKey, authIsPending, updateState,
 }) => {
-  const { theme: { text: { sectionTitle } } } = injectedProps
+  const { theme: { text: { sectionTitle } } } = useContext(ThemeContext)
   const [formApiKey, updateFormApiKey] = useState('')
   const submitBtnClass = classNames('btn', 'btn-primary', { disabled: authIsPending || !formApiKey })
   const inputEl = useRef(null)
@@ -64,4 +64,4 @@ const ApiKeyPrompt = ({
   )
 }
 
-export default withTheme(ApiKeyPrompt)
+export default ApiKeyPrompt

@@ -1,6 +1,6 @@
 @import "../../../assets/main.scss";
 
-.Header {
+.container {
     box-sizing: border-box;
     margin: 0;
     margin-bottom: 0.5rem;
@@ -23,7 +23,7 @@
         flex-wrap: nowrap;
     }
 
-    .header-logo {
+    .logo {
         display: none;
         @include sm {
             margin-left: 1rem;

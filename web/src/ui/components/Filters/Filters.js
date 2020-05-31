@@ -12,7 +12,7 @@ import { ResultContext } from '../../../store/ResultStore.js'
 import { getIsArrayWithN } from '../../../util/getters.js'
 import { getArtifactKindIcon } from '../../styleTools/brandIcons.js'
 import OutlineWidget from '../OutlineWidget/OutlineWidget.js'
-import './Filters.scss'
+import styles from './Filters.module.scss'
 
 const Filters = ({ autoRefreshOn, onFilterClick, setAutoRefreshOn }) => {
   const {
@@ -159,7 +159,7 @@ const Filters = ({ autoRefreshOn, onFilterClick, setAutoRefreshOn }) => {
   )
 
   return (
-    <div className="Filters">
+    <div className={styles.container}>
       <FiltersAppWidget />
       <ArtifactKindsFilter />
       <FiltersBranchWidget />

@@ -1,21 +1,24 @@
-div.Home {
-  height: 100%;
-  display: flex;
-  flex-flow: column nowrap;
+@import "../../../assets/main.scss";
 
-  .page {
+.homeContainer {
+    height: 100%;
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+.homepageWrapper {
     flex-basis: 100%;
     flex-shrink: 0;
-    font-family: 'Open Sans', sans-serif;
+    font-family: $font-stack;
     width: 100%;
     display: flex;
     flex-flow: column nowrap;
     justify-content: space-between;
     align-items: center;
-  }
+}
 
-  .footer {
+.footer {
     flex: 0 1 auto;
     width: 100%;
-  }
+    padding: 1.25rem;
 }

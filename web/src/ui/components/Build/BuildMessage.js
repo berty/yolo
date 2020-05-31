@@ -1,27 +1,29 @@
 import React from 'react'
 import ConditionallyWrappedComponent from '../ConditionallyWrappedComponent'
+import styles from './Build.module.scss'
 
 const SplitMessage = ({ text }) => (
   <>
     {text.split('\n').filter((x) => !!x).map((x, i) => (
-      <p className="build-message-line" key={i}>{x}</p>
+      <p className={styles.buildMessageLine} key={i}>{x}</p>
     ))}
   </>
 )
 
 const LongBuildMessage = ({
-  children, colorInteractiveText, toggleMessageExpanded, messageExpanded,
+  children, toggleMessageExpanded, messageExpanded, theme,
 }) => (
-  <div className="interactive-text build-message" onClick={() => toggleMessageExpanded(!messageExpanded)}>
+  <div className={`${styles.buildMessage} ${styles.interactive}`} onClick={() => toggleMessageExpanded(!messageExpanded)}>
     {children}
-    <span className="build-message-line-suffix" style={colorInteractiveText}>
+    <span className={styles.buildMessageLineSuffix} style={{ color: theme.text.blockTitle }}>
+        &nbsp;
       {!messageExpanded ? '... [show more]' : ' [show less]'}
     </span>
   </div>
 )
 
 const BuildMessage = ({
-  buildMessage = '', colorInteractiveText, messageExpanded, toggleMessageExpanded,
+  buildMessage = '', messageExpanded, toggleMessageExpanded, theme,
 }) => {
   const MESSAGE_LEN = 140
   const isLong = buildMessage.length > MESSAGE_LEN
@@ -30,7 +32,7 @@ const BuildMessage = ({
     <ConditionallyWrappedComponent
       condition={isLong}
       wrapper={(children) => (
-        <LongBuildMessage {...{ colorInteractiveText, messageExpanded, toggleMessageExpanded }}>
+        <LongBuildMessage {...{ messageExpanded, toggleMessageExpanded, theme }}>
           {children}
         </LongBuildMessage>
       )}

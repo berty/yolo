@@ -1,25 +1,19 @@
 
-import React from 'react'
+import React, { useContext } from 'react'
 import { ChevronDown, ChevronUp } from 'react-feather'
-import { tagColorStyles } from '../styleTools/buttonStyler'
 import Tag from './Tag/Tag'
-import withTheme from '../helpers/withTheme'
+import { ThemeContext } from '../../store/ThemeStore'
 
 const ShowingOlderBuildsTag = ({
   nOlderBuilds,
   showingAllBuilds = null,
   toggleShowingAllBuilds = null,
-  ...injectedProps
 }) => {
-  const {
-    theme: {
-      text: { blockTitle },
-    },
-    theme,
-  } = injectedProps
+  const { theme } = useContext(ThemeContext)
 
   const multipleOlderBuilds = nOlderBuilds > 1
   const isInteractive = !!toggleShowingAllBuilds
+  const marginRight = isInteractive ? 0 : undefined
 
   const messagePrefix = showingAllBuilds ? 'hide' : 'show'
 
@@ -29,30 +23,28 @@ const ShowingOlderBuildsTag = ({
     }`
     : ''
 
-  const Icon = () => (showingAllBuilds ? <ChevronUp color={blockTitle} />
-    : <ChevronDown color={blockTitle} />
+  const Icon = () => (showingAllBuilds ? <ChevronUp />
+    : <ChevronDown />
   )
 
   return (message
     && (
-    <Tag
-      classes={['btn-info-tag']}
-      title={message}
-      styles={{
-        ...tagColorStyles({
-          theme,
-          state: null,
-
-        }),
-        cursor: !isInteractive ? 'default' : 'pointer',
-      }}
-      onClick={!isInteractive ? undefined : () => toggleShowingAllBuilds(!showingAllBuilds)}
-    >
-      {isInteractive && <Icon />}
-      {message}
-    </Tag>
+      <Tag
+        title={message}
+        styles={{
+          color: theme.text.blockTitle,
+          borderWidth: '1px',
+          borderStyle: 'solid',
+          borderColor: isInteractive ? theme.text.blockTitle : theme.text.sectionText,
+          marginRight,
+        }}
+        onClick={!isInteractive ? undefined : () => toggleShowingAllBuilds(!showingAllBuilds)}
+      >
+        {isInteractive && <Icon />}
+        {message}
+      </Tag>
     )
   )
 }
 
-export default withTheme(ShowingOlderBuildsTag)
+export default ShowingOlderBuildsTag

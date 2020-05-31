@@ -1,27 +1,73 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { uniq } from 'lodash'
 import React, { useContext, useState } from 'react'
-import { Check, LogOut, X } from 'react-feather'
+import { Check, LogOut } from 'react-feather'
 import { removeAuthCookie } from '../../../api/cookies'
 import {
-  ARTIFACT_KIND_TO_PLATFORM, BRANCH_TO_DISPLAY_NAME, BUILD_DRIVERS, BUILD_DRIVER_TO_NAME, BUILD_STATES, BUILD_STATE_VALUE_TO_NAME, PROJECT, PROJECT_ARTIFACT_KINDS, PROJECT_BUILD_DRIVER,
+  ARTIFACT_KINDS, BUILD_DRIVERS, BUILD_STATES, PROJECT, PROJECTS,
 } from '../../../constants'
 import { INITIAL_STATE, ResultContext } from '../../../store/ResultStore'
-import { addOrRemoveFromArray } from '../../../util/getters'
-import withButtonStyles from '../../helpers/withButtonStyles'
-import withTheme from '../../helpers/withTheme'
-import { getArtifactKindIcon } from '../../styleTools/brandIcons'
-import { getProjectIcon } from '../../styleTools/projectIcons'
-import { getVcsIcon } from '../../styleTools/vcsIcons'
-import OutlineWidget from '../OutlineWidget/OutlineWidget'
-import ThemeToggler from '../ThemeToggler'
-import './FilterModal.scss'
+import { ThemeContext } from '../../../store/ThemeStore'
 import Tag from '../Tag/Tag'
+import ThemeToggler from '../ThemeToggler'
+import styles from './FilterModal.module.scss'
+import {
+  ArtifactFilter, BranchFilter, BuildDriverFilter, BuildStateFilter, ProjectFilter,
+} from './FilterModalWidgets'
+import FilterModalWrapper from './FilterModalWrapper'
 
-const FilterModal = ({
-  closeAction, ...injectedProps
-}) => {
-  const { theme, themeStyles } = injectedProps
+const ProjectWidgets = ({
+  selectedDrivers, setSelectedDrivers, selectedArtifactKinds, setSelectedArtifactKinds, selectedProjects, setSelectedProjects,
+}) => (
+  <>
+    {PROJECTS.filter((p) => p !== PROJECTS.UnknownProject).map((p, i) => (
+      <ProjectFilter
+        key={i}
+        project={PROJECT[p]}
+        {...{
+          selectedDrivers, setSelectedDrivers, selectedArtifactKinds, setSelectedArtifactKinds, selectedProjects, setSelectedProjects,
+        }}
+      />
+    ))}
+  </>
+)
+
+const ArtifactKindWidgets = ({ setSelectedArtifactKinds, selectedArtifactKinds }) => (
+  <>
+    {ARTIFACT_KINDS.map((k, i) => (
+      <ArtifactFilter
+        artifact_kind={k}
+        key={i}
+        {...{ setSelectedArtifactKinds, selectedArtifactKinds }}
+      />
+    ))}
+  </>
+)
+
+const BuildDriverWidgets = ({ selectedDrivers, setSelectedDrivers }) => (
+  <>
+    {BUILD_DRIVERS.map((buildDriverValue, i) => (
+      <BuildDriverFilter
+        buildDriverValue={buildDriverValue}
+        key={i}
+        {...{ selectedDrivers, setSelectedDrivers }}
+      />
+    ))}
+  </>
+)
+
+const BuildStateWidgets = ({ selectedBuildStates, setSelectedBuildStates }) => (
+  <>
+    {BUILD_STATES.map((buildStateValue, i) => (
+      <BuildStateFilter
+        key={i}
+        buildStateValue={buildStateValue}
+        {...{ selectedBuildStates, setSelectedBuildStates }}
+      />
+    ))}
+  </>
+)
+
+const FilterModal = ({ closeAction }) => {
+  const { theme, themeStyles } = useContext(ThemeContext)
   const { state, updateState } = useContext(ResultContext)
   const [selectedDrivers, setSelectedDrivers] = useState([
     ...state.uiFilters.build_driver,
@@ -36,232 +82,90 @@ const FilterModal = ({
     ...state.uiFilters.build_state,
   ])
   const [selectedBranches] = useState(['all'])
-  const filterSelectedAccent = theme.icon.filterSelected
 
-  const ArtifactFilter = ({ artifact_kind: artifactKind }) => {
-    const selected = (selectedArtifactKinds.includes(artifactKind))
-    return (
-      <OutlineWidget
-        onClick={() => setSelectedArtifactKinds(addOrRemoveFromArray(artifactKind, selectedArtifactKinds))}
-        selected={selected}
-        textUnderneath
-        interactive
-        iconComponent={<FontAwesomeIcon icon={getArtifactKindIcon(artifactKind)} size="lg" />}
-        text={ARTIFACT_KIND_TO_PLATFORM[artifactKind]}
-      />
-    )
-  }
 
-  const ProjectFilter = ({ project }) => {
-    const selected = (selectedProjects.includes(project))
-    const artifactKindsForProject = (!!PROJECT_ARTIFACT_KINDS[project])
-    const buildDriverForProject = PROJECT_BUILD_DRIVER[project]
-    const projectValue = PROJECT[project] || 'Unknown Project'
-    const projectIcon = getProjectIcon(projectValue)
-
-    const addProjectFilter = () => {
-      artifactKindsForProject
-        && setSelectedArtifactKinds(
-          uniq([...selectedArtifactKinds, ...PROJECT_ARTIFACT_KINDS[projectValue]]),
-        )
-      buildDriverForProject
-        && setSelectedDrivers(uniq([...selectedDrivers, buildDriverForProject]))
-      setSelectedProjects(uniq([...selectedProjects, projectValue]))
-    }
-
-    const removeProjectFilter = () => {
-      setSelectedProjects(selectedProjects.filter((p) => p !== projectValue))
-    }
-
-    return (
-      <OutlineWidget
-        text={projectValue}
-        iconComponent={projectIcon()}
-        onClick={selected ? removeProjectFilter : addProjectFilter}
-        selected={selected}
-        interactive
-        textUnderneath
-      />
-    )
-  }
-
-  const BranchFilter = ({ branchName }) => {
-    const selected = (selectedBranches.includes(branchName))
-    const implemented = (branchName.toUpperCase() === 'ALL')
-    const branchIcon = getVcsIcon(branchName)
-
-    return (
-      <OutlineWidget
-        iconComponent={branchIcon()}
-        text={BRANCH_TO_DISPLAY_NAME[branchName.toUpperCase()] || 'Unknown Branch'}
-        selected={selected}
-        notImplemented={!implemented}
-        textUnderneath
-        interactive={false}
-      />
-    )
-  }
-
-  const BuildDriverFilter = ({ buildDriverValue }) => {
-    const selected = (selectedDrivers.includes(buildDriverValue))
-    return (
-      <OutlineWidget
-        textUnderneath
-        selected={selected}
-        text={BUILD_DRIVER_TO_NAME[buildDriverValue] || `Unknown Driver :${buildDriverValue}`}
-        onClick={() => setSelectedDrivers(addOrRemoveFromArray(buildDriverValue, selectedDrivers))}
-      />
-    )
-  }
-
-  const BuildStateFilter = ({ buildStateValue }) => {
-    const selected = (selectedBuildStates.includes(buildStateValue))
-    return (
-      <OutlineWidget
-        textUnderneath
-        selected={selected}
-        text={BUILD_STATE_VALUE_TO_NAME[buildStateValue] || `Unknown Driver :${buildStateValue}`}
-        onClick={() => setSelectedBuildStates(addOrRemoveFromArray(buildStateValue, selectedBuildStates))}
-      />
-    )
+  const tablerOverrides = {
+    modalFooterStyle: { borderTop: 'none', justifyContent: 'center' },
+    modalFooterSettingsStyle: { borderTop: 'none', flexWrap: 'wrap', justifyContent: 'flex-end' },
   }
 
   return (
-    <>
-      <div className="faded" />
-      <span className="FilterModal">
-        <div
-          className="modal modal-blur fade show modal-open"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div
-            className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"
-            role="document"
-          >
-            <div className="modal-content" style={{ ...themeStyles.pageBg, ...themeStyles.textPlain }}>
-              <div className="modal-header">
-                <h5 className="modal-title" style={themeStyles.textSectionTitle}>
-                  Filter the builds
-                </h5>
-                <div
-                  className="btn-close"
-                  data-dismiss="modal"
-                  aria-label="Close"
-                  onClick={closeAction}
-                  style={themeStyles.widgetBg}
-                >
-                  <X
-                    size={14}
-                    strokeWidth={3}
-                    color={filterSelectedAccent}
-                  />
-                </div>
-              </div>
-              <div className="modal-body">
-                <div style={themeStyles.textSectionTitle} className="subtitle">
-                  Projects
-                </div>
-                <div className="filter-row">
-                  {ProjectFilter({ project: PROJECT.chat })}
-                  {ProjectFilter({ project: PROJECT['gomobile-ipfs-demo'] })}
-                </div>
-                <div style={themeStyles.textSectionTitle} className="subtitle">
-                  Artifact Kinds
-                </div>
-                <div className="filter-row">
-                  {ArtifactFilter({ artifact_kind: '0' })}
-                  {ArtifactFilter({ artifact_kind: '1' })}
-                  {ArtifactFilter({ artifact_kind: '2' })}
-                  {ArtifactFilter({ artifact_kind: '3' })}
-                </div>
-                <div style={themeStyles.textSectionTitle} className="subtitle">
-                  Build Drivers
-                </div>
-                <div className="filter-row">
-                  {BUILD_DRIVERS.map((buildDriverValue, i) => (
-                    <BuildDriverFilter
-                      buildDriverValue={buildDriverValue}
-                      key={i}
-                    />
-                  ))}
-                </div>
-                <div style={themeStyles.textSectionTitle} className="subtitle">
-                  Branches
-                </div>
-                <div className="filter-row">
-                  <BranchFilter branchName="all" />
-                  <BranchFilter branchName="master" />
-                  <BranchFilter branchName="develop" />
-                </div>
-
-                <div style={themeStyles.textSectionTitle} className="subtitle">
-                  Build State
-                </div>
-                <div className="filter-row">
-                  {BUILD_STATES.map((buildStateValue, i) => (
-                    <BuildStateFilter
-                      key={i}
-                      buildStateValue={buildStateValue}
-                    />
-                  ))}
-                </div>
-              </div>
-              <div className="modal-footer">
-                <div
-                  type="button"
-                  className="btn btn-primary"
-                  data-dismiss="modal"
-                  onClick={() => {
-                    updateState({
-                      needsProgrammaticQuery: true,
-                      isLoaded: false,
-                      builds: [],
-                      uiFilters: {
-                        build_driver: [...selectedDrivers],
-                        artifact_kinds: [...selectedArtifactKinds],
-                        build_state: [...selectedBuildStates],
-                      },
-                      calculatedFilters: {
-                        projects: [...selectedProjects],
-                      },
-                    })
-                    closeAction()
-                  }}
-                  style={injectedProps.themedBtnStyles.primaryButtonColors}
-                >
-                  <Check />
-                  Apply Filters
-                </div>
-              </div>
-              <div className="modal-footer settings">
-                <ThemeToggler />
-                {state.apiKey && state.isAuthed && (
-                  <Tag
-                    styles={{ display: 'flex', alignItems: 'center' }}
-                    onClick={() => {
-                      removeAuthCookie()
-                      updateState({
-                        isAuthed: false,
-                        apiKey: '',
-                        needsProgrammaticQuery: true,
-                        uiFilters: INITIAL_STATE.uiFilters,
-                        calculatedFilters: INITIAL_STATE.calculatedFilters,
-                      })
-                      closeAction()
-                    }}
-                  >
-                    <LogOut height="14" color={theme.icon.filterSelected} />
-                    <div>Logout</div>
-                  </Tag>
-                )}
-              </div>
-            </div>
-          </div>
+    <FilterModalWrapper {...{ closeAction }}>
+      <div className="modal-body">
+        <div style={{ color: theme.text.sectionTitle }} className={styles.subtitle}>Projects</div>
+        <div className={styles.row}>
+          <ProjectWidgets {...{
+            selectedDrivers, setSelectedDrivers, selectedArtifactKinds, setSelectedArtifactKinds, selectedProjects, setSelectedProjects,
+          }}
+          />
         </div>
-      </span>
-    </>
+        <div style={{ color: theme.text.sectionTitle }} className={styles.subtitle}>Artifact Kinds</div>
+        <div className={styles.row}>
+          <ArtifactKindWidgets {...{ selectedArtifactKinds, setSelectedArtifactKinds }} />
+        </div>
+        <div style={{ color: theme.text.sectionTitle }} className={styles.subtitle}>Build Drivers</div>
+        <div className={styles.row}>
+          <BuildDriverWidgets {...{ selectedDrivers, setSelectedDrivers }} />
+        </div>
+        <div style={{ color: theme.text.sectionTitle }} className={styles.subtitle}>Branches</div>
+        <div className={styles.row}>
+          <BranchFilter branchName="all" {...{ selectedBranches }} />
+          <BranchFilter branchName="master" {...{ selectedBranches }} />
+          <BranchFilter branchName="develop" {...{ selectedBranches }} />
+        </div>
+        <div style={{ color: theme.text.sectionTitle }} className={styles.subtitle}>Build State</div>
+        <div className={styles.row}>
+          <BuildStateWidgets {...{ selectedBuildStates, setSelectedBuildStates }} />
+        </div>
+      </div>
+      <div className="modal-footer" style={tablerOverrides.modalFooterStyle}>
+        <div
+          roll="button"
+          className="btn btn-primary"
+          data-dismiss="modal"
+          onClick={() => {
+            updateState({
+              needsProgrammaticQuery: true,
+              isLoaded: false,
+              builds: [],
+              uiFilters: {
+                build_driver: [...selectedDrivers],
+                artifact_kinds: [...selectedArtifactKinds],
+                build_state: [...selectedBuildStates],
+              },
+              calculatedFilters: {
+                projects: [...selectedProjects],
+              },
+            })
+            closeAction()
+          }}
+          style={themeStyles.primaryButtonColors}
+        >
+          <Check style={{ height: '1rem', verticalAlign: 'sub' }} />
+          Apply Filters
+        </div>
+      </div>
+      <div className="modal-footer settings" style={tablerOverrides.modalFooterSettingsStyle}>
+        <ThemeToggler />
+        <Tag
+          onClick={() => {
+            removeAuthCookie()
+            updateState({
+              isAuthed: false,
+              apiKey: '',
+              needsProgrammaticQuery: true,
+              uiFilters: INITIAL_STATE.uiFilters,
+              calculatedFilters: INITIAL_STATE.calculatedFilters,
+            })
+            closeAction()
+          }}
+        >
+          <LogOut height="14" color={theme.icon.filterSelected} />
+          <div>Logout</div>
+        </Tag>
+      </div>
+    </FilterModalWrapper>
   )
 }
 
-export default withButtonStyles(withTheme(FilterModal))
+export default FilterModal

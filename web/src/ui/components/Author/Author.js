@@ -1,24 +1,24 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { User } from 'react-feather'
 import styles from './Author.module.scss'
-import withTheme from '../../helpers/withTheme'
 import ConditionallyWrappedComponent from '../ConditionallyWrappedComponent'
+import { ThemeContext } from '../../../store/ThemeStore'
 
 const Avatar = ({
-  sectionText, buildAuthorAvatarUrl, buildAuthorId, buildAuthorName,
+  theme, buildAuthorAvatarUrl, buildAuthorId, buildAuthorName,
 }) => buildAuthorId && buildAuthorAvatarUrl ? (
   <a href={buildAuthorId} title={buildAuthorId}>
     <img src={buildAuthorAvatarUrl} alt={buildAuthorId} />
   </a>
 ) : (
   <User
-    color={sectionText}
+    color={theme.text.sectionTitle}
     title={buildAuthorName || 'Unknown author'}
   />
 )
 
 const AuthorName = ({
-  themeStyles, buildAuthorId, buildAuthorName,
+  theme, buildAuthorId, buildAuthorName,
 }) => (
   <ConditionallyWrappedComponent
     condition={!!buildAuthorId}
@@ -26,7 +26,7 @@ const AuthorName = ({
       <a
         href={buildAuthorId}
         className={styles['author-url-name']}
-        style={themeStyles.textSectionTitle}
+        style={{ color: theme.text.sectionTitle }}
       >
         {children}
       </a>
@@ -37,22 +37,21 @@ const AuthorName = ({
 )
 
 const Author = ({
-  buildAuthorName = '', buildAuthorId = '', buildAuthorAvatarUrl = '', ...injectedProps
+  buildAuthorName = '', buildAuthorId = '', buildAuthorAvatarUrl = '',
 }) => {
-  const { theme: { text: { sectionText } }, themeStyles } = injectedProps
-
+  const { theme } = useContext(ThemeContext)
 
   return (
     <div className={styles['author-wrapper']}>
       <div className={styles['author-name-wrapper']}>
         <AuthorName {...{
-          buildAuthorId, buildAuthorName, buildAuthorAvatarUrl, themeStyles,
+          buildAuthorId, buildAuthorName, buildAuthorAvatarUrl, theme,
         }}
         />
       </div>
       <div className={styles['author-avatar-wrapper']}>
         <Avatar {...{
-          buildAuthorAvatarUrl, buildAuthorId, buildAuthorName, sectionText,
+          buildAuthorAvatarUrl, buildAuthorId, buildAuthorName, theme,
         }}
         />
       </div>
@@ -60,4 +59,4 @@ const Author = ({
   )
 }
 
-export default withTheme(Author)
+export default Author

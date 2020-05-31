@@ -1,4 +1,18 @@
-.normal-caps {
-    // TODO: Not working yet
-    text-transform: unset;
+@import "../../../assets/main.scss";
+
+.tag {
+    display: flex;
+    align-items: center;
+    font-size: $font-size-xxs;
+    svg {
+        margin-right: 0.4rem;
+        height: 0.9rem;
+        width: 0.9rem;
+        min-width: 0.9rem;
+        min-height: 0.9rem;
+    }
+}
+
+.tagPlainDisplay {
+    font-size: $font-size-sm;
 }

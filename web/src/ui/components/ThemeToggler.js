@@ -1,13 +1,10 @@
 import React, { useContext, useState } from 'react'
-import classNames from 'classnames'
 import { ThemeContext } from '../../store/ThemeStore'
-import withTheme from '../helpers/withTheme'
+import Tag from './Tag/Tag'
 
-const ThemeToggler = ({ ...injectedProps }) => {
-  const { theme } = injectedProps
-  const { changeTheme } = useContext(ThemeContext)
+const ThemeToggler = () => {
+  const { theme, changeTheme } = useContext(ThemeContext)
   const [themeChangePending, setThemeChangePending] = useState(false)
-  const themeBtnClassName = classNames('btn', 'btn-sm', { disabled: !!themeChangePending })
   const onChangeTheme = () => {
     if (!themeChangePending) {
       setThemeChangePending(true)
@@ -17,18 +14,17 @@ const ThemeToggler = ({ ...injectedProps }) => {
   }
 
   return (
-    <div
-      className={themeBtnClassName}
+    <Tag
       onClick={onChangeTheme}
-      onKeyDown={onChangeTheme}
       tabIndex={0}
       role="button"
+      disabled={!!themeChangePending}
     >
       {theme.name === 'light'
-        ? '🌙 Switch to dark theme'
-        : '☀️ Use light theme'}
-    </div>
+        ? '🌙 Dark mode'
+        : '☀️ light mode'}
+    </Tag>
   )
 }
 
-export default withTheme(ThemeToggler)
+export default ThemeToggler

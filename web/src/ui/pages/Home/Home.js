@@ -21,9 +21,10 @@ import { useHistory, useLocation } from 'react-router-dom'
 import { getBuildList } from '../../../api'
 import { validateError } from '../../../api/apiResponseTransforms'
 import {
-  ARTIFACT_KINDS, BUILD_DRIVERS, BUILD_STATES, PLATFORM_TO_ARTIFACT_KIND, DEFAULT_RESULT_REQUEST_LIMIT,
+  ARTIFACT_KINDS, BUILD_DRIVERS, BUILD_STATES, DEFAULT_RESULT_REQUEST_LIMIT, PLATFORM_TO_ARTIFACT_KIND,
 } from '../../../constants'
 import { INITIAL_STATE, ResultContext } from '../../../store/ResultStore'
+import { ThemeContext } from '../../../store/ThemeStore'
 import { getMobileOperatingSystem } from '../../../util/browser'
 import { singleItemToArray } from '../../../util/getters'
 import ApiKeyPrompt from '../../components/ApiKeyPrompt'
@@ -33,10 +34,10 @@ import FilterModal from '../../components/FilterModal/FilterModal'
 import Header from '../../components/Header/Header'
 import ProtocolDisclaimer from '../../components/ProtocolDisclaimer'
 import ShowFiltersButton from '../../components/ShowFiltersButton'
-import withTheme from '../../helpers/withTheme'
-import './Home.scss'
+import styles from './Home.module.scss'
 
-const Home = ({ theme }) => {
+const Home = () => {
+  const { theme } = useContext(ThemeContext)
   const { state, updateState } = useContext(ResultContext)
   const [showingFiltersModal, toggleShowFilters] = useState(false)
   const [showingDisclaimerModal, toggleShowDisclaimer] = useState(false)
@@ -221,8 +222,8 @@ const Home = ({ theme }) => {
   }
 
   return (
-    <div className="Home">
-      <div className="page" style={{ backgroundColor: theme.bg.page }}>
+    <div className={styles.homeContainer}>
+      <div className={styles.homepageWrapper} style={{ backgroundColor: theme.bg.page }}>
         <Header autoRefreshOn={autoRefreshOn} setAutoRefreshOn={setAutoRefreshOn} onFilterClick={() => toggleShowFilters(true)} />
         {state.error && <ErrorDisplay error={state.error} />}
         {state.error && state.error.status === 401 && (
@@ -232,7 +233,8 @@ const Home = ({ theme }) => {
           <BuildListContainer builds={state.builds} loaded={state.isLoaded} />
         )}
         <div
-          className="footer p-4"
+          className={styles.footer}
+          // className="footer p-4"
           style={{ backgroundColor: theme.bg.block }}
         />
       </div>
@@ -251,4 +253,4 @@ const Home = ({ theme }) => {
   )
 }
 
-export default withTheme(Home)
+export default Home
