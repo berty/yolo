@@ -6,74 +6,79 @@ import {
 import { MR_STATE } from '../../../constants'
 import { ThemeContext } from '../../../store/ThemeStore'
 import { colors } from '../../styleTools/themes'
-import Author from '../Author/Author'
 import './Build.scss'
+import BuildBlockTitle from './BuildBlockTitle'
+import Author from '../Author/Author'
+
+const BlockIcon = ({ theme, mrState, buildHasMr }) => {
+  const blockHeaderIconClassNames = classNames('block-left-icon')
+  const blockHeaderIconColorWithMr = mrState === MR_STATE.Merged ? colors.gitHub.ghMergedPurpleLighter : colors.gitHub.ghOpenGreen
+  const blockHeaderIconColor = buildHasMr && (mrState === MR_STATE.Merged || mrState === MR_STATE.Opened) ? blockHeaderIconColorWithMr : theme.text.sectionText
+
+  const BlockHeaderIcon = () => mrState ? <GitPullRequest color={blockHeaderIconColor} /> : <GitCommit color={blockHeaderIconColor} />
+  return (
+    <div className={blockHeaderIconClassNames}>
+      <BlockHeaderIcon />
+    </div>
+  )
+}
+
+const ChevronIcon = ({ theme, collapsed, toggleCollapsed }) => (
+  <div
+    style={{
+      color: theme.text.blockTitle,
+      cursor: 'pointer',
+      flexShrink: 0,
+    }}
+    onClick={() => toggleCollapsed(!collapsed)}
+  >
+    {!collapsed ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+  </div>
+)
+
 
 const BuildBlockHeader = ({
-  blockTitle,
+  buildAuthorName,
   buildAuthorAvatarUrl,
   buildAuthorId,
-  buildAuthorName,
   buildHasMr,
+  buildId,
+  buildShortId,
+  mrShortId,
+  mrId,
+  mrTitle,
+  childrenLatestBuildTags,
   collapsed,
   isMasterBuildBranch,
-  latestBuildStateTags,
   mrState,
   toggleCollapsed,
 }) => {
   const { theme } = useContext(ThemeContext)
   const blockRowClassNames = classNames('block-row', { expanded: !collapsed })
-  const blockHeaderIconClassNames = classNames('block-left-icon')
-  const blockHeaderIconColorWithMr = mrState === MR_STATE.Merged ? colors.gitHub.ghMergedPurpleLighter : colors.gitHub.ghOpenGreen
-  const blockHeaderIconColor = buildHasMr && (mrState === MR_STATE.Merged || mrState === MR_STATE.Opened) ? blockHeaderIconColorWithMr : theme.text.sectionText
-  const BlockHeaderIcon = ({ color }) => mrState ? <GitPullRequest color={color} /> : <GitCommit color={color} />
-
-  const BlockIconPullHasMr = () => (
-    <div className={blockHeaderIconClassNames}>
-      <BlockHeaderIcon color={blockHeaderIconColor} />
-    </div>
-  )
-
-  const BlockIconDefault = () => (
-    <div className={blockHeaderIconClassNames}>
-      <BlockHeaderIcon color={blockHeaderIconColor} />
-    </div>
-  )
-
-  const BlockIcon = () => (!isMasterBuildBranch && buildHasMr ? <BlockIconPullHasMr /> : <BlockIconDefault />)
-
-  const ChevronIcon = () => (
-    <div
-      style={{
-        color: theme.text.blockTitle,
-        cursor: 'pointer',
-        flexShrink: 0,
-      }}
-      onClick={() => toggleCollapsed(!collapsed)}
-    >
-      {!collapsed ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-    </div>
-  )
 
   return (
     <>
       <div className={blockRowClassNames}>
-        <BlockIcon />
-        {blockTitle}
-
-        <Author
-          authorName={buildAuthorName || undefined}
-          authorUrl={buildAuthorId}
-          avatarUrl={buildAuthorAvatarUrl}
+        <BlockIcon {...{ theme, buildHasMr, mrState }} />
+        <BuildBlockTitle {...{
+          isMasterBuildBranch,
+          buildShortId,
+          mrShortId,
+          buildId,
+          mrId,
+          mrTitle,
+          buildHasMr,
+        }}
         />
-        <ChevronIcon />
+        <Author {...{ buildAuthorAvatarUrl, buildAuthorName, buildAuthorId }} />
+        <ChevronIcon {...{ theme, collapsed, toggleCollapsed }} />
       </div>
-      {collapsed && latestBuildStateTags && (
+      {collapsed && childrenLatestBuildTags && (
         <div
           className={blockRowClassNames}
           style={{ display: 'flex', flexWrap: 'wrap' }}
         >
-          {latestBuildStateTags}
+          {childrenLatestBuildTags}
         </div>
       )}
     </>

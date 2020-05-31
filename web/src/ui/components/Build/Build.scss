@@ -126,10 +126,14 @@
             }
             .build-message-line {
                 flex-basis: 100%;
+                font-size: 85%;
                 &:last-of-type {
                     flex-basis: auto;
                     max-width: 80%;
                 }
+            }
+            .build-message-line-suffix {
+                font-size: 85%;
             }
             display: flex;
             flex: 1 1 100%;

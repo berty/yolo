@@ -1,11 +1,11 @@
 
 import React from 'react'
 import { ChevronDown, ChevronUp } from 'react-feather'
-import { tagStyle } from '../styleTools/buttonStyler'
+import { tagColorStyles } from '../styleTools/buttonStyler'
 import Tag from './Tag/Tag'
 import withTheme from '../helpers/withTheme'
 
-const ShownBuildsButton = ({
+const ShowingOlderBuildsTag = ({
   nOlderBuilds,
   showingAllBuilds = null,
   toggleShowingAllBuilds = null,
@@ -13,9 +13,9 @@ const ShownBuildsButton = ({
 }) => {
   const {
     theme: {
-      name,
       text: { blockTitle },
     },
+    theme,
   } = injectedProps
 
   const multipleOlderBuilds = nOlderBuilds > 1
@@ -23,7 +23,7 @@ const ShownBuildsButton = ({
 
   const messagePrefix = showingAllBuilds ? 'hide' : 'show'
 
-  const message = nOlderBuilds
+  const message = nOlderBuilds > 0
     ? `${isInteractive ? messagePrefix : ''} ${nOlderBuilds} older build${
       multipleOlderBuilds ? 's' : ''
     }`
@@ -33,27 +33,26 @@ const ShownBuildsButton = ({
     : <ChevronDown color={blockTitle} />
   )
 
-  const ShownBuildsTag = () => (
+  return (message
+    && (
     <Tag
       classes={['btn-info-tag']}
       title={message}
-      styles={tagStyle({
-        name,
-        state: null,
-        cursor: !isInteractive ? undefined : 'pointer',
-      })}
+      styles={{
+        ...tagColorStyles({
+          theme,
+          state: null,
+
+        }),
+        cursor: !isInteractive ? 'default' : 'pointer',
+      }}
       onClick={!isInteractive ? undefined : () => toggleShowingAllBuilds(!showingAllBuilds)}
     >
       {isInteractive && <Icon />}
       {message}
     </Tag>
-  )
-
-  return (
-    <>
-      {message && <ShownBuildsTag />}
-    </>
+    )
   )
 }
 
-export default withTheme(ShownBuildsButton)
+export default withTheme(ShowingOlderBuildsTag)
