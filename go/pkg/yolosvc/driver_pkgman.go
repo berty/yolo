@@ -53,8 +53,6 @@ func (svc *service) PkgmanWorker(ctx context.Context, opts PkgmanWorkerOpts) err
 		case <-time.After(opts.LoopAfter):
 		}
 	}
-
-	return nil
 }
 
 func (o *PkgmanWorkerOpts) applyDefaults() {

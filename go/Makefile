@@ -23,7 +23,7 @@ install: generate
 
 .PHONY: lint
 lint: generate
-	golangci-lint run
+	cd .. && golangci-lint run
 
 .PHONY: packr
 packr:
