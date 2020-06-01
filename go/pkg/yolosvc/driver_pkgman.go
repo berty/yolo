@@ -3,12 +3,14 @@ package yolosvc
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 	"time"
 
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"github.com/tevino/abool"
 	"go.uber.org/zap"
-	"moul.io/godev"
+	"moul.io/pkgman/pkg/ipa"
 )
 
 type PkgmanWorkerOpts struct {
@@ -21,26 +23,27 @@ type PkgmanWorkerOpts struct {
 // PkgmanWorker goals is to manage the github update routine, it should try to support as much errors as possible by itself
 func (svc *service) PkgmanWorker(ctx context.Context, opts PkgmanWorkerOpts) error {
 	opts.applyDefaults()
-
-	// FIXME: handle pkgman version to recompute already computed artifacts
-	// FIXME: handle "since"
-
+	// FIXME: handle pkgman version to recompute already computed artifacts with new filters
 	var (
 		logger = opts.Logger
 	)
 	for iteration := 0; ; iteration++ {
-		var artifacts []yolopb.Artifact
-		err := svc.db.Find(&artifacts).Error
+		var artifacts []*yolopb.Artifact
+		err := svc.db.Where("bundle_id IS NOT NULL").Find(&artifacts).Error
 		if err != nil {
 			logger.Warn("get artifacts", zap.Error(err))
 		}
 
 		for _, artifact := range artifacts {
-			// if artifact is available locally -> handle it and update db
-			// FIXME: create URL to fetch the ipa image
-			fmt.Println(godev.PrettyJSON(artifact))
+			cache := filepath.Join(svc.artifactsCachePath, artifact.ID)
+			if !fileExists(cache) {
+				continue
+			}
+			err = svc.pkgmanParseArtifactFile(artifact, cache)
+			if err != nil {
+				logger.Warn("failed to parse package", zap.String("path", cache), zap.Error(err))
+			}
 		}
-
 		if opts.Once {
 			return nil
 		}
@@ -59,9 +62,79 @@ func (o *PkgmanWorkerOpts) applyDefaults() {
 		o.Logger = zap.NewNop()
 	}
 	if o.LoopAfter == 0 {
-		o.LoopAfter = 10 * time.Second
+		o.LoopAfter = 20 * time.Second
 	}
 	if o.ClearCache == nil {
 		o.ClearCache = abool.New()
 	}
+}
+
+func (svc *service) pkgmanParseArtifactFile(artifact *yolopb.Artifact, artifactPath string) error {
+	switch artifact.Kind {
+	case yolopb.Artifact_IPA:
+		pkg, err := ipa.Open(artifactPath)
+		if err != nil {
+			return err
+		}
+		defer pkg.Close()
+		apps := pkg.Apps()
+		if len(apps) != 1 {
+			return fmt.Errorf("pkgman: ipa should contain only 1 app, got %d", len(apps))
+		}
+		app := apps[0]
+		plist, err := app.Plist()
+		if err != nil {
+			return err
+		}
+		artifact.BundleName = plist.CFBundleDisplayName
+		artifact.BundleID = plist.CFBundleIdentifier
+		artifact.BundleVersion = plist.CFBundleShortVersionString
+		appIcon, err := svc.pkgmanExtractIPAAppIcon(pkg, app)
+		if err != nil {
+			svc.logger.Debug("failed to extract IPA app icon", zap.Error(err))
+		} else {
+			artifact.BundleIcon = appIcon
+		}
+		err = svc.db.Save(artifact).Error
+		if err != nil {
+			return err
+		}
+	default:
+		svc.logger.Debug(
+			"pkgman: unsupported artifact kind",
+			zap.String("path", artifact.LocalPath),
+			zap.Stringer("kind", artifact.Kind),
+		)
+		return nil
+	}
+	return nil
+}
+
+func (svc *service) pkgmanExtractIPAAppIcon(pkg *ipa.Package, app *ipa.App) (string, error) {
+	// FIXME: only use app.FileBytes with moul.io/pkgman@v1.2.0
+	appIcon := app.File("AppIcon60x60@3x.png")
+	if appIcon == nil {
+		return "", fmt.Errorf("no such app icon in well-known location")
+	}
+	b, err := pkg.FileBytes(appIcon.Name)
+	if err != nil {
+		return "", err
+	}
+
+	icon := md5Sum(b) + ".png"
+	iconsPath := filepath.Join(svc.artifactsCachePath, "icons")
+	if err := os.MkdirAll(iconsPath, 0755); err != nil {
+		return "", err
+	}
+	iconPath := filepath.Join(iconsPath, icon)
+	out, err := os.Create(iconPath)
+	if err != nil {
+		return "", err
+	}
+	defer out.Close()
+	_, err = out.Write(b)
+	if err != nil {
+		return "", err
+	}
+	return icon, nil
 }

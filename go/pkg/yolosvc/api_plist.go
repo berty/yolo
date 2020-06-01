@@ -53,7 +53,23 @@ func (svc *service) PlistGenerator(w http.ResponseWriter, r *http.Request) {
 		httpError(w, err, codes.Internal)
 		return
 	}
-	// FIXME: extract info.plist from the .ipa and update these metadata
+
+	// override with extracted data from artifact
+	if artifact.BundleID != "" {
+		bundleID = artifact.BundleID
+	}
+	if artifact.BundleName != "" {
+		title = artifact.BundleName
+	}
+	if artifact.BundleIcon != "" {
+		displayImageURL := "/api/artifact-icon/" + artifact.BundleIcon
+		url, err = signature.GetSignedURL("GET", displayImageURL, "", svc.authSalt)
+		if err != nil {
+			httpError(w, err, codes.Internal)
+			return
+		}
+		displayImage = baseURL + displayImageURL
+	}
 
 	// append random emojis
 	title = strings.TrimSpace(title + " " + randEmoji())

@@ -184,7 +184,7 @@ func buildFromBuildkiteBuild(build buildkite.Build, logger *zap.Logger) *yolopb.
 }
 
 func artifactFromBuildkiteArtifact(artifact buildkite.Artifact, build buildkite.Build) *yolopb.Artifact {
-	id := "buildkite_" + md5Sum(*artifact.DownloadURL)
+	id := "buildkite_" + md5Sum([]byte(*artifact.DownloadURL))
 	newArtifact := yolopb.Artifact{
 		ID:          id,
 		CreatedAt:   &build.CreatedAt.Time,
