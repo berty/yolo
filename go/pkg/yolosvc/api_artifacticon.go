@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi"
 	"google.golang.org/grpc/codes"
@@ -29,6 +30,9 @@ func (svc *service) ArtifactIcon(w http.ResponseWriter, r *http.Request) {
 	}
 	defer f.Close()
 
+	cacheUntil := time.Now().AddDate(1, 0, 0).Format(http.TimeFormat)
+	w.Header().Add("Cache-Control", "public,max-age=31536000,immutable")
+	w.Header().Add("Expires", cacheUntil)
 	w.Header().Add("Content-Type", "image/png")
 	_, err = io.Copy(w, f)
 	if err != nil {
