@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/go-chi/chi"
 	"google.golang.org/grpc/codes"
@@ -13,6 +14,8 @@ import (
 
 func (svc *service) ArtifactIcon(w http.ResponseWriter, r *http.Request) {
 	name := chi.URLParam(r, "name")
+	name = strings.ReplaceAll(name, "/", string(os.PathSeparator))
+
 	p := filepath.Join(svc.artifactsCachePath, "icons", name)
 	if !fileExists(p) {
 		httpError(w, fmt.Errorf("no such icon"), codes.InvalidArgument)
