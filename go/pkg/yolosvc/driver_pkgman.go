@@ -29,7 +29,7 @@ func (svc *service) PkgmanWorker(ctx context.Context, opts PkgmanWorkerOpts) err
 	)
 	for iteration := 0; ; iteration++ {
 		var artifacts []*yolopb.Artifact
-		err := svc.db.Where("bundle_id IS NULL").Find(&artifacts).Error
+		err := svc.db.Where("bundle_id IS NULL OR bundle_id = ''").Find(&artifacts).Error
 		if err != nil {
 			logger.Warn("get artifacts", zap.Error(err))
 		}
