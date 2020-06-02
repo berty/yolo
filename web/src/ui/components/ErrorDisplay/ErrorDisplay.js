@@ -1,21 +1,21 @@
-import React from 'react'
+import React, { useContext } from 'react'
 
-import './ErrorDisplay.scss'
-import withTheme from '../../helpers/withTheme'
+import styles from './ErrorDisplay.module.scss'
+import { ThemeContext } from '../../../store/ThemeStore'
 
-const ErrorDisplay = ({ error, ...injectedProps }) => {
-  const { themeStyles: { textSectionTitle, textPlain } } = injectedProps
-  const ErrorStatus = error.status > 0 ? `Error ${error.status}: ${error.statusText}` : 'Error:'
+const ErrorDisplay = ({ error }) => {
+  const { theme } = useContext(ThemeContext)
+  const errorStatus = error.status > 0 ? `Error ${error.status}: ${error.statusText}` : 'Error:'
   return (
-    <div className="ErrorDisplay">
-      <h3 className="title" style={textSectionTitle}>
-        {ErrorStatus}
+    <div className={styles.container}>
+      <h3 className="title" style={{ color: theme.text.sectionTitle }}>
+        {errorStatus}
       </h3>
-      <p style={textPlain}>
+      <p style={{ color: theme.text.sectionTitle }}>
         {error.humanMessage}
       </p>
     </div>
   )
 }
 
-export default withTheme(ErrorDisplay)
+export default ErrorDisplay

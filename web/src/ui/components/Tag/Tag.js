@@ -1,7 +1,7 @@
 import React from 'react'
 import classNames from 'classnames'
 import stylers from './Tag.module.scss'
-import { getIsArrayWithN } from '../../../util/getters'
+import ConditionallyWrappedComponent from '../ConditionallyWrappedComponent'
 
 const Tag = ({
   title = null,
@@ -9,13 +9,20 @@ const Tag = ({
   icon = null,
   href = '',
   onClick = null,
-  classes = {},
   styles: manualStyles = {},
   children = null,
-  normalCaps = false,
+  plainDisplay = false, // no border, no background
+  disabled = false,
 }) => {
-  const validClasses = getIsArrayWithN(classes, 1) ? classes.reduce((acc, curr) => { acc[curr] = true; return acc }, {}) : { ...classes }
-  const tagClass = classNames('btn', 'btn-sm', { ...validClasses, [stylers['normal-caps']]: normalCaps })
+  const tagClass = classNames('btn', 'btn-sm', stylers.tag, { [stylers.tagPlainDisplay]: plainDisplay })
+  const tablerOverrideStyles = {
+    letterSpacing: 'normal',
+  }
+  const textTransformStyle = plainDisplay ? {
+    textTransform: 'none',
+    paddingLeft: 0,
+  } : {}
+  const cursorStyle = { cursor: (href || onClick) && !disabled ? 'pointer' : 'auto' }
 
   const contents = (
     children ? <>{children}</> : (
@@ -25,13 +32,42 @@ const Tag = ({
       </>
     )
   )
-  const interactiveTag = onClick && (<div className={tagClass} title={title} role="button" onClick={onClick} onKeyDown={onClick} tabIndex={0} style={manualStyles || {}}>{contents}</div>)
-  const linkTag = href && (<a href={href} className={tagClass} title={href} style={manualStyles || {}}>{contents}</a>)
-  const displayTag = <div className={tagClass} title={title} style={manualStyles || {}}>{contents}</div>
+
+  const style = {
+    ...tablerOverrideStyles,
+    ...textTransformStyle,
+    ...cursorStyle,
+    ...manualStyles,
+  }
+
+  const interactiveTag = onClick && (
+    <div
+      className={tagClass}
+      title={title}
+      role="button"
+      onClick={onClick}
+      onKeyDown={onClick}
+      tabIndex={0}
+      style={style}
+    >
+      {contents}
+    </div>
+  )
+
+  const displayTag = (
+    <div
+      className={tagClass}
+      title={title}
+      style={style}
+    >
+      {contents}
+    </div>
+  )
+
   return (
-    <>
-      {interactiveTag || linkTag || displayTag}
-    </>
+    <ConditionallyWrappedComponent condition={!!href} wrapper={(linkChildren) => <a href={href}>{linkChildren}</a>}>
+      {interactiveTag || displayTag}
+    </ConditionallyWrappedComponent>
   )
 }
 

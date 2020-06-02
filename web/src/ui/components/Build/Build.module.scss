@@ -1,0 +1,217 @@
+@import "../../../assets/main.scss";
+
+$border-bottom-block-section: 1px solid gray;
+
+/* Layout */
+
+.buildBlock {
+    div {
+        min-width: 0;
+    }
+}
+
+.blockSectionContainer {
+    display: flex;
+    margin: 0px;
+    padding: 0.5rem 0rem;
+    width: 100%;
+    height: 100%;
+    margin-bottom: 0.5rem;
+    align-items: center;
+    &:not(:last-of-type) {
+        border-bottom: $border-bottom-block-section;
+    }
+    &.noBorderBottom {
+        border-bottom: 0;
+        &:last-of-type {
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+    }
+}
+
+.blockRightContainer {
+    // github and logs icon links
+    // artifact DL and QR buttons
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-self: flex-start;
+}
+
+.blockSectionDetailContainer {
+    display: flex;
+    flex-flow: row wrap;
+    margin-right: 0.5rem;
+    flex-basis: 100%;
+    font-size: $font-size-sm;
+}
+
+.blockSectionDetailRow {
+    display: flex;
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    align-items: center;
+    min-height: 2.125rem;
+    margin-bottom: 0.5rem;
+    > * {
+        margin-right: 0.6rem;
+        margin-bottom: 0.5rem;
+    }
+}
+
+.blockSectionLeftColumn {
+    display: none;
+
+    @include xs {
+        min-width: 1.5rem;
+        width: 1.5rem;
+        margin-right: 0.5rem;
+        height: 100%;
+        display: flex;
+        flex-flow: column nowrap;
+        flex-shrink: 0;
+        align-self: flex-start;
+        margin-bottom: 0.5rem;
+        &.headerIcon {
+            @include lg {
+                align-self: center;
+                margin-bottom: 0;
+            }
+        }
+    }
+    @include sm {
+        min-width: 1.5rem;
+        margin-right: 0.8rem;
+    }
+}
+
+/* Block Header stuff  */
+
+.blockTitle {
+    padding: 0px;
+    margin: 0px;
+    flex: 0 1 auto;
+    margin-right: auto;
+    display: flex;
+    flex-flow: row wrap;
+    align-items: flex-start;
+    @include lg {
+        flex-wrap: nowrap;
+        white-space: unset;
+    }
+}
+
+.blockMrSubtitle {
+    display: none;
+    margin: 0px;
+    @include xs {
+        display: block;
+        font-size: $font-size-sm;
+        flex: 0 1 100%;
+    }
+    @include lg {
+        font-size: $font-size-lg;
+        flex: 0 1 auto;
+        margin-top: 0rem;
+        margin-left: 0.5rem;
+    }
+}
+
+.shortBlockTitle {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    font-size: 1rem;
+    flex: 0 1 100%;
+    white-space: nowrap;
+    margin-bottom: 0.4rem;
+    padding: 0;
+    @include lg {
+        font-size: $font-size-lg;
+        flex: 1 1 auto;
+        white-space: unset;
+        margin-bottom: 0;
+    }
+}
+
+/* Little stuff */
+
+.buildMessage {
+    display: flex;
+    flex-flow: row wrap;
+    &.interactive {
+        cursor: pointer;
+    }
+}
+
+.buildMessageLineSuffix {
+    font-size: $font-size-xs;
+    line-height: 120%;
+    font-family: monospace;
+    @include sm {
+        font-size: $font-size-sm;
+        font-family: $font-stack;
+        line-height: 140%;
+    }
+}
+
+.buildMessageLine {
+    flex-basis: 100%;
+    font-family: monospace;
+    font-size: $font-size-xxs;
+    line-height: 120%;
+    &:last-of-type {
+        flex-basis: auto;
+        max-width: 80%;
+    }
+    @include sm {
+        font-size: $font-size-sm;
+        font-family: $font-stack;
+        line-height: 140%;
+    }
+}
+
+.btnBranchName {
+    word-wrap: unset;
+    white-space: unset;
+    word-break: break-all;
+    text-align: left;
+    min-height: 0;
+    line-height: 150%;
+    cursor: default;
+}
+
+.artifactLocalPath {
+    display: none;
+    @include xs {
+        font-family: monospace;
+        font-size: $font-size-xxs;
+        line-height: 140%;
+        min-width: 0;
+        max-width: 100%;
+        display: block;
+        word-wrap: unset;
+        white-space: unset;
+        overflow-wrap: anywhere;
+    }
+    @include sm {
+        font-size: $font-size-sm;
+        font-family: $font-stack;
+    }
+}
+
+.showingOlderBuildsWrapper {
+    div {
+        display: flex;
+        justify-content: flex-end;
+        margin-left: auto;
+        width: min-content;
+        margin-bottom: 1rem;
+    }
+    border-bottom: $border-bottom-block-section;
+}
+
+.headerChevronToggler {
+    align-self: flex-start;
+}

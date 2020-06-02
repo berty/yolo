@@ -1,31 +1,23 @@
 import React, { useContext, useState } from 'react'
-import { Link as LinkIcon } from 'react-feather'
-
 import { ThemeContext } from '../../../store/ThemeStore'
-
-import { tagColorStyles } from '../../styleTools/buttonStyler'
-import ArtifactRow from './ArtifactRow'
-import AnchorLink from '../AnchorLink/AnchorLink'
-import Tag from '../Tag/Tag'
-
-import { BUILD_STATE } from '../../../constants'
 import { getIsArray } from '../../../util/getters'
-
-import './Build.scss'
 import ShowingOlderBuildsTag from '../ShowingOlderBuildsTag'
-import BuildMessage from './BuildMessage'
+import ArtifactRow from './ArtifactRow'
+import styles from './Build.module.scss'
 import {
-  CommitIcon, BuildCommit, MrState, MrDriver, BuildDriver, BuildUpdatedAt, BuildCreatedAt, BuildLogs, GithubLink,
+  BranchName, BuildCommit, BuildCreatedAt, BuildDriver, BuildLogs, BuildUpdatedAt, CommitIcon, GithubLink, MrDriver, MrState, SharableBuildLink,
 } from './BuildAndMrContainerWidgets'
+import BuildMessage from './BuildMessage'
+import { BuildStateTag } from './BuildWidgetsShared'
 
 const BuildAndMrContainer = ({
   build,
   buildHasMr,
+  hasRunningBuilds,
   isLatestBuild,
   nOlderBuilds,
   showingAllBuilds,
   toggleShowingAllBuilds,
-  hasRunningBuilds,
 }) => {
   const [messageExpanded, toggleMessageExpanded] = useState(false)
   const showingArtifacts = isLatestBuild || showingAllBuilds || hasRunningBuilds
@@ -61,118 +53,81 @@ const BuildAndMrContainer = ({
     state: mrState = '',
   } = buildHasMr || {}
 
-
-  const colorInteractiveText = {
-    color: blockTitle,
-  }
-
-
-  const BranchName = buildBranch && (
-    <div
-      className="btn btn-branch-name"
-      style={{
-        backgroundColor: filterUnselected,
-      }}
-    >
-      {buildBranch}
-    </div>
-  )
-
-  const BuildStateTagPassed = buildState === BUILD_STATE.Passed && (
-    <Tag
-      title={buildId}
-      classes={['state-tag']}
-      styles={{
-        ...tagColorStyles({
-          theme,
-          state: BUILD_STATE[buildState],
-
-        }),
-        cursor: 'pointer',
-      }}
-      href={buildId}
-      text={buildState}
-    />
-  )
-
-  const BuildStateTagIsNotPassed = buildState && (
-    <Tag
-      text={buildState}
-      title="Build state"
-      classes={['state-tag']}
-      styles={tagColorStyles({ theme, state: BUILD_STATE[buildState] })}
-    />
-  )
-
-  const BuildStateTag = BuildStateTagPassed || BuildStateTagIsNotPassed || ''
-
-
-  const SharableBuildLink = ({ isBlock }) => (
-    <AnchorLink target={`?build_id=${buildId}`} isBlock={isBlock}>
-      <LinkIcon size={16} />
-    </AnchorLink>
-  )
+  const paddingTop = isLatestBuild ? {} : { paddingTop: '1.25rem' }
 
   return (
     <>
-      <div className="block-row expanded" style={{ color: sectionText }}>
-        <div className="block-left-icon icon-top">
+      <div className={styles.blockSectionContainer} style={{ color: sectionText, ...paddingTop }}>
+        <div className={styles.blockSectionLeftColumn}>
           <CommitIcon {...{
-            colorInteractiveText, buildCommitId, mrCommitUrl, buildHasMr,
+            theme, buildCommitId, mrCommitUrl,
           }}
           />
           {isLatestBuild && <SharableBuildLink isBlock />}
         </div>
-        <div className="block-details">
+        <div className={styles.blockSectionDetailContainer}>
           {isLatestBuild && (buildCommitId || mrState || mrDriver) && (
-            <div className="block-details-row">
-              <BuildCommit {...{ buildCommitId, mrCommitUrl, colorInteractiveText }} />
+            <div className={styles.blockSectionDetailRow}>
+              <BuildCommit {...{ buildCommitId, mrCommitUrl, theme }} />
               <MrState {...{ theme, mrState }} />
               <MrDriver {...{ sectionText, mrDriver }} />
             </div>
           )}
           {isLatestBuild && buildBranch && (
-            <div className="block-details-row">{BranchName}</div>
+            <div className={styles.blockSectionDetailRow}>
+              <BranchName {...{ filterUnselected, buildBranch }} />
+            </div>
           )}
           {isLatestBuild && buildMessage && (
-            <div className="block-details-row">
+            <div className={styles.blockSectionDetailRow}>
               <BuildMessage {...{
-                buildMessage, colorInteractiveText, messageExpanded, toggleMessageExpanded,
+                buildMessage, theme, messageExpanded, toggleMessageExpanded,
               }}
               />
             </div>
           )}
 
-          <div className="block-details-row" style={{ alignSelf: 'flex-start' }}>
-            {!isLatestBuild && <SharableBuildLink isBlock={false} />}
+          <div className={styles.blockSectionDetailRow} style={{ alignSelf: 'flex-start' }}>
+            {!isLatestBuild && <SharableBuildLink isBlock={false} {...{ buildId }} />}
             <div>{`Build ${buildShortId || buildId}`}</div>
 
-            {BuildStateTag}
+            <BuildStateTag {...{ buildState, theme, buildId }} />
             <BuildDriver {...{ buildDriver, sectionText }} />
             <BuildUpdatedAt {...{ buildUpdatedAt, sectionText }} />
             <BuildCreatedAt {...{ buildCreatedAt, sectionText }} />
-            {isLatestBuild && nOlderBuilds > 0 && <ShowingOlderBuildsTag showingAllBuilds={showingAllBuilds} toggleShowingAllBuilds={toggleShowingAllBuilds} nOlderBuilds={nOlderBuilds} />}
           </div>
         </div>
         {isLatestBuild && (
-          <div className="block-right-container">
+          <div className={styles.blockRightContainer}>
             <BuildLogs {...{ buildId, blockTitle }} />
             <GithubLink {...{ buildProjectUrl, blockTitle }} />
           </div>
         )}
       </div>
-      {showingArtifacts
+      {
+        showingArtifacts
         && getIsArray(buildHasArtifacts)
-        && buildHasArtifacts.map((artifact) => (
+        && buildHasArtifacts.map((artifact, i) => (
           <ArtifactRow
             artifact={artifact}
             buildMergeUpdatedAt={buildMergeUpdatedAt}
             buildStartedAt={buildStartedAt}
             buildFinishedAt={buildFinishedAt}
             buildShortId={buildShortId}
+            isLastArtifactOfLatestBuild={(!!isLatestBuild && i === buildHasArtifacts.length - 1)}
             key={artifact.id}
           />
-        ))}
+        ))
+      }
+      {isLatestBuild && nOlderBuilds > 0 && (
+        <section className={styles.showingOlderBuildsWrapper}>
+          <ShowingOlderBuildsTag
+            showingAllBuilds={showingAllBuilds}
+            toggleShowingAllBuilds={toggleShowingAllBuilds}
+            nOlderBuilds={nOlderBuilds}
+          />
+        </section>
+      )}
     </>
   )
 }

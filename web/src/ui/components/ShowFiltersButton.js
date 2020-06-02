@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { Sliders } from 'react-feather'
-import withTheme from '../helpers/withTheme'
+import { ThemeContext } from '../../store/ThemeStore'
 
-const ShowFiltersButton = ({ clickAction, showingFiltersModal, ...injectedProps }) => {
-  const { theme: { bg: { btnPrimary } } } = injectedProps
+const ShowFiltersButton = ({ clickAction, showingFiltersModal }) => {
+  const { theme: { bg: { btnPrimary } } } = useContext(ThemeContext)
 
   const showFiltersButtonStyle = {
     position: 'fixed',
@@ -27,4 +27,4 @@ const ShowFiltersButton = ({ clickAction, showingFiltersModal, ...injectedProps 
   )
 }
 
-export default withTheme(ShowFiltersButton)
+export default ShowFiltersButton

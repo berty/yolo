@@ -1,9 +1,10 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import classNames from 'classnames'
 import styles from './Spinner.module.scss'
-import withTheme from '../../helpers/withTheme'
+import { ThemeContext } from '../../../store/ThemeStore'
 
-const Spinner = ({ theme }) => {
+const Spinner = () => {
+  const { theme } = useContext(ThemeContext)
   const spinnerClassNames = (...spinnerClasses) => classNames(spinnerClasses, { [styles.light]: theme.name === 'light', [styles.dark]: theme.name === 'dark' })
   return (
     <div className={spinnerClassNames(styles.spinner)}>
@@ -14,7 +15,7 @@ const Spinner = ({ theme }) => {
   )
 }
 
-export default withTheme(Spinner)
+export default Spinner
 
 /**
  * Spinner credit: https://github.com/tobiasahlin/SpinKit

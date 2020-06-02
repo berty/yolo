@@ -1,37 +1,29 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import React, { useContext, useState } from 'react'
 import { get } from 'lodash'
+import React, { useContext, useState } from 'react'
 import { ARTIFACT_KIND_NAMES, BRANCH, BUILD_STATE } from '../../../constants'
-import { ThemeContext } from '../../../store/ThemeStore'
 import { ResultContext } from '../../../store/ResultStore'
-import { getStrEquNormalized, getIsArray, getIsArrayWithN } from '../../../util/getters'
+import { ThemeContext } from '../../../store/ThemeStore'
+import { getIsArray, getIsArrayWithN, getStrEquNormalized } from '../../../util/getters'
 import { getArtifactKindIcon } from '../../styleTools/brandIcons'
 import { tagColorStyles } from '../../styleTools/buttonStyler'
+import ShowingOlderBuildsTag from '../ShowingOlderBuildsTag'
 import Tag from '../Tag/Tag'
-import './Build.scss'
+import styles from './Build.module.scss'
 import BuildAndMrContainer from './BuildAndMrContainer'
 import BuildBlockHeader from './BuildBlockHeader'
-import ShowingOlderBuildsTag from '../ShowingOlderBuildsTag'
+import tablerOverrides from './BuildTablerOverrides'
+import { BuildStateTag } from './BuildWidgetsShared'
 
-const ArtifactKindIcon = ({ color, kind = '', isFirst }) => (
-  <FontAwesomeIcon
-    icon={getArtifactKindIcon(kind)}
-    color={color}
-    title={`Artifact kind: ${ARTIFACT_KIND_NAMES[kind]}`}
-    size="lg"
-    style={{ marginRight: '1rem', marginLeft: isFirst && '0.5rem', marginTop: kind === ARTIFACT_KIND_NAMES.APK && '0.1rem' }}
-  />
-)
-
-const LatestBuildStatusTag = ({ theme, buildState }) => buildState && (
-  <Tag
-    classes={['btn-state-tag']}
-    text={buildState}
-    styles={tagColorStyles({
-      theme,
-      state: BUILD_STATE[buildState],
-    })}
-  />
+const ArtifactKindIcon = ({ color, kind = '' }) => (
+  <div>
+    <FontAwesomeIcon
+      icon={getArtifactKindIcon(kind)}
+      color={color}
+      title={`Artifact kind: ${ARTIFACT_KIND_NAMES[kind]}`}
+      size="lg"
+    />
+  </div>
 )
 
 const LatestBuildArtifactsIcons = ({ buildHasArtifacts, theme }) => getIsArray(buildHasArtifacts) && (
@@ -44,11 +36,12 @@ const AnyRunningBuildTags = ({ hasRunningBuilds, allBuildsForMr, theme }) => (ha
   && (
     <Tag
       title={`${hasRunningBuilds.length} build${hasRunningBuilds.length > 1 ? 's' : ''} running`}
-      classes={['btn-state-tag']}
-      styles={tagColorStyles({
-        theme,
-        state: BUILD_STATE.Running,
-      })}
+      styles={{
+        ...tagColorStyles({
+          theme,
+          state: BUILD_STATE.Running,
+        }),
+      }}
     >
       {`${hasRunningBuilds.length} build${hasRunningBuilds.length > 1 ? 's' : ''} running`}
     </Tag>
@@ -88,7 +81,7 @@ const BuildContainer = ({
 
   const LatestBuildStateTags = () => collapsed && (
     <>
-      <LatestBuildStatusTag {...{ theme, buildState }} />
+      <BuildStateTag {...{ theme, buildState, buildId }} />
       <LatestBuildArtifactsIcons {...{ theme, buildHasArtifacts }} />
       <ShowingOlderBuildsTag nOlderBuilds={allBuildsForMr.length - 1} />
       <AnyRunningBuildTags {...{ hasRunningBuilds, allBuildsForMr, theme }} />
@@ -96,13 +89,14 @@ const BuildContainer = ({
   )
 
   return (
-    <div className="Build" id={buildId}>
+    <div className={styles.buildBlock}>
       {children}
       <div
         className="card"
         style={{
           backgroundColor: theme.bg.block,
           boxShadow: theme.shadowStyle.block,
+          ...tablerOverrides.card,
         }}
         key={buildId}
       >

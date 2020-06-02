@@ -1,7 +1,6 @@
-import React from 'react'
-
-import './Build.scss'
-import withTheme from '../../helpers/withTheme'
+import React, { useContext } from 'react'
+import { ThemeContext } from '../../../store/ThemeStore'
+import styles from './Build.module.scss'
 
 const BuildBlockTitle = ({
   isMasterBuildBranch,
@@ -11,8 +10,8 @@ const BuildBlockTitle = ({
   mrId,
   mrTitle,
   buildHasMr,
-  ...injectedProps
 }) => {
+  const { theme } = useContext(ThemeContext)
   const mrDisplayId = mrShortId ? `#${mrShortId}` : ''
   const buildDisplayId = buildShortId ? `#${buildShortId}` : buildId
   const BlockTitleMasterNoMr = isMasterBuildBranch
@@ -45,7 +44,7 @@ const BuildBlockTitle = ({
   const BlockSubtitleDefault = ''
 
   const Title = () => (
-    <h2 className="short-block-title">
+    <h2 className={styles.shortBlockTitle}>
       {BlockTitleMasterWithMr
         || BlockTitleMasterNoMr
         || BlockTitlePullWithMr
@@ -54,7 +53,7 @@ const BuildBlockTitle = ({
   )
 
   const Subtitle = () => (
-    <h3 className="block-mr-subtitle" style={injectedProps.themeStyles.textPlain}>
+    <h3 className={styles.blockMrSubtitle} style={{ color: theme.text.sectionText }}>
       {BlockSubtitleMasterWithMr
         || BlockSubtitlePullWithMr
         || BlockSubtitleDefault}
@@ -62,11 +61,11 @@ const BuildBlockTitle = ({
   )
 
   return (
-    <div className="block-title" style={injectedProps.themeStyles.textBlockTitle}>
+    <div className={styles.blockTitle} style={{ color: theme.text.blockTitle }}>
       <Title />
       <Subtitle />
     </div>
   )
 }
 
-export default withTheme(BuildBlockTitle)
+export default BuildBlockTitle

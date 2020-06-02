@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import classNames from 'classnames'
 import styles from './OutlineWidget.module.scss'
-import withWidgetStyles from '../../helpers/withWidgetStyles'
+import { ThemeContext } from '../../../store/ThemeStore'
 
 const OutlineWidget = ({
   title = null,
@@ -14,17 +14,12 @@ const OutlineWidget = ({
   iconComponent = '',
   icons = [],
   onClick = null,
-  ...injectedProps
 }) => {
-  const {
-    themedWidgetStyles: {
-      noStateWidgetAccent, selectedWidgetAccent, unselectedWidgetAccent,
-    },
-  } = injectedProps
+  const { widgetStyles } = useContext(ThemeContext)
   const containerClass = classNames([styles['widget-wrapper']], { [styles['is-interactive']]: interactive, [styles['not-implemented']]: notImplemented, [styles['text-underneath']]: textUnderneath })
   const textClass = classNames([styles['widget-text']], { [styles['no-svg']]: !iconComponent })
-  const themedColorsState = selected ? selectedWidgetAccent : unselectedWidgetAccent
-  const themedColors = hasSelectedState ? themedColorsState : noStateWidgetAccent
+  const themedColorsState = selected ? widgetStyles.selectedWidgetAccent : widgetStyles.unselectedWidgetAccent
+  const themedColors = hasSelectedState ? themedColorsState : widgetStyles.noStateWidgetAccent
   const validTitle = title || text || ''
   const roll = interactive ? 'button' : null
   const tabIndex = interactive ? 0 : null
@@ -35,7 +30,15 @@ const OutlineWidget = ({
 
 
   return (
-    <div style={themedColors} className={containerClass} title={validTitle} roll={roll} onClick={onClick} onKeyDown={onClick} tabIndex={tabIndex}>
+    <div
+      style={themedColors}
+      className={containerClass}
+      title={validTitle}
+      roll={roll}
+      onClick={onClick}
+      onKeyDown={onClick}
+      tabIndex={tabIndex}
+    >
       <Icon />
       <Icons />
       <TextContents />
@@ -43,4 +46,4 @@ const OutlineWidget = ({
   )
 }
 
-export default withWidgetStyles(OutlineWidget)
+export default OutlineWidget

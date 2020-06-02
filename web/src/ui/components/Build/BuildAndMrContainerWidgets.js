@@ -3,22 +3,39 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faAlignLeft, faPencilAlt, faHammer } from '@fortawesome/free-solid-svg-icons'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import {
-  GitCommit, AlertCircle, GitPullRequest, Calendar,
+  GitCommit, AlertCircle, GitPullRequest, Calendar, Link as LinkIcon,
 } from 'react-feather'
 import { getRelativeTime, getTimeLabel } from '../../../util/date'
 import ConditionallyWrappedComponent from '../ConditionallyWrappedComponent'
 import { tagColorStyles } from '../../styleTools/buttonStyler'
 import Tag from '../Tag/Tag'
 import { MR_STATE } from '../../../constants'
+import AnchorLink from '../AnchorLink/AnchorLink'
+import styles from './Build.module.scss'
+
+export const BranchName = ({ filterUnselected, buildBranch }) => buildBranch && (
+  <div
+    className={`btn ${styles.btnBranchName}`}
+    style={{ backgroundColor: filterUnselected }}
+  >
+    {buildBranch}
+  </div>
+)
+
+export const SharableBuildLink = ({ isBlock, buildId }) => (
+  <AnchorLink target={`?build_id=${buildId}`} isBlock={isBlock}>
+    <LinkIcon size={16} />
+  </AnchorLink>
+)
 
 export const BuildUpdatedAt = ({ buildUpdatedAt, sectionText }) => {
   const timeSinceUpdated = getRelativeTime(buildUpdatedAt)
   return timeSinceUpdated && (
     <Tag
-      classes={['normal-caps', 'details']}
       title={getTimeLabel('Build updated', buildUpdatedAt)}
       icon={<FontAwesomeIcon icon={faPencilAlt} color={sectionText} />}
       text={timeSinceUpdated}
+      plainDisplay
     />
   )
 }
@@ -48,23 +65,23 @@ export const GithubLink = ({ buildProjectUrl, blockTitle }) => buildProjectUrl &
 
 export const BuildDriver = ({ buildDriver, sectionText }) => buildDriver && (
   <Tag
-    classes={['normal-caps', 'details']}
     title={`Build driver: ${buildDriver}`}
     icon={<FontAwesomeIcon icon={faHammer} color={sectionText} />}
-    text={`Build driver: ${buildDriver}`}
+    text={`${buildDriver}`}
+    plainDisplay
   />
 )
 
 export const MrDriver = ({ mrDriver, sectionText }) => mrDriver && (
   <Tag
-    classes={['normal-caps', 'details']}
     title={`Merge request driver: ${mrDriver}`}
     icon={<FontAwesomeIcon icon={faHammer} color={sectionText} />}
     text={mrDriver}
+    plainDisplay
   />
 )
 
-export const BuildCommit = ({ buildCommitId, mrCommitUrl, colorInteractiveText }) => {
+export const BuildCommit = ({ buildCommitId, mrCommitUrl, theme }) => {
   const COMMIT_LEN = 7
   return buildCommitId && (
     <div title={buildCommitId}>
@@ -73,7 +90,10 @@ export const BuildCommit = ({ buildCommitId, mrCommitUrl, colorInteractiveText }
       <ConditionallyWrappedComponent
         condition={!!mrCommitUrl}
         wrapper={(children) => (
-          <a href={mrCommitUrl} style={colorInteractiveText} className="interactive-text">
+          <a
+            href={mrCommitUrl}
+            style={{ color: theme.text.blockTitle }}
+          >
             {children}
           </a>
         )}
@@ -90,8 +110,8 @@ export const BuildCreatedAt = ({ buildCreatedAt }) => {
     <Tag
       text={timeSinceCreated}
       icon={<Calendar />}
-      classes={['normal-caps', 'details']}
       title={getTimeLabel('Build created', buildCreatedAt)}
+      plainDisplay
     />
   )
 }
@@ -99,32 +119,24 @@ export const BuildCreatedAt = ({ buildCreatedAt }) => {
 export const MrState = ({ mrState, theme }) => mrState && (
   <Tag
     title="Merge request state"
-    classes={['btn-primary', 'state-tag']}
     styles={tagColorStyles({ theme, state: MR_STATE[mrState] })}
-    icon={
-      mrState === MR_STATE.Opened ? (
-        <AlertCircle style={{ marginRight: '0.2rem' }} />
-      ) : (
-        <GitPullRequest style={{ marginRight: '0.2rem' }} />
-      )
-    }
-    text={mrState}
-  />
+  >
+    {mrState === MR_STATE.Opened ? <AlertCircle /> : <GitPullRequest />}
+    {mrState}
+  </Tag>
 )
 
-export const CommitIcon = ({
-  colorInteractiveText, buildCommitId, mrCommitUrl, buildHasMr,
-}) => (
+export const CommitIcon = ({ theme, buildCommitId, mrCommitUrl }) => (
   <ConditionallyWrappedComponent
     condition={!!mrCommitUrl}
     wrapper={
-        (children) => (
-          <a href={mrCommitUrl} style={colorInteractiveText}>
-            {children}
-          </a>
-        )
-      }
+      (children) => (
+        <a href={mrCommitUrl} style={{ color: theme.text.blockTitle }}>
+          {children}
+        </a>
+      )
+    }
   >
-    <GitCommit title={buildCommitId || ''} style={buildHasMr ? {} : { transform: 'rotate(90deg)' }} />
+    <GitCommit title={buildCommitId || ''} />
   </ConditionallyWrappedComponent>
 )

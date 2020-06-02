@@ -1,10 +1,10 @@
-import React from 'react'
 import classNames from 'classnames'
-
+import React, { useContext } from 'react'
+import { ThemeContext } from '../../../store/ThemeStore'
 import styles from './Divider.module.scss'
-import withTheme from '../../helpers/withTheme'
 
-const Divider = ({ dividerText, theme }) => {
+const Divider = ({ dividerText }) => {
+  const { theme } = useContext(ThemeContext)
   const stylesHr = { backgroundColor: theme.text.sectionText }
   const stylesBadge = {
     backgroundColor: theme.bg.page,
@@ -21,4 +21,4 @@ const Divider = ({ dividerText, theme }) => {
   )
 }
 
-export default withTheme(Divider)
+export default Divider

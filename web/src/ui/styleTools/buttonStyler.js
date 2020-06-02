@@ -29,7 +29,8 @@ export const tagColorStyles = ({ theme, state = null }) => {
     DEFAULT: {
       backgroundColor: 'transparent',
       color: theme.text.sectionText,
-      border: '1px solid gray',
+      borderWidth: '1px',
+      borderStyle: 'solid',
     },
   }
   return styles[state] || styles.DEFAULT
