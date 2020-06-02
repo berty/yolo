@@ -37,11 +37,10 @@ require (
 	golang.org/x/tools v0.0.0-20200423205358-59e73619c742 // indirect
 	google.golang.org/genproto v0.0.0-20200326112834-f447254575fd
 	google.golang.org/grpc v1.28.0
-	gopkg.in/yaml.v3 v3.0.0-20200601152816-913338de1bd2 // indirect
 	howett.net/plist v0.0.0-20200419221736-3b63eb3a43b5
 	moul.io/depviz/v3 v3.11.4
 	moul.io/godev v1.6.0
 	moul.io/hcfilters v1.3.0
-	moul.io/pkgman v1.1.0
+	moul.io/pkgman v1.2.1
 	moul.io/zapgorm v1.0.0
 )

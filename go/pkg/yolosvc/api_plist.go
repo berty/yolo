@@ -48,7 +48,7 @@ func (svc *service) PlistGenerator(w http.ResponseWriter, r *http.Request) {
 			subtitle = strings.Title(artifact.HasBuild.HasProject.HasOwner.Name)
 		}
 	}
-	url, err = signature.GetSignedURL("GET", url, "", svc.authSalt)
+	pkgUrl, err := signature.GetSignedURL("GET", url, "", svc.authSalt)
 	if err != nil {
 		httpError(w, err, codes.Internal)
 		return
@@ -63,19 +63,19 @@ func (svc *service) PlistGenerator(w http.ResponseWriter, r *http.Request) {
 	}
 	if artifact.BundleIcon != "" {
 		displayImageURL := "/api/artifact-icon/" + artifact.BundleIcon
-		url, err = signature.GetSignedURL("GET", displayImageURL, "", svc.authSalt)
+		signedURL, err := signature.GetSignedURL("GET", displayImageURL, "", svc.authSalt)
 		if err != nil {
 			httpError(w, err, codes.Internal)
 			return
 		}
-		displayImage = baseURL + displayImageURL
+		displayImage = baseURL + signedURL
 	}
 
 	// append random emojis
 	title = strings.TrimSpace(title + " " + randEmoji())
 	subtitle = strings.TrimSpace(subtitle + " " + randEmoji())
 
-	plist := plistgen.Release(bundleID, baseURL+url)
+	plist := plistgen.Release(bundleID, baseURL+pkgUrl)
 	plist.SetTitle(title)
 	plist.SetSubtitle(subtitle)
 	plist.SetDisplayImage(displayImage, false)
