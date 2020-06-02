@@ -193,6 +193,10 @@ func yolo(args []string) error {
 				opts := yolosvc.BintrayWorkerOpts{Logger: logger, ClearCache: cc}
 				gr.Add(func() error { return svc.BintrayWorker(ctx, opts) }, func(_ error) { cancel() })
 			}
+			{
+				opts := yolosvc.PkgmanWorkerOpts{Logger: logger, ClearCache: cc}
+				gr.Add(func() error { return svc.PkgmanWorker(ctx, opts) }, func(_ error) { cancel() })
+			}
 			if githubToken != "" {
 				opts := yolosvc.GithubWorkerOpts{Logger: logger, MaxBuilds: maxBuilds, ClearCache: cc}
 				gr.Add(func() error { return svc.GitHubWorker(ctx, opts) }, func(_ error) { cancel() })

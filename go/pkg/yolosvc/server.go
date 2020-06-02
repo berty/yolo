@@ -160,6 +160,7 @@ func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, erro
 		r.Mount("/", http.StripPrefix("/api", handler))
 		r.Get("/plist-gen/{artifactID}.plist", svc.PlistGenerator)
 		r.Get("/artifact-dl/{artifactID}", svc.ArtifactDownloader)
+		r.Get("/artifact-icon/{name}", svc.ArtifactIcon)
 	})
 
 	box := packr.New("web", "../../../web")

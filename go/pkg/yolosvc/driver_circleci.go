@@ -183,7 +183,7 @@ func circleciBuildToBatch(build *circleci.Build) yolopb.Build {
 func circleciArtifactsToBatch(artifacts []*circleci.Artifact, build *circleci.Build) *yolopb.Batch {
 	batch := yolopb.NewBatch()
 	for _, artifact := range artifacts {
-		id := "circleci_" + md5Sum(artifact.URL)
+		id := "circleci_" + md5Sum([]byte(artifact.URL))
 		newArtifact := yolopb.Artifact{
 			ID:          id,
 			CreatedAt:   build.AuthorDate,

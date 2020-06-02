@@ -309,6 +309,10 @@ message Artifact {
   State state = 11;
   Kind kind = 12;
   Driver driver = 13;
+  string bundle_name = 14;
+  string bundle_version = 15;
+  string bundle_id = 16 [(gogoproto.customname) = "BundleID"];
+  string bundle_icon = 17;
 
   /// relationships
 

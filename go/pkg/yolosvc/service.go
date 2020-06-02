@@ -20,11 +20,13 @@ type Service interface {
 	yolopb.YoloServiceServer
 	PlistGenerator(w http.ResponseWriter, r *http.Request)
 	ArtifactDownloader(w http.ResponseWriter, r *http.Request)
+	ArtifactIcon(w http.ResponseWriter, r *http.Request)
 
 	GitHubWorker(ctx context.Context, opts GithubWorkerOpts) error
 	BuildkiteWorker(ctx context.Context, opts BuildkiteWorkerOpts) error
 	CircleciWorker(ctx context.Context, opts CircleciWorkerOpts) error
 	BintrayWorker(ctx context.Context, opts BintrayWorkerOpts) error
+	PkgmanWorker(ctx context.Context, opts PkgmanWorkerOpts) error
 }
 
 type service struct {

@@ -47,9 +47,9 @@ func mimetypeByPath(path string) string {
 	return "application/octet-stream"
 }
 
-func md5Sum(input string) string {
+func md5Sum(input []byte) string {
 	hasher := md5.New()
-	_, _ = hasher.Write([]byte(input))
+	_, _ = hasher.Write(input)
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
