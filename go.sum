@@ -567,8 +567,8 @@ moul.io/graphman/viz v0.0.0-20200301205736-d14252ef2f07/go.mod h1:LrMvUXoSlBip3Z
 moul.io/hcfilters v1.3.0 h1:PsZKgLK0p4JkTHfWh1v0c3pMCnzywgXt9NYZUNsNdwE=
 moul.io/hcfilters v1.3.0/go.mod h1:fXFpC8iYgb/Lfnt/e5yB1NM74yq5Lch99VytoAZnaWc=
 moul.io/multipmuri v1.13.0/go.mod h1:NinVrznZaHGUDU+4zfcL7L9WzMsHtb/kjLr4RaCbM+c=
-moul.io/pkgman v1.1.0 h1:uR2aAZvl//67/ahLifhbMCRXPWjfPYOk96n0AUEW0pU=
-moul.io/pkgman v1.1.0/go.mod h1:+V6T2uso840Gkh6Wepv+AyUeq9HZ4C18aXtSuFa9R4Q=
+moul.io/pkgman v1.2.1 h1:Gq1qgpS4RHEJFz/furgU+uaJyFKUWzpyhyhrUPMm7Pk=
+moul.io/pkgman v1.2.1/go.mod h1:Q+2jtriM2phG+nsdyAmc262pfqr9CGT0SKe1Ea1xkeA=
 moul.io/srand v1.4.0/go.mod h1:P2uaZB+GFstFNo8sEj6/U8FRV1n25kD0LLckFpJ+qvc=
 moul.io/zapgorm v1.0.0 h1:HpO9x1TmsKFd4JoLNHrSIc1uZn6kmyDxLQK4xjfz8JE=
 moul.io/zapgorm v1.0.0/go.mod h1:JDE3xz5BQ1ccnAijE5+T8Qin6T256Bw2Cpdi+qMfWgw=

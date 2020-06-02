@@ -29,7 +29,7 @@ func (svc *service) PkgmanWorker(ctx context.Context, opts PkgmanWorkerOpts) err
 	)
 	for iteration := 0; ; iteration++ {
 		var artifacts []*yolopb.Artifact
-		err := svc.db.Where("bundle_id IS NOT NULL").Find(&artifacts).Error
+		err := svc.db.Where("bundle_id IS NULL").Find(&artifacts).Error
 		if err != nil {
 			logger.Warn("get artifacts", zap.Error(err))
 		}
@@ -87,7 +87,7 @@ func (svc *service) pkgmanParseArtifactFile(artifact *yolopb.Artifact, artifactP
 		artifact.BundleName = plist.CFBundleDisplayName
 		artifact.BundleID = plist.CFBundleIdentifier
 		artifact.BundleVersion = plist.CFBundleShortVersionString
-		appIcon, err := svc.pkgmanExtractIPAAppIcon(pkg, app)
+		appIcon, err := svc.pkgmanExtractIPAAppIcon(app)
 		if err != nil {
 			svc.logger.Debug("failed to extract IPA app icon", zap.Error(err))
 		} else {
@@ -108,13 +108,8 @@ func (svc *service) pkgmanParseArtifactFile(artifact *yolopb.Artifact, artifactP
 	return nil
 }
 
-func (svc *service) pkgmanExtractIPAAppIcon(pkg *ipa.Package, app *ipa.App) (string, error) {
-	// FIXME: only use app.FileBytes with moul.io/pkgman@v1.2.0
-	appIcon := app.File("AppIcon60x60@3x.png")
-	if appIcon == nil {
-		return "", fmt.Errorf("no such app icon in well-known location")
-	}
-	b, err := pkg.FileBytes(appIcon.Name)
+func (svc *service) pkgmanExtractIPAAppIcon(app *ipa.App) (string, error) {
+	b, err := app.FileBytes("AppIcon60x60@3x.png")
 	if err != nil {
 		return "", err
 	}
