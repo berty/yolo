@@ -14,7 +14,7 @@ import { getArtifactKindIcon } from '../../styleTools/brandIcons.js'
 import OutlineWidget from '../OutlineWidget/OutlineWidget.js'
 import styles from './Filters.module.scss'
 
-const Filters = ({ autoRefreshOn, onFilterClick, setAutoRefreshOn }) => {
+const Filters = React.memo(({ autoRefreshOn, onFilterClick, setAutoRefreshOn }) => {
   const {
     state: {
       uiFilters: {
@@ -170,6 +170,8 @@ const Filters = ({ autoRefreshOn, onFilterClick, setAutoRefreshOn }) => {
       <Logout />
     </div>
   )
-}
+})
+
+Filters.whyDidYouRender = true
 
 export default Filters

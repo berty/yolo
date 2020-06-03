@@ -110,7 +110,7 @@ const Home = () => {
       updateState({
         error: null,
         isLoaded: false,
-        builds: [],
+        // builds: [],
       })
       getBuildList({
         apiKey: state.apiKey,
@@ -141,7 +141,6 @@ const Home = () => {
           setNeedsNewFetch(false)
           updateState({
             isLoaded: true,
-            needsQuietRefresh: false,
             authIsPending: false,
           })
         })
@@ -192,7 +191,6 @@ const Home = () => {
       clearInterval(timer)
       timer = setInterval(() => {
         updateState({
-          needsQuietRefresh: true,
           needsRefresh: true,
         })
       }, 10000)
@@ -224,7 +222,7 @@ const Home = () => {
   return (
     <div className={styles.homeContainer}>
       <div className={styles.homepageWrapper} style={{ backgroundColor: theme.bg.page }}>
-        <Header autoRefreshOn={autoRefreshOn} setAutoRefreshOn={setAutoRefreshOn} onFilterClick={() => toggleShowFilters(true)} />
+        <Header autoRefreshOn={autoRefreshOn} setAutoRefreshOn={setAutoRefreshOn} onFilterClick={toggleShowFilters} />
         {state.error && <ErrorDisplay error={state.error} />}
         {state.error && state.error.status === 401 && (
           <ApiKeyPrompt failedKey={state.apiKey} updateState={updateState} authIsPending={state.authIsPending} />

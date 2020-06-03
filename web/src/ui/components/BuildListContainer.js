@@ -1,18 +1,22 @@
 import React from 'react'
 import BuildList from './BuildList'
 import Spinner from './Spinner/Spinner'
+import ConditionallyWrappedComponent from './ConditionallyWrappedComponent'
 
 const BuildListContainer = ({ loaded, builds }) => {
-  // TODO: Dim stale builds instead of hiding them on quiet refresh
-  // const { state: { needsQuietRefresh } } = useContext(ResultContext)
-  const Loading = () => (
+  const Loading = ({ children }) => (
     <>
       <div className="faded" />
       <Spinner />
-
+      {children}
     </>
   )
-  return <>{!loaded ? <Loading /> : <BuildList builds={builds} />}</>
+  const WithLoading = () => (
+    <ConditionallyWrappedComponent condition={!loaded} wrapper={(children) => <Loading>{children}</Loading>}>
+      <BuildList builds={builds} loaded={loaded} />
+    </ConditionallyWrappedComponent>
+  )
+  return <WithLoading />
 }
 
 export default BuildListContainer

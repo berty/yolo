@@ -5,7 +5,10 @@
  */
 
 .spinner {
-    margin: 100px auto 0;
+    position: absolute;
+    z-index: 1050;
+    top: 33vh;
+    margin: 0 auto 0;
     width: 70px;
     text-align: center;
     color: white;
