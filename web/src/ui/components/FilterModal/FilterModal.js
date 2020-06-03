@@ -127,7 +127,7 @@ const FilterModal = ({ closeAction }) => {
             updateState({
               needsProgrammaticQuery: true,
               isLoaded: false,
-              builds: [],
+              // builds: [],
               uiFilters: {
                 build_driver: [...selectedDrivers],
                 artifact_kinds: [...selectedArtifactKinds],

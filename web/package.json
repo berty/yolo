@@ -34,6 +34,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.13.0",
     "@fortawesome/react-fontawesome": "^0.1.9",
     "@hot-loader/react-dom": "16.13.0",
+    "@welldone-software/why-did-you-render": "^4.2.5",
     "core-js": "3.6.4",
     "dayjs": "^1.8.25",
     "js-cookie": "^2.2.1",

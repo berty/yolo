@@ -86,4 +86,6 @@ const BuildBlockHeader = ({
   )
 }
 
+// BuildBlockHeader.whyDidYouRender = true
+
 export default BuildBlockHeader

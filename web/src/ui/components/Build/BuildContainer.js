@@ -48,7 +48,7 @@ const AnyRunningBuildTags = ({ hasRunningBuilds, allBuildsForMr, theme }) => (ha
   )
 )
 
-const BuildContainer = ({
+const BuildContainer = React.memo(({
   build, toCollapse, children, hasRunningBuilds,
 }) => {
   const { state } = useContext(ResultContext)
@@ -135,6 +135,8 @@ const BuildContainer = ({
       </div>
     </div>
   )
-}
+})
+
+BuildContainer.whyDidYouRender = true
 
 export default BuildContainer

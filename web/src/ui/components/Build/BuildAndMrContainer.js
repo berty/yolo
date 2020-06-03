@@ -132,4 +132,6 @@ const BuildAndMrContainer = ({
   )
 }
 
+BuildAndMrContainer.whyDidYouRender = true
+
 export default BuildAndMrContainer

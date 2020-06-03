@@ -29,7 +29,6 @@ export const INITIAL_STATE = {
   isAuthed: false,
   isLoaded: false,
   needsProgrammaticQuery: false,
-  needsQuietRefresh: false,
   needsRefresh: false,
   userAgent: '',
   uiFilters: {

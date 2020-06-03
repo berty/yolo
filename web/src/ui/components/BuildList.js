@@ -12,12 +12,12 @@ import {
 import Divider from './Divider/Divider'
 import { getDayFormat } from '../../util/date'
 
-const BuildList = ({ builds = [] }) => {
+const BuildList = React.memo(({ builds = [], loaded }) => {
   const oneBuildInResultsHasMaster = useMemo(() => oneBuildResultHasBranchMaster(builds), [builds])
   const buildsByMr = useMemo(() => flagBuildsFirstOfDay(groupBuildsByMr(builds)), [builds])
   const NoBuilds = () => <div>No results match your query.</div>
 
-  return !builds.length ? (
+  return !builds.length && loaded ? (
     <NoBuilds />
   ) : (
     <div className="container">
@@ -36,6 +36,8 @@ const BuildList = ({ builds = [] }) => {
       ))}
     </div>
   )
-}
+})
+
+BuildList.whyDidYouRender = true
 
 export default BuildList

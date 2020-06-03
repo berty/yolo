@@ -1,6 +1,7 @@
 /* eslint-disable import/default */
 /* eslint-disable global-require */
 
+import './wdyr'
 import React from 'react'
 import { render } from 'react-dom'
 import { AppContainer } from 'react-hot-loader'
