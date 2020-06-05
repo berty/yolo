@@ -23,6 +23,28 @@ const BlockIcon = ({ theme, mrState, buildHasMr }) => {
   )
 }
 
+// TODO: Cleanup when/if/where decide to keep
+export const ProjectIcon = ({
+  theme, projectOwnerId, projectOwnerAvatarUrl,
+}) => (projectOwnerId && projectOwnerAvatarUrl && (
+  <div
+    title={projectOwnerId}
+    style={{
+      // display: 'flex',
+      // height: '100%',
+      // alignItems: 'center',
+      alignSelf: 'flex-start',
+      marginTop: '-0.25rem',
+      flexShrink: 0,
+      marginRight: '0.8rem',
+    }}
+  >
+    <a href={projectOwnerId} style={{ color: theme.text.blockTitle }}>
+      <img src={projectOwnerAvatarUrl} style={{ height: '1rem', borderRadius: '15%' }} alt={projectOwnerId} />
+    </a>
+  </div>
+))
+
 const ChevronIcon = ({ theme, collapsed, toggleCollapsed }) => (
   <div
     className={styles.headerChevronToggler}
@@ -49,6 +71,8 @@ const BuildBlockHeader = ({
   isMasterBuildBranch,
   mrState,
   toggleCollapsed,
+  projectOwnerId,
+  projectOwnerAvatarUrl,
 }) => {
   const { theme } = useContext(ThemeContext)
   const blockHeaderContainerClassNames = classNames(styles.blockSectionContainer, { [styles.noBorderBottom]: !!collapsed })
@@ -67,6 +91,10 @@ const BuildBlockHeader = ({
           buildHasMr,
         }}
         />
+        <ProjectIcon {...{
+          collapsed, theme, projectOwnerId, projectOwnerAvatarUrl,
+        }}
+        />
         <Author {...{ buildAuthorAvatarUrl, buildAuthorName, buildAuthorId }} />
         <ChevronIcon {...{ theme, collapsed, toggleCollapsed }} />
       </div>
@@ -78,6 +106,7 @@ const BuildBlockHeader = ({
           <div className={styles.blockSectionDetailContainer}>
             <div className={styles.blockSectionDetailRow}>
               {childrenLatestBuildTags}
+
             </div>
           </div>
         </div>
