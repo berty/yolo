@@ -63,6 +63,7 @@ const BuildContainer = React.memo(({
     state: buildState = '',
     has_mergerequest: buildHasMr = null,
     has_artifacts: buildHasArtifacts = null,
+    has_project: buildHasProject = null,
     has_mergerequest: {
       short_id: mrShortId = '',
       id: mrId = '',
@@ -76,6 +77,13 @@ const BuildContainer = React.memo(({
     } = {},
     allBuildsForMr = [],
   } = build || {}
+
+  const {
+    has_owner: {
+      id: projectOwnerId = '',
+      avatar_url: projectOwnerAvatarUrl = '',
+    } = {},
+  } = buildHasProject || {}
 
   const isMasterBuildBranch = getStrEquNormalized(buildBranch, BRANCH.MASTER)
 
@@ -114,6 +122,8 @@ const BuildContainer = React.memo(({
           mrShortId,
           mrState,
           toggleCollapsed,
+          projectOwnerId,
+          projectOwnerAvatarUrl,
           ...{ childrenLatestBuildTags: <LatestBuildStateTags /> },
         }}
         />
