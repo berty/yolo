@@ -20,13 +20,13 @@ const AnchorLink = ({
   const location = useLocation()
 
   return (
-    <div className={iconClasses} style={{ color: theme.text.blockTitle }}>
+    <div title={`Copy to clipboard: ${window.location.protocol}//${window.location.host}${location.pathname}${target}`} className={iconClasses} style={{ color: theme.text.blockTitle }}>
       {confirmCopyMessage && (
         <div className={confirmationPopupClass}>{confirmCopyMessage}</div>
       )}
       <CopyToClipboard
         text={`${window.location.protocol}//${window.location.host}${location.pathname}${target}`}
-        title="Copy link to clipboard"
+        title={`Copy to clipboard: ${window.location.protocol}//${window.location.host}${location.pathname}${target}`}
         onCopy={() => {
           setConfirmCopyMessage('Link copied')
           setTimeout(() => setConfirmCopyMessage(''), 1000)

@@ -63,7 +63,7 @@ const BuildAndMrContainer = ({
             theme, buildCommitId, mrCommitUrl,
           }}
           />
-          {isLatestBuild && <SharableBuildLink isBlock />}
+          {isLatestBuild && <SharableBuildLink isBlock {...{ buildId }} />}
         </div>
         <div className={styles.blockSectionDetailContainer}>
           {isLatestBuild && (buildCommitId || mrState || mrDriver) && (
