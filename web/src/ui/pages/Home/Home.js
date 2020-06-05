@@ -1,4 +1,5 @@
 /* eslint-disable import/no-named-as-default */
+/* eslint-disable react-hooks/exhaustive-deps */
 
 /**
  * BEWARE ⚠️
@@ -15,13 +16,13 @@
 import Cookies from 'js-cookie'
 import queryString from 'query-string'
 import React, {
-  useCallback, useContext, useEffect, useState,
+  useContext, useEffect, useState,
 } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 import { getBuildList } from '../../../api'
 import { validateError } from '../../../api/apiResponseTransforms'
 import {
-  ARTIFACT_KINDS, BUILD_DRIVERS, BUILD_STATES, DEFAULT_RESULT_REQUEST_LIMIT, PLATFORM_TO_ARTIFACT_KIND,
+  ARTIFACT_KINDS, BUILD_DRIVERS, BUILD_STATES, DEFAULT_RESULT_REQUEST_LIMIT, PLATFORM_TO_ARTIFACT_KIND, KIND_TO_PLATFORM,
 } from '../../../constants'
 import { INITIAL_STATE, ResultContext } from '../../../store/ResultStore'
 import { ThemeContext } from '../../../store/ThemeStore'
@@ -41,38 +42,39 @@ const Home = () => {
   const { state, updateState } = useContext(ResultContext)
   const [showingFiltersModal, toggleShowFilters] = useState(false)
   const [showingDisclaimerModal, toggleShowDisclaimer] = useState(false)
-  const [needsNewFetch, setNeedsNewFetch] = useState(true)
+  const [needsNewFetch, setNeedsNewFetch] = useState(false)
   const [autoRefreshOn, setAutoRefreshOn] = useState(false)
   const { search: locationSearch } = useLocation()
   const history = useHistory()
 
-  // Detect useragent and set default artifact results accordingly
-  const setArtifactKindsFromUserAgent = useCallback(() => {
-    const userAgent = getMobileOperatingSystem()
-    const defaultKind = PLATFORM_TO_ARTIFACT_KIND[userAgent]
-    const { uiFilters: { artifact_kinds: initialArtifactKinds } } = INITIAL_STATE
-    updateState({
-      userAgent,
-      uiFilters: {
-        ...state.uiFilters,
-        artifact_kinds: userAgent === 'Unknown OS'
-          ? initialArtifactKinds
-          : [defaultKind],
-      },
-    })
-  }, [state.uiFilters, updateState])
-
-  // 🚧 On render, set/get query params based on URL bar or state.uiFilters
+  // 🚧 Hacky - On initial render, set/get query params based on URL bar or state.uiFilters
   useEffect(() => {
     if (!locationSearch) {
-      setArtifactKindsFromUserAgent()
-      const { artifact_kinds: artifactKinds = '', build_driver: buildDriver = '' } = state.uiFilters
-      // TODO: qS 'options' field doesn't seem to work
+      const { uiFilters: { artifact_kinds: initialArtifactKinds, build_driver: initialBuildDriver } } = INITIAL_STATE
+      const userAgent = state.userAgent || getMobileOperatingSystem()
+      const isMobile = (userAgent === KIND_TO_PLATFORM.IPA || userAgent === KIND_TO_PLATFORM.APK)
+      const defaultKind = isMobile ? [PLATFORM_TO_ARTIFACT_KIND[userAgent]] : [...initialArtifactKinds]
+      const defaultDriver = [...initialBuildDriver]
+
+      // TODO: This is hacky; pushing to history below + setNeedsNewFetch
+      //    will trigger the next useEffect
+      updateState({
+        userAgent,
+        uiFilters: {
+          ...state.uiFilters,
+          artifact_kinds: defaultKind,
+        },
+      })
+      // qS 'options' field doesn't seem to work
       // (e.g. if artifact_kinds === null)
       const initialLocationSearch = queryString.stringify({
-        artifact_kinds: singleItemToArray(artifactKinds),
-        build_driver: singleItemToArray(buildDriver),
+        artifact_kinds: defaultKind,
+        build_driver: defaultDriver,
       }, { skipNull: true, skipEmptyString: true })
+
+      // Hacky continued
+      setNeedsNewFetch(true)
+
       history.push({
         pathname: '/',
         search: initialLocationSearch,
@@ -96,6 +98,7 @@ const Home = () => {
       const buildState = queryBuildState ? singleItemToArray(queryBuildState.toString())
         .filter((bS) => BUILD_STATES.includes(bS)) : []
 
+      setNeedsNewFetch(true)
       updateState({
         uiFilters: {
           ...state.uiFilters, artifact_kinds: artifactKinds, build_driver: buildDriver, build_state: buildState,
