@@ -47,7 +47,13 @@ export const ARTIFACT_KIND_NAMES = {
 export const ARTIFACT_KINDS = Object.values(ARTIFACT_KIND_VALUE).map((kind) => kind.toString())
 
 export const PROJECT = {
-  chat: 'chat',
+  messenger: 'messenger',
+  'gomobile-ipfs-demo': 'gomobile-ipfs-demo',
+  UnknownProject: 'Unknown Project',
+}
+
+export const PROJECT_NAME = {
+  messenger: 'Messenger',
   'gomobile-ipfs-demo': 'gomobile-ipfs-demo',
   UnknownProject: 'Unknown Project',
 }
@@ -81,12 +87,12 @@ export const BUILD_DRIVER_NAMES = {
 export const BUILD_DRIVERS = Object.values(BUILD_DRIVER_VALUE)
 
 export const PROJECT_BUILD_DRIVER = {
-  chat: BUILD_DRIVER_VALUE.Buildkite,
+  messenger: BUILD_DRIVER_VALUE.Buildkite,
   'gomobile-ipfs-demo': BUILD_DRIVER_VALUE.Bintray,
 }
 
 export const PROJECT_ARTIFACT_KINDS = {
-  chat: [ARTIFACT_KIND_VALUE.IPA],
+  messenger: [ARTIFACT_KIND_VALUE.IPA],
   'gomobile-ipfs-demo': [ARTIFACT_KIND_VALUE.APK, ARTIFACT_KIND_VALUE.IPA],
 }
 
