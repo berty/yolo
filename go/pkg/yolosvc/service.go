@@ -21,6 +21,7 @@ type Service interface {
 	PlistGenerator(w http.ResponseWriter, r *http.Request)
 	ArtifactDownloader(w http.ResponseWriter, r *http.Request)
 	ArtifactIcon(w http.ResponseWriter, r *http.Request)
+	ArtifactGetFile(w http.ResponseWriter, r *http.Request)
 
 	GitHubWorker(ctx context.Context, opts GithubWorkerOpts) error
 	BuildkiteWorker(ctx context.Context, opts BuildkiteWorkerOpts) error

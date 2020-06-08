@@ -41,7 +41,7 @@ func (svc *service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
 	}
 
 	base := path.Base(artifact.LocalPath)
-	w.Header().Add("Content-Disposition", fmt.Sprintf("inline; filename=%s", base))
+	w.Header().Add("Content-Disposition", fmt.Sprintf("attachment; filename=%s", base))
 	if artifact.FileSize > 0 {
 		w.Header().Add("Content-Length", fmt.Sprintf("%d", artifact.FileSize))
 	}

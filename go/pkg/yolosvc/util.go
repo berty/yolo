@@ -43,6 +43,8 @@ func mimetypeByPath(path string) string {
 		return "application/json"
 	case ".zip":
 		return "application/zip"
+	case ".plist":
+		return "application/x-plist"
 	}
 	return "application/octet-stream"
 }
