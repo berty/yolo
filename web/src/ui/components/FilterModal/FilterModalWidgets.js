@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { uniq } from 'lodash'
 import React from 'react'
 import {
-  ARTIFACT_KIND_TO_PLATFORM, BRANCH_TO_DISPLAY_NAME, BUILD_DRIVER_TO_NAME, BUILD_STATE_VALUE_TO_NAME, PROJECT, PROJECT_ARTIFACT_KINDS, PROJECT_BUILD_DRIVER,
+  ARTIFACT_KIND_TO_PLATFORM, BRANCH_TO_DISPLAY_NAME, BUILD_DRIVER_TO_NAME, BUILD_STATE_VALUE_TO_NAME, PROJECT, PROJECT_ARTIFACT_KINDS, PROJECT_BUILD_DRIVER, PROJECT_NAME,
 } from '../../../constants'
 import { addOrRemoveFromArray } from '../../../util/getters'
 import { getArtifactKindIcon } from '../../styleTools/brandIcons'
@@ -55,8 +55,8 @@ export const ProjectFilter = ({
 
   return (
     <OutlineWidget
-      text={projectValue}
-      iconComponent={projectIcon()}
+      text={PROJECT_NAME[projectValue]}
+      iconComponent={<span style={{ opacity: selected ? 1 : 0.3 }}>{projectIcon()}</span>}
       onClick={selected ? removeProjectFilter : addProjectFilter}
       selected={selected}
       interactive

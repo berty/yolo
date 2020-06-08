@@ -2,17 +2,18 @@ import { faCube } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useContext } from 'react'
 import {
-  Check, GitBranch, LogOut, MessageCircle, X,
+  Check, GitBranch, LogOut, X,
 } from 'react-feather'
 import { removeAuthCookie } from '../../../api/cookies'
 import {
-  ARTIFACT_VALUE_KIND, BUILD_DRIVERS, BUILD_DRIVER_TO_NAME, BUILD_STATES, BUILD_STATE_VALUE_TO_NAME, PROJECT,
+  ARTIFACT_VALUE_KIND, BUILD_DRIVERS, BUILD_DRIVER_TO_NAME, BUILD_STATES, BUILD_STATE_VALUE_TO_NAME, PROJECT, PROJECT_NAME,
 } from '../../../constants'
 import { ResultContext } from '../../../store/ResultStore.js'
 import { getIsArrayWithN } from '../../../util/getters.js'
 import { getArtifactKindIcon } from '../../styleTools/brandIcons.js'
 import OutlineWidget from '../OutlineWidget/OutlineWidget.js'
 import styles from './Filters.module.scss'
+import IconProjectBertyMessenger from '../../../assets/svg/IconProjectBertyMessenger'
 
 const Filters = React.memo(({ autoRefreshOn, onFilterClick, setAutoRefreshOn }) => {
   const {
@@ -26,13 +27,13 @@ const Filters = React.memo(({ autoRefreshOn, onFilterClick, setAutoRefreshOn }) 
     }, updateState,
   } = useContext(ResultContext)
 
-  const FilterChat = () => (projects.includes(PROJECT.chat) && (
+  const FilterMessenger = () => (projects.includes(PROJECT.messenger) && (
     <OutlineWidget
       interactive
       selected
       onClick={onFilterClick}
-      iconComponent={<MessageCircle />}
-      text={PROJECT.chat}
+      iconComponent={<IconProjectBertyMessenger size="20px" />}
+      title={PROJECT_NAME[PROJECT.messenger]}
     />
   ))
 
@@ -48,7 +49,7 @@ const Filters = React.memo(({ autoRefreshOn, onFilterClick, setAutoRefreshOn }) 
 
   const FiltersAppWidget = () => (
     <>
-      <FilterChat />
+      <FilterMessenger />
       <FilterGoIpfs />
     </>
   )

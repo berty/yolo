@@ -33,11 +33,11 @@ export const INITIAL_STATE = {
   userAgent: '',
   uiFilters: {
     artifact_kinds: [ARTIFACT_KIND_VALUE.IPA],
-    build_driver: [PROJECT_BUILD_DRIVER[PROJECT.chat]],
+    build_driver: [PROJECT_BUILD_DRIVER[PROJECT.messenger]],
     build_state: [],
   },
   calculatedFilters: {
-    projects: [PROJECT.chat],
+    projects: [PROJECT.messenger],
     order: 'created_at',
   },
 }
