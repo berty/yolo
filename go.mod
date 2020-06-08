@@ -41,6 +41,6 @@ require (
 	moul.io/depviz/v3 v3.11.4
 	moul.io/godev v1.6.0
 	moul.io/hcfilters v1.3.0
-	moul.io/pkgman v1.2.1
+	moul.io/pkgman v1.2.2
 	moul.io/zapgorm v1.0.0
 )

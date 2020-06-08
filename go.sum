@@ -349,6 +349,8 @@ github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UV
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/stretchr/testify v1.5.1 h1:nOGnQDM7FYENwehXlg/kFVnos3rEvtKTjRvOWSzb6H4=
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
+github.com/stretchr/testify v1.6.1 h1:hDPOHmpOpP40lSULcqw7IrRb/u7w6RpDC9399XyoNd0=
+github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/tracer v0.0.0-20140124184152-66d3696bba97 h1:ZXZ3Ko4supnaInt/pSZnq3QL65Qx/KSZTUPMJH5RlIk=
 github.com/stretchr/tracer v0.0.0-20140124184152-66d3696bba97/go.mod h1:H0mYc1JTiYc9K0keLMYcR2ybyeom20X4cOYrKya1M1Y=
 github.com/syndtr/goleveldb v1.0.0/go.mod h1:ZVVdQEZoIme9iO1Ch2Jdy24qqXrMMOU6lpPAyBWyWuQ=
@@ -567,8 +569,8 @@ moul.io/graphman/viz v0.0.0-20200301205736-d14252ef2f07/go.mod h1:LrMvUXoSlBip3Z
 moul.io/hcfilters v1.3.0 h1:PsZKgLK0p4JkTHfWh1v0c3pMCnzywgXt9NYZUNsNdwE=
 moul.io/hcfilters v1.3.0/go.mod h1:fXFpC8iYgb/Lfnt/e5yB1NM74yq5Lch99VytoAZnaWc=
 moul.io/multipmuri v1.13.0/go.mod h1:NinVrznZaHGUDU+4zfcL7L9WzMsHtb/kjLr4RaCbM+c=
-moul.io/pkgman v1.2.1 h1:Gq1qgpS4RHEJFz/furgU+uaJyFKUWzpyhyhrUPMm7Pk=
-moul.io/pkgman v1.2.1/go.mod h1:Q+2jtriM2phG+nsdyAmc262pfqr9CGT0SKe1Ea1xkeA=
+moul.io/pkgman v1.2.2 h1:oLT/oEINIBsAuNE4GpK1L97fU1ypaLlOr8n8EdZyzS0=
+moul.io/pkgman v1.2.2/go.mod h1:rVsnDN/+htSk94lVRAv1UWwlaurLdlBWg3MfQpqtzQU=
 moul.io/srand v1.4.0/go.mod h1:P2uaZB+GFstFNo8sEj6/U8FRV1n25kD0LLckFpJ+qvc=
 moul.io/zapgorm v1.0.0 h1:HpO9x1TmsKFd4JoLNHrSIc1uZn6kmyDxLQK4xjfz8JE=
 moul.io/zapgorm v1.0.0/go.mod h1:JDE3xz5BQ1ccnAijE5+T8Qin6T256Bw2Cpdi+qMfWgw=
