@@ -1,4 +1,4 @@
-import { values } from 'lodash'
+import { values, uniq } from 'lodash'
 import { getSafeStr } from '../util/getters'
 import { getIsNextDay } from '../util/date'
 
@@ -68,6 +68,26 @@ const groupByMr = (acc = {}, build, i) => {
  * @return {Array<BuildObject>}
  */
 export const groupBuildsByMr = (builds) => values(builds.reduce(groupByMr, {}))
+
+/**
+ * Gets index of builds in the top-level builds you want to list
+ * that have branch Master and are the most recent for each unique project in API results
+ *
+ * Build must have has_project_id: string field
+ *
+ * Assumes builds are sorted in descending order by build.created_at
+ *)
+ *
+ * @param  {Array<BuildObject>} sortedTopLevelBuilds
+ * @return {Array<Number>}
+ */
+export const getLatestMasterBuildsForProjects = (sortedTopLevelBuilds) => {
+  const uniqueProjects = uniq(sortedTopLevelBuilds.map((b) => b.has_project_id))
+  const latestMasterBuildPerProject = uniqueProjects
+    .map((p) => sortedTopLevelBuilds
+      .findIndex((build) => build.has_project_id && build.has_project_id === p))
+  return latestMasterBuildPerProject
+}
 
 /**
  * Takes axios HTTP error and formats it

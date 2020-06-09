@@ -2,10 +2,12 @@ import dayjs from 'dayjs'
 import advancedFormat from 'dayjs/plugin/advancedFormat'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import localizedFormat from 'dayjs/plugin/localizedFormat'
+import isToday from 'dayjs/plugin/isToday'
 
 dayjs.extend(localizedFormat)
 dayjs.extend(advancedFormat)
 dayjs.extend(relativeTime)
+dayjs.extend(isToday)
 
 const getDay = (rawDate, formatString = 'YYYY-MM-DDTHH:mm:ssZ') => {
   const isValid = dayjs(rawDate, formatString).isValid()
@@ -32,7 +34,9 @@ export const getDayFormat = (
   formatString = 'YYYY-MM-DDTHH:mm:ssZ',
 ) => {
   const date = dayjs(rawDate, formatString)
-  return date.isValid() ? date.format('LL') : ''
+  const today = () => date.isToday() ? 'Today' : ''
+  const dayFormatted = () => date.format('LL')
+  return date.isValid() && (today() || dayFormatted())
 }
 
 export const getRelativeTime = (
