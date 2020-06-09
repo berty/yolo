@@ -1,6 +1,7 @@
 import { values, uniq } from 'lodash'
-import { getSafeStr } from '../util/getters'
+import { getSafeStr, getStrEquNormalized } from '../util/getters'
 import { getIsNextDay } from '../util/date'
+import { BRANCH } from '../constants'
 
 /**
  * Adds entry {buildIsFirstOfDay: boolean} to each build
@@ -85,7 +86,9 @@ export const getLatestMasterBuildsForProjects = (sortedTopLevelBuilds) => {
   const uniqueProjects = uniq(sortedTopLevelBuilds.map((b) => b.has_project_id))
   const latestMasterBuildPerProject = uniqueProjects
     .map((p) => sortedTopLevelBuilds
-      .findIndex((build) => build.has_project_id && build.has_project_id === p))
+      .findIndex((build) => build.has_project_id
+        && build.has_project_id === p
+        && getStrEquNormalized(build.branch, BRANCH.MASTER)))
   return latestMasterBuildPerProject
 }
 
