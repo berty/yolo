@@ -1,1 +1,6 @@
 Dockerfile
+web/node_modules/
+web/dist/
+.dockerignore
+cache/
+vendor/

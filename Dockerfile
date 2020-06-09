@@ -19,7 +19,7 @@ COPY            go.* ./
 RUN             go mod download
 COPY            go ./go/
 RUN             rm -rf web
-COPY            --from=web-build /app/dist web
+COPY            --from=web-build /app/dist web/dist
 WORKDIR         /go/src/berty.tech/yolo/go
 RUN		        make packr
 RUN             make install

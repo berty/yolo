@@ -12,6 +12,7 @@ require (
 	github.com/gogo/gateway v1.1.0
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang/protobuf v1.3.5
+	github.com/google/go-cmp v0.4.0 // indirect
 	github.com/google/go-github/v31 v31.0.0
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
@@ -25,6 +26,7 @@ require (
 	github.com/peterbourgon/diskv v2.0.1+incompatible
 	github.com/peterbourgon/ff/v2 v2.0.0
 	github.com/rs/cors v1.7.0
+	github.com/sirupsen/logrus v1.5.0 // indirect
 	github.com/stretchr/signature v0.0.0-20160104132143-168b2a1e1b56
 	github.com/stretchr/stew v0.0.0-20130812190256-80ef0842b48b // indirect
 	github.com/stretchr/tracer v0.0.0-20140124184152-66d3696bba97 // indirect
@@ -32,13 +34,18 @@ require (
 	github.com/treastech/logger v0.0.0-20180705232552-e381e9ecf2e3
 	go.uber.org/zap v1.14.1
 	golang.org/x/crypto v0.0.0-20200423211502-4bdfaf469ed5 // indirect
+	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
+	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
+	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a // indirect
 	golang.org/x/sys v0.0.0-20200420163511-1957bb5e6d1f // indirect
 	golang.org/x/tools v0.0.0-20200423205358-59e73619c742 // indirect
+	google.golang.org/appengine v1.6.5 // indirect
 	google.golang.org/genproto v0.0.0-20200326112834-f447254575fd
 	google.golang.org/grpc v1.28.0
+	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
+	honnef.co/go/tools v0.0.1-2020.1.3 // indirect
 	howett.net/plist v0.0.0-20200419221736-3b63eb3a43b5
-	moul.io/depviz/v3 v3.11.4
 	moul.io/godev v1.6.0
 	moul.io/hcfilters v1.3.0
 	moul.io/pkgman v1.2.2
