@@ -30,7 +30,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"moul.io/depviz/v3/pkg/chiutil"
 )
 
 type Server struct {
@@ -164,8 +163,19 @@ func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, erro
 		r.Get("/artifact-get-file/{artifactID}/*", svc.ArtifactGetFile)
 	})
 
-	box := packr.New("web", "../../../web")
-	chiutil.FileServer(r, "/", box)
+	box := packr.New("web", "../../../web/dist")
+
+	// static files and 404 handler
+	fs := http.StripPrefix("/", http.FileServer(box))
+	r.Get("/*", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			_, err := box.FindString(r.URL.Path)
+			if err != nil {
+				r.URL.Path = "/" // 404 redirects to index.html
+			}
+		}
+		fs.ServeHTTP(w, r)
+	}))
 
 	httpListener, err := net.Listen("tcp", opts.HTTPBind)
 	if err != nil {
