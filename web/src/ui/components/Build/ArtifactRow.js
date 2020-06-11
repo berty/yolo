@@ -28,7 +28,10 @@ const QrCode = ({ artifactPlistSignedUrl, closeAction }) => (
   <QRCodeModal closeAction={closeAction}>
     <QRCode
       value={`itms-services://?action=download-manifest&url=${process.env.API_SERVER}${artifactPlistSignedUrl}`}
+      size={256}
+      level="M"
       renderAs="svg"
+      includeMargin
     />
   </QRCodeModal>
 )
