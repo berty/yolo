@@ -34,24 +34,28 @@ const BuildList = React.memo(({ builds = [], loaded }) => {
             hasRunningBuilds={buildsStateIsRunning(build.allBuildsForMr, builds)}
           >
             {i === 0 && (
-            <Divider dividerText="Latest builds on Master" />
+            <Divider dividerText="Latest build on Master" /> // can be multiple builds if grouped by MR or multiple projects are in feed
             )}
           </BuildContainer>
         ))}
       {latestMasterBuildsForProjects.length > 0
-          && <Divider dividerText="All builds by date" />}
-      {buildsByMr.map((build, i) => (
-        <BuildContainer
-          key={`${build.id}-${i}`}
-          build={build}
-          toCollapse={latestMasterBuildsForProjects.includes(i) || (oneBuildInResultsHasMaster && !buildBranchIsMaster(build))}
-          hasRunningBuilds={buildsStateIsRunning(build.allBuildsForMr, builds)}
-        >
-          {build.buildIsFirstOfDay && (
-          <h4>{getDayFormat(build.created_at)}</h4>
-          )}
+          && <Divider dividerText="All other builds by date" />}
+      {buildsByMr.map((build, i) => ( // The i is important, don't change the positions of items in this arr
+        (
+          !latestMasterBuildsForProjects.includes(i)
+            && (
+              <BuildContainer
+                key={`${build.id}-${i}`}
+                build={build}
+                toCollapse={(oneBuildInResultsHasMaster && !buildBranchIsMaster(build))}
+                hasRunningBuilds={buildsStateIsRunning(build.allBuildsForMr, builds)}
+              >
+                {build.buildIsFirstOfDay && (
+                  <h4>{getDayFormat(build.created_at)}</h4>
+                )}
 
-        </BuildContainer>
+              </BuildContainer>
+            ))
       ))}
     </div>
   )
