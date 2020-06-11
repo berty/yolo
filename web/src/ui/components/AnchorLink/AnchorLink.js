@@ -16,7 +16,7 @@ const AnchorLink = ({
     'badge-secondary',
     styles.badge,
   )
-  const iconClasses = classNames(styles['copy-link-icon'], { [styles.block]: isBlock })
+  const iconClasses = classNames(styles.copyLinkIcon, isBlock ? styles.block : styles.inline)
   const location = useLocation()
 
   return (
