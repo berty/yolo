@@ -4,17 +4,24 @@
     position: absolute;
 }
 
-.copy-link-icon {
+.copyLinkIcon.inline {
+    cursor: pointer;
+    display: flex;
+    svg {
+        height: $font-size-sm;
+    }
+    @include xs {
+        display: none;
+    }
+}
+
+.copyLinkIcon.block {
     display: none;
     @include xs {
+        display: flex;
         cursor: pointer;
-        display: block;
-        height: 1rem;
-        &.block {
-            display: flex;
-            width: 100%;
-            justify-content: center;
-            margin-top: 0.5rem;
-        }
+        width: 100%;
+        justify-content: center;
+        margin-top: 0.5rem;
     }
 }

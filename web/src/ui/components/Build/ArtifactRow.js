@@ -36,6 +36,12 @@ const QrCode = ({ artifactPlistSignedUrl, closeAction }) => (
   </QRCodeModal>
 )
 
+export const SharableArtifactLink = ({ buildId, artifactKind, isBlock }) => (
+  <AnchorLink target={`?build_id=${buildId}&artifact_kinds=${ARTIFACT_KIND_VALUE[artifactKind.toString() || '1']}`} isBlock={isBlock}>
+    <LinkIcon size={16} />
+  </AnchorLink>
+)
+
 const ArtifactDownloadButton = ({
   artifactPlistSignedUrl = '',
   artifactDlArtifactSignedUrl = '',
@@ -138,14 +144,15 @@ const ArtifactDriver = ({ artifactDriver, theme }) => artifactDriver && (
   </Tag>
 )
 
-const SharableArtifactLink = ({ artifactId, implemented = false }) => implemented && (
-  <AnchorLink target={`?artifact_id=${artifactId}`}>
-    <LinkIcon size={16} />
-  </AnchorLink>
-)
+// const SharableArtifactLink = ({ artifactId, implemented = false }) => implemented && (
+//   <AnchorLink target={`?artifact_id=${artifactId}`}>
+//     <LinkIcon size={16} />
+//   </AnchorLink>
+// )
 
 const ArtifactRow = ({
   artifact,
+  buildId,
   buildMergeUpdatedAt,
   buildStartedAt,
   buildFinishedAt,
@@ -155,7 +162,6 @@ const ArtifactRow = ({
   const { theme } = useContext(ThemeContext)
   const [showingQrModal, toggleShowQrModal] = useState(false)
   const {
-    id: artifactId = '',
     plist_signed_url: artifactPlistSignedUrl = '',
     dl_artifact_signed_url: artifactDlArtifactSignedUrl = '',
     kind: artifactKind = '',
@@ -177,13 +183,14 @@ const ArtifactRow = ({
         style={{ color: theme.text.sectionText, ...containerBorderBottomStyle }}
       >
         <div className={styles.blockSectionLeftColumn}>
-          <SharableArtifactLink {...{ artifactId }} implemented={false} />
+          <SharableArtifactLink {...{ artifactKind, buildId }} isBlock />
         </div>
         <div className={styles.blockSectionDetailContainer}>
           <div className={styles.blockSectionDetailRow}>
             <ArtifactRowKindIcon color={theme.bg.tagGreen} kind={artifactKind} />
             <ArtifactKindName {...{ artifactKind }} />
             <BuildIdentifier {...{ buildShortId }} />
+            <SharableArtifactLink {...{ artifactKind, buildId }} isBlock={false} />
           </div>
           <ArtifactLocalPathRow {...{ artifactLocalPath }} />
           <div className={styles.blockSectionDetailRow}>

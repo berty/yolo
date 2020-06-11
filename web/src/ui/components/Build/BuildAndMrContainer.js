@@ -110,6 +110,7 @@ const BuildAndMrContainer = ({
         && buildHasArtifacts.map((artifact, i) => (
           <ArtifactRow
             artifact={artifact}
+            buildId={buildId}
             buildMergeUpdatedAt={buildMergeUpdatedAt}
             buildStartedAt={buildStartedAt}
             buildFinishedAt={buildFinishedAt}
