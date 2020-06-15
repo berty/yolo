@@ -133,8 +133,8 @@ func (svc *service) BuildList(ctx context.Context, req *yolopb.BuildList_Request
 
 	// prepare response
 	for _, build := range resp.Builds {
-		if err := build.AddSignedURLs(svc.authSalt); err != nil {
-			return nil, fmt.Errorf("sign URLs")
+		if err := build.PrepareOutput(svc.authSalt); err != nil {
+			return nil, fmt.Errorf("failed preparing output")
 		}
 		for _, artifact := range build.HasArtifacts {
 			if count, found := artifactMap[artifact.ID]; found {
