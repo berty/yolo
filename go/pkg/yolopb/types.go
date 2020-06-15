@@ -14,11 +14,9 @@ var (
 
 // PrepareOutput adds new fields containing URLs with a signature and filters sensitive/useless data
 func (b *Build) PrepareOutput(salt string) error {
-	if salt != "" {
-		for _, artifact := range b.HasArtifacts {
-			if err := artifact.AddSignedURLs(salt); err != nil {
-				return err
-			}
+	for _, artifact := range b.HasArtifacts {
+		if err := artifact.AddSignedURLs(salt); err != nil {
+			return err
 		}
 	}
 
