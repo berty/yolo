@@ -33,3 +33,4 @@ linters:
     #- goimports # disabling goimports while we can't configure it to ignore vendors (github.com/whyrusleeping/go-logging seems to be badly formated)
     - golint
     - ineffassign
+    #- wsl
