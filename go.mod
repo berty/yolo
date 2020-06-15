@@ -29,6 +29,7 @@ require (
 	github.com/sirupsen/logrus v1.5.0 // indirect
 	github.com/stretchr/signature v0.0.0-20160104132143-168b2a1e1b56
 	github.com/stretchr/stew v0.0.0-20130812190256-80ef0842b48b // indirect
+	github.com/stretchr/testify v1.6.1
 	github.com/stretchr/tracer v0.0.0-20140124184152-66d3696bba97 // indirect
 	github.com/tevino/abool v0.0.0-20170917061928-9b9efcf221b5
 	github.com/treastech/logger v0.0.0-20180705232552-e381e9ecf2e3

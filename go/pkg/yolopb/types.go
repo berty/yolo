@@ -2,16 +2,29 @@ package yolopb
 
 import (
 	"net/url"
+	"regexp"
+	"strings"
 
 	"github.com/stretchr/signature"
 )
 
-// AddSignedURLs adds new fields containing URLs with a signature
-func (b *Build) AddSignedURLs(key string) error {
-	for _, artifact := range b.HasArtifacts {
-		if err := artifact.AddSignedURLs(key); err != nil {
-			return err
+var (
+	signedOffByLine = regexp.MustCompile(`Signed-off-by: (.*)`)
+)
+
+// PrepareOutput adds new fields containing URLs with a signature and filters sensitive/useless data
+func (b *Build) PrepareOutput(salt string) error {
+	if salt != "" {
+		for _, artifact := range b.HasArtifacts {
+			if err := artifact.AddSignedURLs(salt); err != nil {
+				return err
+			}
 		}
+	}
+
+	if b.HasMergerequest != nil {
+		b.HasMergerequest.Message = signedOffByLine.ReplaceAllString(b.HasMergerequest.Message, "")
+		b.HasMergerequest.Message = strings.TrimRight(b.HasMergerequest.Message, "\n")
 	}
 
 	return nil

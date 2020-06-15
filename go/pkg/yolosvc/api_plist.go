@@ -48,7 +48,7 @@ func (svc *service) PlistGenerator(w http.ResponseWriter, r *http.Request) {
 			subtitle = strings.Title(artifact.HasBuild.HasProject.HasOwner.Name)
 		}
 	}
-	pkgUrl, err := signature.GetSignedURL("GET", url, "", svc.authSalt)
+	pkgURL, err := signature.GetSignedURL("GET", url, "", svc.authSalt)
 	if err != nil {
 		httpError(w, err, codes.Internal)
 		return
@@ -75,7 +75,7 @@ func (svc *service) PlistGenerator(w http.ResponseWriter, r *http.Request) {
 	title = strings.TrimSpace(title + " " + randEmoji())
 	subtitle = strings.TrimSpace(subtitle + " " + randEmoji())
 
-	plist := plistgen.Release(bundleID, baseURL+pkgUrl)
+	plist := plistgen.Release(bundleID, baseURL+pkgURL)
 	plist.SetTitle(title)
 	plist.SetSubtitle(subtitle)
 	plist.SetDisplayImage(displayImage, false)
