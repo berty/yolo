@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { get } from 'lodash'
 import React, { useContext, useState } from 'react'
 import { ARTIFACT_KIND_NAMES, BRANCH, BUILD_STATE } from '../../../constants'
-import { ResultContext } from '../../../store/ResultStore'
+import { GlobalContext } from '../../../store/GlobalStore'
 import { ThemeContext } from '../../../store/ThemeStore'
 import { getIsArray, getIsArrayWithN, getStrEquNormalized } from '../../../util/getters'
 import { getArtifactKindIcon } from '../../styleTools/brandIcons'
@@ -51,7 +51,7 @@ const AnyRunningBuildTags = ({ hasRunningBuilds, allBuildsForMr, theme }) => (ha
 const BuildContainer = React.memo(({
   build, toCollapse, children, hasRunningBuilds,
 }) => {
-  const { state } = useContext(ResultContext)
+  const { state } = useContext(GlobalContext)
   const [collapsed, toggleCollapsed] = useState(toCollapse)
   const [showingAllBuilds, toggleShowingAllBuilds] = useState(false)
   const { theme } = useContext(ThemeContext)

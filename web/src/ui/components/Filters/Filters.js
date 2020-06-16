@@ -8,14 +8,14 @@ import { removeAuthCookie } from '../../../api/cookies'
 import {
   ARTIFACT_VALUE_KIND, BUILD_DRIVERS, BUILD_DRIVER_TO_NAME, BUILD_STATES, BUILD_STATE_VALUE_TO_NAME, PROJECT, PROJECT_NAME,
 } from '../../../constants'
-import { ResultContext } from '../../../store/ResultStore.js'
+import { GlobalContext } from '../../../store/GlobalStore.js'
 import { getIsArrayWithN } from '../../../util/getters.js'
 import { getArtifactKindIcon } from '../../styleTools/brandIcons.js'
 import OutlineWidget from '../OutlineWidget/OutlineWidget.js'
 import styles from './Filters.module.scss'
 import IconProjectBertyMessenger from '../../../assets/svg/IconProjectBertyMessenger'
 
-const Filters = React.memo(({ autoRefreshOn, onFilterClick, setAutoRefreshOn }) => {
+const Filters = React.memo(({ autoRefreshOn = false, onFilterClick = () => { }, setAutoRefreshOn = () => { } }) => {
   const {
     state: {
       uiFilters: {
@@ -25,7 +25,7 @@ const Filters = React.memo(({ autoRefreshOn, onFilterClick, setAutoRefreshOn }) 
         projects,
       },
     }, updateState,
-  } = useContext(ResultContext)
+  } = useContext(GlobalContext)
 
   const FilterMessenger = () => (projects.includes(PROJECT.messenger) && (
     <OutlineWidget
@@ -173,6 +173,8 @@ const Filters = React.memo(({ autoRefreshOn, onFilterClick, setAutoRefreshOn }) 
   )
 })
 
-Filters.whyDidYouRender = true
+Filters.whyDidYouRender = {
+  logOwnerReasons: true,
+}
 
 export default Filters

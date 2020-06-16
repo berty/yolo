@@ -18,7 +18,7 @@ import {
   PROJECT_BUILD_DRIVER,
 } from '../constants'
 
-export const ResultContext = React.createContext()
+export const GlobalContext = React.createContext()
 
 export const INITIAL_STATE = {
   apiKey: retrieveAuthCookie() || null,
@@ -51,22 +51,26 @@ function reducer(state, action) {
   }
 }
 
-export const ResultStore = ({ children }) => {
+export const GlobalStore = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE)
 
   // custom actions can go here; for now we just have one
+  // 🚧 not cool, we need to split this so we don't get redundant re-renders
+  //     or have to do a slow deep equality check to prevent it
   const updateState = (payload) => {
     dispatch({ type: actions.UPDATE_STATE, payload: cloneDeep(payload) })
   }
 
+
   return (
-    <ResultContext.Provider
+    <GlobalContext.Provider
       value={{
         state,
         updateState,
+        dispatch,
       }}
     >
       {children}
-    </ResultContext.Provider>
+    </GlobalContext.Provider>
   )
 }
