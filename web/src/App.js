@@ -6,7 +6,7 @@ import {
 } from 'react-router-dom'
 import 'tabler-react/dist/Tabler.css'
 import './assets/main.scss'
-import { ResultStore } from './store/ResultStore'
+import { GlobalStore } from './store/GlobalStore'
 import { ThemeContext, ThemeStore } from './store/ThemeStore'
 import Error404 from './ui/pages/Error404/Error404'
 import Home from './ui/pages/Home/Home'
@@ -36,9 +36,9 @@ const AppRouter = () => {
 
 const App = () => (
   <ThemeStore>
-    <ResultStore>
+    <GlobalStore>
       <AppRouter />
-    </ResultStore>
+    </GlobalStore>
   </ThemeStore>
 )
 

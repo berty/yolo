@@ -4,7 +4,7 @@ import { removeAuthCookie } from '../../../api/cookies'
 import {
   ARTIFACT_KINDS, BUILD_DRIVERS, BUILD_STATES, PROJECT, PROJECTS,
 } from '../../../constants'
-import { INITIAL_STATE, ResultContext } from '../../../store/ResultStore'
+import { INITIAL_STATE, GlobalContext } from '../../../store/GlobalStore'
 import { ThemeContext } from '../../../store/ThemeStore'
 import Tag from '../Tag/Tag'
 import ThemeToggler from '../ThemeToggler'
@@ -68,7 +68,7 @@ const BuildStateWidgets = ({ selectedBuildStates, setSelectedBuildStates }) => (
 
 const FilterModal = ({ closeAction }) => {
   const { theme, themeStyles } = useContext(ThemeContext)
-  const { state, updateState } = useContext(ResultContext)
+  const { state, updateState } = useContext(GlobalContext)
   const [selectedDrivers, setSelectedDrivers] = useState([
     ...state.uiFilters.build_driver,
   ])

@@ -24,7 +24,7 @@ import { validateError } from '../../../api/apiResponseTransforms'
 import {
   ARTIFACT_KINDS, BUILD_DRIVERS, BUILD_STATES, DEFAULT_RESULT_REQUEST_LIMIT, PLATFORM_TO_ARTIFACT_KIND, KIND_TO_PLATFORM,
 } from '../../../constants'
-import { INITIAL_STATE, ResultContext } from '../../../store/ResultStore'
+import { INITIAL_STATE, GlobalContext } from '../../../store/GlobalStore'
 import { ThemeContext } from '../../../store/ThemeStore'
 import { getMobileOperatingSystem } from '../../../util/browser'
 import { singleItemToArray } from '../../../util/getters'
@@ -36,16 +36,25 @@ import Header from '../../components/Header/Header'
 import ProtocolDisclaimer from '../../components/ProtocolDisclaimer'
 import ShowFiltersButton from '../../components/ShowFiltersButton'
 import styles from './Home.module.scss'
+import { useRecursiveTimeout } from '../../../hooks/useRecursiveTimeout'
 
 const Home = () => {
   const { theme } = useContext(ThemeContext)
-  const { state, updateState } = useContext(ResultContext)
+  const { state, updateState } = useContext(GlobalContext)
   const [showingFiltersModal, toggleShowFilters] = useState(false)
   const [showingDisclaimerModal, toggleShowDisclaimer] = useState(false)
   const [needsNewFetch, setNeedsNewFetch] = useState(false)
   const [autoRefreshOn, setAutoRefreshOn] = useState(false)
   const { search: locationSearch } = useLocation()
   const history = useHistory()
+
+  useRecursiveTimeout(() => {
+    if (autoRefreshOn && !showingFiltersModal && !showingDisclaimerModal) {
+      updateState({
+        needsRefresh: true,
+      })
+    }
+  }, 10 * 1000)
 
   // 🚧 Hacky - On initial render, set/get query params based on URL bar or state.uiFilters
   useEffect(() => {
@@ -183,33 +192,6 @@ const Home = () => {
     if (state.needsRefresh === true) triggerNewQuery()
   }, [state.needsRefresh])
 
-  // 🚧 If autoRefresh is enabled, trigger API call every 10 sec
-  useEffect(() => {
-    let timer
-    if (
-      !showingDisclaimerModal
-      && !showingFiltersModal
-      && autoRefreshOn
-    ) {
-      clearInterval(timer)
-      timer = setInterval(() => {
-        updateState({
-          needsRefresh: true,
-        })
-      }, 10000)
-    } else {
-      clearInterval(timer)
-    }
-    return () => {
-      clearInterval(timer)
-    }
-  }, [
-    showingDisclaimerModal,
-    showingFiltersModal,
-    autoRefreshOn,
-    updateState,
-  ])
-
   // Show protocol warning modal + agreement on component render
   useEffect(() => {
     const disclaimerAccepted = Cookies.get('disclaimerAccepted')
@@ -222,10 +204,15 @@ const Home = () => {
     toggleShowDisclaimer(!accepted)
   }
 
+
   return (
     <div className={styles.homeContainer}>
       <div className={styles.homepageWrapper} style={{ backgroundColor: theme.bg.page }}>
-        <Header autoRefreshOn={autoRefreshOn} setAutoRefreshOn={setAutoRefreshOn} onFilterClick={toggleShowFilters} />
+        <Header
+          autoRefreshOn={autoRefreshOn}
+          setAutoRefreshOn={setAutoRefreshOn}
+          onFilterClick={toggleShowFilters}
+        />
         {state.error && <ErrorDisplay error={state.error} />}
         {state.error && state.error.status === 401 && (
           <ApiKeyPrompt failedKey={state.apiKey} updateState={updateState} authIsPending={state.authIsPending} />
@@ -235,7 +222,6 @@ const Home = () => {
         )}
         <div
           className={styles.footer}
-          // className="footer p-4"
           style={{ backgroundColor: theme.bg.block }}
         />
       </div>
