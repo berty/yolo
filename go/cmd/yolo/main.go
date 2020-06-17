@@ -378,6 +378,7 @@ func roundTripperFromArgs(ctx context.Context, bearerSecretKey, httpCachePath st
 			return nil, err
 		}
 		roundTripper = agent.Decorate(roundTripper)
+		// FIXME: return closer to call it at defer from main
 	}
 
 	if httpCachePath != "" {
