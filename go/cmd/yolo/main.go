@@ -14,7 +14,7 @@ import (
 	"berty.tech/yolo/v2/go/pkg/bintray"
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"berty.tech/yolo/v2/go/pkg/yolosvc"
-	bearer "github.com/Bearer/bearer-go"
+	bearer "github.com/bearer/go-agent"
 	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/google/go-github/v31/github"
 	"github.com/gregjones/httpcache"
@@ -114,7 +114,10 @@ func yolo(args []string) error {
 			ctx, cancel := context.WithCancel(ctx)
 			defer cancel()
 
-			roundTripper := roundTripperFromArgs(ctx, bearerSecretKey, httpCachePath, logger)
+			roundTripper, err := roundTripperFromArgs(ctx, bearerSecretKey, httpCachePath, logger)
+			if err != nil {
+				return err
+			}
 			http.DefaultTransport = roundTripper
 
 			db, err := dbFromArgs(dbStorePath, logger)
@@ -365,16 +368,17 @@ func dbFromArgs(dbPath string, logger *zap.Logger) (*gorm.DB, error) {
 	return db, nil
 }
 
-func roundTripperFromArgs(ctx context.Context, bearerSecretKey, httpCachePath string, logger *zap.Logger) http.RoundTripper {
+func roundTripperFromArgs(ctx context.Context, bearerSecretKey, httpCachePath string, logger *zap.Logger) (http.RoundTripper, error) {
 	roundTripper := http.DefaultTransport
 
 	if bearerSecretKey != "" {
-		roundTripper = &bearer.Agent{
-			SecretKey: bearerSecretKey,
-			Logger:    logger,
-			Transport: roundTripper,
-			Context:   ctx,
+		zap.RedirectStdLog(logger.Named("bearer"))
+		agent, err := bearer.NewAgent(bearerSecretKey, log.Writer())
+		if err != nil {
+			return nil, err
 		}
+		roundTripper = agent.Decorate(roundTripper)
+		// FIXME: return closer to call it at defer from main
 	}
 
 	if httpCachePath != "" {
@@ -392,5 +396,5 @@ func roundTripperFromArgs(ctx context.Context, bearerSecretKey, httpCachePath st
 		}
 	}
 
-	return roundTripper
+	return roundTripper, nil
 }

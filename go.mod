@@ -3,7 +3,7 @@ module berty.tech/yolo/v2
 go 1.13
 
 require (
-	github.com/Bearer/bearer-go v1.2.1
+	github.com/bearer/go-agent v0.0.0-00010101000000-000000000000
 	github.com/buildkite/go-buildkite v2.2.0+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/go-chi/chi v4.1.2+incompatible
@@ -54,3 +54,5 @@ require (
 	moul.io/pkgman v1.2.2
 	moul.io/zapgorm v1.0.0
 )
+
+replace github.com/bearer/go-agent => ../../code.osinet.fr/OSInet/bearer-go-agent
