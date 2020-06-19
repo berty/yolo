@@ -1,18 +1,16 @@
 import React, { useMemo } from 'react'
-import BuildContainer from './Build/BuildContainer'
 import {
-  oneBuildResultHasBranchMaster,
   buildBranchIsMaster,
-  buildsStateIsRunning,
+  buildsStateIsRunning, oneBuildResultHasBranchMaster,
 } from '../../api/apiResponseGetters'
 import {
-  groupBuildsByMr,
   flagBuildsFirstOfDay,
-  getLatestMasterBuildsForProjects,
+  getLatestMasterBuildsForProjects, groupBuildsByMr,
 } from '../../api/apiResponseTransforms'
-import Divider from './Divider/Divider'
 import { getDayFormat } from '../../util/date'
 import { getIsArrayWithN } from '../../util/getters'
+import BuildContainer from './Build/BuildContainer'
+import Divider from './Divider/Divider'
 
 const BuildList = React.memo(({ builds = [], loaded }) => {
   const oneBuildInResultsHasMaster = useMemo(() => oneBuildResultHasBranchMaster(builds), [builds])

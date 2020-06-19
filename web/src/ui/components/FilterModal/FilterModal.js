@@ -1,11 +1,15 @@
+import _ from 'lodash'
+import queryString from 'query-string'
 import React, { useContext, useState } from 'react'
 import { Check, LogOut } from 'react-feather'
+import { useHistory } from 'react-router-dom'
 import { removeAuthCookie } from '../../../api/cookies'
 import {
-  ARTIFACT_KINDS, BUILD_DRIVERS, BUILD_STATES, PROJECT, PROJECTS,
+  ARTIFACT_KINDS, BUILD_DRIVERS, BUILD_STATES, PROJECT, PROJECTS, actions,
 } from '../../../constants'
-import { INITIAL_STATE, GlobalContext } from '../../../store/GlobalStore'
+import { GlobalContext } from '../../../store/GlobalStore'
 import { ThemeContext } from '../../../store/ThemeStore'
+import { getIsArrayWithN } from '../../../util/getters'
 import Tag from '../Tag/Tag'
 import ThemeToggler from '../ThemeToggler'
 import styles from './FilterModal.module.scss'
@@ -68,7 +72,7 @@ const BuildStateWidgets = ({ selectedBuildStates, setSelectedBuildStates }) => (
 
 const FilterModal = ({ closeAction }) => {
   const { theme, themeStyles } = useContext(ThemeContext)
-  const { state, updateState } = useContext(GlobalContext)
+  const { state, updateState, dispatch } = useContext(GlobalContext)
   const [selectedDrivers, setSelectedDrivers] = useState([
     ...state.uiFilters.build_driver,
   ])
@@ -82,6 +86,7 @@ const FilterModal = ({ closeAction }) => {
     ...state.uiFilters.build_state,
   ])
   const [selectedBranches] = useState(['all'])
+  const history = useHistory()
 
 
   const tablerOverrides = {
@@ -125,19 +130,25 @@ const FilterModal = ({ closeAction }) => {
           data-dismiss="modal"
           onClick={() => {
             updateState({
-              needsProgrammaticQuery: true,
               isLoaded: false,
-              // builds: [],
-              uiFilters: {
-                build_driver: [...selectedDrivers],
-                artifact_kinds: [...selectedArtifactKinds],
-                build_state: [...selectedBuildStates],
-              },
+              needsRefresh: true,
               calculatedFilters: {
                 projects: [...selectedProjects],
               },
             })
             closeAction()
+            history.push({
+              path: '/',
+              search: queryString
+                .stringify(
+                  _.pickBy({
+                    build_driver: selectedDrivers,
+                    build_state: selectedBuildStates,
+                    artifact_kinds: selectedArtifactKinds,
+                  },
+                  (val) => getIsArrayWithN(val, 1)),
+                ),
+            })
           }}
           style={themeStyles.primaryButtonColors}
         >
@@ -150,13 +161,8 @@ const FilterModal = ({ closeAction }) => {
         <Tag
           onClick={() => {
             removeAuthCookie()
-            updateState({
-              isAuthed: false,
-              apiKey: '',
-              needsProgrammaticQuery: true,
-              uiFilters: INITIAL_STATE.uiFilters,
-              calculatedFilters: INITIAL_STATE.calculatedFilters,
-            })
+            dispatch({ type: actions.LOGOUT })
+            dispatch({ type: actions.UPDATE_UI_FILTERS, payload: {} })
             closeAction()
           }}
         >

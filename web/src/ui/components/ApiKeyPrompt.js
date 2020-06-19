@@ -2,6 +2,7 @@ import React, {
   useState, useRef, useEffect, useContext,
 } from 'react'
 import classNames from 'classnames'
+import { useHistory } from 'react-router-dom'
 import { setAuthCookie } from '../../api/cookies'
 import { getSafeStr } from '../../util/getters'
 import { ThemeContext } from '../../store/ThemeStore'
@@ -13,6 +14,7 @@ const ApiKeyPrompt = ({
   const [formApiKey, updateFormApiKey] = useState('')
   const submitBtnClass = classNames('btn', 'btn-primary', { disabled: authIsPending || !formApiKey })
   const inputEl = useRef(null)
+  const history = useHistory()
   useEffect(() => inputEl.current.focus())
 
   const onFormSubmit = (e) => {
@@ -20,10 +22,11 @@ const ApiKeyPrompt = ({
     setAuthCookie({ apiKey: `${btoa(getSafeStr(formApiKey))}` })
     updateState({
       apiKey: btoa(getSafeStr(formApiKey)),
-      needsProgrammaticQuery: true,
+      needsRefresh: true,
       authIsPending: true,
     })
     inputEl.current.value = ''
+    history.push('/')
   }
   useEffect(() => { inputEl.current.focus() })
 
