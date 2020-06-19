@@ -2,14 +2,8 @@ package yolopb
 
 import (
 	"net/url"
-	"regexp"
-	"strings"
 
 	"github.com/stretchr/signature"
-)
-
-var (
-	signedOffByLine = regexp.MustCompile(`Signed-off-by: (.*)`)
 )
 
 // PrepareOutput adds new fields containing URLs with a signature and filters sensitive/useless data
@@ -20,9 +14,10 @@ func (b *Build) PrepareOutput(salt string) error {
 		}
 	}
 
+	// cleanup messages
+	b.Message = cleanupCommitMessage(b.Message)
 	if b.HasMergerequest != nil {
-		b.HasMergerequest.Message = signedOffByLine.ReplaceAllString(b.HasMergerequest.Message, "")
-		b.HasMergerequest.Message = strings.TrimRight(b.HasMergerequest.Message, "\n")
+		b.HasMergerequest.Message = cleanupCommitMessage(b.HasMergerequest.Message)
 	}
 
 	return nil

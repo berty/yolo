@@ -21,6 +21,7 @@ func TestBuildPrepareOutput(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.msg, func(t *testing.T) {
 			build := Build{
+				Message: tt.msg,
 				HasMergerequest: &MergeRequest{
 					Message: tt.msg,
 				},
@@ -28,6 +29,7 @@ func TestBuildPrepareOutput(t *testing.T) {
 			err := build.PrepareOutput("")
 			require.NoError(t, err)
 			assert.Equal(t, tt.expected, build.HasMergerequest.Message)
+			assert.Equal(t, tt.expected, build.Message)
 		})
 	}
 }
