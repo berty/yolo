@@ -1,3 +1,5 @@
+/* eslint-disable camelcase */
+
 /**
  * BEWARE ⚠️
  *
@@ -9,13 +11,13 @@
  */
 
 import React, { useReducer } from 'react'
-import { cloneDeep } from 'lodash'
+import {
+  cloneDeep, isEqual, omit, keys, pick, has,
+} from 'lodash'
 import { retrieveAuthCookie } from '../api/cookies'
 import {
   actions,
-  ARTIFACT_KIND_VALUE,
   PROJECT,
-  PROJECT_BUILD_DRIVER,
 } from '../constants'
 
 export const GlobalContext = React.createContext()
@@ -28,24 +30,45 @@ export const INITIAL_STATE = {
   error: null,
   isAuthed: false,
   isLoaded: false,
-  needsProgrammaticQuery: false,
-  needsRefresh: false,
+  needsRefresh: true,
   userAgent: '',
   uiFilters: {
-    artifact_kinds: [ARTIFACT_KIND_VALUE.IPA],
-    build_driver: [PROJECT_BUILD_DRIVER[PROJECT.messenger]],
+    artifact_kinds: [],
+    build_driver: [],
     build_state: [],
   },
   calculatedFilters: {
     projects: [PROJECT.messenger],
     order: 'created_at',
   },
+  showingFilterModal: false,
 }
 
 function reducer(state, action) {
   switch (action.type) {
     case actions.UPDATE_STATE:
       return { ...state, ...action.payload }
+    case actions.UPDATE_UI_FILTERS: {
+      const { artifact_kinds = [], build_driver = [], build_state = [] } = action.payload || {}
+      return {
+        ...state,
+        uiFilters: {
+          artifact_kinds,
+          build_driver,
+          build_state,
+        },
+      }
+    }
+    case actions.LOGOUT:
+      return {
+        ...state,
+        autoRefreshOn: false,
+        isAuthed: false,
+        builds: [],
+        apiKey: '',
+        needsRefresh: true,
+        calculatedFilters: INITIAL_STATE.calculatedFilters,
+      }
     default:
       return { ...state }
   }
@@ -54,13 +77,18 @@ function reducer(state, action) {
 export const GlobalStore = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE)
 
+
   // custom actions can go here; for now we just have one
   // 🚧 not cool, we need to split this so we don't get redundant re-renders
   //     or have to do a slow deep equality check to prevent it
   const updateState = (payload) => {
-    dispatch({ type: actions.UPDATE_STATE, payload: cloneDeep(payload) })
+    const hasBuilds = has(payload, 'builds')
+    const stateFilteredFromPayload = pick(state, keys(payload))
+    const stateFilteredNoBuilds = omit(stateFilteredFromPayload, 'builds')
+    const payloadNoBuilds = omit(payload, 'builds')
+    const newInfoFromPayload = !isEqual(stateFilteredNoBuilds, payloadNoBuilds)
+    if (hasBuilds || newInfoFromPayload) dispatch({ type: actions.UPDATE_STATE, payload: cloneDeep(payload) })
   }
-
 
   return (
     <GlobalContext.Provider

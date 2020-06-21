@@ -45,7 +45,7 @@
     "jsx-a11y/no-static-element-interactions": 0,
     "react/jsx-props-no-spreading": 0,
     "no-unused-expressions": 1,
-    "camelcase": 1,
+    "camelcase": 0,
     "jsx-a11y/accessible-emoji": 1,
     "react/no-unescaped-entities": 1,
     "jsx-a11y/anchor-is-valid": [

@@ -6,7 +6,7 @@ import {
 } from 'react-feather'
 import { removeAuthCookie } from '../../../api/cookies'
 import {
-  ARTIFACT_VALUE_KIND, BUILD_DRIVERS, BUILD_DRIVER_TO_NAME, BUILD_STATES, BUILD_STATE_VALUE_TO_NAME, PROJECT, PROJECT_NAME,
+  ARTIFACT_VALUE_KIND, BUILD_DRIVERS, BUILD_DRIVER_TO_NAME, BUILD_STATES, BUILD_STATE_VALUE_TO_NAME, PROJECT, PROJECT_NAME, actions,
 } from '../../../constants'
 import { GlobalContext } from '../../../store/GlobalStore.js'
 import { getIsArrayWithN } from '../../../util/getters.js'
@@ -15,16 +15,19 @@ import OutlineWidget from '../OutlineWidget/OutlineWidget.js'
 import styles from './Filters.module.scss'
 import IconProjectBertyMessenger from '../../../assets/svg/IconProjectBertyMessenger'
 
-const Filters = React.memo(({ autoRefreshOn = false, onFilterClick = () => { }, setAutoRefreshOn = () => { } }) => {
+const Filters = ({ onFilterClick = () => { } }) => {
   const {
+    dispatch,
     state: {
+      autoRefreshOn,
       uiFilters: {
         artifact_kinds: artifactKinds, build_driver: buildDrivers, build_state: buildStates,
       },
       calculatedFilters: {
         projects,
       },
-    }, updateState,
+    },
+    updateState,
   } = useContext(GlobalContext)
 
   const FilterMessenger = () => (projects.includes(PROJECT.messenger) && (
@@ -133,7 +136,9 @@ const Filters = React.memo(({ autoRefreshOn = false, onFilterClick = () => { }, 
         interactive
         selected={selected}
         onClick={() => {
-          setAutoRefreshOn(!autoRefreshOn)
+          updateState({
+            autoRefreshOn: (!autoRefreshOn),
+          })
         }}
         title="Toggle auto refresh every 10 sec"
         iconComponent={selected ? <Check /> : <X />}
@@ -148,11 +153,8 @@ const Filters = React.memo(({ autoRefreshOn = false, onFilterClick = () => { }, 
       hasSelectedState={false}
       onClick={() => {
         removeAuthCookie()
-        updateState({
-          isAuthed: false,
-          apiKey: '',
-          needsProgrammaticQuery: true,
-        })
+        dispatch({ type: actions.LOGOUT })
+        dispatch({ type: actions.UPDATE_UI_FILTERS, payload: {} })
       }}
       iconComponent={<LogOut />}
       text="Logout"
@@ -171,10 +173,10 @@ const Filters = React.memo(({ autoRefreshOn = false, onFilterClick = () => { }, 
       <Logout />
     </div>
   )
-})
-
-Filters.whyDidYouRender = {
-  logOwnerReasons: true,
 }
+
+// Filters.whyDidYouRender = {
+//   logOwnerReasons: true,
+// }
 
 export default Filters

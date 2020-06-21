@@ -5,29 +5,24 @@
  * BEWARE ⚠️
  *
  * A container for many side effects
- * - URL query param changes
- * - authentication handling
- * - triggering and handling API requests
- * - ... other stuff
+ *
+ * The most important "feature" here:
+ *     Query params in the URL bar
+ *     are parsed and stored in global state,
+ *     AND are used directly to make an API request.
  *
  * Tell ekelen to refactor me
  */
 
 import Cookies from 'js-cookie'
-import queryString from 'query-string'
-import React, {
-  useContext, useEffect, useState,
-} from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
-import { getBuildList } from '../../../api'
-import { validateError } from '../../../api/apiResponseTransforms'
-import {
-  ARTIFACT_KINDS, BUILD_DRIVERS, BUILD_STATES, DEFAULT_RESULT_REQUEST_LIMIT, PLATFORM_TO_ARTIFACT_KIND, KIND_TO_PLATFORM,
-} from '../../../constants'
-import { INITIAL_STATE, GlobalContext } from '../../../store/GlobalStore'
+import { requestBuilds } from '../../../api'
+import { actions } from '../../../constants'
+import { useRecursiveTimeout } from '../../../hooks/useRecursiveTimeout'
+import { GlobalContext } from '../../../store/GlobalStore'
+import { getFallbackQueryString, getFiltersFromUrlQuery } from '../../../store/globalStoreHelpers'
 import { ThemeContext } from '../../../store/ThemeStore'
-import { getMobileOperatingSystem } from '../../../util/browser'
-import { singleItemToArray } from '../../../util/getters'
 import ApiKeyPrompt from '../../components/ApiKeyPrompt'
 import BuildListContainer from '../../components/BuildListContainer'
 import ErrorDisplay from '../../components/ErrorDisplay/ErrorDisplay'
@@ -36,161 +31,74 @@ import Header from '../../components/Header/Header'
 import ProtocolDisclaimer from '../../components/ProtocolDisclaimer'
 import ShowFiltersButton from '../../components/ShowFiltersButton'
 import styles from './Home.module.scss'
-import { useRecursiveTimeout } from '../../../hooks/useRecursiveTimeout'
+
+const useRedirectOnEmptyQuery = () => {
+  const { search: locationSearch } = useLocation()
+  const { state: { userAgent }, updateState } = useContext(GlobalContext)
+  const history = useHistory()
+  useEffect(() => {
+    if (!locationSearch) {
+      const fallbackQueryString = getFallbackQueryString({ userAgent, updateState })
+      history.push({
+        pathname: '/',
+        search: fallbackQueryString,
+      })
+    }
+  },
+  [locationSearch])
+}
+
+const useSetFiltersOnQueryChange = () => {
+  const { dispatch } = useContext(GlobalContext)
+  const { search: locationSearch } = useLocation()
+  useEffect(() => {
+    const updateFilters = () => {
+      const { artifact_kinds, build_driver, build_state } = getFiltersFromUrlQuery({ locationSearch }) || {}
+      dispatch({
+        type: actions.UPDATE_UI_FILTERS,
+        payload:
+          { artifact_kinds, build_driver, build_state },
+      })
+    }
+    if (locationSearch) updateFilters()
+  }, [locationSearch])
+}
 
 const Home = () => {
   const { theme } = useContext(ThemeContext)
   const { state, updateState } = useContext(GlobalContext)
-  const [showingFiltersModal, toggleShowFilters] = useState(false)
+  const [showingFilterModal, toggleShowFilters] = useState(false)
   const [showingDisclaimerModal, toggleShowDisclaimer] = useState(false)
-  const [needsNewFetch, setNeedsNewFetch] = useState(false)
-  const [autoRefreshOn, setAutoRefreshOn] = useState(false)
   const { search: locationSearch } = useLocation()
-  const history = useHistory()
 
+  // Hide protocol warning popup
+  const setDisclaimerAccepted = (accepted) => {
+    Cookies.set('disclaimerAccepted', 1, { expires: 7 })
+    toggleShowDisclaimer(!accepted)
+  }
+
+  useRedirectOnEmptyQuery()
+  useSetFiltersOnQueryChange()
+
+  // Fetch data every 10 sec if state.autoRefeshOn is true
   useRecursiveTimeout(() => {
-    if (autoRefreshOn && !showingFiltersModal && !showingDisclaimerModal) {
+    if (
+      state.autoRefreshOn
+      && !showingFilterModal
+      && !showingDisclaimerModal) {
       updateState({
         needsRefresh: true,
       })
     }
   }, 10 * 1000)
 
-  // 🚧 Hacky - On initial render, set/get query params based on URL bar or state.uiFilters
+  // 🚧 Hacky: If URL query changes, make server call
+  //   based on params in URL bar query
   useEffect(() => {
-    if (!locationSearch) {
-      const { uiFilters: { artifact_kinds: initialArtifactKinds, build_driver: initialBuildDriver } } = INITIAL_STATE
-      const userAgent = state.userAgent || getMobileOperatingSystem()
-      const isMobile = (userAgent === KIND_TO_PLATFORM.IPA || userAgent === KIND_TO_PLATFORM.APK)
-      const defaultKind = isMobile ? [PLATFORM_TO_ARTIFACT_KIND[userAgent]] : [...initialArtifactKinds]
-      const defaultDriver = [...initialBuildDriver]
-
-      // TODO: This is hacky; pushing to history below + setNeedsNewFetch
-      //    will trigger the next useEffect
-      updateState({
-        userAgent,
-        uiFilters: {
-          ...state.uiFilters,
-          artifact_kinds: defaultKind,
-        },
-      })
-      // qS 'options' field doesn't seem to work
-      // (e.g. if artifact_kinds === null)
-      const initialLocationSearch = queryString.stringify({
-        artifact_kinds: defaultKind,
-        build_driver: defaultDriver,
-      }, { skipNull: true, skipEmptyString: true })
-
-      // Hacky continued
-      setNeedsNewFetch(true)
-
-      history.push({
-        pathname: '/',
-        search: initialLocationSearch,
-      })
-    } else {
-      const locationObject = queryString.parse(locationSearch)
-      const {
-        artifact_kinds: queryArtifactKinds = [],
-        build_driver: queryBuildDrivers = [],
-        build_state: queryBuildState = [],
-      } = locationObject
-      const artifactKinds = (!Array.isArray(queryArtifactKinds)
-        ? [queryArtifactKinds]
-        : queryArtifactKinds
-      ).filter((aK) => ARTIFACT_KINDS.includes(aK))
-      const buildDriver = (!Array.isArray(queryBuildDrivers)
-        ? [queryBuildDrivers]
-        : queryBuildDrivers
-      ).filter((bD) => BUILD_DRIVERS.includes(bD))
-
-      const buildState = queryBuildState ? singleItemToArray(queryBuildState.toString())
-        .filter((bS) => BUILD_STATES.includes(bS)) : []
-
-      setNeedsNewFetch(true)
-      updateState({
-        uiFilters: {
-          ...state.uiFilters, artifact_kinds: artifactKinds, build_driver: buildDriver, build_state: buildState,
-        },
-      })
+    if (locationSearch && state.needsRefresh) {
+      requestBuilds({ updateState, locationSearch, apiKey: state.apiKey })
     }
-  }, [])
-
-  // 🚧 If URL query or state uiFilters change, call/handle API request
-  useEffect(() => {
-    const getNewFetch = () => {
-      updateState({
-        error: null,
-        isLoaded: false,
-        // builds: [],
-      })
-      getBuildList({
-        apiKey: state.apiKey,
-        queryObject: queryString.parse(locationSearch),
-        locationQuery: queryString.parse({ 'user-query': locationSearch }),
-      })
-        .then(
-          (result) => {
-            const { data: { builds = [] } = { builds: [] } } = result
-            updateState({
-              builds,
-              error: null,
-              isAuthed: true,
-            })
-          },
-          (error) => {
-            const validatedError = validateError({ error })
-            const { status } = validatedError
-            updateState({
-              error: validatedError,
-              isAuthed: status !== 401,
-
-            })
-            setAutoRefreshOn(false)
-          },
-        )
-        .finally(() => {
-          setNeedsNewFetch(false)
-          updateState({
-            isLoaded: true,
-            authIsPending: false,
-          })
-        })
-    }
-    if (needsNewFetch && locationSearch) {
-      getNewFetch()
-    }
-  }, [locationSearch, needsNewFetch])
-
-  // 🚧 Trigger API call any time state.needsProgrammaticQuery is true
-  useEffect(() => {
-    const triggerNewQuery = () => {
-      updateState({
-        needsProgrammaticQuery: false,
-      })
-      history.push({
-        path: '/',
-        search: queryString.stringify(state.uiFilters) || `limit=${DEFAULT_RESULT_REQUEST_LIMIT}`,
-      })
-      setNeedsNewFetch(true)
-    }
-    if (state.needsProgrammaticQuery === true) triggerNewQuery()
-  }, [state.needsProgrammaticQuery])
-
-  // 🚧 Trigger API call using current URL bar params
-  useEffect(() => {
-    const triggerNewQuery = () => {
-      updateState({
-        needsRefresh: false,
-      })
-      history.push({
-        path: '/',
-        search: locationSearch,
-      })
-      setNeedsNewFetch(true)
-    }
-    if (state.needsRefresh === true) triggerNewQuery()
-  }, [state.needsRefresh])
+  }, [locationSearch, state.needsRefresh])
 
   // Show protocol warning modal + agreement on component render
   useEffect(() => {
@@ -198,20 +106,12 @@ const Home = () => {
     toggleShowDisclaimer(!disclaimerAccepted)
   }, [])
 
-  // Hide protocol warning modal on Okay click
-  const setDisclaimerAccepted = (accepted) => {
-    Cookies.set('disclaimerAccepted', 1, { expires: 7 })
-    toggleShowDisclaimer(!accepted)
-  }
-
-
   return (
     <div className={styles.homeContainer}>
       <div className={styles.homepageWrapper} style={{ backgroundColor: theme.bg.page }}>
-        <Header
-          autoRefreshOn={autoRefreshOn}
-          setAutoRefreshOn={setAutoRefreshOn}
-          onFilterClick={toggleShowFilters}
+        <Header onFilterClick={() => {
+          toggleShowFilters(true)
+        }}
         />
         {state.error && <ErrorDisplay error={state.error} />}
         {state.error && state.error.status === 401 && (
@@ -225,19 +125,21 @@ const Home = () => {
           style={{ backgroundColor: theme.bg.block }}
         />
       </div>
-      {showingDisclaimerModal && (
+      {state.showingDisclaimerModal && (
         <ProtocolDisclaimer closeAction={() => setDisclaimerAccepted(true)} />
       )}
-      {!showingFiltersModal && state.isAuthed && (
+      {!showingFilterModal && state.isAuthed && (
         <ShowFiltersButton
-          clickAction={() => toggleShowFilters(!showingFiltersModal)}
+          clickAction={() => toggleShowFilters(true)}
         />
       )}
-      {showingFiltersModal && state.isAuthed && (
+      {showingFilterModal && state.isAuthed && (
         <FilterModal closeAction={() => toggleShowFilters(false)} needsFilterColors />
       )}
     </div>
   )
 }
+
+Home.whyDidYouRender = true
 
 export default Home
