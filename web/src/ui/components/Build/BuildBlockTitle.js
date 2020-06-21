@@ -38,6 +38,7 @@ const BuildBlockTitle = ({
       <u>
         {mrDisplayId}
       </u>
+      {mrTitle && `: ${mrTitle}`}
     </a>
   )
   const BlockSubtitlePullWithMr = !isMasterBuildBranch && mrShortId && <>{mrTitle}</>
