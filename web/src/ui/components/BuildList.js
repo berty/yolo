@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, Fragment } from 'react'
 import {
   buildBranchIsMaster,
   buildsStateIsRunning, oneBuildResultHasBranchMaster,
@@ -29,31 +29,27 @@ const BuildList = React.memo(({ builds = [], loaded }) => {
             key={`${build.id}-${i}`}
             build={build}
             toCollapse={false}
+            isLatestMaster
             hasRunningBuilds={buildsStateIsRunning(build.allBuildsForMr, builds)}
-          >
-            {i === 0 && (
-            <Divider dividerText="Latest build on Master" /> // can be multiple builds if grouped by MR or multiple projects are in feed
-            )}
-          </BuildContainer>
+          />
         ))}
-      {latestMasterBuildsForProjects.length > 0
-          && <Divider dividerText="All other builds by date" />}
-      {buildsByMr.map((build, i) => ( // The i is important, don't change the positions of items in this arr
+      {buildsByMr.map((build, i) => ( // The i is important to get day dividers, so don't change length of this array
         (
-          !latestMasterBuildsForProjects.includes(i)
-            && (
-              <BuildContainer
-                key={`${build.id}-${i}`}
-                build={build}
-                toCollapse={(oneBuildInResultsHasMaster && !buildBranchIsMaster(build))}
-                hasRunningBuilds={buildsStateIsRunning(build.allBuildsForMr, builds)}
-              >
-                {build.buildIsFirstOfDay && (
-                  <h4>{getDayFormat(build.created_at)}</h4>
+          <Fragment key={`${build.id}-${i}`}>
+            {build.buildIsFirstOfDay && (
+            // <h4>{getDayFormat(build.created_at)}</h4>
+            <Divider dividerText={getDayFormat(build.created_at)} />
+            )}
+            {!latestMasterBuildsForProjects.includes(i)
+                && (
+                  <BuildContainer
+                    build={build}
+                    toCollapse={(oneBuildInResultsHasMaster && !buildBranchIsMaster(build))}
+                    hasRunningBuilds={buildsStateIsRunning(build.allBuildsForMr, builds)}
+                  />
                 )}
-
-              </BuildContainer>
-            ))
+          </Fragment>
+        )
       ))}
     </div>
   )

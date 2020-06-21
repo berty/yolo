@@ -123,6 +123,7 @@ const Filters = ({ onFilterClick = () => { } }) => {
       onClick={() => {
         updateState({
           needsRefresh: true,
+          error: null,
         })
       }}
       text="F5"

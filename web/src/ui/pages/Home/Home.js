@@ -16,12 +16,11 @@
 
 import Cookies from 'js-cookie'
 import React, { useContext, useEffect, useState } from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
-import { requestBuilds } from '../../../api'
-import { actions } from '../../../constants'
 import { useRecursiveTimeout } from '../../../hooks/useRecursiveTimeout'
+import { useRedirectOnEmptyQuery } from '../../../hooks/useRedirectOnEmptyQuery'
+import { useRequestOnQueryChange } from '../../../hooks/useRequestOnQueryChange'
+import { useSetFiltersOnQueryChange } from '../../../hooks/useSetFiltersOnQueryChange'
 import { GlobalContext } from '../../../store/GlobalStore'
-import { getFallbackQueryString, getFiltersFromUrlQuery } from '../../../store/globalStoreHelpers'
 import { ThemeContext } from '../../../store/ThemeStore'
 import ApiKeyPrompt from '../../components/ApiKeyPrompt'
 import BuildListContainer from '../../components/BuildListContainer'
@@ -32,44 +31,11 @@ import ProtocolDisclaimer from '../../components/ProtocolDisclaimer'
 import ShowFiltersButton from '../../components/ShowFiltersButton'
 import styles from './Home.module.scss'
 
-const useRedirectOnEmptyQuery = () => {
-  const { search: locationSearch } = useLocation()
-  const { state: { userAgent }, updateState } = useContext(GlobalContext)
-  const history = useHistory()
-  useEffect(() => {
-    if (!locationSearch) {
-      const fallbackQueryString = getFallbackQueryString({ userAgent, updateState })
-      history.push({
-        pathname: '/',
-        search: fallbackQueryString,
-      })
-    }
-  },
-  [locationSearch])
-}
-
-const useSetFiltersOnQueryChange = () => {
-  const { dispatch } = useContext(GlobalContext)
-  const { search: locationSearch } = useLocation()
-  useEffect(() => {
-    const updateFilters = () => {
-      const { artifact_kinds, build_driver, build_state } = getFiltersFromUrlQuery({ locationSearch }) || {}
-      dispatch({
-        type: actions.UPDATE_UI_FILTERS,
-        payload:
-          { artifact_kinds, build_driver, build_state },
-      })
-    }
-    if (locationSearch) updateFilters()
-  }, [locationSearch])
-}
-
 const Home = () => {
   const { theme } = useContext(ThemeContext)
   const { state, updateState } = useContext(GlobalContext)
   const [showingFilterModal, toggleShowFilters] = useState(false)
   const [showingDisclaimerModal, toggleShowDisclaimer] = useState(false)
-  const { search: locationSearch } = useLocation()
 
   // Hide protocol warning popup
   const setDisclaimerAccepted = (accepted) => {
@@ -79,6 +45,7 @@ const Home = () => {
 
   useRedirectOnEmptyQuery()
   useSetFiltersOnQueryChange()
+  useRequestOnQueryChange()
 
   // Fetch data every 10 sec if state.autoRefeshOn is true
   useRecursiveTimeout(() => {
@@ -91,14 +58,6 @@ const Home = () => {
       })
     }
   }, 10 * 1000)
-
-  // 🚧 Hacky: If URL query changes, make server call
-  //   based on params in URL bar query
-  useEffect(() => {
-    if (locationSearch && state.needsRefresh) {
-      requestBuilds({ updateState, locationSearch, apiKey: state.apiKey })
-    }
-  }, [locationSearch, state.needsRefresh])
 
   // Show protocol warning modal + agreement on component render
   useEffect(() => {

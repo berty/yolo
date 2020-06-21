@@ -10,6 +10,7 @@ const BuildBlockTitle = ({
   mrId,
   mrTitle,
   buildHasMr,
+  isLatestMaster,
 }) => {
   const { theme } = useContext(ThemeContext)
   const mrDisplayId = mrShortId ? `#${mrShortId}` : ''
@@ -41,15 +42,19 @@ const BuildBlockTitle = ({
       {mrTitle && `: ${mrTitle}`}
     </a>
   )
+
+  const BuildIsLatestMasterIndicator = isLatestMaster && (<span role="img" aria-label="sheep" style={{ marginRight: '0.66rem', cursor: 'default' }} title="Latest build on Master!">⭐️</span>)
   const BlockSubtitlePullWithMr = !isMasterBuildBranch && mrShortId && <>{mrTitle}</>
   const BlockSubtitleDefault = ''
 
   const Title = () => (
     <h2 className={styles.shortBlockTitle}>
+      {BuildIsLatestMasterIndicator}
       {BlockTitleMasterWithMr
         || BlockTitleMasterNoMr
         || BlockTitlePullWithMr
         || BlockDefaultTitle}
+
     </h2>
   )
 

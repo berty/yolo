@@ -13,3 +13,14 @@ export const buildListRequest = ({ apiKey = '', queryObject = {} }) => {
   }
   return axios(options)
 }
+
+export const ping = ({ apiKey = '' }) => {
+  const options = {
+    method: 'get',
+    baseURL: `${process.env.API_SERVER}/api/ping`,
+    headers: {
+      Authorization: `Basic ${apiKey}`,
+    },
+  }
+  return axios(options)
+}
