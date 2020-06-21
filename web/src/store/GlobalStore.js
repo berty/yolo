@@ -42,6 +42,7 @@ export const INITIAL_STATE = {
     order: 'created_at',
   },
   showingFilterModal: false,
+  testProperty: 'ignore me',
 }
 
 function reducer(state, action) {

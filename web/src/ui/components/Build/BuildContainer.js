@@ -49,7 +49,7 @@ const AnyRunningBuildTags = ({ hasRunningBuilds, allBuildsForMr, theme }) => (ha
 )
 
 const BuildContainer = React.memo(({
-  build, toCollapse, children, hasRunningBuilds,
+  build, toCollapse, hasRunningBuilds, isLatestMaster = false,
 }) => {
   const { state } = useContext(GlobalContext)
   const [collapsed, toggleCollapsed] = useState(toCollapse)
@@ -98,7 +98,6 @@ const BuildContainer = React.memo(({
 
   return (
     <div className={styles.buildBlock}>
-      {children}
       <div
         className="card"
         style={{
@@ -117,6 +116,7 @@ const BuildContainer = React.memo(({
           buildShortId,
           collapsed,
           isMasterBuildBranch,
+          isLatestMaster,
           mrId,
           mrTitle,
           mrShortId,

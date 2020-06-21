@@ -69,6 +69,7 @@ const BuildBlockHeader = ({
   childrenLatestBuildTags,
   collapsed,
   isMasterBuildBranch,
+  isLatestMaster,
   mrState,
   toggleCollapsed,
   projectOwnerId,
@@ -89,6 +90,7 @@ const BuildBlockHeader = ({
           mrId,
           mrTitle,
           buildHasMr,
+          isLatestMaster,
         }}
         />
         <ProjectIcon {...{

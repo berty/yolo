@@ -1,15 +1,18 @@
+@import "../../../assets/main.scss";
+
 .hr {
     position: relative;
     width: 90%;
-    margin: 1rem auto;
+    margin: 1.2rem auto;
     height: 1px;
 }
 
-.hr-text {
+.hrText {
     position: absolute;
     left: 50%;
-    margin-left: -50px;
-    top: -0.5rem;
-    width: min-content;
+    transform: translateX(-50%);
+    top: -1rem;
     white-space: nowrap;
+    padding: 0.33rem;
+    font-size: $font-size-sm;
 }
