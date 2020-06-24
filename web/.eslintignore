@@ -7,3 +7,5 @@ bower_components/
 packages/
 .git/
 tools/
+**/*.test.js
+tmp/

@@ -6,6 +6,7 @@ export const buildListRequest = ({ apiKey = '', queryObject = {} }) => {
     method: 'get',
     baseURL: `${process.env.API_SERVER}/api/build-list`,
     params: { ...queryObject },
+
     paramsSerializer: (params) => queryString.stringify(params),
     headers: {
       Authorization: `Basic ${apiKey}`,

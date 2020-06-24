@@ -1,4 +1,6 @@
 import React, { useMemo, Fragment } from 'react'
+// eslint-disable-next-line no-unused-vars
+import { uniq } from 'lodash'
 import {
   buildBranchIsMaster,
   buildsStateIsRunning, oneBuildResultHasBranchMaster,
@@ -14,15 +16,16 @@ import Divider from './Divider/Divider'
 
 const BuildList = React.memo(({ builds = [], loaded }) => {
   const oneBuildInResultsHasMaster = useMemo(() => oneBuildResultHasBranchMaster(builds), [builds])
-  const buildsByMr = useMemo(() => flagBuildsFirstOfDay(groupBuildsByMr(builds)), [builds])
-  const latestMasterBuildsForProjects = !getIsArrayWithN(buildsByMr, 2) || !oneBuildInResultsHasMaster ? [] : getLatestMasterBuildsForProjects(buildsByMr)
+  const buildsByMr = useMemo(() => groupBuildsByMr(builds), [builds])
+  const buildsByMrWithDateFlags = useMemo(() => flagBuildsFirstOfDay(buildsByMr), [buildsByMr])
+  const latestMasterBuildsForProjects = !getIsArrayWithN(buildsByMrWithDateFlags, 2) || !oneBuildInResultsHasMaster ? [] : getLatestMasterBuildsForProjects(buildsByMrWithDateFlags)
   const NoBuilds = () => <div>No results match your query.</div>
 
   return !builds.length && loaded ? (
     <NoBuilds />
   ) : (
     <div className="container">
-      {latestMasterBuildsForProjects.length > 0 && buildsByMr
+      {latestMasterBuildsForProjects.length > 0 && buildsByMrWithDateFlags
         .filter((_, i) => latestMasterBuildsForProjects.includes(i))
         .map((build, i) => (
           <BuildContainer
@@ -33,7 +36,7 @@ const BuildList = React.memo(({ builds = [], loaded }) => {
             hasRunningBuilds={buildsStateIsRunning(build.allBuildsForMr, builds)}
           />
         ))}
-      {buildsByMr.map((build, i) => ( // The i is important to get day dividers, so don't change length of this array
+      {buildsByMrWithDateFlags.map((build, i) => ( // The i is important to get day dividers, so don't change length of this array
         (
           <Fragment key={`${build.id}-${i}`}>
             {build.buildIsFirstOfDay && (

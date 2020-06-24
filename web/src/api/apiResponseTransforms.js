@@ -14,13 +14,12 @@ import { BRANCH } from '../constants'
  */
 export const flagBuildsFirstOfDay = (sortedTopLevelBuilds) => Array.isArray(sortedTopLevelBuilds)
   && sortedTopLevelBuilds.reduce((acc, build, i) => {
-    const isFirstBuild = i === 0
     const { created_at: buildCreatedAt = null } = build
     const { created_at: laterBuildCreatedAt = null } = acc[i - 1] || {}
     acc[i] = {
       ...build,
       buildIsFirstOfDay:
-        isFirstBuild || !!getIsNextDay(buildCreatedAt, laterBuildCreatedAt),
+        !!getIsNextDay(buildCreatedAt, laterBuildCreatedAt),
     }
     return acc
   }, [])
@@ -31,7 +30,7 @@ export const flagBuildsFirstOfDay = (sortedTopLevelBuilds) => Array.isArray(sort
  * each int corresponds to builds indices in state.builds
  * with the same merge request ID
  */
-const groupByMr = (acc = {}, build, i) => {
+export const groupByMr = (acc = {}, build, i) => {
   const {
     has_mergerequest: hasMergeRequest,
     has_mergerequest_id: buildMrId,
@@ -89,6 +88,7 @@ export const getLatestMasterBuildsForProjects = (sortedTopLevelBuilds) => {
       .findIndex((build) => build.has_project_id
         && build.has_project_id === p
         && getStrEquNormalized(build.branch, BRANCH.MASTER)))
+    .filter((index) => index > -1)
   return latestMasterBuildPerProject
 }
 
