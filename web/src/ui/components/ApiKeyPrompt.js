@@ -1,11 +1,11 @@
-import React, {
-  useState, useRef, useEffect, useContext,
-} from 'react'
 import classNames from 'classnames'
-import { useHistory } from 'react-router-dom'
+import React, {
+  useContext, useEffect, useRef, useState,
+} from 'react'
+import { useHistory, useLocation } from 'react-router-dom'
 import { setAuthCookie } from '../../api/cookies'
-import { getSafeStr } from '../../util/getters'
 import { ThemeContext } from '../../store/ThemeStore'
+import { getSafeStr } from '../../util/getters'
 
 const ApiKeyPrompt = ({
   failedKey, authIsPending, updateState,
@@ -15,6 +15,7 @@ const ApiKeyPrompt = ({
   const submitBtnClass = classNames('btn', 'btn-primary', { disabled: authIsPending || !formApiKey })
   const inputEl = useRef(null)
   const history = useHistory()
+  const { search: locationSearch } = useLocation()
   useEffect(() => inputEl.current.focus())
 
   const onFormSubmit = (e) => {
@@ -26,7 +27,10 @@ const ApiKeyPrompt = ({
       authIsPending: true,
     })
     inputEl.current.value = ''
-    history.push('/')
+    history.push({
+      path: '/',
+      search: locationSearch,
+    })
   }
   useEffect(() => { inputEl.current.focus() })
 

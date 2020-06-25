@@ -17,6 +17,7 @@ import {
   ArtifactFilter, BranchFilter, BuildDriverFilter, BuildStateFilter, ProjectFilter,
 } from './FilterModalWidgets'
 import FilterModalWrapper from './FilterModalWrapper'
+import { useRedirectHome } from '../../../hooks/queryHooks'
 
 const ProjectWidgets = ({
   selectedDrivers, setSelectedDrivers, selectedArtifactKinds, setSelectedArtifactKinds, selectedProjects, setSelectedProjects,
@@ -73,6 +74,7 @@ const BuildStateWidgets = ({ selectedBuildStates, setSelectedBuildStates }) => (
 const FilterModal = ({ closeAction }) => {
   const { theme, themeStyles } = useContext(ThemeContext)
   const { state, updateState, dispatch } = useContext(GlobalContext)
+  const { redirectHome } = useRedirectHome()
   const [selectedDrivers, setSelectedDrivers] = useState([
     ...state.uiFilters.build_driver,
   ])
@@ -164,6 +166,7 @@ const FilterModal = ({ closeAction }) => {
             dispatch({ type: actions.LOGOUT })
             dispatch({ type: actions.UPDATE_UI_FILTERS, payload: {} })
             closeAction()
+            redirectHome()
           }}
         >
           <LogOut height="14" color={theme.icon.filterSelected} />

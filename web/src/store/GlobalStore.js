@@ -10,10 +10,10 @@
  * Tell ekelen to refactor me
  */
 
-import React, { useReducer } from 'react'
 import {
-  cloneDeep, isEqual, omit, keys, pick, has,
+  cloneDeep, has, isEqual, keys, omit, pick,
 } from 'lodash'
+import React, { useReducer } from 'react'
 import { retrieveAuthCookie } from '../api/cookies'
 import {
   actions,

@@ -1,9 +1,17 @@
-import { useLocation, useHistory } from 'react-router-dom'
-import { useContext, useEffect } from 'react'
+import { useCallback, useContext, useEffect } from 'react'
+import { useHistory, useLocation } from 'react-router-dom'
 import { requestBuilds } from '../api'
-import { getFallbackQueryString, getFiltersFromUrlQuery } from '../store/globalStoreHelpers'
-import { GlobalContext } from '../store/GlobalStore'
 import { actions } from '../constants'
+import { GlobalContext } from '../store/GlobalStore'
+import { getFallbackQueryString, getFiltersFromUrlQuery } from '../store/globalStoreHelpers'
+
+export const useRedirectHome = () => {
+  const history = useHistory()
+  const redirectHome = useCallback(() => history.push({
+    path: '/',
+  }), [history])
+  return { redirectHome }
+}
 
 /**
  * Adds query params to URL bar if there are none
