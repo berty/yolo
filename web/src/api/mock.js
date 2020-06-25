@@ -8,7 +8,7 @@ import axios from 'axios'
  */
 export const mockBuildListRequest = () => axios.get(`${process.env.MOCK_DATA_FILE_ENDPOINT}`)
   .then(async (response) => {
-    await new Promise((r) => setTimeout(r, 3000))
+    await new Promise((r) => setTimeout(r, 1000))
     return response
   })
   .then((response) => {

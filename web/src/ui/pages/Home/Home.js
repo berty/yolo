@@ -17,9 +17,6 @@
 import Cookies from 'js-cookie'
 import React, { useContext, useEffect, useState } from 'react'
 import { useRecursiveTimeout } from '../../../hooks/useRecursiveTimeout'
-import { useRedirectOnEmptyQuery } from '../../../hooks/useRedirectOnEmptyQuery'
-import { useRequestOnQueryChange } from '../../../hooks/useRequestOnQueryChange'
-import { useSetFiltersOnQueryChange } from '../../../hooks/useSetFiltersOnQueryChange'
 import { GlobalContext } from '../../../store/GlobalStore'
 import { ThemeContext } from '../../../store/ThemeStore'
 import ApiKeyPrompt from '../../components/ApiKeyPrompt'
@@ -30,6 +27,7 @@ import Header from '../../components/Header/Header'
 import ProtocolDisclaimer from '../../components/ProtocolDisclaimer'
 import ShowFiltersButton from '../../components/ShowFiltersButton'
 import styles from './Home.module.scss'
+import { useRedirectOnEmptyQuery, useSetFiltersOnQueryChange, useRequestOnQueryChange } from '../../../hooks/queryHooks'
 
 const Home = () => {
   const { theme } = useContext(ThemeContext)

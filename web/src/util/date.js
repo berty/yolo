@@ -21,6 +21,7 @@ export const getIsNextDay = (
   rawDateItemPrevious = '',
   formatString = 'YYYY-MM-DDTHH:mm:ssZ',
 ) => {
+  if (!rawDateItemPrevious) return true
   const dayItem = getDay(rawDateItem, formatString)
   const dayItemPrevious = getDay(rawDateItemPrevious, formatString)
   if (!dayItem || !dayItemPrevious) return false

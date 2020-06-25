@@ -71,7 +71,7 @@ export default merge(common, {
       },
       {
         test: /\.jsx?$/,
-        exclude: /node_modules/,
+        exclude: /node_modules|\.test.jsx?$/,
         use: ['babel-loader'],
       },
       {
