@@ -14,6 +14,7 @@ import { getArtifactKindIcon } from '../../styleTools/brandIcons.js'
 import OutlineWidget from '../OutlineWidget/OutlineWidget.js'
 import styles from './Filters.module.scss'
 import IconProjectBertyMessenger from '../../../assets/svg/IconProjectBertyMessenger'
+import { useRedirectHome } from '../../../hooks/queryHooks'
 
 const Filters = ({ onFilterClick = () => { } }) => {
   const {
@@ -29,6 +30,7 @@ const Filters = ({ onFilterClick = () => { } }) => {
     },
     updateState,
   } = useContext(GlobalContext)
+  const { redirectHome } = useRedirectHome()
 
   const FilterMessenger = () => (projects.includes(PROJECT.messenger) && (
     <OutlineWidget
@@ -156,6 +158,7 @@ const Filters = ({ onFilterClick = () => { } }) => {
         removeAuthCookie()
         dispatch({ type: actions.LOGOUT })
         dispatch({ type: actions.UPDATE_UI_FILTERS, payload: {} })
+        redirectHome()
       }}
       iconComponent={<LogOut />}
       text="Logout"
