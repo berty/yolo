@@ -373,10 +373,11 @@ func roundTripperFromArgs(ctx context.Context, bearerSecretKey, httpCachePath st
 
 	if bearerSecretKey != "" {
 		zap.RedirectStdLog(logger.Named("bearer"))
-		agent, err := bearer.NewAgent(bearerSecretKey, log.Writer())
+		agent, err := bearer.NewAgent(bearerSecretKey)
 		if err != nil {
 			return nil, err
 		}
+		agent.SetLogger(log.Writer())
 		roundTripper = agent.Decorate(roundTripper)
 		// FIXME: return closer to call it at defer from main
 	}
