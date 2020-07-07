@@ -1,12 +1,12 @@
-# web build
-FROM            node:10 as web-build
+# web2 build
+FROM            node:12 as web2-build
 WORKDIR         /app
-COPY            ./web/package*.json ./web/yarn.* ./
+COPY            ./web2/package*.json ./web2/yarn.* ./
 RUN             npm install
-COPY            ./web ./
+COPY            ./web2 ./
 RUN             npm run build
 # checking successful build, until there is a better way
-RUN             cat dist/index.html
+RUN             cat build/index.html
 
 # go build
 FROM            golang:1.14-alpine as go-build
@@ -18,8 +18,8 @@ ENV             GO111MODULE=on \
 COPY            go.* ./
 RUN             go mod download
 COPY            go ./go/
-RUN             rm -rf web
-COPY            --from=web-build /app/dist web/dist
+RUN             rm -rf web2
+COPY            --from=web2-build /app/build web2/build
 WORKDIR         /go/src/berty.tech/yolo/go
 RUN		        make packr
 RUN             make install
