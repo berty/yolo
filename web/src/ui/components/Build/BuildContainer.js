@@ -4,7 +4,11 @@ import React, { useContext, useState } from 'react'
 import { ARTIFACT_KIND_NAMES, BRANCH, BUILD_STATE } from '../../../constants'
 import { GlobalContext } from '../../../store/GlobalStore'
 import { ThemeContext } from '../../../store/ThemeStore'
-import { getIsArray, getIsArrayWithN, getStrEquNormalized } from '../../../util/getters'
+import {
+  getIsArray,
+  getIsArrayWithN,
+  getStrEquNormalized,
+} from '../../../util/getters'
 import { getArtifactKindIcon } from '../../styleTools/brandIcons'
 import { tagColorStyles } from '../../styleTools/buttonStyler'
 import ShowingOlderBuildsTag from '../ShowingOlderBuildsTag'
@@ -27,15 +31,25 @@ const ArtifactKindIcon = ({ color, kind = '' }) => (
 )
 
 const LatestBuildArtifactsIcons = ({ buildHasArtifacts, theme }) => getIsArray(buildHasArtifacts) && (
-  <>
-    {buildHasArtifacts.map((a, i) => <ArtifactKindIcon kind={get(a, 'kind', ARTIFACT_KIND_NAMES.UnknownKind)} color={theme.bg.tagGreen} isFirst={(i === 0)} key={i} />)}
-  </>
+<>
+  {buildHasArtifacts.map((a, i) => (
+    <ArtifactKindIcon
+      kind={get(a, 'kind', ARTIFACT_KIND_NAMES.UnknownKind)}
+      color={theme.bg.tagGreen}
+      isFirst={i === 0}
+      key={i}
+    />
+  ))}
+</>
 )
 
-const AnyRunningBuildTags = ({ hasRunningBuilds, allBuildsForMr, theme }) => (hasRunningBuilds && getIsArrayWithN(hasRunningBuilds) && getIsArrayWithN(allBuildsForMr, 2)
-  && (
+const AnyRunningBuildTags = ({ hasRunningBuilds, allBuildsForMr, theme }) => hasRunningBuilds
+  && getIsArrayWithN(hasRunningBuilds)
+  && getIsArrayWithN(allBuildsForMr, 2) && (
     <Tag
-      title={`${hasRunningBuilds.length} build${hasRunningBuilds.length > 1 ? 's' : ''} running`}
+      title={`${hasRunningBuilds.length} build${
+        hasRunningBuilds.length > 1 ? 's' : ''
+      } running`}
       styles={{
         ...tagColorStyles({
           theme,
@@ -43,110 +57,122 @@ const AnyRunningBuildTags = ({ hasRunningBuilds, allBuildsForMr, theme }) => (ha
         }),
       }}
     >
-      {`${hasRunningBuilds.length} build${hasRunningBuilds.length > 1 ? 's' : ''} running`}
+      {`${hasRunningBuilds.length} build${
+        hasRunningBuilds.length > 1 ? 's' : ''
+      } running`}
     </Tag>
-  )
 )
 
-const BuildContainer = React.memo(({
-  build, toCollapse, hasRunningBuilds, isLatestMaster = false,
-}) => {
-  const { state } = useContext(GlobalContext)
-  const [collapsed, toggleCollapsed] = useState(toCollapse)
-  const [showingAllBuilds, toggleShowingAllBuilds] = useState(false)
-  const { theme } = useContext(ThemeContext)
+const BuildContainer = React.memo(
+  ({
+    build, toCollapse, hasRunningBuilds, isLatestMaster = false,
+  }) => {
+    const { state } = useContext(GlobalContext)
+    const [collapsed, setCollapsed] = useState(toCollapse)
+    const [showingAllBuilds, toggleShowingAllBuilds] = useState(false)
+    const { theme } = useContext(ThemeContext)
 
-  const {
-    short_id: buildShortId = '',
-    id: buildId = '',
-    branch: buildBranch = '',
-    state: buildState = '',
-    has_mergerequest: buildHasMr = null,
-    has_artifacts: buildHasArtifacts = null,
-    has_project: buildHasProject = null,
-    has_mergerequest: {
-      short_id: mrShortId = '',
-      id: mrId = '',
-      title: mrTitle = '',
-      state: mrState = '',
-      has_author: {
-        name: buildAuthorName = '',
-        id: buildAuthorId = '',
-        avatar_url: buildAuthorAvatarUrl = '',
+    const toggleCollapsed = () => setCollapsed(!collapsed)
+
+    const {
+      short_id: buildShortId = '',
+      id: buildId = '',
+      branch: buildBranch = '',
+      state: buildState = '',
+      has_mergerequest: buildHasMr = null,
+      has_artifacts: buildHasArtifacts = null,
+      has_project: buildHasProject = null,
+      has_mergerequest: {
+        short_id: mrShortId = '',
+        id: mrId = '',
+        title: mrTitle = '',
+        state: mrState = '',
+        has_author: {
+          name: buildAuthorName = '',
+          id: buildAuthorId = '',
+          avatar_url: buildAuthorAvatarUrl = '',
+        } = {},
       } = {},
-    } = {},
-    allBuildsForMr = [],
-  } = build || {}
+      allBuildsForMr = [],
+    } = build || {}
 
-  const {
-    has_owner: {
-      id: projectOwnerId = '',
-      avatar_url: projectOwnerAvatarUrl = '',
-    } = {},
-  } = buildHasProject || {}
+    const {
+      has_owner: {
+        id: projectOwnerId = '',
+        avatar_url: projectOwnerAvatarUrl = '',
+      } = {},
+    } = buildHasProject || {}
 
-  const isMasterBuildBranch = getStrEquNormalized(buildBranch, BRANCH.MASTER)
+    const isMasterBuildBranch = getStrEquNormalized(buildBranch, BRANCH.MASTER)
 
-  const LatestBuildStateTags = () => collapsed && (
+    const LatestBuildStateTags = () => collapsed && (
     <>
       <BuildStateTag {...{ theme, buildState, buildId }} />
       <LatestBuildArtifactsIcons {...{ theme, buildHasArtifacts }} />
       <ShowingOlderBuildsTag nOlderBuilds={allBuildsForMr.length - 1} />
-      <AnyRunningBuildTags {...{ hasRunningBuilds, allBuildsForMr, theme }} />
+      <AnyRunningBuildTags
+        {...{ hasRunningBuilds, allBuildsForMr, theme }}
+      />
     </>
-  )
+    )
 
-  return (
-    <div className={styles.buildBlock}>
-      <div
-        className="card"
-        style={{
-          backgroundColor: theme.bg.block,
-          boxShadow: theme.shadowStyle.block,
-          ...tablerOverrides.card,
-        }}
-        key={buildId}
-      >
-        <BuildBlockHeader {...{
-          buildAuthorName,
-          buildAuthorAvatarUrl,
-          buildAuthorId,
-          buildHasMr,
-          buildId,
-          buildShortId,
-          collapsed,
-          isMasterBuildBranch,
-          isLatestMaster,
-          mrId,
-          mrTitle,
-          mrShortId,
-          mrState,
-          toggleCollapsed,
-          projectOwnerId,
-          projectOwnerAvatarUrl,
-          ...{ childrenLatestBuildTags: <LatestBuildStateTags /> },
-        }}
-        />
-        {!collapsed
-          && allBuildsForMr
-            .filter((bIdx, i) => showingAllBuilds ? Number.isInteger(bIdx) : i === 0)
-            .map((buildidx, i) => (
-              <BuildAndMrContainer
-                build={state.builds[buildidx]}
-                buildHasMr={buildHasMr}
-                hasRunningBuilds={hasRunningBuilds}
-                isLatestBuild={i === 0}
-                key={i}
-                nOlderBuilds={i === 0 && getIsArrayWithN(allBuildsForMr, 2) ? allBuildsForMr.length - 1 : 0}
-                showingAllBuilds={showingAllBuilds}
-                toggleShowingAllBuilds={toggleShowingAllBuilds}
-              />
-            ))}
+    return (
+      <div className={styles.buildBlock}>
+        <div
+          className="card"
+          style={{
+            backgroundColor: theme.bg.block,
+            boxShadow: theme.shadowStyle.block,
+            ...tablerOverrides.card,
+          }}
+          key={buildId}
+        >
+          <BuildBlockHeader
+            {...{
+              buildAuthorName,
+              buildAuthorAvatarUrl,
+              buildAuthorId,
+              buildHasMr,
+              buildId,
+              buildShortId,
+              collapsed,
+              isMasterBuildBranch,
+              isLatestMaster,
+              mrId,
+              mrTitle,
+              mrShortId,
+              mrState,
+              toggleCollapsed,
+              projectOwnerId,
+              projectOwnerAvatarUrl,
+              ...{ childrenLatestBuildTags: <LatestBuildStateTags /> },
+            }}
+          />
+          {!collapsed
+            && allBuildsForMr
+              .filter((bIdx, i) => showingAllBuilds ? Number.isInteger(bIdx) : i === 0)
+              .map((buildidx, i) => (
+                <BuildAndMrContainer
+                  build={state.builds[buildidx]}
+                  buildHasMr={buildHasMr}
+                  hasRunningBuilds={hasRunningBuilds}
+                  isLatestBuild={i === 0}
+                  key={i}
+                  nOlderBuilds={
+                    i === 0 && getIsArrayWithN(allBuildsForMr, 2)
+                      ? allBuildsForMr.length - 1
+                      : 0
+                  }
+                  showingAllBuilds={showingAllBuilds}
+                  toggleShowingAllBuilds={toggleShowingAllBuilds}
+                />
+              ))}
+        </div>
       </div>
-    </div>
-  )
-})
+    )
+  },
+)
 
-BuildContainer.whyDidYouRender = true
+// BuildContainer.whyDidYouRender = true
 
 export default BuildContainer

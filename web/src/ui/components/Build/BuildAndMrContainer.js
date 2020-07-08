@@ -5,7 +5,17 @@ import ShowingOlderBuildsTag from '../ShowingOlderBuildsTag'
 import ArtifactRow from './ArtifactRow'
 import styles from './Build.module.scss'
 import {
-  BranchName, BuildCommit, BuildCreatedAt, BuildDriver, BuildLogs, BuildUpdatedAt, CommitIcon, GithubLink, MrDriver, MrState, SharableBuildLink,
+  BranchName,
+  BuildCommit,
+  BuildCreatedAt,
+  BuildDriver,
+  BuildLogs,
+  BuildUpdatedAt,
+  CommitIcon,
+  GithubLink,
+  MrDriver,
+  MrState,
+  SharableBuildLink,
 } from './BuildAndMrContainerWidgets'
 import BuildMessage from './BuildMessage'
 import { BuildStateTag } from './BuildWidgetsShared'
@@ -57,11 +67,17 @@ const BuildAndMrContainer = ({
 
   return (
     <>
-      <div className={styles.blockSectionContainer} style={{ color: sectionText, ...paddingTop }}>
+      <div
+        className={styles.blockSectionContainer}
+        style={{ color: sectionText, ...paddingTop }}
+      >
         <div className={styles.blockSectionLeftColumn}>
-          <CommitIcon {...{
-            theme, buildCommitId, mrCommitUrl,
-          }}
+          <CommitIcon
+            {...{
+              theme,
+              buildCommitId,
+              mrCommitUrl,
+            }}
           />
           {isLatestBuild && <SharableBuildLink isBlock {...{ buildId }} />}
         </div>
@@ -80,15 +96,24 @@ const BuildAndMrContainer = ({
           )}
           {isLatestBuild && buildMessage && (
             <div className={styles.blockSectionDetailRow}>
-              <BuildMessage {...{
-                buildMessage, theme, messageExpanded, toggleMessageExpanded,
-              }}
+              <BuildMessage
+                {...{
+                  buildMessage,
+                  theme,
+                  messageExpanded,
+                  toggleMessageExpanded,
+                }}
               />
             </div>
           )}
 
-          <div className={styles.blockSectionDetailRow} style={{ alignSelf: 'flex-start' }}>
-            {!isLatestBuild && <SharableBuildLink isBlock={false} {...{ buildId }} />}
+          <div
+            className={styles.blockSectionDetailRow}
+            style={{ alignSelf: 'flex-start' }}
+          >
+            {!isLatestBuild && (
+              <SharableBuildLink isBlock={false} {...{ buildId }} />
+            )}
             <div>{`Build ${buildShortId || buildId}`}</div>
 
             <BuildStateTag {...{ buildState, theme, buildId }} />
@@ -104,8 +129,7 @@ const BuildAndMrContainer = ({
           </div>
         )}
       </div>
-      {
-        showingArtifacts
+      {showingArtifacts
         && getIsArray(buildHasArtifacts)
         && buildHasArtifacts.map((artifact, i) => (
           <ArtifactRow
@@ -115,11 +139,12 @@ const BuildAndMrContainer = ({
             buildStartedAt={buildStartedAt}
             buildFinishedAt={buildFinishedAt}
             buildShortId={buildShortId}
-            isLastArtifactOfLatestBuild={(!!isLatestBuild && i === buildHasArtifacts.length - 1)}
+            isLastArtifactOfLatestBuild={
+              !!isLatestBuild && i === buildHasArtifacts.length - 1
+            }
             key={artifact.id}
           />
-        ))
-      }
+        ))}
       {isLatestBuild && nOlderBuilds > 0 && (
         <section className={styles.showingOlderBuildsWrapper}>
           <ShowingOlderBuildsTag
@@ -133,6 +158,6 @@ const BuildAndMrContainer = ({
   )
 }
 
-BuildAndMrContainer.whyDidYouRender = true
+// BuildAndMrContainer.whyDidYouRender = true
 
 export default BuildAndMrContainer
