@@ -27,7 +27,11 @@ import Header from '../../components/Header/Header'
 import ProtocolDisclaimer from '../../components/ProtocolDisclaimer'
 import ShowFiltersButton from '../../components/ShowFiltersButton'
 import styles from './Home.module.scss'
-import { useRedirectOnEmptyQuery, useSetFiltersOnQueryChange, useRequestOnQueryChange } from '../../../hooks/queryHooks'
+import {
+  useRedirectOnEmptyQuery,
+  useSetFiltersOnQueryChange,
+  useRequestOnQueryChange,
+} from '../../../hooks/queryHooks'
 
 const Home = () => {
   const { theme } = useContext(ThemeContext)
@@ -47,10 +51,7 @@ const Home = () => {
 
   // Fetch data every 10 sec if state.autoRefeshOn is true
   useRecursiveTimeout(() => {
-    if (
-      state.autoRefreshOn
-      && !showingFilterModal
-      && !showingDisclaimerModal) {
+    if (state.autoRefreshOn && !showingFilterModal && !showingDisclaimerModal) {
       updateState({
         needsRefresh: true,
       })
@@ -65,14 +66,22 @@ const Home = () => {
 
   return (
     <div className={styles.homeContainer}>
-      <div className={styles.homepageWrapper} style={{ backgroundColor: theme.bg.page }}>
-        <Header onFilterClick={() => {
-          toggleShowFilters(true)
-        }}
+      <div
+        className={styles.homepageWrapper}
+        style={{ backgroundColor: theme.bg.page }}
+      >
+        <Header
+          onFilterClick={() => {
+            toggleShowFilters(true)
+          }}
         />
         {state.error && <ErrorDisplay error={state.error} />}
         {state.error && state.error.status === 401 && (
-          <ApiKeyPrompt failedKey={state.apiKey} updateState={updateState} authIsPending={state.authIsPending} />
+          <ApiKeyPrompt
+            failedKey={state.apiKey}
+            updateState={updateState}
+            authIsPending={state.authIsPending}
+          />
         )}
         {!state.error && (
           <BuildListContainer builds={state.builds} loaded={state.isLoaded} />
@@ -86,17 +95,18 @@ const Home = () => {
         <ProtocolDisclaimer closeAction={() => setDisclaimerAccepted(true)} />
       )}
       {!showingFilterModal && state.isAuthed && (
-        <ShowFiltersButton
-          clickAction={() => toggleShowFilters(true)}
-        />
+        <ShowFiltersButton clickAction={() => toggleShowFilters(true)} />
       )}
       {showingFilterModal && state.isAuthed && (
-        <FilterModal closeAction={() => toggleShowFilters(false)} needsFilterColors />
+        <FilterModal
+          closeAction={() => toggleShowFilters(false)}
+          needsFilterColors
+        />
       )}
     </div>
   )
 }
 
-Home.whyDidYouRender = true
+// Home.whyDidYouRender = true
 
 export default Home

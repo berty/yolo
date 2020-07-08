@@ -5,7 +5,10 @@ import ConditionallyWrappedComponent from '../ConditionallyWrappedComponent'
 import { ThemeContext } from '../../../store/ThemeStore'
 
 const Avatar = ({
-  theme, buildAuthorAvatarUrl, buildAuthorId, buildAuthorName,
+  theme,
+  buildAuthorAvatarUrl,
+  buildAuthorId,
+  buildAuthorName,
 }) => buildAuthorId && buildAuthorAvatarUrl ? (
   <a href={buildAuthorId} title={buildAuthorId}>
     <img src={buildAuthorAvatarUrl} alt={buildAuthorId} />
@@ -17,9 +20,7 @@ const Avatar = ({
   />
 )
 
-const AuthorName = ({
-  theme, buildAuthorId, buildAuthorName,
-}) => (
+const AuthorName = ({ theme, buildAuthorId, buildAuthorName }) => (
   <ConditionallyWrappedComponent
     condition={!!buildAuthorId}
     wrapper={(children) => (
@@ -37,22 +38,37 @@ const AuthorName = ({
 )
 
 const Author = ({
-  buildAuthorName = '', buildAuthorId = '', buildAuthorAvatarUrl = '',
+  buildAuthorName = '',
+  buildAuthorId = '',
+  buildAuthorAvatarUrl = '',
 }) => {
   const { theme } = useContext(ThemeContext)
 
   return (
-    <div className={styles['author-wrapper']}>
+    <div
+      className={styles['author-wrapper']}
+      onClick={(e) => {
+        e.stopPropagation()
+      }}
+    >
       <div className={styles['author-name-wrapper']}>
-        <AuthorName {...{
-          buildAuthorId, buildAuthorName, buildAuthorAvatarUrl, theme,
-        }}
+        <AuthorName
+          {...{
+            buildAuthorId,
+            buildAuthorName,
+            buildAuthorAvatarUrl,
+            theme,
+          }}
         />
       </div>
       <div className={styles['author-avatar-wrapper']}>
-        <Avatar {...{
-          buildAuthorAvatarUrl, buildAuthorId, buildAuthorName, theme,
-        }}
+        <Avatar
+          {...{
+            buildAuthorAvatarUrl,
+            buildAuthorId,
+            buildAuthorName,
+            theme,
+          }}
         />
       </div>
     </div>
