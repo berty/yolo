@@ -33,6 +33,7 @@ import (
 	"golang.org/x/oauth2"
 	"moul.io/godev"
 	"moul.io/hcfilters"
+	"moul.io/u"
 )
 
 func main() {
@@ -51,6 +52,7 @@ func yolo(args []string) error {
 		withCache          bool
 		maxBuilds          int
 		bearerSecretKey    string
+		bearerEnvironment  string
 		buildkiteToken     string
 		githubToken        string
 		bintrayUsername    string
@@ -96,6 +98,7 @@ func yolo(args []string) error {
 	serverFlagSet.StringVar(&basicAuth, "basic-auth-password", "", "if set, enables basic authentication")
 	serverFlagSet.StringVar(&realm, "realm", "Yolo", "authentication Realm")
 	serverFlagSet.StringVar(&bearerSecretKey, "bearer-secretkey", "", "optional Bearer.sh Secret Key")
+	serverFlagSet.StringVar(&bearerEnvironment, "bearer-environment", "development", "project's environment on Bearer.sh")
 	serverFlagSet.StringVar(&authSalt, "auth-salt", "", "salt used to generate authentication tokens at the end of the URLs")
 	serverFlagSet.StringVar(&httpCachePath, "http-cache-path", "", "if set, will cache http client requests")
 	storeFlagSet.StringVar(&dbStorePath, "db-path", ":memory:", "DB Store path")
@@ -114,10 +117,8 @@ func yolo(args []string) error {
 			ctx, cancel := context.WithCancel(ctx)
 			defer cancel()
 
-			roundTripper, err := roundTripperFromArgs(ctx, bearerSecretKey, httpCachePath, logger)
-			if err != nil {
-				return err
-			}
+			roundTripper, rtCloser := roundTripperFromArgs(ctx, bearerSecretKey, bearerEnvironment, httpCachePath, logger)
+			defer rtCloser()
 			http.DefaultTransport = roundTripper
 
 			db, err := dbFromArgs(dbStorePath, logger)
@@ -368,18 +369,22 @@ func dbFromArgs(dbPath string, logger *zap.Logger) (*gorm.DB, error) {
 	return db, nil
 }
 
-func roundTripperFromArgs(ctx context.Context, bearerSecretKey, httpCachePath string, logger *zap.Logger) (http.RoundTripper, error) {
+func roundTripperFromArgs(ctx context.Context, bearerSecretKey, bearerEnvironment, httpCachePath string, logger *zap.Logger) (http.RoundTripper, func()) {
 	roundTripper := http.DefaultTransport
+	closer := func() {}
 
 	if bearerSecretKey != "" {
 		zap.RedirectStdLog(logger.Named("bearer"))
-		agent, err := bearer.NewAgent(bearerSecretKey)
-		if err != nil {
-			return nil, err
-		}
-		agent.SetLogger(log.Writer())
+		agent := bearer.New(bearerSecretKey,
+			//bearer.WithLogger(log.Writer()),
+			bearer.WithEnvironment(bearerEnvironment),
+		)
 		roundTripper = agent.Decorate(roundTripper)
-		// FIXME: return closer to call it at defer from main
+		closer = u.CombineFuncs(closer,
+			func() {
+				_ = agent.Close()
+			},
+		)
 	}
 
 	if httpCachePath != "" {
@@ -397,5 +402,5 @@ func roundTripperFromArgs(ctx context.Context, bearerSecretKey, httpCachePath st
 		}
 	}
 
-	return roundTripper, nil
+	return roundTripper, closer
 }
