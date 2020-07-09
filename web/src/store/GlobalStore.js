@@ -16,6 +16,7 @@ import {
 import React, { useReducer } from 'react'
 import { retrieveAuthCookie } from '../api/cookies'
 import { actions, PROJECT } from '../constants'
+import { getMobileOperatingSystem } from '../util/browser'
 
 export const GlobalContext = React.createContext()
 
@@ -27,7 +28,7 @@ export const INITIAL_STATE = {
   isAuthed: false,
   isLoaded: false,
   needsRefresh: true,
-  userAgent: '',
+  userAgent: getMobileOperatingSystem(),
   uiFilters: {
     artifact_kinds: [],
     build_driver: [],

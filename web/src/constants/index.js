@@ -1,5 +1,11 @@
 import * as actions from './actions.js'
 
+export const USERAGENT = {
+  iOS: 'iOS',
+  Android: 'Android',
+  'Unknown OS': 'Unknown OS',
+}
+
 export const DEFAULT_RESULT_REQUEST_LIMIT = 25
 
 export const KIND_TO_PLATFORM = {
@@ -58,7 +64,10 @@ export const PROJECT_NAME = {
   UnknownProject: 'Unknown Project',
 }
 
-export const PROJECTS = Object.values(PROJECT).slice(0, Object.values(PROJECT).length - 2)
+export const PROJECTS = Object.values(PROJECT).slice(
+  0,
+  Object.values(PROJECT).length - 2,
+)
 
 export const BUILD_DRIVER_VALUE = {
   UnknownDriver: '0',
