@@ -15,17 +15,13 @@ import {
 } from 'lodash'
 import React, { useReducer } from 'react'
 import { retrieveAuthCookie } from '../api/cookies'
-import {
-  actions,
-  PROJECT,
-} from '../constants'
+import { actions, PROJECT } from '../constants'
 
 export const GlobalContext = React.createContext()
 
 export const INITIAL_STATE = {
   apiKey: retrieveAuthCookie() || null,
   authIsPending: false,
-  autoRefreshOn: false,
   builds: [],
   error: null,
   isAuthed: false,
@@ -77,7 +73,6 @@ function reducer(state, action) {
 
 export const GlobalStore = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE)
-
 
   // custom actions can go here; for now we just have one
   // 🚧 not cool, we need to split this so we don't get redundant re-renders

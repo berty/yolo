@@ -91,7 +91,7 @@ const Home = () => {
           style={{ backgroundColor: theme.bg.block }}
         />
       </div>
-      {state.showingDisclaimerModal && (
+      {showingDisclaimerModal && (
         <ProtocolDisclaimer closeAction={() => setDisclaimerAccepted(true)} />
       )}
       {!showingFilterModal && state.isAuthed && (
