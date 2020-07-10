@@ -1,15 +1,1 @@
-<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg" style="vector-effect: non-scaling-stroke;" preserveAspectRatio="xMidYMid meet">
- <metadata style="vector-effect: non-scaling-stroke;">Created by potrace 1.16, written by Peter Selinger 2001-2019</metadata>
-
- <g>
-  <title>background</title>
-  <rect fill="none" id="canvas_background" height="102" width="102" y="-1" x="-1"/>
- </g>
- <g>
-  <title>Layer 1</title>
-  <g transform="translate(0, 225) scale(0.1, -0.1)" id="svg_1" fill="black">
-   <path fill="#ffffff" id="svg_2" d="m455,2140l-69,-70l22,-22l22,-22l30,29c16,16 32,26 35,23c3,-3 4,-105 3,-227l-3,-223l-102,104l-103,103l40,3c38,3 40,5 40,38l0,35l-102,-3l-103,-3l-3,-102l-3,-103l36,0l35,0l0,47l0,48l148,-148l148,-148l144,145c131,132 163,157 159,123c-1,-7 -1,-24 0,-39c1,-24 5,-28 31,-28l30,0l0,105l0,106l-102,-3l-103,-3l-3,-32c-3,-31 -2,-32 43,-35l46,-3l-106,-105l-105,-105l0,235l0,234l35,-34l35,-34l22,22l22,22l-69,70c-38,39 -72,70 -75,70c-3,0 -37,-31 -75,-70z"/>
-   <path fill="#ffffff" id="svg_3" d="m160,1320l0,-30l365,0l365,0l0,30l0,30l-365,0l-365,0l0,-30z"/>
-  </g>
- </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" preserveAspectRatio="xMidYMid meet" style="vector-effect:non-scaling-stroke"><metadata style="vector-effect:non-scaling-stroke">Created by potrace 1.16, written by Peter Selinger 2001-2019</metadata><g><title>background</title><rect id="canvas_background" width="102" height="102" x="-1" y="-1" fill="none"/></g><g><title>Layer 1</title><g id="svg_1" fill="#000" transform="translate(0, 225) scale(0.1, -0.1)"><path id="svg_2" fill="#fff" d="m455,2140l-69,-70l22,-22l22,-22l30,29c16,16 32,26 35,23c3,-3 4,-105 3,-227l-3,-223l-102,104l-103,103l40,3c38,3 40,5 40,38l0,35l-102,-3l-103,-3l-3,-102l-3,-103l36,0l35,0l0,47l0,48l148,-148l148,-148l144,145c131,132 163,157 159,123c-1,-7 -1,-24 0,-39c1,-24 5,-28 31,-28l30,0l0,105l0,106l-102,-3l-103,-3l-3,-32c-3,-31 -2,-32 43,-35l46,-3l-106,-105l-105,-105l0,235l0,234l35,-34l35,-34l22,22l22,22l-69,70c-38,39 -72,70 -75,70c-3,0 -37,-31 -75,-70z"/><path id="svg_3" fill="#fff" d="m160,1320l0,-30l365,0l365,0l0,30l0,30l-365,0l-365,0l0,-30z"/></g></g></svg>
