@@ -107,7 +107,10 @@ const BuildBlockHeader = ({
     <>
       <div
         className={blockHeaderContainerClassNames}
-        onClick={() => toggleCollapsed()}
+        onClick={(e) => {
+          e.stopPropagation()
+          toggleCollapsed()
+        }}
       >
         <BlockIcon {...{ theme, buildHasMr, mrState }} />
         <BuildBlockTitle
