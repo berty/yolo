@@ -107,6 +107,7 @@ export const PROJECT_ARTIFACT_KINDS = {
 
 export const BRANCH = {
   MASTER: 'MASTER',
+  ALL: 'ALL',
 }
 
 export const BRANCH_TO_DISPLAY_NAME = {
@@ -115,7 +116,7 @@ export const BRANCH_TO_DISPLAY_NAME = {
   ALL: 'All',
 }
 
-export const IMPLEMENTED_BRANCHES = ['ALL']
+export const IMPLEMENTED_BRANCHES = ['ALL', 'MASTER']
 
 export const MR_STATE = {
   UnknownState: 'UnknownState',

@@ -39,6 +39,7 @@ const Filters = ({ onFilterClick = () => {} }) => {
         artifact_kinds: artifactKinds,
         build_driver: buildDrivers,
         build_state: buildStates,
+        branchFilter,
       },
       userAgent,
       calculatedFilters: { projects },
@@ -102,7 +103,7 @@ const Filters = ({ onFilterClick = () => {} }) => {
 
   const FiltersBranchWidget = () => (
     <OutlineWidget
-      text="All"
+      text={branchFilter || 'All'}
       selected
       interactive
       iconComponent={<GitBranch />}
@@ -152,10 +153,8 @@ const Filters = ({ onFilterClick = () => {} }) => {
     </>
   )
 
-  const FiltersBuildDriver = () => (
-    buildDrivers.length
-      && (isMobile ? <FiltersBuildDriverMobile /> : <TextBuildDrivers />)
-  )
+  const FiltersBuildDriver = () => buildDrivers.length
+    && (isMobile ? <FiltersBuildDriverMobile /> : <TextBuildDrivers />)
 
   const ShowRunningBuilds = () => getIsArrayWithN(buildStates, 1) && (
   <>

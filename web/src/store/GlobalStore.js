@@ -33,6 +33,7 @@ export const INITIAL_STATE = {
     artifact_kinds: [],
     build_driver: [],
     build_state: [],
+    branch: [],
   },
   calculatedFilters: {
     projects: [PROJECT.messenger],
@@ -47,13 +48,19 @@ function reducer(state, action) {
     case actions.UPDATE_STATE:
       return { ...state, ...action.payload }
     case actions.UPDATE_UI_FILTERS: {
-      const { artifact_kinds = [], build_driver = [], build_state = [] } = action.payload || {}
+      const {
+        artifact_kinds = [],
+        build_driver = [],
+        build_state = [],
+        branch = [],
+      } = action.payload || {}
       return {
         ...state,
         uiFilters: {
           artifact_kinds,
           build_driver,
           build_state,
+          branch,
         },
       }
     }

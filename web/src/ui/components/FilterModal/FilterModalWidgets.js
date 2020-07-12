@@ -10,6 +10,7 @@ import {
   PROJECT_ARTIFACT_KINDS,
   PROJECT_BUILD_DRIVER,
   PROJECT_NAME,
+  BRANCH,
 } from '../../../constants'
 import { addOrRemoveFromArray } from '../../../util/getters'
 import { getArtifactKindIcon } from '../../styleTools/brandIcons'
@@ -127,9 +128,16 @@ export const BuildStateFilter = ({
   )
 }
 
-export const BranchFilter = ({ branchName, selectedBranches }) => {
-  const selected = selectedBranches.includes(branchName)
-  const implemented = branchName.toUpperCase() === 'ALL'
+export const BranchFilter = ({
+  branchName,
+  selectedBranches,
+  setSelectedBranch,
+}) => {
+  const selected = selectedBranches
+    .map((b) => b.toUpperCase())
+    .includes(branchName.toUpperCase())
+  const implemented = branchName.toUpperCase() === BRANCH.ALL
+    || branchName.toUpperCase() === BRANCH.MASTER
   const branchIcon = getVcsIcon(branchName)
 
   return (
@@ -141,7 +149,21 @@ export const BranchFilter = ({ branchName, selectedBranches }) => {
       selected={selected}
       notImplemented={!implemented}
       textUnderneath
-      interactive={false}
+      interactive
+      onClick={() => {
+        if (implemented) {
+          switch (branchName.toUpperCase()) {
+            case BRANCH.ALL:
+              setSelectedBranch(['All'])
+              break
+            case BRANCH.MASTER:
+              setSelectedBranch(['Master'])
+              break
+            default:
+              break
+          }
+        }
+      }}
     />
   )
 }
