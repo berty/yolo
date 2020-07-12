@@ -8,10 +8,9 @@
     position: absolute;
     z-index: 1050;
     top: 33vh;
-    margin: 0 auto 0;
+    margin-left: calc(50% - 45px);
     width: 70px;
     text-align: center;
-    color: white;
 }
 
 .spinner > div {
@@ -25,11 +24,11 @@
 }
 
 .light > div {
-    background-color: $body-color-light;
+    background-color: $body-bg-dark;
 }
 
 .dark > div {
-    background-color: $body-color-dark;
+    background-color: $body-color-light;
 }
 
 .spinner .bounce1 {

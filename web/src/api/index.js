@@ -3,11 +3,15 @@ import { mockBuildListRequest } from './mock'
 import { buildListRequest } from './requests'
 import { validateError } from './apiResponseTransforms'
 
-export const getBuildList = ({ apiKey = '', queryObject }) => (process.env.YOLO_UI_TEST === 'true'
+export const getBuildList = ({ apiKey = '', queryObject }) => process.env.YOLO_UI_TEST === 'true'
   ? mockBuildListRequest()
-  : buildListRequest({ apiKey, queryObject }))
+  : buildListRequest({ apiKey, queryObject })
 
-export const requestBuilds = ({ updateState = () => { }, locationSearch = '', apiKey = '' }) => {
+export const requestBuilds = ({
+  updateState = () => {},
+  locationSearch = '',
+  apiKey = '',
+}) => {
   if (!locationSearch) {
     return null
   }
@@ -43,4 +47,11 @@ export const requestBuilds = ({ updateState = () => { }, locationSearch = '', ap
         })
       },
     )
+    .finally(() => {
+      updateState({
+        autoRefreshOn: false,
+        isLoaded: true,
+        authIsPending: false,
+      })
+    })
 }
