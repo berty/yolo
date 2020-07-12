@@ -31,14 +31,19 @@ const PullDownContent = () => (
   />
 )
 
-export const PullToRefreshWrapper = ({ onRefresh, children, isAuthed }) => (
+export const PullToRefreshWrapper = ({
+  onRefresh,
+  children,
+  isAuthed,
+  isMobile,
+}) => (
   <PullToRefresh
     pullDownContent={<PullDownContent />}
     releaseContent={<ReleaseContent />}
     refreshContent={<RefreshContent />}
     pullDownThreshold={50}
     onRefresh={onRefresh}
-    triggerHeight={isAuthed ? 200 : 0}
+    triggerHeight={isAuthed && isMobile ? 200 : 0}
     // startInvisible
     backgroundColor="invisible"
   >

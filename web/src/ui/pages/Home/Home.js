@@ -35,6 +35,7 @@ import { PullToRefreshWrapper } from '../../components/PullToRefresh'
 import ShowFiltersButton from '../../components/ShowFiltersButton'
 import Spinner from '../../components/Spinner/Spinner'
 import styles from './Home.module.scss'
+import { USERAGENT } from '../../../constants'
 
 const Home = () => {
   const { theme } = useContext(ThemeContext)
@@ -106,6 +107,10 @@ const Home = () => {
         <PullToRefreshWrapper
           onRefresh={() => onPull()}
           isAuthed={state.isAuthed && !state.authIsPending}
+          isMobile={
+            state.userAgent === USERAGENT.Android
+            || state.userAgent === USERAGENT.iOS
+          }
         >
           <Page />
         </PullToRefreshWrapper>
