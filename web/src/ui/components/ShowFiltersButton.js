@@ -3,7 +3,11 @@ import { Sliders } from 'react-feather'
 import { ThemeContext } from '../../store/ThemeStore'
 
 const ShowFiltersButton = ({ clickAction, showingFiltersModal }) => {
-  const { theme: { bg: { btnPrimary } } } = useContext(ThemeContext)
+  const {
+    theme: {
+      bg: { btnPrimary },
+    },
+  } = useContext(ThemeContext)
 
   const showFiltersButtonStyle = {
     position: 'fixed',
@@ -18,10 +22,17 @@ const ShowFiltersButton = ({ clickAction, showingFiltersModal }) => {
     transform: 'rotate(90deg)',
     cursor: 'pointer',
     display: showingFiltersModal ? 'none' : 'flex',
+    zIndex: 2000,
   }
 
   return (
-    <div style={showFiltersButtonStyle} onClick={clickAction} onKeyDown={clickAction} tabIndex={0} role="button">
+    <div
+      style={showFiltersButtonStyle}
+      onClick={clickAction}
+      onKeyDown={clickAction}
+      tabIndex={0}
+      role="button"
+    >
       <Sliders color="white" size={20} />
     </div>
   )

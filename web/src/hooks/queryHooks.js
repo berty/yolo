@@ -3,13 +3,19 @@ import { useHistory, useLocation } from 'react-router-dom'
 import { requestBuilds } from '../api'
 import { actions } from '../constants'
 import { GlobalContext } from '../store/GlobalStore'
-import { getFallbackQueryString, getFiltersFromUrlQuery } from '../store/globalStoreHelpers'
+import {
+  getFallbackQueryString,
+  getFiltersFromUrlQuery,
+} from '../store/globalStoreHelpers'
 
 export const useRedirectHome = () => {
   const history = useHistory()
-  const redirectHome = useCallback(() => history.push({
-    path: '/',
-  }), [history])
+  const redirectHome = useCallback(
+    () => history.push({
+      path: '/',
+    }),
+    [history],
+  )
   return { redirectHome }
 }
 
@@ -19,27 +25,38 @@ export const useRedirectHome = () => {
  */
 export const useRedirectOnEmptyQuery = () => {
   const { search: locationSearch } = useLocation()
-  const { state: { userAgent }, updateState } = useContext(GlobalContext)
+  const {
+    state: { userAgent },
+    updateState,
+  } = useContext(GlobalContext)
   const history = useHistory()
-  useEffect(() => {
-    if (!locationSearch) {
-      const fallbackQueryString = getFallbackQueryString({ userAgent, updateState })
-      history.push({
-        pathname: '/',
-        search: fallbackQueryString,
-      })
-    }
-  },
-  // TODO: Bad; refactor
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  [locationSearch])
+  useEffect(
+    () => {
+      if (!locationSearch) {
+        const fallbackQueryString = getFallbackQueryString({
+          userAgent,
+          updateState,
+        })
+        history.push({
+          pathname: '/',
+          search: fallbackQueryString,
+        })
+      }
+    },
+    // TODO: Bad; refactor
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [locationSearch],
+  )
 }
 
 /**
- * Call API if query in URL bar changes
+ * Call API if query in URL bar changes and state.needsRefresh is true
  */
 export const useRequestOnQueryChange = () => {
-  const { state: { needsRefresh, apiKey }, updateState } = useContext(GlobalContext)
+  const {
+    state: { needsRefresh, apiKey },
+    updateState,
+  } = useContext(GlobalContext)
   const { search: locationSearch } = useLocation()
 
   useEffect(() => {
@@ -62,8 +79,7 @@ export const useSetFiltersOnQueryChange = () => {
       const { artifact_kinds, build_driver, build_state } = getFiltersFromUrlQuery({ locationSearch }) || {}
       dispatch({
         type: actions.UPDATE_UI_FILTERS,
-        payload:
-          { artifact_kinds, build_driver, build_state },
+        payload: { artifact_kinds, build_driver, build_state },
       })
     }
     if (locationSearch) updateFilters()

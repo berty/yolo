@@ -15,29 +15,38 @@
  */
 
 import Cookies from 'js-cookie'
+// import _ from "lodash";
 import React, { useContext, useEffect, useState } from 'react'
+import {
+  useRedirectOnEmptyQuery,
+  useRequestOnQueryChange,
+  useSetFiltersOnQueryChange,
+} from '../../../hooks/queryHooks'
 import { useRecursiveTimeout } from '../../../hooks/useRecursiveTimeout'
 import { GlobalContext } from '../../../store/GlobalStore'
 import { ThemeContext } from '../../../store/ThemeStore'
 import ApiKeyPrompt from '../../components/ApiKeyPrompt'
-import BuildListContainer from '../../components/BuildListContainer'
+import BuildList from '../../components/BuildList'
 import ErrorDisplay from '../../components/ErrorDisplay/ErrorDisplay'
 import FilterModal from '../../components/FilterModal/FilterModal'
 import Header from '../../components/Header/Header'
 import ProtocolDisclaimer from '../../components/ProtocolDisclaimer'
+import { PullToRefreshWrapper } from '../../components/PullToRefresh'
 import ShowFiltersButton from '../../components/ShowFiltersButton'
+import Spinner from '../../components/Spinner/Spinner'
 import styles from './Home.module.scss'
-import {
-  useRedirectOnEmptyQuery,
-  useSetFiltersOnQueryChange,
-  useRequestOnQueryChange,
-} from '../../../hooks/queryHooks'
+import { USERAGENT } from '../../../constants'
 
 const Home = () => {
   const { theme } = useContext(ThemeContext)
-  const { state, updateState } = useContext(GlobalContext)
+  const {
+    state,
+    state: { isLoaded },
+    updateState,
+  } = useContext(GlobalContext)
   const [showingFilterModal, toggleShowFilters] = useState(false)
   const [showingDisclaimerModal, toggleShowDisclaimer] = useState(false)
+  const onPull = () => Promise.resolve(updateState({ needsRefresh: true }))
 
   // Hide protocol warning popup
   const setDisclaimerAccepted = (accepted) => {
@@ -64,32 +73,47 @@ const Home = () => {
     toggleShowDisclaimer(!disclaimerAccepted)
   }, [])
 
+  const Page = () => (
+    <>
+      <Header
+        onFilterClick={() => {
+          toggleShowFilters(true)
+        }}
+      />
+      {state.error && <ErrorDisplay error={state.error} />}
+      {state.error && state.error.status === 401 && (
+        <ApiKeyPrompt
+          failedKey={state.apiKey}
+          updateState={updateState}
+          authIsPending={state.authIsPending}
+        />
+      )}
+      {!state.error && (
+        <BuildList builds={state.builds} loaded={state.isLoaded} />
+      )}
+      <div
+        className={styles.footer}
+        style={{ backgroundColor: theme.bg.block }}
+      />
+    </>
+  )
+
   return (
     <div className={styles.homeContainer}>
       <div
         className={styles.homepageWrapper}
         style={{ backgroundColor: theme.bg.page }}
       >
-        <Header
-          onFilterClick={() => {
-            toggleShowFilters(true)
-          }}
-        />
-        {state.error && <ErrorDisplay error={state.error} />}
-        {state.error && state.error.status === 401 && (
-          <ApiKeyPrompt
-            failedKey={state.apiKey}
-            updateState={updateState}
-            authIsPending={state.authIsPending}
-          />
-        )}
-        {!state.error && (
-          <BuildListContainer builds={state.builds} loaded={state.isLoaded} />
-        )}
-        <div
-          className={styles.footer}
-          style={{ backgroundColor: theme.bg.block }}
-        />
+        <PullToRefreshWrapper
+          onRefresh={() => onPull()}
+          isAuthed={state.isAuthed && !state.authIsPending}
+          isMobile={
+            state.userAgent === USERAGENT.Android
+            || state.userAgent === USERAGENT.iOS
+          }
+        >
+          <Page />
+        </PullToRefreshWrapper>
       </div>
       {showingDisclaimerModal && (
         <ProtocolDisclaimer closeAction={() => setDisclaimerAccepted(true)} />
@@ -103,6 +127,13 @@ const Home = () => {
           needsFilterColors
         />
       )}
+      {!isLoaded && (
+        <>
+          <div className="faded" />
+          <Spinner />
+        </>
+      )}
+      {/* <div>{JSON.stringify(_.omit(state, "builds"), null, 2)}</div> */}
     </div>
   )
 }

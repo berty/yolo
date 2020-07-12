@@ -18,12 +18,10 @@ export const flagBuildsFirstOfDay = (sortedTopLevelBuilds) => Array.isArray(sort
     const { created_at: laterBuildCreatedAt = null } = acc[i - 1] || {}
     acc[i] = {
       ...build,
-      buildIsFirstOfDay:
-        !!getIsNextDay(buildCreatedAt, laterBuildCreatedAt),
+      buildIsFirstOfDay: !!getIsNextDay(buildCreatedAt, laterBuildCreatedAt),
     }
     return acc
   }, [])
-
 
 /**
  * Adds entry {allBuildsForMr: Array<int>} to each build,
@@ -31,10 +29,7 @@ export const flagBuildsFirstOfDay = (sortedTopLevelBuilds) => Array.isArray(sort
  * with the same merge request ID
  */
 export const groupByMr = (acc = {}, build, i) => {
-  const {
-    has_mergerequest: hasMergeRequest,
-    has_mergerequest_id: buildMrId,
-  } = build || {}
+  const { has_mergerequest: hasMergeRequest, has_mergerequest_id: buildMrId } = build || {}
 
   if (!hasMergeRequest || !buildMrId) {
     return {
@@ -82,12 +77,15 @@ export const groupBuildsByMr = (builds) => values(builds.reduce(groupByMr, {}))
  * @return {Array<Number>}
  */
 export const getLatestMasterBuildsForProjects = (sortedTopLevelBuilds) => {
-  const uniqueProjects = uniq(sortedTopLevelBuilds.map((b) => b.has_project_id))
+  const uniqueProjects = uniq(
+    sortedTopLevelBuilds.map((b) => b.has_project_id),
+  )
   const latestMasterBuildPerProject = uniqueProjects
-    .map((p) => sortedTopLevelBuilds
-      .findIndex((build) => build.has_project_id
-        && build.has_project_id === p
-        && getStrEquNormalized(build.branch, BRANCH.MASTER)))
+    .map((p) => sortedTopLevelBuilds.findIndex(
+      (build) => build.has_project_id
+          && build.has_project_id === p
+          && getStrEquNormalized(build.branch, BRANCH.MASTER),
+    ))
     .filter((index) => index > -1)
   return latestMasterBuildPerProject
 }
@@ -98,7 +96,9 @@ export const getLatestMasterBuildsForProjects = (sortedTopLevelBuilds) => {
  * @return {Object<{humanMessage: string, status: number, statusText: string}>}
  */
 export const validateError = ({ error }) => {
-  const { message: axiosMessage } = error.toJSON()
+  const { message: axiosMessage } = error.toJSON
+    ? error.toJSON()
+    : { error: error.toString() }
   const {
     response: { data: customTopLevelMessage = '', status, statusText } = {
       data: '',
@@ -106,10 +106,15 @@ export const validateError = ({ error }) => {
       statusText: '',
     },
   } = error || {}
+  const { response = {} } = error || {}
   const {
-    response: { data: { message: customNestedMessage } = { data: { message: '' } } },
-  } = error || {}
-  const humanMessage = getSafeStr(customTopLevelMessage) || getSafeStr(customNestedMessage) || axiosMessage
+    data: { message: customNestedMessage = '' } = {
+      data: { message: '' },
+    },
+  } = response || {}
+  const humanMessage = getSafeStr(customTopLevelMessage)
+    || getSafeStr(customNestedMessage)
+    || axiosMessage
   return {
     humanMessage,
     status,

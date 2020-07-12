@@ -2,20 +2,39 @@
 import React, { useContext, useEffect } from 'react'
 import { hot } from 'react-hot-loader'
 import {
-  BrowserRouter as Router, Redirect, Route, Switch,
+  BrowserRouter as Router,
+  Redirect,
+  Route,
+  Switch,
 } from 'react-router-dom'
 import 'tabler-react/dist/Tabler.css'
 import './assets/main.scss'
-import { GlobalStore } from './store/GlobalStore'
+import { GlobalStore, GlobalContext } from './store/GlobalStore'
 import { ThemeContext, ThemeStore } from './store/ThemeStore'
 import Error404 from './ui/pages/Error404/Error404'
 import Home from './ui/pages/Home/Home'
+import { getMobileOperatingSystem } from './util/browser'
 
 const AppRouter = () => {
-  const { theme: { bg: { page: pageBgColor } } } = useContext(ThemeContext)
+  const {
+    theme: {
+      bg: { page: pageBgColor },
+    },
+  } = useContext(ThemeContext)
+  const {
+    state: { userAgent },
+    updateState,
+  } = useContext(GlobalContext)
   useEffect(() => {
     document.body.style.backgroundColor = pageBgColor
   }, [pageBgColor])
+  useEffect(() => {
+    if (!userAgent) {
+      updateState({
+        userAgent: getMobileOperatingSystem(),
+      })
+    }
+  }, [userAgent, updateState])
 
   return (
     <Router>
