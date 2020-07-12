@@ -126,6 +126,11 @@ const BuildContainer = React.memo(
             ...tablerOverrides.card,
           }}
           key={buildId}
+          onClick={() => {
+            if (collapsed) {
+              toggleCollapsed()
+            }
+          }}
         >
           <BuildBlockHeader
             {...{
