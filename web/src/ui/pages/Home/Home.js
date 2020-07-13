@@ -31,11 +31,9 @@ import ErrorDisplay from '../../components/ErrorDisplay/ErrorDisplay'
 import FilterModal from '../../components/FilterModal/FilterModal'
 import Header from '../../components/Header/Header'
 import ProtocolDisclaimer from '../../components/ProtocolDisclaimer'
-import { PullToRefreshWrapper } from '../../components/PullToRefresh'
 import ShowFiltersButton from '../../components/ShowFiltersButton'
 import Spinner from '../../components/Spinner/Spinner'
 import styles from './Home.module.scss'
-import { USERAGENT } from '../../../constants'
 
 const Home = () => {
   const { theme } = useContext(ThemeContext)
@@ -46,7 +44,7 @@ const Home = () => {
   } = useContext(GlobalContext)
   const [showingFilterModal, toggleShowFilters] = useState(false)
   const [showingDisclaimerModal, toggleShowDisclaimer] = useState(false)
-  const onPull = () => Promise.resolve(updateState({ needsRefresh: true }))
+  // const onPull = () => Promise.resolve(updateState({ needsRefresh: true }));
 
   // Hide protocol warning popup
   const setDisclaimerAccepted = (accepted) => {
@@ -104,16 +102,16 @@ const Home = () => {
         className={styles.homepageWrapper}
         style={{ backgroundColor: theme.bg.page }}
       >
-        <PullToRefreshWrapper
+        {/* <PullToRefreshWrapper
           onRefresh={() => onPull()}
           isAuthed={state.isAuthed && !state.authIsPending}
           isMobile={
-            state.userAgent === USERAGENT.Android
-            || state.userAgent === USERAGENT.iOS
+            state.userAgent === USERAGENT.Android ||
+            state.userAgent === USERAGENT.iOS
           }
-        >
-          <Page />
-        </PullToRefreshWrapper>
+        > */}
+        <Page />
+        {/* </PullToRefreshWrapper> */}
       </div>
       {showingDisclaimerModal && (
         <ProtocolDisclaimer closeAction={() => setDisclaimerAccepted(true)} />
