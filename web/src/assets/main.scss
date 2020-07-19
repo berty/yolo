@@ -1,13 +1,6 @@
 @import "variables";
 @import "breakpointMixins";
 
-html {
-    font-size: 12px;
-    @include xs {
-        font-size: 16px;
-    }
-}
-
 // global tabler css overrides
 
 .btn:focus {

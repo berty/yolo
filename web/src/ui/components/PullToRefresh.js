@@ -31,11 +31,8 @@ const PullDownContent = () => (
   />
 )
 
-export const PullToRefreshWrapper = ({
-  onRefresh,
-  children,
-  isAuthed,
-  isMobile,
+const PullToRefreshWrapper = ({
+  onRefresh, children, isAuthed, isMobile,
 }) => (
   <PullToRefresh
     pullDownContent={<PullDownContent />}
@@ -50,3 +47,5 @@ export const PullToRefreshWrapper = ({
     {children}
   </PullToRefresh>
 )
+
+export default PullToRefreshWrapper
