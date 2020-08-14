@@ -14,7 +14,7 @@ import (
 	"berty.tech/yolo/v2/go/pkg/bintray"
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"berty.tech/yolo/v2/go/pkg/yolosvc"
-	bearer "github.com/Bearer/bearer-go"
+	bearer "github.com/bearer/go-agent"
 	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/google/go-github/v31/github"
 	"github.com/gregjones/httpcache"
@@ -33,6 +33,7 @@ import (
 	"golang.org/x/oauth2"
 	"moul.io/godev"
 	"moul.io/hcfilters"
+	"moul.io/u"
 )
 
 func main() {
@@ -51,6 +52,7 @@ func yolo(args []string) error {
 		withCache          bool
 		maxBuilds          int
 		bearerSecretKey    string
+		bearerEnvironment  string
 		buildkiteToken     string
 		githubToken        string
 		bintrayUsername    string
@@ -96,6 +98,7 @@ func yolo(args []string) error {
 	serverFlagSet.StringVar(&basicAuth, "basic-auth-password", "", "if set, enables basic authentication")
 	serverFlagSet.StringVar(&realm, "realm", "Yolo", "authentication Realm")
 	serverFlagSet.StringVar(&bearerSecretKey, "bearer-secretkey", "", "optional Bearer.sh Secret Key")
+	serverFlagSet.StringVar(&bearerEnvironment, "bearer-environment", "development", "project's environment on Bearer.sh")
 	serverFlagSet.StringVar(&authSalt, "auth-salt", "", "salt used to generate authentication tokens at the end of the URLs")
 	serverFlagSet.StringVar(&httpCachePath, "http-cache-path", "", "if set, will cache http client requests")
 	storeFlagSet.StringVar(&dbStorePath, "db-path", ":memory:", "DB Store path")
@@ -114,7 +117,8 @@ func yolo(args []string) error {
 			ctx, cancel := context.WithCancel(ctx)
 			defer cancel()
 
-			roundTripper := roundTripperFromArgs(ctx, bearerSecretKey, httpCachePath, logger)
+			roundTripper, rtCloser := roundTripperFromArgs(ctx, bearerSecretKey, bearerEnvironment, httpCachePath, logger)
+			defer rtCloser()
 			http.DefaultTransport = roundTripper
 
 			db, err := dbFromArgs(dbStorePath, logger)
@@ -365,16 +369,22 @@ func dbFromArgs(dbPath string, logger *zap.Logger) (*gorm.DB, error) {
 	return db, nil
 }
 
-func roundTripperFromArgs(ctx context.Context, bearerSecretKey, httpCachePath string, logger *zap.Logger) http.RoundTripper {
+func roundTripperFromArgs(ctx context.Context, bearerSecretKey, bearerEnvironment, httpCachePath string, logger *zap.Logger) (http.RoundTripper, func()) {
 	roundTripper := http.DefaultTransport
+	closer := func() {}
 
 	if bearerSecretKey != "" {
-		roundTripper = &bearer.Agent{
-			SecretKey: bearerSecretKey,
-			Logger:    logger,
-			Transport: roundTripper,
-			Context:   ctx,
-		}
+		zap.RedirectStdLog(logger.Named("bearer"))
+		agent := bearer.New(bearerSecretKey,
+			//bearer.WithLogger(log.Writer()),
+			bearer.WithEnvironment(bearerEnvironment),
+		)
+		roundTripper = agent.Decorate(roundTripper)
+		closer = u.CombineFuncs(closer,
+			func() {
+				_ = agent.Close()
+			},
+		)
 	}
 
 	if httpCachePath != "" {
@@ -392,5 +402,5 @@ func roundTripperFromArgs(ctx context.Context, bearerSecretKey, httpCachePath st
 		}
 	}
 
-	return roundTripper
+	return roundTripper, closer
 }
