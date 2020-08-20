@@ -35,7 +35,7 @@ export const getDayFormat = (
   formatString = 'YYYY-MM-DDTHH:mm:ssZ',
 ) => {
   const date = dayjs(rawDate, formatString)
-  const today = () => date.isToday() ? 'Today' : ''
+  const today = () => (date.isToday() ? 'Today' : '')
   const dayFormatted = () => date.format('LL')
   return date.isValid() && (today() || dayFormatted())
 }
