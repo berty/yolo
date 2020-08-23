@@ -1,6 +1,4 @@
-import React, { useMemo, Fragment } from 'react'
-// eslint-disable-next-line no-unused-vars
-import { uniq } from 'lodash'
+import React, { Fragment, useMemo } from 'react'
 import {
   buildsStateIsRunning,
   oneBuildResultHasBranchMaster,
@@ -25,7 +23,7 @@ const BuildList = React.memo(({ builds = [], loaded }) => {
     () => flagBuildsFirstOfDay(buildsByMr),
     [buildsByMr],
   )
-  const latestMasterBuildsForProjects = !getIsArrayWithN(buildsByMrWithDateFlags, 2) || !oneBuildInResultsHasMaster
+  const indexOfLatestMasterBuildsForProjects = !getIsArrayWithN(buildsByMrWithDateFlags, 2) || !oneBuildInResultsHasMaster
     ? []
     : getLatestMasterBuildsForProjects(buildsByMrWithDateFlags)
   const NoBuilds = () => <div>No results match your query.</div>
@@ -34,9 +32,9 @@ const BuildList = React.memo(({ builds = [], loaded }) => {
     <NoBuilds />
   ) : (
     <div className="container">
-      {latestMasterBuildsForProjects.length > 0
+      {indexOfLatestMasterBuildsForProjects.length > 0
         && buildsByMrWithDateFlags
-          .filter((_, i) => latestMasterBuildsForProjects.includes(i))
+          .filter((_, i) => indexOfLatestMasterBuildsForProjects.includes(i))
           .map((build, i) => (
             <BuildContainer
               key={`${build.id}-${i}`}
@@ -54,14 +52,14 @@ const BuildList = React.memo(({ builds = [], loaded }) => {
         i, // The i is important to get day dividers, so don't change length of this array
       ) => (
         <Fragment key={`${build.id}-${i}`}>
-          {build.buildIsFirstOfDay && (
-            // <h4>{getDayFormat(build.created_at)}</h4>
-            <Divider dividerText={getDayFormat(build.created_at)} />
+          {build.buildIsFirstOfDay
+            && !indexOfLatestMasterBuildsForProjects.includes(i) && (
+              <Divider dividerText={getDayFormat(build.created_at)} />
           )}
-          {!latestMasterBuildsForProjects.includes(i) && (
+          {!indexOfLatestMasterBuildsForProjects.includes(i) && (
             <BuildContainer
               build={build}
-              toCollapse={latestMasterBuildsForProjects.length > 0}
+              toCollapse={indexOfLatestMasterBuildsForProjects.length > 0}
               hasRunningBuilds={buildsStateIsRunning(
                 build.allBuildsForMr,
                 builds,
