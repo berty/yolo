@@ -6,6 +6,7 @@ import {
   GitCommit,
   GitPullRequest,
 } from 'react-feather'
+import _ from 'lodash'
 import { MR_STATE } from '../../../constants'
 import { ThemeContext } from '../../../store/ThemeStore'
 import { colors } from '../../styleTools/themes'
@@ -61,6 +62,10 @@ export const OwnerIcon = ({ theme, projectOwnerId, projectOwnerAvatarUrl }) => p
           style={{ height: '1rem', borderRadius: '15%' }}
           alt={projectOwnerId}
         />
+        {' '}
+        /
+        {' '}
+        {_.last(projectOwnerId.split('/'))}
       </a>
     </div>
 )
