@@ -29,7 +29,7 @@ const FeedDisplayToggler = ({
     padding: '0.3rem 0.7rem',
     display: 'flex',
     alignItems: 'center',
-    marginBottom: displayFeed ? 'auto' : '1rem',
+    marginBottom: '1rem',
   }
 
   return (
