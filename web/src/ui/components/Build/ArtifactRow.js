@@ -3,10 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import QRCode from 'qrcode.react'
 import React, { useContext, useState } from 'react'
 import {
-  ArrowDownCircle,
-  Calendar,
-  Clock,
-  Link as LinkIcon,
+  Calendar, Clock, Download, Link as LinkIcon,
 } from 'react-feather'
 import {
   ARTIFACT_KIND_NAMES,
@@ -69,19 +66,17 @@ const ArtifactDownloadButton = ({
     hasDlUrl && (
       <a
         href={hasDlUrl}
-        className="btn btn-large-icon"
+        className="btn btn-large"
         style={{
           ...primaryButtonColors(theme),
-          width: '2.6rem',
-          height: '2.6rem',
-          marginTop: '0.3rem',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}
         title={hasDlUrl}
       >
-        <ArrowDownCircle style={{ transform: 'scale(120%)' }} />
+        <Download size="1rem" style={{ marginRight: '0.3rem' }} />
+        Download
       </a>
     )
   )
@@ -93,9 +88,9 @@ const ArtifactQrButton = ({ onClick, theme }) => (
     className="btn btn-large-icon"
     style={{
       ...primaryButtonColors(theme),
-      width: '2.6rem',
-      height: '2.6rem',
-      marginTop: '1rem',
+      width: '2.2rem',
+      height: '2.2rem',
+      marginLeft: '1rem',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -106,7 +101,12 @@ const ArtifactQrButton = ({ onClick, theme }) => (
       icon={faQrcode}
       size="2x"
       color={theme.text.btnPrimary}
-      style={{ marginTop: 0, marginBottom: 0, transform: 'scale(90%)' }}
+      style={{
+        marginTop: 0,
+        marginBottom: 0,
+        // transform: "scale(70%)"
+        width: '80%',
+      }}
     />
   </div>
 )
@@ -181,12 +181,6 @@ const ArtifactDriver = ({ artifactDriver, theme }) => artifactDriver && (
 </Tag>
 )
 
-// const SharableArtifactLink = ({ artifactId, implemented = false }) => implemented && (
-//   <AnchorLink target={`?artifact_id=${artifactId}`}>
-//     <LinkIcon size={16} />
-//   </AnchorLink>
-// )
-
 const ArtifactRow = ({
   artifact,
   buildId,
@@ -221,14 +215,14 @@ const ArtifactRow = ({
       )}
 
       <div
-        className={styles.blockSectionContainer}
+        className={styles.artifactBlockSectionContainer}
         style={{ color: theme.text.sectionText, ...containerBorderBottomStyle }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className={styles.blockSectionLeftColumn}>
+        <div className={styles.artifactBlockSectionLeftColumn}>
           <SharableArtifactLink {...{ artifactKind, buildId }} isBlock />
         </div>
-        <div className={styles.blockSectionDetailContainer}>
+        <div className={styles.artifactBlockSectionDetailContainer}>
           <div className={styles.blockSectionDetailRow}>
             <ArtifactRowKindIcon
               color={theme.bg.tagGreen}
@@ -249,7 +243,7 @@ const ArtifactRow = ({
             <ArtifactDriver {...{ artifactDriver, theme }} />
           </div>
         </div>
-        <div className={styles.blockRightContainer}>
+        <div className={styles.artifactBlockRightContainer}>
           <ArtifactDownloadButton
             {...{ artifactPlistSignedUrl, artifactDlArtifactSignedUrl }}
           />
