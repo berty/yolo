@@ -26,6 +26,7 @@ const FeedDisplayToggler = ({
   const { theme } = useContext(ThemeContext)
   const containerStyle = {
     backgroundColor: theme.bg.btnPrimary,
+    color: theme.text.btnPrimary,
     padding: '0.3rem 0.7rem',
     display: 'flex',
     alignItems: 'center',
@@ -41,9 +42,17 @@ const FeedDisplayToggler = ({
     >
       {`${displayFeed ? 'Hide' : 'Show'} feed`}
       {displayFeed ? (
-        <ChevronUp size={16} style={{ marginLeft: '0.2rem' }} />
+        <ChevronUp
+          size={16}
+          style={{ marginLeft: '0.2rem' }}
+          color={theme.text.btnPrimary}
+        />
       ) : (
-        <ChevronDown size={16} style={{ marginLeft: '0.2rem' }} />
+        <ChevronDown
+          size={16}
+          style={{ marginLeft: '0.2rem' }}
+          color={theme.text.btnPrimary}
+        />
       )}
     </button>
   )
