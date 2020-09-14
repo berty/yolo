@@ -10,13 +10,7 @@
     "browser": true,
     "node": true
   },
-  "plugins": [
-    "react",
-    "react-hooks",
-    "node",
-    "promise",
-    "jsx-a11y"
-  ],
+  "plugins": ["react", "react-hooks", "node", "promise", "jsx-a11y"],
   "extends": [
     "airbnb",
     "eslint:recommended",
@@ -27,6 +21,7 @@
     "expect": false
   },
   "rules": {
+    "linebreak-style": 0,
     "no-console": "error",
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "error",
@@ -51,23 +46,13 @@
     "jsx-a11y/anchor-is-valid": [
       "error",
       {
-        "components": [
-          "Link"
-        ],
-        "specialLink": [
-          "to"
-        ]
+        "components": ["Link"],
+        "specialLink": ["to"]
       }
     ],
-    "semi": [
-      "error",
-      "never"
-    ],
+    "semi": ["error", "never"],
     "max-len": 0,
-    "no-return-assign": [
-      "error",
-      "except-parens"
-    ],
+    "no-return-assign": ["error", "except-parens"],
     "no-underscore-dangle": [
       "error",
       {
