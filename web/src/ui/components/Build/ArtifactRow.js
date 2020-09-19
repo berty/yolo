@@ -42,9 +42,10 @@ const QrCode = ({ artifactPlistSignedUrl, closeAction }) => (
 
 export const SharableArtifactLink = ({ buildId, artifactKind, isBlock }) => (
   <AnchorLink
-    target={`?build_id=${buildId}&artifact_kinds=${
-      ARTIFACT_KIND_VALUE[artifactKind.toString() || '1']
-    }`}
+    target={`?build_id=${buildId}${
+      artifactKind ? `&artifact_kinds=${ARTIFACT_KIND_VALUE[artifactKind]}` : ''
+    }
+    `}
     isBlock={isBlock}
   >
     <LinkIcon size={16} />
