@@ -78,7 +78,7 @@ const BuildList = ({ builds = [], loaded }) => {
     setDisplayFeed(!displayFeed)
   }
 
-  return !builds.length && loaded ? (
+  return !builds.length > 0 && loaded ? (
     <NoBuilds />
   ) : (
     <div className="container">

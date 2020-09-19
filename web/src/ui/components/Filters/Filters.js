@@ -152,10 +152,8 @@ const Filters = ({ onFilterClick = () => {} }) => {
     </>
   )
 
-  const FiltersBuildDriver = () => (
-    buildDrivers.length
-      && (isMobile ? <FiltersBuildDriverMobile /> : <TextBuildDrivers />)
-  )
+  const FiltersBuildDriver = () => buildDrivers.length > 0
+    && (isMobile ? <FiltersBuildDriverMobile /> : <TextBuildDrivers />)
 
   const ShowRunningBuilds = () => getIsArrayWithN(buildStates, 1) && (
   <>
