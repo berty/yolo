@@ -4,10 +4,11 @@ services:
   yolo:
     image: bertytech/yolo:latest
     restart: unless-stopped
+    network_mode: bridge
     volumes:
       - ./data:/data
-    ports:
-      - 80:8000
+    expose:
+      - 8000
     environment:
       - BUILDKITE_TOKEN=${YOLO_BUILDKITE_TOKEN}
       - CIRCLE_TOKEN=${YOLO_CIRCLE_TOKEN}
@@ -17,4 +18,15 @@ services:
       - BEARER_SECRETKEY=${YOLO_BEARER_SECRETKEY}
     command: -v server --cors-allowed-origins="*" --max-builds=30 --db-path=/data/yolo.sqlite --basic-auth-password="${YOLO_BASIC_AUTH_PASSWORD}" --request-timeout=10s --shutdown-timeout=11s --http-cache-path=/data/httpcache --artifacts-cache-path=/data/artifacts-cache
     labels:
-      com.centurylinklabs.watchtower.enable: "true"
+      - 'com.centurylinklabs.watchtower.enable=true'
+      # traefik specific labels
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.yolo.rule=Host(`yolo.berty.io`)'
+      - 'traefik.http.routers.yolo.service=yolo'
+      - 'traefik.http.routers.yolo.entryPoints=https'
+      - 'traefik.http.routers.yolo.tls=true'
+      - 'traefik.http.routers.yolo.tls.certresolver=cf'
+      - 'traefik.http.routers.yolo.tls.domains[0].main=berty.io'
+      - 'traefik.http.routers.yolo.tls.domains[0].sans=yolo.berty.io'
+
+      - 'traefik.http.services.yolo.loadbalancer.server.port=8000'
