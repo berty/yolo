@@ -24,9 +24,7 @@ type PkgmanWorkerOpts struct {
 func (svc *service) PkgmanWorker(ctx context.Context, opts PkgmanWorkerOpts) error {
 	opts.applyDefaults()
 	// FIXME: handle pkgman version to recompute already computed artifacts with new filters
-	var (
-		logger = opts.Logger
-	)
+	var logger = opts.Logger.Named("pman")
 	for iteration := 0; ; iteration++ {
 		var artifacts []*yolopb.Artifact
 		err := svc.db.Where("bundle_id IS NULL OR bundle_id = ''").Find(&artifacts).Error

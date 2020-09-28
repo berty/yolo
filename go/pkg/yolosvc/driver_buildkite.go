@@ -26,7 +26,7 @@ func (svc *service) BuildkiteWorker(ctx context.Context, opts BuildkiteWorkerOpt
 	opts.applyDefaults()
 
 	var (
-		logger   = opts.Logger
+		logger   = opts.Logger.Named("bkit")
 		maxPages = int(math.Ceil(float64(opts.MaxBuilds) / 30))
 	)
 
