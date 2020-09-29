@@ -95,11 +95,6 @@ export const BUILD_DRIVER_NAMES = {
 
 export const BUILD_DRIVERS = Object.values(BUILD_DRIVER_VALUE)
 
-export const PROJECT_BUILD_DRIVER = {
-  messenger: BUILD_DRIVER_VALUE.Buildkite,
-  'gomobile-ipfs-demo': BUILD_DRIVER_VALUE.Bintray,
-}
-
 export const PROJECT_ARTIFACT_KINDS = {
   messenger: [ARTIFACT_KIND_VALUE.IPA],
   'gomobile-ipfs-demo': [ARTIFACT_KIND_VALUE.APK, ARTIFACT_KIND_VALUE.IPA],

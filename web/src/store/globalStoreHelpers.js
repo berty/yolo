@@ -1,7 +1,7 @@
 import queryString from 'query-string'
 import { isEqual } from 'lodash'
 import {
-  ARTIFACT_KINDS, BUILD_DRIVERS, BUILD_STATES, KIND_TO_PLATFORM, PLATFORM_TO_ARTIFACT_KIND, PROJECT_BUILD_DRIVER, PROJECT_ARTIFACT_KINDS,
+  ARTIFACT_KINDS, BUILD_DRIVERS, BUILD_STATES, KIND_TO_PLATFORM, PLATFORM_TO_ARTIFACT_KIND, PROJECT_ARTIFACT_KINDS,
 } from '../constants'
 import { singleItemToArray } from '../util/getters'
 import { getMobileOperatingSystem } from '../util/browser'
@@ -34,7 +34,6 @@ export const getFiltersFromUrlQuery = ({ locationSearch = '', uiFilters }) => {
 
 export const getFallbackQueryString = ({ userAgent = '', updateState }) => {
   const defaultArtifactKinds = [PROJECT_ARTIFACT_KINDS.messenger]
-  const defaultBuildDriver = [PROJECT_BUILD_DRIVER.messenger]
   const userAgentToSetDefaultFilters = userAgent || getMobileOperatingSystem()
   const isMobile = (userAgentToSetDefaultFilters === KIND_TO_PLATFORM.IPA || userAgentToSetDefaultFilters === KIND_TO_PLATFORM.APK)
   const defaultKind = isMobile ? [PLATFORM_TO_ARTIFACT_KIND[userAgentToSetDefaultFilters]] : [...defaultArtifactKinds]
@@ -42,6 +41,6 @@ export const getFallbackQueryString = ({ userAgent = '', updateState }) => {
   updateState({
     userAgent,
   })
-  const fallbackQueryString = queryString.stringify({ artifact_kinds: defaultKind, build_driver: defaultBuildDriver })
+  const fallbackQueryString = queryString.stringify({ artifact_kinds: defaultKind })
   return fallbackQueryString
 }
