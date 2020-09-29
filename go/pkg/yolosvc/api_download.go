@@ -1,12 +1,19 @@
 package yolosvc
 
 import (
+	"archive/zip"
+	"bytes"
+	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"time"
 
 	"berty.tech/yolo/v2/go/pkg/bintray"
@@ -75,7 +82,8 @@ func (svc *service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		// proxy
-		err = svc.artifactDownloadFromProvider(&artifact, w)
+		ctx := context.Background()
+		err = svc.artifactDownloadFromProvider(ctx, &artifact, w)
 		if err != nil {
 			httpError(w, err, codes.Internal)
 		}
@@ -88,7 +96,8 @@ func (svc *service) artifactDownloadToFile(artifact *yolopb.Artifact, dest strin
 		return err
 	}
 
-	err = svc.artifactDownloadFromProvider(artifact, out)
+	ctx := context.Background()
+	err = svc.artifactDownloadFromProvider(ctx, artifact, out)
 	if err != nil {
 		out.Close()
 		return err
@@ -106,7 +115,7 @@ func (svc *service) artifactDownloadToFile(artifact *yolopb.Artifact, dest strin
 	return nil
 }
 
-func (svc *service) artifactDownloadFromProvider(artifact *yolopb.Artifact, w io.Writer) error {
+func (svc *service) artifactDownloadFromProvider(ctx context.Context, artifact *yolopb.Artifact, w io.Writer) error {
 	switch artifact.Driver {
 	case yolopb.Driver_Buildkite:
 		if svc.bkc == nil {
@@ -117,6 +126,67 @@ func (svc *service) artifactDownloadFromProvider(artifact *yolopb.Artifact, w io
 	case yolopb.Driver_Bintray:
 		return bintray.DownloadContent(artifact.DownloadURL, w)
 		// case Driver_CircleCI:
+	case yolopb.Driver_GitHub:
+		if svc.ghc == nil {
+			return fmt.Errorf("github token required")
+		}
+
+		// get artifact archive (.zip)
+		var zipContent []byte
+		{
+			// FIXME: if cachePath != nil -> cache the zip
+			u, err := url.Parse(artifact.GetDownloadURL())
+			if err != nil {
+				return err
+			}
+			parts := strings.Split(u.Path, "/")
+			if len(parts) != 8 || parts[5] != "artifacts" || parts[7] != "zip" {
+				return fmt.Errorf("unsupported download URL: %q", u)
+			}
+			owner, repo := parts[2], parts[3]
+			artifactID, err := strconv.Atoi(parts[6])
+			if err != nil {
+				return fmt.Errorf("invalid download URL: %w", err)
+			}
+			dlurl, _, err := svc.ghc.Actions.DownloadArtifact(ctx, owner, repo, int64(artifactID), true)
+			if err != nil {
+				return fmt.Errorf("failed to generate download URL: %w", err)
+			}
+			resp, err := http.Get(dlurl.String())
+			if err != nil {
+				return fmt.Errorf("failed to download artifact: %w", err)
+			}
+			defer resp.Body.Close()
+			zipContent, err = ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return fmt.Errorf("failed to download artifact stream: %w", err)
+			}
+		}
+
+		// extract file from archive
+		{
+			bytesReader := bytes.NewReader(zipContent)
+			zipReader, err := zip.NewReader(bytesReader, int64(len(zipContent)))
+			if err != nil {
+				return fmt.Errorf("failed to open artifact archive: %w", err)
+			}
+			if len(zipReader.File) != 1 {
+				return fmt.Errorf("artifact archive should only have 1 file")
+			}
+			for _, f := range zipReader.File {
+				fd, err := f.Open()
+				if err != nil {
+					return fmt.Errorf("failed to read file from archive: %w", err)
+				}
+				defer fd.Close()
+				_, err = io.Copy(w, fd)
+				if err != nil {
+					return fmt.Errorf("io error while sending content of the artifact: %w", err)
+				}
+			}
+		}
+
+		return nil
 	}
 	return fmt.Errorf("download not supported for this driver")
 }

@@ -16,7 +16,7 @@ import (
 	"berty.tech/yolo/v2/go/pkg/yolosvc"
 	bearer "github.com/bearer/go-agent"
 	"github.com/buildkite/go-buildkite/buildkite"
-	"github.com/google/go-github/v31/github"
+	"github.com/google/go-github/v32/github"
 	"github.com/gregjones/httpcache"
 	"github.com/gregjones/httpcache/diskcache"
 	_ "github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger/options" // required by protoc
@@ -70,7 +70,7 @@ func yolo(args []string) error {
 		authSalt           string
 		httpCachePath      string
 		realm              string
-		// FIXME: once bool
+		once               bool
 	)
 	var (
 		rootFlagSet   = flag.NewFlagSet("yolo", flag.ExitOnError)
@@ -101,6 +101,7 @@ func yolo(args []string) error {
 	serverFlagSet.StringVar(&bearerEnvironment, "bearer-environment", "development", "project's environment on Bearer.sh")
 	serverFlagSet.StringVar(&authSalt, "auth-salt", "", "salt used to generate authentication tokens at the end of the URLs")
 	serverFlagSet.StringVar(&httpCachePath, "http-cache-path", "", "if set, will cache http client requests")
+	serverFlagSet.BoolVar(&once, "once", false, "just run workers once")
 	storeFlagSet.StringVar(&dbStorePath, "db-path", ":memory:", "DB Store path")
 	storeFlagSet.BoolVar(&withPreloading, "with-preloading", false, "with auto DB preloading")
 
@@ -186,23 +187,23 @@ func yolo(args []string) error {
 
 			// service workers
 			if bkc != nil {
-				opts := yolosvc.BuildkiteWorkerOpts{Logger: logger, MaxBuilds: maxBuilds, ClearCache: cc}
+				opts := yolosvc.BuildkiteWorkerOpts{Logger: logger, MaxBuilds: maxBuilds, ClearCache: cc, Once: once}
 				gr.Add(func() error { return svc.BuildkiteWorker(ctx, opts) }, func(_ error) { cancel() })
 			}
 			if ccc != nil {
-				opts := yolosvc.CircleciWorkerOpts{Logger: logger, MaxBuilds: maxBuilds, ClearCache: cc}
+				opts := yolosvc.CircleciWorkerOpts{Logger: logger, MaxBuilds: maxBuilds, ClearCache: cc, Once: once}
 				gr.Add(func() error { return svc.CircleciWorker(ctx, opts) }, func(_ error) { cancel() })
 			}
 			if btc != nil {
-				opts := yolosvc.BintrayWorkerOpts{Logger: logger, ClearCache: cc}
+				opts := yolosvc.BintrayWorkerOpts{Logger: logger, ClearCache: cc, Once: once}
 				gr.Add(func() error { return svc.BintrayWorker(ctx, opts) }, func(_ error) { cancel() })
 			}
-			{
-				opts := yolosvc.PkgmanWorkerOpts{Logger: logger, ClearCache: cc}
+			if !once { // disable pkgman when running with --once
+				opts := yolosvc.PkgmanWorkerOpts{Logger: logger, ClearCache: cc, Once: once}
 				gr.Add(func() error { return svc.PkgmanWorker(ctx, opts) }, func(_ error) { cancel() })
 			}
 			if githubToken != "" {
-				opts := yolosvc.GithubWorkerOpts{Logger: logger, MaxBuilds: maxBuilds, ClearCache: cc}
+				opts := yolosvc.GithubWorkerOpts{Logger: logger, MaxBuilds: maxBuilds, ClearCache: cc, Once: once}
 				gr.Add(func() error { return svc.GitHubWorker(ctx, opts) }, func(_ error) { cancel() })
 			}
 

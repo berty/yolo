@@ -12,7 +12,7 @@ require (
 	github.com/gogo/gateway v1.1.0
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang/protobuf v1.4.2
-	github.com/google/go-github/v31 v31.0.0
+	github.com/google/go-github/v32 v32.1.0
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway v1.14.6
