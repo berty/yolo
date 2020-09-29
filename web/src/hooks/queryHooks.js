@@ -76,7 +76,7 @@ export const useSetFiltersOnQueryChange = () => {
   const { search: locationSearch } = useLocation()
   useEffect(() => {
     const updateFilters = () => {
-      const { artifact_kinds, build_driver, build_state } = JSON.parse(window.localStorage.getItem("uiFilters")) || getFiltersFromUrlQuery({ locationSearch }) || {}
+      const { artifact_kinds, build_driver, build_state } = JSON.parse(window.localStorage.getItem('uiFilters')) || getFiltersFromUrlQuery({ locationSearch }) || {}
       dispatch({
         type: actions.UPDATE_UI_FILTERS,
         payload: { artifact_kinds, build_driver, build_state },

@@ -35,7 +35,7 @@ export const INITIAL_STATE = {
     build_state: [],
   },
   calculatedFilters: {
-    projects: JSON.parse(window.localStorage.getItem("projects")) || [PROJECT.messenger],
+    projects: JSON.parse(window.localStorage.getItem('projects')) || [PROJECT.messenger],
     order: 'created_at',
   },
   showingFilterModal: false,
@@ -58,8 +58,8 @@ function reducer(state, action) {
       }
     }
     case actions.LOGOUT:
-      window.localStorage.removeItem("projects")
-      window.localStorage.removeItem("uiFilters")
+      window.localStorage.removeItem('projects')
+      window.localStorage.removeItem('uiFilters')
       return {
         ...state,
         autoRefreshOn: false,

@@ -81,7 +81,10 @@ const BuildList = ({ builds = [], loaded }) => {
   return !builds.length > 0 && loaded ? (
     <NoBuilds />
   ) : (
-    <div className="container">
+    <div
+      className="container"
+      style={{ alignSelf: 'flex-start', minHeight: '100%' }}
+    >
       {indexOfLatestMasterBuildsForProjects.length > 0
         && buildsByMrWithDateFlags
           .filter((_, i) => indexOfLatestMasterBuildsForProjects.includes(i))

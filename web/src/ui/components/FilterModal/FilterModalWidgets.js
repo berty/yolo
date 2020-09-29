@@ -8,7 +8,6 @@ import {
   BUILD_STATE_VALUE_TO_NAME,
   PROJECT,
   PROJECT_ARTIFACT_KINDS,
-  PROJECT_BUILD_DRIVER,
   PROJECT_NAME,
 } from '../../../constants'
 import { addOrRemoveFromArray } from '../../../util/getters'
@@ -43,14 +42,11 @@ export const ProjectFilter = ({
   project,
   selectedProjects,
   setSelectedProjects,
-  selectedDrivers,
-  setSelectedDrivers,
   selectedArtifactKinds,
   setSelectedArtifactKinds,
 }) => {
   const selected = selectedProjects.includes(project)
   const artifactKindsForProject = !!PROJECT_ARTIFACT_KINDS[project]
-  const buildDriverForProject = PROJECT_BUILD_DRIVER[project]
   const projectValue = PROJECT[project] || 'Unknown Project'
   const ownerIcon = getOwnerIcon(projectValue)
 
@@ -62,8 +58,6 @@ export const ProjectFilter = ({
           ...PROJECT_ARTIFACT_KINDS[projectValue],
         ]),
       )
-    buildDriverForProject
-      && setSelectedDrivers(uniq([...selectedDrivers, buildDriverForProject]))
     setSelectedProjects(uniq([...selectedProjects, projectValue]))
   }
 
