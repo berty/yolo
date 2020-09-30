@@ -71,6 +71,9 @@ func yolo(args []string) error {
 		httpCachePath      string
 		realm              string
 		once               bool
+		iosPrivkeyPath     string
+		iosProvPath        string
+		iosPrivkeyPass     string
 	)
 	var (
 		rootFlagSet   = flag.NewFlagSet("yolo", flag.ExitOnError)
@@ -102,6 +105,9 @@ func yolo(args []string) error {
 	serverFlagSet.StringVar(&authSalt, "auth-salt", "", "salt used to generate authentication tokens at the end of the URLs")
 	serverFlagSet.StringVar(&httpCachePath, "http-cache-path", "", "if set, will cache http client requests")
 	serverFlagSet.BoolVar(&once, "once", false, "just run workers once")
+	serverFlagSet.StringVar(&iosPrivkeyPath, "ios-privkey", "", "iOS signing: path to private key or p12 file (PEM or DER format)")
+	serverFlagSet.StringVar(&iosProvPath, "ios-prov", "", "iOS signing: path to mobile provisioning profile")
+	serverFlagSet.StringVar(&iosPrivkeyPass, "ios-pass", "", "iOS signing: password for private key or p12 file")
 	storeFlagSet.StringVar(&dbStorePath, "db-path", ":memory:", "DB Store path")
 	storeFlagSet.BoolVar(&withPreloading, "with-preloading", false, "with auto DB preloading")
 
@@ -180,6 +186,9 @@ func yolo(args []string) error {
 				AuthSalt:           authSalt,
 				DevMode:            devMode,
 				ArtifactsCachePath: artifactsCachePath,
+				IOSPrivkeyPath:     iosPrivkeyPath,
+				IOSProvPath:        iosProvPath,
+				IOSPrivkeyPass:     iosPrivkeyPass,
 			})
 			if err != nil {
 				return err
