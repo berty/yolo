@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"github.com/tevino/abool"
 	"go.uber.org/zap"
+	"moul.io/pkgman/pkg/apk"
 	"moul.io/pkgman/pkg/ipa"
 )
 
@@ -91,6 +93,26 @@ func (svc *service) pkgmanParseArtifactFile(artifact *yolopb.Artifact, artifactP
 		} else {
 			artifact.BundleIcon = appIcon
 		}
+		err = svc.db.Save(artifact).Error
+		if err != nil {
+			return err
+		}
+	case yolopb.Artifact_APK:
+		pkg, err := apk.Open(artifactPath)
+		if err != nil {
+			return err
+		}
+		defer pkg.Close()
+		manifest, err := pkg.Manifest()
+		if err != nil {
+			return err
+		}
+		if mainActivity := manifest.MainActivity(); mainActivity != nil {
+			artifact.BundleName = mainActivity.Label
+			artifact.BundleID = strings.TrimSuffix(mainActivity.Name, ".MainActivity")
+			artifact.BundleVersion = manifest.VersionName
+		}
+		// FIXME: extract icon
 		err = svc.db.Save(artifact).Error
 		if err != nil {
 			return err
