@@ -34,13 +34,10 @@ require (
 	github.com/tevino/abool v0.0.0-20170917061928-9b9efcf221b5
 	github.com/treastech/logger v0.0.0-20180705232552-e381e9ecf2e3
 	go.uber.org/zap v1.15.0
-	golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9 // indirect
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
-	golang.org/x/net v0.0.0-20200602114024-627f9648deb9 // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a // indirect
 	golang.org/x/sys v0.0.0-20200615200032-f1bc736245b1 // indirect
-	golang.org/x/text v0.3.3 // indirect
 	golang.org/x/tools v0.0.0-20200423205358-59e73619c742 // indirect
 	google.golang.org/appengine v1.6.6 // indirect
 	google.golang.org/genproto v0.0.0-20200617032506-f1bdc9086088
@@ -51,7 +48,7 @@ require (
 	howett.net/plist v0.0.0-20200419221736-3b63eb3a43b5
 	moul.io/godev v1.6.0
 	moul.io/hcfilters v1.3.1
-	moul.io/pkgman v1.2.2
-	moul.io/u v1.5.0
+	moul.io/pkgman v1.3.1
+	moul.io/u v1.13.0
 	moul.io/zapgorm v1.0.0
 )
