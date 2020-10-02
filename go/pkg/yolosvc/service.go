@@ -32,21 +32,22 @@ type Service interface {
 }
 
 type service struct {
-	startTime           time.Time
-	db                  *gorm.DB
-	logger              *zap.Logger
-	bkc                 *buildkite.Client
-	btc                 *bintray.Client
-	ccc                 *circleci.Client
-	ghc                 *github.Client
-	authSalt            string
-	devMode             bool
-	clearCache          *abool.AtomicBool
-	artifactsCachePath  string
-	artifactsCacheMutex sync.Mutex
-	iosPrivkeyPath      string
-	iosProvPath         string
-	iosPrivkeyPass      string
+	startTime              time.Time
+	db                     *gorm.DB
+	logger                 *zap.Logger
+	bkc                    *buildkite.Client
+	btc                    *bintray.Client
+	ccc                    *circleci.Client
+	ghc                    *github.Client
+	authSalt               string
+	devMode                bool
+	clearCache             *abool.AtomicBool
+	artifactsCachePath     string
+	artifactsCacheMapMutex map[string]*sync.Mutex // per-cache mutex
+	artifactsCacheMutex    sync.Mutex             // mutex used to manipulate the artifactsCacheMapMutex
+	iosPrivkeyPath         string
+	iosProvPath            string
+	iosPrivkeyPass         string
 }
 
 type ServiceOpts struct {
@@ -73,20 +74,21 @@ func NewService(db *gorm.DB, opts ServiceOpts) (Service, error) {
 	}
 
 	return &service{
-		startTime:          time.Now(),
-		db:                 db,
-		logger:             opts.Logger,
-		bkc:                opts.BuildkiteClient,
-		btc:                opts.BintrayClient,
-		ccc:                opts.CircleciClient,
-		ghc:                opts.GithubClient,
-		authSalt:           opts.AuthSalt,
-		devMode:            opts.DevMode,
-		clearCache:         opts.ClearCache,
-		artifactsCachePath: opts.ArtifactsCachePath,
-		iosPrivkeyPath:     u.MustExpandUser(opts.IOSPrivkeyPath),
-		iosProvPath:        u.MustExpandUser(opts.IOSProvPath),
-		iosPrivkeyPass:     opts.IOSPrivkeyPass,
+		startTime:              time.Now(),
+		db:                     db,
+		logger:                 opts.Logger,
+		bkc:                    opts.BuildkiteClient,
+		btc:                    opts.BintrayClient,
+		ccc:                    opts.CircleciClient,
+		ghc:                    opts.GithubClient,
+		authSalt:               opts.AuthSalt,
+		devMode:                opts.DevMode,
+		clearCache:             opts.ClearCache,
+		artifactsCachePath:     opts.ArtifactsCachePath,
+		iosPrivkeyPath:         u.MustExpandUser(opts.IOSPrivkeyPath),
+		iosProvPath:            u.MustExpandUser(opts.IOSProvPath),
+		iosPrivkeyPass:         opts.IOSPrivkeyPass,
+		artifactsCacheMapMutex: map[string]*sync.Mutex{},
 	}, nil
 }
 
