@@ -1,3 +1,4 @@
+.zsign_cache
 vendor/
 coverage.txt
 packrd/

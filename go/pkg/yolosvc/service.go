@@ -14,6 +14,7 @@ import (
 	circleci "github.com/jszwedko/go-circleci"
 	"github.com/tevino/abool"
 	"go.uber.org/zap"
+	"moul.io/u"
 )
 
 type Service interface {
@@ -43,6 +44,9 @@ type service struct {
 	clearCache          *abool.AtomicBool
 	artifactsCachePath  string
 	artifactsCacheMutex sync.Mutex
+	iosPrivkeyPath      string
+	iosProvPath         string
+	iosPrivkeyPass      string
 }
 
 type ServiceOpts struct {
@@ -55,6 +59,9 @@ type ServiceOpts struct {
 	DevMode            bool
 	ClearCache         *abool.AtomicBool
 	ArtifactsCachePath string
+	IOSPrivkeyPath     string
+	IOSProvPath        string
+	IOSPrivkeyPass     string
 }
 
 func NewService(db *gorm.DB, opts ServiceOpts) (Service, error) {
@@ -77,6 +84,9 @@ func NewService(db *gorm.DB, opts ServiceOpts) (Service, error) {
 		devMode:            opts.DevMode,
 		clearCache:         opts.ClearCache,
 		artifactsCachePath: opts.ArtifactsCachePath,
+		iosPrivkeyPath:     u.MustExpandUser(opts.IOSPrivkeyPath),
+		iosProvPath:        u.MustExpandUser(opts.IOSProvPath),
+		iosPrivkeyPass:     opts.IOSPrivkeyPass,
 	}, nil
 }
 

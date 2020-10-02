@@ -5,18 +5,33 @@ services:
     image: bertytech/yolo:latest
     restart: unless-stopped
     network_mode: bridge
+    working_dir: /tmp
     volumes:
       - ./data:/data
+      - ~/codesign:/codesign:ro
     expose:
       - 8000
     environment:
-      - BUILDKITE_TOKEN=${YOLO_BUILDKITE_TOKEN}
-      - CIRCLE_TOKEN=${YOLO_CIRCLE_TOKEN}
-      - GITHUB_TOKEN=${YOLO_GITHUB_TOKEN}
-      - BINTRAY_TOKEN=${YOLO_BINTRAY_TOKEN}
-      - BINTRAY_USERNAME=${YOLO_BINTRAY_USERNAME}
-      - BEARER_SECRETKEY=${YOLO_BEARER_SECRETKEY}
-    command: -v server --cors-allowed-origins="*" --max-builds=30 --db-path=/data/yolo.sqlite --basic-auth-password="${YOLO_BASIC_AUTH_PASSWORD}" --request-timeout=10s --shutdown-timeout=11s --http-cache-path=/data/httpcache --artifacts-cache-path=/data/artifacts-cache
+      - BUILDKITE_TOKEN
+      - CIRCLE_TOKEN
+      - GITHUB_TOKEN
+      - BINTRAY_TOKEN
+      - BINTRAY_USERNAME
+      - BEARER_SECRETKEY
+      - BASIC_AUTH_PASSWORD
+      - IOS_PASS
+      - IOS_PROV
+      - IOS_PRIVKEY
+    command:
+      - -v
+      - server
+      - --cors-allowed-origins=*
+      - --max-builds=30
+      - --db-path=/data/yolo.sqlite
+      - --request-timeout=10s
+      - --shutdown-timeout=11s
+      - --http-cache-path=/data/httpcache
+      - --artifacts-cache-path=/data/artifacts-cache
     labels:
       - 'com.centurylinklabs.watchtower.enable=true'
       # traefik specific labels
@@ -28,5 +43,5 @@ services:
       - 'traefik.http.routers.yolo.tls.certresolver=cf'
       - 'traefik.http.routers.yolo.tls.domains[0].main=berty.io'
       - 'traefik.http.routers.yolo.tls.domains[0].sans=yolo.berty.io'
-
       - 'traefik.http.services.yolo.loadbalancer.server.port=8000'
+      - 'traefik.http.services.yolo.loadbalancer.healthcheck.port=9090'

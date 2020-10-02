@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"strconv"
@@ -21,9 +22,12 @@ import (
 	"github.com/go-chi/chi"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
+	"moul.io/u"
 )
 
 func (svc *service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
+	// FIXME: if caching enabled, lock by artifact ID
+
 	id := chi.URLParam(r, "artifactID")
 	var artifact yolopb.Artifact
 	err := svc.db.First(&artifact, "ID = ?", id).Error
@@ -32,6 +36,119 @@ func (svc *service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	switch ext := filepath.Ext(artifact.LocalPath); ext {
+	case ".unsigned-ipa", ".dummy-signed-ipa":
+		if !u.CommandExists("zsign") {
+			httpError(w, fmt.Errorf("missing signing binary"), codes.Internal)
+			return
+		}
+		if svc.iosPrivkeyPath == "" || svc.iosProvPath == "" {
+			httpError(w, fmt.Errorf("missing iOS signing configuration"), codes.InvalidArgument)
+			return
+		}
+		if !u.FileExists(svc.iosPrivkeyPath) || !u.FileExists(svc.iosProvPath) {
+			httpError(w, fmt.Errorf("invalid iOS signing configuration"), codes.InvalidArgument)
+			return
+		}
+
+		// send some headers early, to make loading icon appearing soon on the iOS device
+		{
+			filename := strings.TrimSuffix(path.Base(artifact.LocalPath), ext) + ".ipa"
+			w.Header().Add("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+			if artifact.MimeType != "" {
+				w.Header().Add("Content-Type", artifact.MimeType)
+			}
+		}
+
+		// FIXME: cache file + send content-length
+
+		err := svc.signAndStreamIPA(artifact, w)
+		if err != nil {
+			httpError(w, err, codes.Internal)
+		}
+	default:
+		base := path.Base(artifact.LocalPath)
+		w.Header().Add("Content-Disposition", fmt.Sprintf("attachment; filename=%s", base))
+		if artifact.FileSize > 0 {
+			w.Header().Add("Content-Length", fmt.Sprintf("%d", artifact.FileSize))
+		}
+		if artifact.MimeType != "" {
+			w.Header().Add("Content-Type", artifact.MimeType)
+		}
+
+		err := svc.artifactToStream(artifact, w)
+		if err != nil {
+			httpError(w, err, codes.Internal)
+		}
+	}
+}
+
+func (svc *service) signAndStreamIPA(artifact yolopb.Artifact, w io.Writer) error {
+	// sign ipa
+	var signed string
+	{
+		tempdir, err := ioutil.TempDir("", "yolo")
+		if err != nil {
+			return err
+		}
+		defer os.RemoveAll(tempdir)
+
+		// write unsigned-file to tempdir
+		unsigned := filepath.Join(tempdir, "unsigned.ipa")
+		signed = filepath.Join(tempdir, "signed.ipa")
+		f, err := os.OpenFile(unsigned, os.O_RDWR|os.O_CREATE, 0755)
+		if err != nil {
+			return err
+		}
+		err = svc.artifactToStream(artifact, f)
+		if err != nil {
+			return err
+		}
+		if err := f.Close(); err != nil {
+			return err
+		}
+
+		// zsign the archive
+		zsignArgs := []string{
+			"-k", svc.iosPrivkeyPath,
+			"-m", svc.iosProvPath, // should be retrieved from the artifact archive directly
+			"-o", signed,
+			"-z", "1",
+		}
+		if svc.iosPrivkeyPass != "" {
+			zsignArgs = append(zsignArgs,
+				"-p", svc.iosPrivkeyPass,
+			)
+		}
+		zsignArgs = append(zsignArgs, unsigned)
+		cmd := exec.Command("zsign", zsignArgs...)
+		svc.logger.Info("zsign", zap.Strings("args", zsignArgs))
+		cmd.Stderr = os.Stderr
+		cmd.Stdout = os.Stdout
+		err = cmd.Run()
+		if err != nil {
+			return err
+		}
+	}
+
+	// send the signed iPA
+	{
+		f, err := os.Open(signed)
+		if err != nil {
+			return err
+		}
+
+		// content-length
+
+		_, err = io.Copy(w, f)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (svc *service) artifactToStream(artifact yolopb.Artifact, w io.Writer) error {
 	cache := filepath.Join(svc.artifactsCachePath, artifact.ID)
 	// download missing cache
 	if svc.artifactsCachePath != "" {
@@ -40,20 +157,10 @@ func (svc *service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
 			err := svc.artifactDownloadToFile(&artifact, cache)
 			if err != nil {
 				svc.artifactsCacheMutex.Unlock()
-				httpError(w, err, codes.Internal)
-				return
+				return err
 			}
 		}
 		svc.artifactsCacheMutex.Unlock()
-	}
-
-	base := path.Base(artifact.LocalPath)
-	w.Header().Add("Content-Disposition", fmt.Sprintf("attachment; filename=%s", base))
-	if artifact.FileSize > 0 {
-		w.Header().Add("Content-Length", fmt.Sprintf("%d", artifact.FileSize))
-	}
-	if artifact.MimeType != "" {
-		w.Header().Add("Content-Type", artifact.MimeType)
 	}
 
 	// save download
@@ -63,31 +170,31 @@ func (svc *service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
 		CreatedAt:     &now,
 		// FIXME: user agent for analytics?
 	}
-	err = svc.db.Create(&download).Error
+	err := svc.db.Create(&download).Error
 	if err != nil {
-		svc.logger.Warn("add download entry", zap.Error(err))
+		svc.logger.Warn("failed to add download log entry", zap.Error(err))
 	}
 
 	if svc.artifactsCachePath != "" {
 		// send cache
 		f, err := os.Open(cache)
 		if err != nil {
-			httpError(w, err, codes.Internal)
-			return
+			return err
 		}
 		defer f.Close()
 		_, err = io.Copy(w, f)
 		if err != nil {
-			httpError(w, err, codes.Internal)
+			return err
 		}
 	} else {
 		// proxy
 		ctx := context.Background()
 		err = svc.artifactDownloadFromProvider(ctx, &artifact, w)
 		if err != nil {
-			httpError(w, err, codes.Internal)
+			return err
 		}
 	}
+	return nil
 }
 
 func (svc *service) artifactDownloadToFile(artifact *yolopb.Artifact, dest string) error {
