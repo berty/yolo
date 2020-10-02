@@ -131,6 +131,7 @@ const FilterModal = ({ closeAction }) => {
           className="btn btn-primary"
           data-dismiss="modal"
           onClick={() => {
+            window.localStorage.setItem("projects", JSON.stringify([...selectedProjects]))
             updateState({
               isLoaded: false,
               needsRefresh: true,
@@ -139,16 +140,20 @@ const FilterModal = ({ closeAction }) => {
               },
             })
             closeAction()
+            const uiFilters = {
+              build_driver: selectedDrivers,
+              build_state: selectedBuildStates,
+              artifact_kinds: selectedArtifactKinds,
+            }
+            window.localStorage.setItem("uiFilters", JSON.stringify(uiFilters))
             history.push({
               path: '/',
               search: queryString
                 .stringify(
-                  _.pickBy({
-                    build_driver: selectedDrivers,
-                    build_state: selectedBuildStates,
-                    artifact_kinds: selectedArtifactKinds,
-                  },
-                  (val) => getIsArrayWithN(val, 1)),
+                  _.pickBy(
+                    uiFilters,
+                    (val) => getIsArrayWithN(val, 1),
+                  ),
                 ),
             })
           }}
@@ -163,8 +168,8 @@ const FilterModal = ({ closeAction }) => {
         <Tag
           onClick={() => {
             removeAuthCookie()
-            dispatch({ type: actions.LOGOUT })
             dispatch({ type: actions.UPDATE_UI_FILTERS, payload: {} })
+            dispatch({ type: actions.LOGOUT })
             closeAction()
             redirectHome()
           }}
