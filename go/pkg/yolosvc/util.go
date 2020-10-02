@@ -4,7 +4,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"os"
 	"path/filepath"
 	"regexp"
 
@@ -69,9 +68,4 @@ func guessMissingBuildInfo(build *yolopb.Build) {
 		// FIXME: check if the build.project.driver is GitHub
 		build.VCSTagURL = fmt.Sprintf("%s/tree/%s", build.HasProjectID, build.VCSTag)
 	}
-}
-
-func fileExists(path string) bool {
-	_, err := os.Stat(path)
-	return !os.IsNotExist(err)
 }

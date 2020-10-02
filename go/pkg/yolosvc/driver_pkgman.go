@@ -13,6 +13,7 @@ import (
 	"go.uber.org/zap"
 	"moul.io/pkgman/pkg/apk"
 	"moul.io/pkgman/pkg/ipa"
+	"moul.io/u"
 )
 
 type PkgmanWorkerOpts struct {
@@ -36,7 +37,7 @@ func (svc *service) PkgmanWorker(ctx context.Context, opts PkgmanWorkerOpts) err
 
 		for _, artifact := range artifacts {
 			cache := filepath.Join(svc.artifactsCachePath, artifact.ID)
-			if !fileExists(cache) {
+			if !u.FileExists(cache) {
 				continue
 			}
 			err = svc.pkgmanParseArtifactFile(artifact, cache)

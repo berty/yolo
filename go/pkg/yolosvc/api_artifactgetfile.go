@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi"
 	"google.golang.org/grpc/codes"
 	"moul.io/pkgman/pkg/ipa"
+	"moul.io/u"
 )
 
 func (svc *service) ArtifactGetFile(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +30,7 @@ func (svc *service) ArtifactGetFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	artifactPath := filepath.Join(svc.artifactsCachePath, artifact.ID)
-	if !fileExists(artifactPath) {
+	if !u.FileExists(artifactPath) {
 		httpError(w, err, codes.NotFound)
 		return
 	}

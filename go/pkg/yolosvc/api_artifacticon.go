@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"google.golang.org/grpc/codes"
+	"moul.io/u"
 )
 
 func (svc *service) ArtifactIcon(w http.ResponseWriter, r *http.Request) {
@@ -18,7 +19,7 @@ func (svc *service) ArtifactIcon(w http.ResponseWriter, r *http.Request) {
 	name = strings.ReplaceAll(name, "/", string(os.PathSeparator))
 
 	p := filepath.Join(svc.artifactsCachePath, "icons", name)
-	if !fileExists(p) {
+	if !u.FileExists(p) {
 		httpError(w, fmt.Errorf("no such icon"), codes.InvalidArgument)
 		return
 	}
