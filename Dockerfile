@@ -33,7 +33,7 @@ RUN             make install
 
 # minimalist runtime
 FROM alpine:3.11
-RUN             apk add --update --no-cache ca-certificates libstdc++
+RUN             apk add --update --no-cache ca-certificates libstdc++ unzip zip
 COPY            --from=go-build /go/bin/yolo /bin/
 COPY            --from=zsign-build zsign/zsign /bin/
 ENTRYPOINT      ["yolo"]
