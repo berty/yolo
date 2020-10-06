@@ -49,7 +49,6 @@ export const requestBuilds = ({
     )
     .finally(() => {
       updateState({
-        autoRefreshOn: false,
         isLoaded: true,
         authIsPending: false,
       })

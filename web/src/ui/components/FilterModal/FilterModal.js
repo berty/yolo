@@ -91,7 +91,11 @@ const BuildStateWidgets = ({ selectedBuildStates, setSelectedBuildStates }) => (
 
 const FilterModal = ({ closeAction }) => {
   const { theme, themeStyles } = useContext(ThemeContext)
-  const { state, updateState, dispatch } = useContext(GlobalContext)
+  const {
+    state, updateState, dispatch, logoutAction,
+  } = useContext(
+    GlobalContext,
+  )
   const { redirectHome } = useRedirectHome()
   const [selectedDrivers, setSelectedDrivers] = useState([
     ...state.uiFilters.build_driver,
@@ -189,7 +193,7 @@ const FilterModal = ({ closeAction }) => {
           onClick={() => {
             window.localStorage.setItem(
               'projects',
-              JSON.stringify([...selectedProjects]),
+              JSON.stringify(selectedProjects),
             )
             updateState({
               isLoaded: false,
@@ -227,7 +231,7 @@ const FilterModal = ({ closeAction }) => {
           onClick={() => {
             removeAuthCookie()
             dispatch({ type: actions.UPDATE_UI_FILTERS, payload: {} })
-            dispatch({ type: actions.LOGOUT })
+            logoutAction()
             closeAction()
             redirectHome()
           }}

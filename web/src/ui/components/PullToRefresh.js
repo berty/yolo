@@ -1,51 +1,17 @@
 import React from 'react'
-import { PullToRefresh } from 'react-js-pull-to-refresh'
+import {
+  PullToRefresh,
+  PullDownContent,
+  RefreshContent,
+  ReleaseContent,
+} from 'react-js-pull-to-refresh'
 
-const RefreshContent = () => (
-  <div
-    style={{
-      backgroundColor: 'transparent',
-      textAlign: 'center',
-      height: 75,
-      width: '100vw',
-    }}
-  />
-)
-
-const ReleaseContent = () => (
-  <div
-    style={{
-      height: 75,
-      width: '100vw',
-    }}
-  />
-)
-
-const PullDownContent = () => (
-  <div
-    style={{
-      textAlign: 'center',
-      height: 75,
-      width: '100vw',
-    }}
-  />
-)
-
-export const PullToRefreshWrapper = ({
-  onRefresh,
-  children,
-  isAuthed,
-  isMobile,
-}) => (
+export const PullToRefreshWrapper = ({ onRefresh, children }) => (
   <PullToRefresh
-    pullDownContent={<PullDownContent />}
-    releaseContent={<ReleaseContent />}
-    refreshContent={<RefreshContent />}
-    pullDownThreshold={50}
+    pullDownThreshold={80}
     onRefresh={onRefresh}
-    triggerHeight={isAuthed && isMobile ? 200 : 0}
-    // startInvisible
-    backgroundColor="invisible"
+    triggerHeight={200}
+    {...{ PullDownContent, RefreshContent, ReleaseContent }}
   >
     {children}
   </PullToRefresh>

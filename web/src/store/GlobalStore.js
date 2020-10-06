@@ -4,15 +4,12 @@
  * BEWARE ⚠️
  *
  * This is a container for ALL (almost) the app state.
- * It is mutated uniquely via action updateState()
+ * It is mutated uniquely via action updateState() and logoutAction()
  * throughout the entire app
  *
  * Tell ekelen to refactor me
  */
 
-import {
-  cloneDeep, has, isEqual, keys, omit, pick,
-} from 'lodash'
 import React, { useReducer } from 'react'
 import { retrieveAuthCookie } from '../api/cookies'
 import { actions, PROJECT } from '../constants'
@@ -35,7 +32,9 @@ export const INITIAL_STATE = {
     build_state: [],
   },
   calculatedFilters: {
-    projects: JSON.parse(window.localStorage.getItem('projects')) || [PROJECT.messenger],
+    projects: JSON.parse(window.localStorage.getItem('projects')) || [
+      PROJECT.messenger,
+    ],
     order: 'created_at',
   },
   showingFilterModal: false,
@@ -58,8 +57,6 @@ function reducer(state, action) {
       }
     }
     case actions.LOGOUT:
-      window.localStorage.removeItem('projects')
-      window.localStorage.removeItem('uiFilters')
       return {
         ...state,
         autoRefreshOn: false,
@@ -81,12 +78,14 @@ export const GlobalStore = ({ children }) => {
   // 🚧 not cool, we need to split this so we don't get redundant re-renders
   //     or have to do a slow deep equality check to prevent it
   const updateState = (payload) => {
-    const hasBuilds = has(payload, 'builds')
-    const stateFilteredFromPayload = pick(state, keys(payload))
-    const stateFilteredNoBuilds = omit(stateFilteredFromPayload, 'builds')
-    const payloadNoBuilds = omit(payload, 'builds')
-    const newInfoFromPayload = !isEqual(stateFilteredNoBuilds, payloadNoBuilds)
-    if (hasBuilds || newInfoFromPayload) dispatch({ type: actions.UPDATE_STATE, payload: cloneDeep(payload) })
+    dispatch({ type: actions.UPDATE_STATE, payload })
+  }
+
+  const logoutAction = () => {
+    window.localStorage.removeItem('projects')
+    window.localStorage.removeItem('uiFilters')
+    window.localStorage.removeItem('displayFeed')
+    dispatch({ type: actions.LOGOUT })
   }
 
   return (
@@ -94,6 +93,7 @@ export const GlobalStore = ({ children }) => {
       value={{
         state,
         updateState,
+        logoutAction,
         dispatch,
       }}
     >
