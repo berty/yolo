@@ -5,7 +5,12 @@ import { Check, LogOut } from 'react-feather'
 import { useHistory } from 'react-router-dom'
 import { removeAuthCookie } from '../../../api/cookies'
 import {
-  ARTIFACT_KINDS, BUILD_DRIVERS, BUILD_STATES, PROJECT, PROJECTS, actions,
+  ARTIFACT_KINDS,
+  BUILD_DRIVERS,
+  BUILD_STATES,
+  PROJECT,
+  PROJECTS,
+  actions,
 } from '../../../constants'
 import { GlobalContext } from '../../../store/GlobalStore'
 import { ThemeContext } from '../../../store/ThemeStore'
@@ -14,13 +19,20 @@ import Tag from '../Tag/Tag'
 import ThemeToggler from '../ThemeToggler'
 import styles from './FilterModal.module.scss'
 import {
-  ArtifactFilter, BranchFilter, BuildDriverFilter, BuildStateFilter, ProjectFilter,
+  ArtifactFilter,
+  BranchFilter,
+  BuildDriverFilter,
+  BuildStateFilter,
+  ProjectFilter,
 } from './FilterModalWidgets'
 import FilterModalWrapper from './FilterModalWrapper'
 import { useRedirectHome } from '../../../hooks/queryHooks'
 
 const ProjectWidgets = ({
-  selectedDrivers, setSelectedDrivers, selectedArtifactKinds, setSelectedArtifactKinds, selectedProjects, setSelectedProjects,
+  selectedArtifactKinds,
+  setSelectedArtifactKinds,
+  selectedProjects,
+  setSelectedProjects,
 }) => (
   <>
     {PROJECTS.filter((p) => p !== PROJECTS.UnknownProject).map((p, i) => (
@@ -28,14 +40,20 @@ const ProjectWidgets = ({
         key={i}
         project={PROJECT[p]}
         {...{
-          selectedDrivers, setSelectedDrivers, selectedArtifactKinds, setSelectedArtifactKinds, selectedProjects, setSelectedProjects,
+          selectedArtifactKinds,
+          setSelectedArtifactKinds,
+          selectedProjects,
+          setSelectedProjects,
         }}
       />
     ))}
   </>
 )
 
-const ArtifactKindWidgets = ({ setSelectedArtifactKinds, selectedArtifactKinds }) => (
+const ArtifactKindWidgets = ({
+  setSelectedArtifactKinds,
+  selectedArtifactKinds,
+}) => (
   <>
     {ARTIFACT_KINDS.map((k, i) => (
       <ArtifactFilter
@@ -90,39 +108,77 @@ const FilterModal = ({ closeAction }) => {
   const [selectedBranches] = useState(['all'])
   const history = useHistory()
 
-
   const tablerOverrides = {
     modalFooterStyle: { borderTop: 'none', justifyContent: 'center' },
-    modalFooterSettingsStyle: { borderTop: 'none', flexWrap: 'wrap', justifyContent: 'flex-end' },
+    modalFooterSettingsStyle: {
+      borderTop: 'none',
+      flexWrap: 'wrap',
+      justifyContent: 'flex-end',
+    },
   }
 
   return (
     <FilterModalWrapper {...{ closeAction }}>
       <div className="modal-body">
-        <div style={{ color: theme.text.sectionTitle }} className={styles.subtitle}>Projects</div>
+        <div
+          style={{ color: theme.text.sectionTitle }}
+          className={styles.subtitle}
+        >
+          Projects
+        </div>
         <div className={styles.row}>
-          <ProjectWidgets {...{
-            selectedDrivers, setSelectedDrivers, selectedArtifactKinds, setSelectedArtifactKinds, selectedProjects, setSelectedProjects,
-          }}
+          <ProjectWidgets
+            {...{
+              selectedDrivers,
+              setSelectedDrivers,
+              selectedArtifactKinds,
+              setSelectedArtifactKinds,
+              selectedProjects,
+              setSelectedProjects,
+            }}
           />
         </div>
-        <div style={{ color: theme.text.sectionTitle }} className={styles.subtitle}>Artifact Kinds</div>
-        <div className={styles.row}>
-          <ArtifactKindWidgets {...{ selectedArtifactKinds, setSelectedArtifactKinds }} />
+        <div
+          style={{ color: theme.text.sectionTitle }}
+          className={styles.subtitle}
+        >
+          Artifact Kinds
         </div>
-        <div style={{ color: theme.text.sectionTitle }} className={styles.subtitle}>Build Drivers</div>
+        <div className={styles.row}>
+          <ArtifactKindWidgets
+            {...{ selectedArtifactKinds, setSelectedArtifactKinds }}
+          />
+        </div>
+        <div
+          style={{ color: theme.text.sectionTitle }}
+          className={styles.subtitle}
+        >
+          Build Drivers
+        </div>
         <div className={styles.row}>
           <BuildDriverWidgets {...{ selectedDrivers, setSelectedDrivers }} />
         </div>
-        <div style={{ color: theme.text.sectionTitle }} className={styles.subtitle}>Branches</div>
+        <div
+          style={{ color: theme.text.sectionTitle }}
+          className={styles.subtitle}
+        >
+          Branches
+        </div>
         <div className={styles.row}>
           <BranchFilter branchName="all" {...{ selectedBranches }} />
           <BranchFilter branchName="master" {...{ selectedBranches }} />
           <BranchFilter branchName="develop" {...{ selectedBranches }} />
         </div>
-        <div style={{ color: theme.text.sectionTitle }} className={styles.subtitle}>Build State</div>
+        <div
+          style={{ color: theme.text.sectionTitle }}
+          className={styles.subtitle}
+        >
+          Build State
+        </div>
         <div className={styles.row}>
-          <BuildStateWidgets {...{ selectedBuildStates, setSelectedBuildStates }} />
+          <BuildStateWidgets
+            {...{ selectedBuildStates, setSelectedBuildStates }}
+          />
         </div>
       </div>
       <div className="modal-footer" style={tablerOverrides.modalFooterStyle}>
@@ -131,7 +187,10 @@ const FilterModal = ({ closeAction }) => {
           className="btn btn-primary"
           data-dismiss="modal"
           onClick={() => {
-            window.localStorage.setItem("projects", JSON.stringify([...selectedProjects]))
+            window.localStorage.setItem(
+              'projects',
+              JSON.stringify([...selectedProjects]),
+            )
             updateState({
               isLoaded: false,
               needsRefresh: true,
@@ -145,16 +204,12 @@ const FilterModal = ({ closeAction }) => {
               build_state: selectedBuildStates,
               artifact_kinds: selectedArtifactKinds,
             }
-            window.localStorage.setItem("uiFilters", JSON.stringify(uiFilters))
+            window.localStorage.setItem('uiFilters', JSON.stringify(uiFilters))
             history.push({
               path: '/',
-              search: queryString
-                .stringify(
-                  _.pickBy(
-                    uiFilters,
-                    (val) => getIsArrayWithN(val, 1),
-                  ),
-                ),
+              search: queryString.stringify(
+                _.pickBy(uiFilters, (val) => getIsArrayWithN(val, 1)),
+              ),
             })
           }}
           style={themeStyles.primaryButtonColors}
@@ -163,7 +218,10 @@ const FilterModal = ({ closeAction }) => {
           Apply Filters
         </div>
       </div>
-      <div className="modal-footer settings" style={tablerOverrides.modalFooterSettingsStyle}>
+      <div
+        className="modal-footer settings"
+        style={tablerOverrides.modalFooterSettingsStyle}
+      >
         <ThemeToggler />
         <Tag
           onClick={() => {

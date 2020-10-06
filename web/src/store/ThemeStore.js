@@ -14,7 +14,7 @@ export const ThemeStore = ({ children }) => {
   const [theme, setTheme] = useState(themes.dark)
 
   const changeTheme = (newName) => {
-    window.localStorage.setItem("theme", newName)
+    window.localStorage.setItem('theme', newName)
     setTheme(themes[newName] || themes.dark)
   }
 
@@ -45,7 +45,7 @@ export const ThemeStore = ({ children }) => {
   }, [theme])
 
   useEffect(() => {
-    const lTheme = window.localStorage.getItem("theme")
+    const lTheme = window.localStorage.getItem('theme')
     if (lTheme) {
       changeTheme(lTheme)
       return
