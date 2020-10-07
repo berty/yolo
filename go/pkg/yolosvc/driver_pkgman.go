@@ -30,7 +30,10 @@ func (svc *service) PkgmanWorker(ctx context.Context, opts PkgmanWorkerOpts) err
 	var logger = opts.Logger.Named("pman")
 	for iteration := 0; ; iteration++ {
 		var artifacts []*yolopb.Artifact
-		err := svc.db.Where("bundle_id IS NULL OR bundle_id = ''").Find(&artifacts).Error
+		err := svc.db.
+			Where("bundle_id IS NULL OR bundle_id = ''").
+			Find(&artifacts).
+			Error
 		if err != nil {
 			logger.Warn("get artifacts", zap.Error(err))
 		}
@@ -132,7 +135,10 @@ func (svc *service) pkgmanParseArtifactFile(artifact *yolopb.Artifact, artifactP
 func (svc *service) pkgmanExtractIPAAppIcon(app *ipa.App) (string, error) {
 	b, err := app.FileBytes("AppIcon60x60@3x.png")
 	if err != nil {
-		return "", err
+		b, err = app.FileBytes("AppIcon60x60@2x.png")
+		if err != nil {
+			return "", err
+		}
 	}
 
 	icon := md5Sum(b) + ".png"
