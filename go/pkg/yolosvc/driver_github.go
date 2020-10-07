@@ -60,14 +60,16 @@ func (svc *service) GitHubWorker(ctx context.Context, opts GithubWorkerOpts) err
 
 	// fetch recent activity in a loop
 	for iteration := 0; ; iteration++ {
-		if iteration > 0 {
-			worker.logger.Debug("refresh", zap.Int("iteration", iteration))
+		since, err := lastBuildCreatedTime(ctx, svc.db, yolopb.Driver_GitHub)
+		if err != nil {
+			svc.logger.Warn("get last github build created time", zap.Error(err))
 		}
+		svc.logger.Debug("github: refresh", zap.Int("iteration", iteration), zap.Time("since", since))
 
 		// fetch repo activity
 		for _, repo := range worker.repoConfigs {
 			// FIXME: support "since"
-			batch, err := worker.fetchRepoActivity(ctx, repo)
+			batch, err := worker.fetchRepoActivity(ctx, repo, iteration, since)
 			if err != nil {
 				worker.logger.Warn("fetch", zap.Error(err))
 			} else {
@@ -184,6 +186,7 @@ func (worker *githubWorker) repoMaintenance(ctx context.Context, repo githubRepo
 		err := worker.svc.db.
 			Where(yolopb.Build{Driver: yolopb.Driver_GitHub}).
 			Where("has_mergerequest_id IS NULL OR has_mergerequest_id = ''").
+			Where("updated_at >= date('now','-1 hour')").
 			Find(&builds).
 			Error
 		if err != nil {
@@ -212,54 +215,83 @@ func (worker *githubWorker) repoMaintenance(ctx context.Context, repo githubRepo
 	return batch, nil
 }
 
-func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRepoConfig) (*yolopb.Batch, error) {
+func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRepoConfig, iteration int, lastFinishedBuild time.Time) (*yolopb.Batch, error) {
 	batch := yolopb.NewBatch()
+
+	// paginate 5 pages every 10 runs.
+	// starting at the second one to have a fast first one.
+	maxPages := 1
+	if iteration%10 == 1 {
+		maxPages = 5
+	}
 
 	// fetch PRs
 	{
-		opts := &github.PullRequestListOptions{
-			State:     "all",
-			Sort:      "updated",
-			Direction: "desc",
-			// PerPage:   maxBuilds, // FIXME: support API limits nicely
-		}
+		for page := 0; page < maxPages; page++ {
+			opts := &github.PullRequestListOptions{
+				State:     "all",
+				Sort:      "updated",
+				Direction: "desc",
+				ListOptions: github.ListOptions{
+					Page: page,
+				},
+			}
 
-		before := time.Now()
-		pulls, _, err := worker.svc.ghc.PullRequests.List(ctx, repo.owner, repo.repo, opts)
-		if err != nil {
-			return nil, err
-		}
-		worker.logger.Debug("github.PullRequests.List", zap.Int("total", len(pulls)), zap.Duration("duration", time.Since(before)))
+			before := time.Now()
+			pulls, _, err := worker.svc.ghc.PullRequests.List(ctx, repo.owner, repo.repo, opts)
+			if err != nil {
+				return nil, err
+			}
+			worker.logger.Debug("github.PullRequests.List", zap.Int("total", len(pulls)), zap.Duration("duration", time.Since(before)))
 
-		for _, pull := range pulls {
-			batch.Merge(worker.batchFromPR(pull))
+			for _, pull := range pulls {
+				batch.Merge(worker.batchFromPR(pull))
+			}
 		}
 	}
 
 	// fetch workflow runs
 	var runs []*github.WorkflowRun
 	{
-		opts := &github.ListWorkflowRunsOptions{}
-		before := time.Now()
-		ret, _, err := worker.svc.ghc.Actions.ListRepositoryWorkflowRuns(ctx, repo.owner, repo.repo, opts)
-		if err != nil {
-			return nil, err
-		}
-		runs = ret.WorkflowRuns
-		worker.logger.Debug("github.Actions.ListRepositoryWorkflowRuns", zap.Int("total", len(runs)), zap.Duration("duration", time.Since(before)))
+		for page := 0; page < maxPages; page++ {
+			opts := &github.ListWorkflowRunsOptions{
+				ListOptions: github.ListOptions{
+					Page: page,
+				},
+			}
+			before := time.Now()
+			ret, _, err := worker.svc.ghc.Actions.ListRepositoryWorkflowRuns(ctx, repo.owner, repo.repo, opts)
+			if err != nil {
+				return nil, err
+			}
+			worker.logger.Debug("github.Actions.ListRepositoryWorkflowRuns",
+				zap.Int("total", len(ret.WorkflowRuns)),
+				zap.Duration("duration", time.Since(before)),
+				zap.String("repo", repo.repo),
+				zap.Int("page", page),
+			)
 
-		// FIXME: parallelize?
-		for _, run := range runs {
-			// fetch PRs associated to this run
-			if run.GetHeadBranch() != "master" {
-				opts := &github.PullRequestListOptions{}
-				ret, _, err := worker.svc.ghc.PullRequests.ListPullRequestsWithCommit(ctx, repo.owner, repo.repo, run.GetHeadSHA(), opts)
-				if err != nil {
-					return nil, err
+			// FIXME: parallelize?
+			for _, run := range ret.WorkflowRuns {
+				if run.GetUpdatedAt().Time.Before(lastFinishedBuild) {
+					continue
 				}
-				batch.Merge(worker.batchFromWorkflowRun(run, ret))
-			} else {
-				batch.Merge(worker.batchFromWorkflowRun(run, nil))
+				runs = append(runs, run)
+
+				// fetch PRs associated to this run
+				if run.GetHeadBranch() != "master" {
+					opts := &github.PullRequestListOptions{}
+					ret, _, err := worker.svc.ghc.PullRequests.ListPullRequestsWithCommit(ctx, repo.owner, repo.repo, run.GetHeadSHA(), opts)
+					if err != nil {
+						return nil, err
+					}
+					batch.Merge(worker.batchFromWorkflowRun(run, ret))
+				} else {
+					batch.Merge(worker.batchFromWorkflowRun(run, nil))
+				}
+			}
+			if len(runs) == 0 { // first page of result does not have any new result, do not check for the next pages
+				continue
 			}
 		}
 	}
@@ -300,7 +332,6 @@ func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRe
 				return nil, err
 			}
 			worker.logger.Debug("github.Actions.ListWorkflowRunArtifacts", zap.Int("total", len(ret.Artifacts)), zap.Duration("duration", time.Since(before)))
-
 			for _, artifact := range ret.Artifacts {
 				batch.Merge(worker.batchFromWorkflowRunArtifact(run, artifact))
 			}
@@ -353,6 +384,9 @@ func (worker *githubWorker) batchFromWorkflowRun(run *github.WorkflowRun, prs []
 		Message:      run.GetHeadCommit().GetMessage(),
 	}
 
+	if run.GetConclusion() != "" {
+		newBuild.FinishedAt = &updatedAt // maybe we can have a more accurate date?
+	}
 	// state
 	{
 		status := run.GetStatus()
