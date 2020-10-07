@@ -64,6 +64,7 @@ func (svc *service) GitHubWorker(ctx context.Context, opts GithubWorkerOpts) err
 			worker.logger.Debug("refresh", zap.Int("iteration", iteration))
 		}
 
+		// fetch repo activity
 		for _, repo := range worker.repoConfigs {
 			// FIXME: support "since"
 			batch, err := worker.fetchRepoActivity(ctx, repo)
@@ -72,6 +73,21 @@ func (svc *service) GitHubWorker(ctx context.Context, opts GithubWorkerOpts) err
 			} else {
 				if err := svc.saveBatch(ctx, batch); err != nil {
 					worker.logger.Warn("save batch", zap.Error(err))
+				}
+			}
+		}
+
+		// maintenance: try to fix missing links
+		if iteration%10 == 0 {
+			for _, repo := range worker.repoConfigs {
+				// FIXME: support "since"
+				batch, err := worker.repoMaintenance(ctx, repo)
+				if err != nil {
+					worker.logger.Warn("fetch", zap.Error(err))
+				} else {
+					if err := svc.saveBatch(ctx, batch); err != nil {
+						worker.logger.Warn("save batch", zap.Error(err))
+					}
 				}
 			}
 		}
@@ -144,7 +160,7 @@ func (worker *githubWorker) fetchBaseObjects(ctx context.Context) (*yolopb.Batch
 					return nil, err
 				}
 				logger.Debug("github.Actions.ListWorkflows", zap.Int("total", len(workflows.Workflows)), zap.Duration("duration", time.Since(before)))
-				fmt.Println(godev.PrettyJSON(workflows))
+				fmt.Println(u.PrettyJSON(workflows))
 			}
 		*/
 
@@ -153,6 +169,43 @@ func (worker *githubWorker) fetchBaseObjects(ctx context.Context) (*yolopb.Batch
 				owner: "berty", repo: "berty",
 				// workflows: map[int64]githubWorkflowConfig{2598412: githubWorkflowConfig{}},
 			},
+		}
+	}
+
+	return batch, nil
+}
+
+func (worker *githubWorker) repoMaintenance(ctx context.Context, repo githubRepoConfig) (*yolopb.Batch, error) {
+	batch := yolopb.NewBatch()
+
+	// github builds without PR
+	{
+		var builds []*yolopb.Build
+		err := worker.svc.db.
+			Where(yolopb.Build{Driver: yolopb.Driver_GitHub}).
+			Where("has_mergerequest_id IS NULL OR has_mergerequest_id = ''").
+			Find(&builds).
+			Error
+		if err != nil {
+			return nil, err
+		}
+		worker.logger.Debug("repo maintenance", zap.String("repo", repo.repo), zap.Int("orphan builds", len(builds)))
+		// FIXME: parallelize?
+		for _, build := range builds {
+			before := time.Now()
+			opts := &github.PullRequestListOptions{}
+			ret, _, err := worker.svc.ghc.PullRequests.ListPullRequestsWithCommit(ctx, repo.owner, repo.repo, build.HasCommitID, opts)
+			if err != nil {
+				return nil, err
+			}
+			worker.logger.Debug("github.PullRequests.ListPulLRequestsWithCommit",
+				zap.Int("total", len(ret)),
+				zap.Duration("duration", time.Since(before)),
+			)
+			if len(ret) == 1 {
+				build.HasMergerequestID = ret[0].GetHTMLURL()
+				batch.Builds = append(batch.Builds, build)
+			}
 		}
 	}
 
@@ -195,6 +248,7 @@ func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRe
 		runs = ret.WorkflowRuns
 		worker.logger.Debug("github.Actions.ListRepositoryWorkflowRuns", zap.Int("total", len(runs)), zap.Duration("duration", time.Since(before)))
 
+		// FIXME: parallelize?
 		for _, run := range runs {
 			// fetch PRs associated to this run
 			if run.GetHeadBranch() != "master" {
@@ -213,6 +267,7 @@ func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRe
 	// fetch artifacts
 	// FIXME: try to make a single call that gets artifacts for a repo with link to builds
 	{
+		// FIXME: parallelize?
 		for _, run := range runs {
 			if run.GetStatus() != "completed" {
 				continue
@@ -328,7 +383,7 @@ func (worker *githubWorker) batchFromWorkflowRun(run *github.WorkflowRun, prs []
 	}
 
 	if len(prs) > 0 {
-		pr := prs[0] // only take first
+		pr := prs[0] // only take the first one
 		newBuild.HasMergerequestID = pr.GetHTMLURL()
 	}
 
