@@ -89,6 +89,10 @@ func lastBuildCreatedTime(ctx context.Context, db *gorm.DB, driver yolopb.Driver
 		return time.Time{}, err
 	}
 
+	if build.FinishedAt == nil {
+		return time.Time{}, nil
+	}
+
 	since := *build.FinishedAt
 	if !since.IsZero() {
 		since = since.Add(time.Second) // in order to skip the last one
