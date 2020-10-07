@@ -3,7 +3,6 @@ package yolosvc
 import (
 	"context"
 	"crypto/subtle"
-	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
@@ -30,6 +29,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"moul.io/u"
 )
 
 type Server struct {
@@ -243,8 +243,7 @@ func httpError(w http.ResponseWriter, err error, code codes.Code) {
 		Message: code.String(),
 		Details: fmt.Sprintf("%v", err),
 	}
-	out, _ := json.MarshalIndent(msg, "", "  ")
-	http.Error(w, string(out), runtime.HTTPStatusFromCode(code))
+	http.Error(w, u.PrettyJSON(msg), runtime.HTTPStatusFromCode(code))
 }
 
 func (o *ServerOpts) applyDefaults() {
