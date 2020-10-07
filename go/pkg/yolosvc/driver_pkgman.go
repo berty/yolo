@@ -89,6 +89,9 @@ func (svc *service) pkgmanParseArtifactFile(artifact *yolopb.Artifact, artifactP
 			return err
 		}
 		artifact.BundleName = plist.CFBundleDisplayName
+		if artifact.BundleName == "" {
+			artifact.BundleName = plist.CFBundleName
+		}
 		artifact.BundleID = plist.CFBundleIdentifier
 		artifact.BundleVersion = plist.CFBundleShortVersionString
 		appIcon, err := svc.pkgmanExtractIPAAppIcon(app)
