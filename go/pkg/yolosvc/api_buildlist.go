@@ -71,6 +71,9 @@ func (svc *service) BuildList(ctx context.Context, req *yolopb.BuildList_Request
 		if len(req.MergerequestState) > 0 {
 			query = query.Where("merge_request.state IN (?)", req.MergerequestState)
 		}
+		if !req.WithNoMergerequest {
+			query = query.Where("build.has_mergerequest_id IS NOT NULL AND build.has_mergerequest_id != ''")
+		}
 		if len(req.Branch) > 0 {
 			if req.WithMergerequest {
 				query = query.Where("merge_request.branch IN (?) OR build.branch IN (?)", req.Branch, req.Branch)
