@@ -16,7 +16,7 @@ RUN             npm run build
 RUN             cat dist/index.html
 
 # go build
-FROM            golang:1.14-alpine as go-build
+FROM            golang:1.15-alpine as go-build
 RUN             apk add --update --no-cache git gcc musl-dev make perl-utils
 RUN             GO111MODULE=off go get github.com/gobuffalo/packr/v2/packr2
 WORKDIR         /go/src/berty.tech/yolo
