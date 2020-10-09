@@ -6,7 +6,7 @@ package yolo;
 
 import "google/api/annotations.proto";
 import "github.com/gogo/protobuf/gogoproto/gogo.proto";
-import "github.com/golang/protobuf/ptypes/timestamp/timestamp.proto";
+import "google/protobuf/timestamp.proto";
 
 option go_package = "berty.tech/yolo/go/pkg/yolopb";
 option (gogoproto.sizer_all) = true;
@@ -97,6 +97,9 @@ message BuildList {
 
     // filter on branch
     repeated string branch = 13;
+
+    // filter builds with merge requests
+    bool with_no_mergerequest = 14;
   }
   message Response {
     repeated Build builds = 1;
@@ -108,6 +111,8 @@ message BuildListFilters {
   message Response {
     repeated Entity entities = 1;
     repeated Project projects = 2;
+    // FIXME: authors
+    // FIXME: branchs?
   }
 }
 
