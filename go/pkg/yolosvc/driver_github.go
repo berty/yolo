@@ -79,21 +79,6 @@ func (svc *service) GitHubWorker(ctx context.Context, opts GithubWorkerOpts) err
 			}
 		}
 
-		// maintenance: try to fix missing links
-		if iteration%10 == 0 {
-			for _, repo := range worker.repoConfigs {
-				// FIXME: support "since"
-				batch, err := worker.repoMaintenance(ctx, repo)
-				if err != nil {
-					worker.logger.Warn("fetch", zap.Error(err))
-				} else {
-					if err := svc.saveBatch(ctx, batch); err != nil {
-						worker.logger.Warn("save batch", zap.Error(err))
-					}
-				}
-			}
-		}
-
 		// FIXME: subscribe to orgs' events
 
 		limits, _, err := svc.ghc.RateLimits(ctx)
@@ -177,51 +162,17 @@ func (worker *githubWorker) fetchBaseObjects(ctx context.Context) (*yolopb.Batch
 	return batch, nil
 }
 
-func (worker *githubWorker) repoMaintenance(ctx context.Context, repo githubRepoConfig) (*yolopb.Batch, error) {
-	batch := yolopb.NewBatch()
-
-	// github builds without PR
-	{
-		var builds []*yolopb.Build
-		err := worker.svc.db.
-			Where(yolopb.Build{Driver: yolopb.Driver_GitHub}).
-			Where("has_mergerequest_id IS NULL OR has_mergerequest_id = ''").
-			Where("updated_at >= date('now','-1 hour')").
-			Find(&builds).
-			Error
-		if err != nil {
-			return nil, err
-		}
-		worker.logger.Debug("repo maintenance", zap.String("repo", repo.repo), zap.Int("orphan builds", len(builds)))
-		// FIXME: parallelize?
-		for _, build := range builds {
-			before := time.Now()
-			opts := &github.PullRequestListOptions{}
-			ret, _, err := worker.svc.ghc.PullRequests.ListPullRequestsWithCommit(ctx, repo.owner, repo.repo, build.HasCommitID, opts)
-			if err != nil {
-				return nil, err
-			}
-			worker.logger.Debug("github.PullRequests.ListPulLRequestsWithCommit",
-				zap.Int("total", len(ret)),
-				zap.Duration("duration", time.Since(before)),
-			)
-			if len(ret) == 1 {
-				build.HasMergerequestID = ret[0].GetHTMLURL()
-				batch.Builds = append(batch.Builds, build)
-			}
-		}
-	}
-
-	return batch, nil
-}
-
 func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRepoConfig, iteration int, lastFinishedBuild time.Time) (*yolopb.Batch, error) {
 	batch := yolopb.NewBatch()
 
-	// paginate 5 pages every 10 runs.
-	// starting at the second one to have a fast first one.
-	maxPages := 1
-	if iteration%10 == 1 {
+	// choose how maeny pages to aggregate
+	var maxPages int
+	switch {
+	case iteration == 0: // first run should be fast
+		maxPages = 1
+	case iteration == 1: // second run is here to populate a lot more
+		maxPages = 10
+	case iteration%10 == 0: // then, every 10 runs, check the 5 first pages to check if we miss some PRs in a flood
 		maxPages = 5
 	}
 
@@ -273,15 +224,22 @@ func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRe
 
 			// FIXME: parallelize?
 			for _, run := range ret.WorkflowRuns {
-				if run.GetUpdatedAt().Time.Before(lastFinishedBuild) {
-					continue
-				}
+				// FIXME: compare updated_at before doing next calls
 				runs = append(runs, run)
 
+				isFork := run.GetHeadRepository().GetOwner().GetLogin() != repo.owner ||
+					run.GetHeadRepository().GetName() != repo.repo
+
 				// fetch PRs associated to this run
-				if run.GetHeadBranch() != "master" {
+				if isFork || run.GetHeadBranch() != "master" {
 					opts := &github.PullRequestListOptions{}
-					ret, _, err := worker.svc.ghc.PullRequests.ListPullRequestsWithCommit(ctx, repo.owner, repo.repo, run.GetHeadSHA(), opts)
+					ret, _, err := worker.svc.ghc.PullRequests.ListPullRequestsWithCommit(
+						ctx,
+						run.GetHeadRepository().GetOwner().GetLogin(),
+						run.GetHeadRepository().GetName(),
+						run.GetHeadSHA(),
+						opts,
+					)
 					if err != nil {
 						return nil, err
 					}
@@ -289,9 +247,6 @@ func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRe
 				} else {
 					batch.Merge(worker.batchFromWorkflowRun(run, nil))
 				}
-			}
-			if len(runs) == 0 { // first page of result does not have any new result, do not check for the next pages
-				continue
 			}
 		}
 	}
