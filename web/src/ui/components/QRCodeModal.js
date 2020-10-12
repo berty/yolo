@@ -2,7 +2,14 @@ import React from 'react'
 import MessageModal from './MessageModal/MessageModal'
 
 const QRCodeModal = ({ closeAction, children }) => (
-  <MessageModal>
+  <MessageModal onClose={closeAction}>
+    <h2 style={{ color: 'darkgoldenrod', fontSize: '1.4rem' }}>
+      Scan me!
+      {' '}
+      <span role="img" aria-label="a cellular phone">
+        📱
+      </span>
+    </h2>
     <div style={{ width: 'auto' }}>
       {children}
       <div className="modal-footer">

@@ -74,8 +74,7 @@ const ChevronIcon = ({ theme, collapsed, toggleCollapsed }) => (
   <div
     className={styles.headerChevronToggler}
     style={{ color: theme.text.blockTitle }}
-    onClick={(e) => {
-      e.stopPropagation()
+    onClick={() => {
       toggleCollapsed(!collapsed)
     }}
   >

@@ -162,13 +162,18 @@ const BuildList = ({ builds = [], loaded }) => {
 
   useEffect(() => {
     // On show feed, scroll to feed with 'hide feed' button at top of screen
-    if (refOpen?.current && displayFeed === true && prevDisplay === false) {
+    if (
+      refOpen?.current
+      && displayFeed === true
+      && prevDisplay === false
+      && builds.length
+    ) {
       refOpen.current.scrollIntoView({
         behavior: 'smooth',
         block: 'start',
       })
     }
-  }, [displayFeed, refOpen, prevDisplay])
+  }, [displayFeed, refOpen, prevDisplay, builds.length])
 
   return !builds.length > 0 && loaded ? (
     <NoBuilds />
