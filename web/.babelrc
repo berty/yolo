@@ -17,6 +17,7 @@
         "@babel/plugin-syntax-dynamic-import",
         ["transform-react-remove-prop-types",{ "removeImport": true }],
         "@babel/plugin-proposal-class-properties",
+        "@babel/plugin-proposal-optional-chaining",
         "react-hot-loader/babel"
       ]
     },
