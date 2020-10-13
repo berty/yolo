@@ -93,7 +93,8 @@ const FeedDisplayToggler = ({
     padding: '0.3rem 0.7rem',
     display: 'flex',
     alignItems: 'center',
-    marginBottom: '1rem',
+    marginBottom: '1.4rem',
+    marginTop: '1.4rem',
   }
 
   return (
@@ -206,14 +207,18 @@ const BuildList = ({ builds = [], loaded }) => {
         }}
       />
       {loaded && indexOfLatestMasterBuildsForProjects.length > 0 && (
-        <FeedDisplayToggler
-          {...{
-            onSetDisplayFeed,
-            displayFeed,
-            loaded,
-            builds,
-          }}
-        />
+        <div
+          style={{ display: 'flex', width: '100%', justifyContent: 'center' }}
+        >
+          <FeedDisplayToggler
+            {...{
+              onSetDisplayFeed,
+              displayFeed,
+              loaded,
+              builds,
+            }}
+          />
+        </div>
       )}
       <div
         ref={ref}
