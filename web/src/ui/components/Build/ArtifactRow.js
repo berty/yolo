@@ -28,14 +28,15 @@ const ArtifactRowKindIcon = ({ color, kind = '' }) => (
   />
 )
 
-const QrCode = ({ artifactPlistSignedUrl, closeAction }) => (
+export const QrCode = ({ artifactPlistSignedUrl, closeAction }) => (
   <QRCodeModal closeAction={closeAction}>
     <QRCode
       value={`itms-services://?action=download-manifest&url=${process.env.API_SERVER}${artifactPlistSignedUrl}`}
-      size={256}
+      // size={256}
       level="M"
       renderAs="svg"
       includeMargin
+      style={{ width: '100%' }}
     />
   </QRCodeModal>
 )

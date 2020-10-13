@@ -1,6 +1,8 @@
+import { faQrcode } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { get } from 'lodash'
 import React, { useContext, useState } from 'react'
+import { Download } from 'react-feather'
 import { ARTIFACT_KIND_NAMES, BRANCH, BUILD_STATE } from '../../../constants'
 import { GlobalContext } from '../../../store/GlobalStore'
 import { ThemeContext } from '../../../store/ThemeStore'
@@ -10,9 +12,13 @@ import {
   getStrEquNormalized,
 } from '../../../util/getters'
 import { getArtifactKindIcon } from '../../styleTools/brandIcons'
-import { tagColorStyles } from '../../styleTools/buttonStyler'
+import {
+  primaryButtonColors,
+  tagColorStyles,
+} from '../../styleTools/buttonStyler'
 import ShowingOlderBuildsTag from '../ShowingOlderBuildsTag'
 import Tag from '../Tag/Tag'
+import { QrCode } from './ArtifactRow'
 import styles from './Build.module.scss'
 import BuildAndMrContainer from './BuildAndMrContainer'
 import BuildBlockHeader from './BuildBlockHeader'
@@ -63,6 +69,106 @@ const AnyRunningBuildTags = ({ hasRunningBuilds, allBuildsForMr, theme }) => has
     </Tag>
 )
 
+const LatestBuildQrButton = ({ onClick, theme, artifactPlistSignedUrl }) => artifactPlistSignedUrl && (
+<div
+  onClick={(e) => {
+    onClick()
+    e.stopPropagation()
+  }}
+  className="btn btn-sm"
+  style={{
+    ...primaryButtonColors(theme),
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+  title="Show QR code"
+>
+  <FontAwesomeIcon
+    icon={faQrcode}
+    size="lg"
+    color={theme.text.btnPrimary}
+    style={{
+      marginTop: 0,
+      marginBottom: 0,
+    }}
+  />
+</div>
+)
+
+const DlButtonSmall = ({ buildHasArtifacts, theme }) => buildHasArtifacts && (
+<>
+  {buildHasArtifacts.map((artifact, i) => {
+    const {
+      plist_signed_url: artifactPlistSignedUrl = '',
+      dl_artifact_signed_url: artifactDlArtifactSignedUrl = '',
+      kind: artifactKind = '',
+    } = artifact
+
+    const fullPlistSignedUrl = artifactPlistSignedUrl
+          && `itms-services://?action=download-manifest&url=${process.env.API_SERVER}${artifactPlistSignedUrl}`
+
+    const fullDlArtifactSignedUrl = artifactDlArtifactSignedUrl
+          && `${process.env.API_SERVER}${artifactDlArtifactSignedUrl}`
+
+    const hasDlUrl = fullPlistSignedUrl || fullDlArtifactSignedUrl
+    return (
+      <a
+        key={`${artifactPlistSignedUrl}=${i}`}
+        href={hasDlUrl}
+        className="btn btn-sm"
+        style={{
+          ...primaryButtonColors(theme),
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+        title={hasDlUrl}
+      >
+        <Download size="1rem" style={{ marginRight: '0.3rem' }} />
+        {`.${ARTIFACT_KIND_NAMES[artifactKind]}`}
+      </a>
+    )
+  })}
+</>
+)
+
+const LatestBuildStateTags = ({
+  collapsed,
+  theme,
+  buildState,
+  buildId,
+  buildHasArtifacts,
+  allBuildsForMr,
+  hasRunningBuilds,
+}) => {
+  const [showingQrModal, toggleShowQrModal] = useState(false)
+  const firstArtifactPlistSignedUrl = buildHasArtifacts?.find((a) => a.kind === ARTIFACT_KIND_NAMES.IPA)
+      ?.plist_signed_url || null
+  return (
+    collapsed && (
+      <>
+        {showingQrModal && firstArtifactPlistSignedUrl && (
+          <QrCode
+            artifactPlistSignedUrl={firstArtifactPlistSignedUrl}
+            closeAction={() => toggleShowQrModal(false)}
+          />
+        )}
+        <BuildStateTag {...{ theme, buildState, buildId }} />
+        <LatestBuildArtifactsIcons {...{ theme, buildHasArtifacts }} />
+        <AnyRunningBuildTags {...{ hasRunningBuilds, allBuildsForMr, theme }} />
+        <DlButtonSmall {...{ buildHasArtifacts, theme }} />
+        <LatestBuildQrButton
+          onClick={() => toggleShowQrModal(true)}
+          theme={theme}
+          artifactPlistSignedUrl={firstArtifactPlistSignedUrl}
+        />
+        <ShowingOlderBuildsTag nOlderBuilds={allBuildsForMr.length - 1} />
+      </>
+    )
+  )
+}
+
 const BuildContainer = React.memo(
   ({
     build, toCollapse, hasRunningBuilds, isLatestMaster = false,
@@ -70,6 +176,7 @@ const BuildContainer = React.memo(
     const { state } = useContext(GlobalContext)
     const [collapsed, setCollapsed] = useState(toCollapse)
     const [showingAllBuilds, toggleShowingAllBuilds] = useState(false)
+
     const { theme } = useContext(ThemeContext)
 
     const toggleCollapsed = () => setCollapsed(!collapsed)
@@ -105,75 +212,80 @@ const BuildContainer = React.memo(
 
     const isMasterBuildBranch = getStrEquNormalized(buildBranch, BRANCH.MASTER)
 
-    const LatestBuildStateTags = () => collapsed && (
-    <>
-      <BuildStateTag {...{ theme, buildState, buildId }} />
-      <LatestBuildArtifactsIcons {...{ theme, buildHasArtifacts }} />
-      <ShowingOlderBuildsTag nOlderBuilds={allBuildsForMr.length - 1} />
-      <AnyRunningBuildTags
-        {...{ hasRunningBuilds, allBuildsForMr, theme }}
-      />
-    </>
-    )
-
     return (
-      <div className={styles.buildBlock}>
-        <div
-          className="card"
-          style={{
-            backgroundColor: theme.bg.block,
-            boxShadow: theme.shadowStyle.block,
-            ...tablerOverrides.card,
-          }}
-          key={buildId}
-          onClick={() => {
-            if (collapsed) {
-              toggleCollapsed()
-            }
-          }}
-        >
-          <BuildBlockHeader
-            {...{
-              buildAuthorName,
-              buildAuthorAvatarUrl,
-              buildAuthorId,
-              buildHasMr,
-              buildId,
-              buildShortId,
-              collapsed,
-              isMasterBuildBranch,
-              isLatestMaster,
-              mrId,
-              mrTitle,
-              mrShortId,
-              mrState,
-              toggleCollapsed,
-              projectOwnerId,
-              projectOwnerAvatarUrl,
-              ...{ childrenLatestBuildTags: <LatestBuildStateTags /> },
+      <>
+        <div className={styles.buildBlock}>
+          <div
+            className="card"
+            style={{
+              backgroundColor: theme.bg.block,
+              boxShadow: theme.shadowStyle.block,
+              ...tablerOverrides.card,
             }}
-          />
-          {!collapsed
-            && allBuildsForMr
-              .filter((bIdx, i) => showingAllBuilds ? Number.isInteger(bIdx) : i === 0)
-              .map((buildidx, i) => (
-                <BuildAndMrContainer
-                  build={state.builds[buildidx]}
-                  buildHasMr={buildHasMr}
-                  hasRunningBuilds={hasRunningBuilds}
-                  isLatestBuild={i === 0}
-                  key={i}
-                  nOlderBuilds={
-                    i === 0 && getIsArrayWithN(allBuildsForMr, 2)
-                      ? allBuildsForMr.length - 1
-                      : 0
-                  }
-                  showingAllBuilds={showingAllBuilds}
-                  toggleShowingAllBuilds={toggleShowingAllBuilds}
-                />
-              ))}
+            key={buildId}
+            onClick={() => {
+              if (collapsed) {
+                toggleCollapsed()
+              }
+            }}
+          >
+            <BuildBlockHeader
+              {...{
+                buildAuthorName,
+                buildAuthorAvatarUrl,
+                buildAuthorId,
+                buildHasMr,
+                buildId,
+                buildShortId,
+                collapsed,
+                isMasterBuildBranch,
+                isLatestMaster,
+                mrId,
+                mrTitle,
+                mrShortId,
+                mrState,
+                toggleCollapsed,
+                projectOwnerId,
+                projectOwnerAvatarUrl,
+                ...{
+                  childrenLatestBuildTags: (
+                    <LatestBuildStateTags
+                      {...{
+                        collapsed,
+                        theme,
+                        buildState,
+                        buildId,
+                        buildHasArtifacts,
+                        allBuildsForMr,
+                        hasRunningBuilds,
+                      }}
+                    />
+                  ),
+                },
+              }}
+            />
+            {!collapsed
+              && allBuildsForMr
+                .filter((bIdx, i) => showingAllBuilds ? Number.isInteger(bIdx) : i === 0)
+                .map((buildidx, i) => (
+                  <BuildAndMrContainer
+                    build={state.builds[buildidx]}
+                    buildHasMr={buildHasMr}
+                    hasRunningBuilds={hasRunningBuilds}
+                    isLatestBuild={i === 0}
+                    key={i}
+                    nOlderBuilds={
+                      i === 0 && getIsArrayWithN(allBuildsForMr, 2)
+                        ? allBuildsForMr.length - 1
+                        : 0
+                    }
+                    showingAllBuilds={showingAllBuilds}
+                    toggleShowingAllBuilds={toggleShowingAllBuilds}
+                  />
+                ))}
+          </div>
         </div>
-      </div>
+      </>
     )
   },
 )
