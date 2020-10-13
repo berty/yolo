@@ -7,12 +7,16 @@ import { setAuthCookie } from '../../api/cookies'
 import { ThemeContext } from '../../store/ThemeStore'
 import { getSafeStr } from '../../util/getters'
 
-const ApiKeyPrompt = ({
-  failedKey, authIsPending, updateState,
-}) => {
-  const { theme: { text: { sectionTitle } } } = useContext(ThemeContext)
+const ApiKeyPrompt = ({ failedKey, authIsPending, updateState }) => {
+  const {
+    theme: {
+      text: { sectionTitle },
+    },
+  } = useContext(ThemeContext)
   const [formApiKey, updateFormApiKey] = useState('')
-  const submitBtnClass = classNames('btn', 'btn-primary', { disabled: authIsPending || !formApiKey })
+  const submitBtnClass = classNames('btn', 'btn-primary', {
+    disabled: authIsPending || !formApiKey,
+  })
   const inputEl = useRef(null)
   const history = useHistory()
   const { search: locationSearch } = useLocation()
@@ -32,17 +36,17 @@ const ApiKeyPrompt = ({
       search: locationSearch,
     })
   }
-  useEffect(() => { inputEl.current.focus() })
+  useEffect(() => {
+    inputEl.current.focus()
+  })
 
   return (
-    <section>
+    <section style={{ marginBottom: '3rem' }}>
       <form className="form-group" onSubmit={onFormSubmit}>
         <label className="mt-3 form-label mb-2">
           Enter an API key in the form of
           {' '}
-          <strong
-            style={{ fontFamily: 'monospace', color: sectionTitle }}
-          >
+          <strong style={{ fontFamily: 'monospace', color: sectionTitle }}>
             :password
           </strong>
         </label>
@@ -51,7 +55,9 @@ const ApiKeyPrompt = ({
             ref={inputEl}
             type="text"
             className="form-control"
-            placeholder={`Current key: ${(failedKey && getSafeStr(atob(failedKey))) || 'no key set'}`}
+            placeholder={`Current key: ${
+              (failedKey && getSafeStr(atob(failedKey))) || 'no key set'
+            }`}
             onChange={(e) => {
               updateFormApiKey(e.target.value)
             }}

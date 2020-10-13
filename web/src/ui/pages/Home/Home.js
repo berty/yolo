@@ -89,10 +89,10 @@ const Home = () => {
       {!state.error && (
         <BuildList builds={state.builds} loaded={state.isLoaded} />
       )}
-      <div
+      {/* <div
         className={styles.footer}
         style={{ backgroundColor: theme.bg.block }}
-      />
+      /> */}
     </>
   )
 

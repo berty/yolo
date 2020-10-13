@@ -166,7 +166,7 @@ const BuildList = ({ builds = [], loaded }) => {
       refOpen?.current
       && displayFeed === true
       && prevDisplay === false
-      && builds.length
+      && builds.length > 0
     ) {
       refOpen.current.scrollIntoView({
         behavior: 'smooth',
