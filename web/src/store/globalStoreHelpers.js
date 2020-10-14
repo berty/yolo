@@ -1,5 +1,6 @@
 import queryString from 'query-string'
 import { isEqual } from 'lodash'
+import { useContext } from 'react'
 import {
   ARTIFACT_KINDS,
   BUILD_DRIVERS,
@@ -10,6 +11,16 @@ import {
 } from '../constants'
 import { singleItemToArray } from '../util/getters'
 import { getMobileOperatingSystem } from '../util/browser'
+import { GlobalContext } from './GlobalStore'
+
+export const useIsMobile = () => {
+  const {
+    state: { userAgent },
+  } = useContext(GlobalContext)
+  return (
+    userAgent === KIND_TO_PLATFORM.IPA || userAgent === KIND_TO_PLATFORM.APK
+  )
+}
 
 export const getFiltersFromUrlQuery = ({ locationSearch = '', uiFilters }) => {
   if (!locationSearch) {

@@ -43,7 +43,7 @@ export const useRedirectOnEmptyQuery = () => {
         })
       }
     },
-    // TODO: Bad; refactor
+    // TODO: Refactor to follow hook rules
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [locationSearch],
   )
@@ -63,7 +63,7 @@ export const useRequestOnQueryChange = () => {
     if (locationSearch && needsRefresh) {
       requestBuilds({ updateState, locationSearch, apiKey })
     }
-    // TODO: Bad; refactor
+    // TODO: Refactor to follow hook rules
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locationSearch, needsRefresh])
 }
@@ -76,7 +76,9 @@ export const useSetFiltersOnQueryChange = () => {
   const { search: locationSearch } = useLocation()
   useEffect(() => {
     const updateFilters = () => {
-      const { artifact_kinds, build_driver, build_state } = JSON.parse(window.localStorage.getItem('uiFilters')) || getFiltersFromUrlQuery({ locationSearch }) || {}
+      const { artifact_kinds, build_driver, build_state } = JSON.parse(window.localStorage.getItem('uiFilters'))
+        || getFiltersFromUrlQuery({ locationSearch })
+        || {}
       dispatch({
         type: actions.UPDATE_UI_FILTERS,
         payload: { artifact_kinds, build_driver, build_state },

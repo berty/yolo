@@ -17,6 +17,8 @@
 import Cookies from 'js-cookie'
 // import _ from "lodash";
 import React, { useContext, useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
+import { requestBuilds } from '../../../api'
 import {
   useRedirectOnEmptyQuery,
   useRequestOnQueryChange,
@@ -24,13 +26,16 @@ import {
 } from '../../../hooks/queryHooks'
 import { useRecursiveTimeout } from '../../../hooks/useRecursiveTimeout'
 import { GlobalContext } from '../../../store/GlobalStore'
+import { useIsMobile } from '../../../store/globalStoreHelpers'
 import { ThemeContext } from '../../../store/ThemeStore'
 import ApiKeyPrompt from '../../components/ApiKeyPrompt'
 import BuildList from '../../components/BuildList'
+import ConditionallyWrappedComponent from '../../components/ConditionallyWrappedComponent'
 import ErrorDisplay from '../../components/ErrorDisplay/ErrorDisplay'
 import FilterModal from '../../components/FilterModal/FilterModal'
 import Header from '../../components/Header/Header'
 import ProtocolDisclaimer from '../../components/ProtocolDisclaimer'
+import { PullToRefreshWrapper } from '../../components/PullToRefresh'
 import ShowFiltersButton from '../../components/ShowFiltersButton'
 import Spinner from '../../components/Spinner/Spinner'
 import styles from './Home.module.scss'
@@ -44,11 +49,12 @@ const Home = () => {
   } = useContext(GlobalContext)
   const [showingFilterModal, toggleShowFilters] = useState(false)
   const [showingDisclaimerModal, toggleShowDisclaimer] = useState(false)
-  // const onPull = () => Promise.resolve(updateState({ needsRefresh: true }));
+  const { search: locationSearch } = useLocation()
+  const isMobile = useIsMobile()
 
   // Hide protocol warning popup
   const setDisclaimerAccepted = (accepted) => {
-    Cookies.set('disclaimerAccepted', 1, { expires: 7 })
+    Cookies.set('disclaimerAccepted', 1, { expires: 21 })
     toggleShowDisclaimer(!accepted)
   }
 
@@ -89,50 +95,57 @@ const Home = () => {
       {!state.error && (
         <BuildList builds={state.builds} loaded={state.isLoaded} />
       )}
-      {/* <div
-        className={styles.footer}
-        style={{ backgroundColor: theme.bg.block }}
-      /> */}
     </>
   )
 
   return (
-    <div className={styles.homeContainer}>
-      <div
-        className={styles.homepageWrapper}
-        style={{ backgroundColor: theme.bg.page }}
-      >
-        {/* <PullToRefreshWrapper
-          onRefresh={() => onPull()}
-          isAuthed={state.isAuthed && !state.authIsPending}
-          isMobile={
-            state.userAgent === USERAGENT.Android ||
-            state.userAgent === USERAGENT.iOS
-          }
-        > */}
-        <Page />
-        {/* </PullToRefreshWrapper> */}
+    <>
+      <div className={styles.homeContainer}>
+        <ConditionallyWrappedComponent
+          condition={isMobile && state.isAuthed && !state.authIsPending}
+          wrapper={(children) => (
+            <PullToRefreshWrapper
+              onRefresh={() => requestBuilds({
+                updateState,
+                locationSearch,
+                apiKey: state.apiKey,
+                // apiKey: "42",
+              })}
+            >
+              {children}
+            </PullToRefreshWrapper>
+          )}
+        >
+          <div className={styles.homepageWrapper}>
+            <Page />
+          </div>
+        </ConditionallyWrappedComponent>
+        {showingDisclaimerModal && (
+          <ProtocolDisclaimer closeAction={() => setDisclaimerAccepted(true)} />
+        )}
+        {!showingFilterModal && state.isAuthed && (
+          <ShowFiltersButton clickAction={() => toggleShowFilters(true)} />
+        )}
+        {showingFilterModal && state.isAuthed && (
+          <FilterModal
+            closeAction={() => toggleShowFilters(false)}
+            needsFilterColors
+          />
+        )}
+        {!isLoaded && (
+          <>
+            <div className="faded" />
+            <Spinner />
+          </>
+        )}
       </div>
-      {showingDisclaimerModal && (
-        <ProtocolDisclaimer closeAction={() => setDisclaimerAccepted(true)} />
-      )}
-      {!showingFilterModal && state.isAuthed && (
-        <ShowFiltersButton clickAction={() => toggleShowFilters(true)} />
-      )}
-      {showingFilterModal && state.isAuthed && (
-        <FilterModal
-          closeAction={() => toggleShowFilters(false)}
-          needsFilterColors
+      {!isMobile && (
+        <div
+          className={styles.footer}
+          style={{ backgroundColor: theme.bg.block }}
         />
       )}
-      {!isLoaded && (
-        <>
-          <div className="faded" />
-          <Spinner />
-        </>
-      )}
-      {/* <div>{JSON.stringify(_.omit(state, "builds"), null, 2)}</div> */}
-    </div>
+    </>
   )
 }
 

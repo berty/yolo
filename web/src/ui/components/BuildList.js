@@ -122,7 +122,9 @@ const FeedDisplayToggler = ({
 }
 
 const BuildList = ({ builds = [], loaded }) => {
-  const [displayFeed, setDisplayFeed] = useState(false)
+  const [displayFeed, setDisplayFeed] = useState(
+    window.localStorage.getItem('displayFeed') === 'true',
+  )
   const ref = useRef()
   const refOpen = useRef()
   const oneBuildInResultsHasMaster = useMemo(
@@ -157,6 +159,7 @@ const BuildList = ({ builds = [], loaded }) => {
         behavior: 'smooth',
         block: 'end',
       })
+      window.localStorage.setItem('displayFeed', 'false')
     }
   }, [displayFeed, prevDisplay, builds.length])
 
@@ -172,6 +175,7 @@ const BuildList = ({ builds = [], loaded }) => {
         behavior: 'smooth',
         block: 'start',
       })
+      window.localStorage.setItem('displayFeed', 'true')
     }
   }, [displayFeed, refOpen, prevDisplay, builds.length])
 

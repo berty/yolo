@@ -44,6 +44,7 @@ const Filters = ({ onFilterClick = () => {} }) => {
       calculatedFilters: { projects },
     },
     updateState,
+    logoutAction,
   } = useContext(GlobalContext)
   const { redirectHome } = useRedirectHome()
   const {
@@ -236,7 +237,7 @@ const Filters = ({ onFilterClick = () => {} }) => {
       hasSelectedState={false}
       onClick={() => {
         removeAuthCookie()
-        dispatch({ type: actions.LOGOUT })
+        logoutAction()
         dispatch({ type: actions.UPDATE_UI_FILTERS, payload: {} })
         redirectHome()
       }}

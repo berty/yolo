@@ -5,16 +5,20 @@ const ProtocolDisclaimer = ({ closeAction }) => {
   const DisclaimerMessage = () => (
     <>
       <div className="modal-header">
-        <h5 className="modal-title">🚧 Disclaimer 🚧</h5>
+        {/* <h5 className="modal-title">🚧 Disclaimer 🚧</h5> */}
         <button
           type="button"
           className="close"
           data-dismiss="modal"
           aria-label="Close"
           onClick={closeAction}
+          style={{ position: 'absolute', top: 15, right: 15 }}
         />
       </div>
       <div className="modal-body">
+        <h5 style={{ whiteSpace: 'nowrap', marginBottom: '30px' }}>
+          🚧 Disclaimer 🚧
+        </h5>
         Yolo does NOT use Berty Protocol yet.
         {' '}
         <br />
