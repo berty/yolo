@@ -113,21 +113,25 @@ const DlButtonSmall = ({ buildHasArtifacts, theme }) => buildHasArtifacts && (
 
     const hasDlUrl = fullPlistSignedUrl || fullDlArtifactSignedUrl
     return (
-      <a
+      <div
+        onClick={(e) => e.stopPropagation()}
         key={`${artifactPlistSignedUrl}=${i}`}
-        href={hasDlUrl}
-        className="btn btn-sm"
-        style={{
-          ...primaryButtonColors(theme),
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-        title={hasDlUrl}
       >
-        <Download size="1rem" style={{ marginRight: '0.3rem' }} />
-        {`.${ARTIFACT_KIND_NAMES[artifactKind]}`}
-      </a>
+        <a
+          href={hasDlUrl}
+          className="btn btn-sm"
+          style={{
+            ...primaryButtonColors(theme),
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          title={hasDlUrl}
+        >
+          <Download size="1rem" style={{ marginRight: '0.3rem' }} />
+          {`.${ARTIFACT_KIND_NAMES[artifactKind]}`}
+        </a>
+      </div>
     )
   })}
 </>
