@@ -1,9 +1,9 @@
-import React, { useContext, useState } from 'react'
-import { ThemeContext } from '../../../store/ThemeStore'
-import { getIsArray } from '../../../util/getters'
-import ShowingOlderBuildsTag from '../ShowingOlderBuildsTag'
-import ArtifactRow from './ArtifactRow'
-import styles from './Build.module.scss'
+import React, { useContext, useState } from "react";
+import { ThemeContext } from "../../../store/ThemeStore";
+import { getIsArray } from "../../../util/getters";
+import ShowingOlderBuildsTag from "../ShowingOlderBuildsTag";
+import ArtifactRow from "./ArtifactRow";
+import styles from "./Build.module.scss";
 import {
   BranchName,
   BuildCommit,
@@ -16,9 +16,9 @@ import {
   MrDriver,
   MrState,
   SharableBuildLink,
-} from './BuildAndMrContainerWidgets'
-import BuildMessage from './BuildMessage'
-import { BuildStateTag } from './BuildWidgetsShared'
+} from "./BuildAndMrContainerWidgets";
+import BuildMessage from "./BuildMessage";
+import { BuildStateTag } from "./BuildWidgetsShared";
 
 const BuildAndMrContainer = ({
   build,
@@ -29,8 +29,9 @@ const BuildAndMrContainer = ({
   showingAllBuilds,
   toggleShowingAllBuilds,
 }) => {
-  const [messageExpanded, toggleMessageExpanded] = useState(false)
-  const showingArtifacts = isLatestBuild || showingAllBuilds || hasRunningBuilds
+  const [messageExpanded, toggleMessageExpanded] = useState(false);
+  const showingArtifacts =
+    isLatestBuild || showingAllBuilds || hasRunningBuilds;
 
   const {
     theme,
@@ -38,32 +39,32 @@ const BuildAndMrContainer = ({
       text: { sectionText, blockTitle },
       border: { filterUnselected },
     },
-  } = useContext(ThemeContext)
+  } = useContext(ThemeContext);
 
   const {
-    id: buildId = '',
-    short_id: buildShortId = '',
-    branch: buildBranch = '',
-    state: buildState = '',
-    has_commit_id: buildCommitId = '',
-    message: buildMessage = '',
-    started_at: buildStartedAt = '',
-    finished_at: buildFinishedAt = '',
-    created_at: buildCreatedAt = '',
-    updated_at: buildUpdatedAt = '',
-    driver: buildDriver = '',
-    has_project: { id: buildProjectUrl = '' } = {},
+    id: buildId = "",
+    short_id: buildShortId = "",
+    branch: buildBranch = "",
+    state: buildState = "",
+    has_commit_id: buildCommitId = "",
+    message: buildMessage = "",
+    started_at: buildStartedAt = "",
+    finished_at: buildFinishedAt = "",
+    created_at: buildCreatedAt = "",
+    updated_at: buildUpdatedAt = "",
+    driver: buildDriver = "",
+    has_project: { id: buildProjectUrl = "" } = {},
     has_artifacts: buildHasArtifacts = null,
-  } = build
+  } = build;
 
   const {
-    commit_url: mrCommitUrl = '',
-    updated_at: buildMergeUpdatedAt = '',
-    driver: mrDriver = '',
-    state: mrState = '',
-  } = buildHasMr || {}
+    commit_url: mrCommitUrl = "",
+    updated_at: buildMergeUpdatedAt = "",
+    driver: mrDriver = "",
+    state: mrState = "",
+  } = buildHasMr || {};
 
-  const paddingTop = isLatestBuild ? {} : { paddingTop: '1.25rem' }
+  const paddingTop = isLatestBuild ? {} : { paddingTop: "1.25rem" };
 
   return (
     <>
@@ -109,7 +110,7 @@ const BuildAndMrContainer = ({
 
           <div
             className={styles.blockSectionDetailRow}
-            style={{ alignSelf: 'flex-start' }}
+            style={{ alignSelf: "flex-start" }}
           >
             {!isLatestBuild && (
               <SharableBuildLink isBlock={false} {...{ buildId }} />
@@ -129,9 +130,9 @@ const BuildAndMrContainer = ({
           </div>
         )}
       </div>
-      {showingArtifacts
-        && getIsArray(buildHasArtifacts)
-        && buildHasArtifacts.map((artifact, i) => (
+      {showingArtifacts &&
+        getIsArray(buildHasArtifacts) &&
+        buildHasArtifacts.map((artifact, i) => (
           <ArtifactRow
             artifact={artifact}
             buildId={buildId}
@@ -155,9 +156,9 @@ const BuildAndMrContainer = ({
         </section>
       )}
     </>
-  )
-}
+  );
+};
 
 // BuildAndMrContainer.whyDidYouRender = true
 
-export default BuildAndMrContainer
+export default BuildAndMrContainer;

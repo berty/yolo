@@ -9,11 +9,9 @@ RUN             g++ ./*.cpp common/*.cpp -lcrypto -O3 -o zsign
 FROM            node:10 as web-build
 WORKDIR         /app
 COPY            ./web/package*.json ./web/yarn.* ./
-RUN             npm install
+RUN             yarn install
 COPY            ./web ./
-RUN             npm run build
-# checking successful build, until there is a better way
-RUN             cat dist/index.html
+RUN             yarn build
 
 # go build
 FROM            golang:1.15-alpine as go-build
@@ -25,8 +23,8 @@ ENV             GO111MODULE=on \
 COPY            go.* ./
 RUN             go mod download
 COPY            go ./go/
-RUN             rm -rf web
-COPY            --from=web-build /app/dist web/dist
+RUN             rm -rf web web
+COPY            --from=web-build /app/build web/dist
 WORKDIR         /go/src/berty.tech/yolo/go
 RUN		        make packr
 RUN             make install

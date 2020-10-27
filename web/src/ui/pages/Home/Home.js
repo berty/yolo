@@ -14,74 +14,74 @@
  * Tell ekelen to refactor me
  */
 
-import Cookies from 'js-cookie'
+import Cookies from "js-cookie";
 // import _ from "lodash";
-import React, { useContext, useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
-import { requestBuilds } from '../../../api'
+import React, { useContext, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { requestBuilds } from "../../../api";
 import {
   useRedirectOnEmptyQuery,
   useRequestOnQueryChange,
   useSetFiltersOnQueryChange,
-} from '../../../hooks/queryHooks'
-import { useRecursiveTimeout } from '../../../hooks/useRecursiveTimeout'
-import { GlobalContext } from '../../../store/GlobalStore'
-import { useIsMobile } from '../../../store/globalStoreHelpers'
-import { ThemeContext } from '../../../store/ThemeStore'
-import ApiKeyPrompt from '../../components/ApiKeyPrompt'
-import BuildList from '../../components/BuildList'
-import ConditionallyWrappedComponent from '../../components/ConditionallyWrappedComponent'
-import ErrorDisplay from '../../components/ErrorDisplay/ErrorDisplay'
-import FilterModal from '../../components/FilterModal/FilterModal'
-import Header from '../../components/Header/Header'
-import ProtocolDisclaimer from '../../components/ProtocolDisclaimer'
-import { PullToRefreshWrapper } from '../../components/PullToRefresh'
-import ShowFiltersButton from '../../components/ShowFiltersButton'
-import Spinner from '../../components/Spinner/Spinner'
-import styles from './Home.module.scss'
+} from "../../../hooks/queryHooks";
+import { useRecursiveTimeout } from "../../../hooks/useRecursiveTimeout";
+import { GlobalContext } from "../../../store/GlobalStore";
+import { useIsMobile } from "../../../store/globalStoreHelpers";
+// import { ThemeContext } from "../../../store/ThemeStore";
+import ApiKeyPrompt from "../../components/ApiKeyPrompt";
+import BuildList from "../../components/BuildList";
+import ConditionallyWrappedComponent from "../../components/ConditionallyWrappedComponent";
+import ErrorDisplay from "../../components/ErrorDisplay/ErrorDisplay";
+import FilterModal from "../../components/FilterModal/FilterModal";
+import Header from "../../components/Header/Header";
+import ProtocolDisclaimer from "../../components/ProtocolDisclaimer";
+import { PullToRefreshWrapper } from "../../components/PullToRefresh";
+import ShowFiltersButton from "../../components/ShowFiltersButton";
+import Spinner from "../../components/Spinner/Spinner";
+import styles from "./Home.module.scss";
 
 const Home = () => {
-  const { theme } = useContext(ThemeContext)
+  // const { theme } = useContext(ThemeContext);
   const {
     state,
     state: { isLoaded },
     updateState,
-  } = useContext(GlobalContext)
-  const [showingFilterModal, toggleShowFilters] = useState(false)
-  const [showingDisclaimerModal, toggleShowDisclaimer] = useState(false)
-  const { search: locationSearch } = useLocation()
-  const isMobile = useIsMobile()
+  } = useContext(GlobalContext);
+  const [showingFilterModal, toggleShowFilters] = useState(false);
+  const [showingDisclaimerModal, toggleShowDisclaimer] = useState(false);
+  const { search: locationSearch } = useLocation();
+  const isMobile = useIsMobile();
 
   // Hide protocol warning popup
   const setDisclaimerAccepted = (accepted) => {
-    Cookies.set('disclaimerAccepted', 1, { expires: 21 })
-    toggleShowDisclaimer(!accepted)
-  }
+    Cookies.set("disclaimerAccepted", 1, { expires: 21 });
+    toggleShowDisclaimer(!accepted);
+  };
 
-  useRedirectOnEmptyQuery()
-  useSetFiltersOnQueryChange()
-  useRequestOnQueryChange()
+  useRedirectOnEmptyQuery();
+  useSetFiltersOnQueryChange();
+  useRequestOnQueryChange();
 
   // Fetch data every 10 sec if state.autoRefeshOn is true
   useRecursiveTimeout(() => {
     if (state.autoRefreshOn && !showingFilterModal && !showingDisclaimerModal) {
       updateState({
         needsRefresh: true,
-      })
+      });
     }
-  }, 10 * 1000)
+  }, 10 * 1000);
 
   // Show protocol warning modal + agreement on component render
   useEffect(() => {
-    const disclaimerAccepted = Cookies.get('disclaimerAccepted')
-    toggleShowDisclaimer(!disclaimerAccepted)
-  }, [])
+    const disclaimerAccepted = Cookies.get("disclaimerAccepted");
+    toggleShowDisclaimer(!disclaimerAccepted);
+  }, []);
 
   const Page = () => (
     <>
       <Header
         onFilterClick={() => {
-          toggleShowFilters(true)
+          toggleShowFilters(true);
         }}
       />
       {state.error && <ErrorDisplay error={state.error} />}
@@ -96,7 +96,7 @@ const Home = () => {
         <BuildList builds={state.builds} loaded={state.isLoaded} />
       )}
     </>
-  )
+  );
 
   return (
     <>
@@ -105,12 +105,14 @@ const Home = () => {
           condition={isMobile && state.isAuthed && !state.authIsPending}
           wrapper={(children) => (
             <PullToRefreshWrapper
-              onRefresh={() => requestBuilds({
-                updateState,
-                locationSearch,
-                apiKey: state.apiKey,
-                // apiKey: "42",
-              })}
+              onRefresh={() =>
+                requestBuilds({
+                  updateState,
+                  locationSearch,
+                  apiKey: state.apiKey,
+                  // apiKey: "42",
+                })
+              }
             >
               {children}
             </PullToRefreshWrapper>
@@ -139,16 +141,16 @@ const Home = () => {
           </>
         )}
       </div>
-      {!isMobile && (
+      {/* {!isMobile && (
         <div
           className={styles.footer}
           style={{ backgroundColor: theme.bg.block }}
         />
-      )}
+      )} */}
     </>
-  )
-}
+  );
+};
 
 // Home.whyDidYouRender = true
 
-export default Home
+export default Home;

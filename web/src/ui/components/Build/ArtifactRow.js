@@ -1,68 +1,68 @@
-import { faFile, faHammer, faQrcode } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import QRCode from 'qrcode.react'
-import React, { useContext, useState } from 'react'
-import {
-  Calendar, Clock, Download, Link as LinkIcon,
-} from 'react-feather'
+import { faFile, faHammer, faQrcode } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import QRCode from "qrcode.react";
+import React, { useContext, useState } from "react";
+import { Calendar, Clock, Download, Link as LinkIcon } from "react-feather";
 import {
   ARTIFACT_KIND_NAMES,
   ARTIFACT_KIND_TO_PLATFORM,
   ARTIFACT_KIND_VALUE,
-} from '../../../constants'
-import { ThemeContext } from '../../../store/ThemeStore'
-import { getRelativeTime, getTimeDuration } from '../../../util/date'
-import { getArtifactKindIcon } from '../../styleTools/brandIcons'
-import { primaryButtonColors } from '../../styleTools/buttonStyler'
-import AnchorLink from '../AnchorLink/AnchorLink'
-import QRCodeModal from '../QRCodeModal'
-import Tag from '../Tag/Tag'
-import styles from './Build.module.scss'
+} from "../../../constants";
+import { ThemeContext } from "../../../store/ThemeStore";
+import { getRelativeTime, getTimeDuration } from "../../../util/date";
+import { getArtifactKindIcon } from "../../styleTools/brandIcons";
+import { primaryButtonColors } from "../../styleTools/buttonStyler";
+import AnchorLink from "../AnchorLink/AnchorLink";
+import QRCodeModal from "../QRCodeModal";
+import Tag from "../Tag/Tag";
+import styles from "./Build.module.scss";
 
-const ArtifactRowKindIcon = ({ color, kind = '' }) => (
+const ArtifactRowKindIcon = ({ color, kind = "" }) => (
   <FontAwesomeIcon
     icon={getArtifactKindIcon(kind)}
     color={color}
     title={`Artifact kind: ${ARTIFACT_KIND_NAMES[kind]}`}
     size="lg"
   />
-)
+);
 
 export const QrCode = ({ artifactPlistSignedUrl, closeAction }) => (
   <QRCodeModal closeAction={closeAction}>
     <QRCode
-      value={`itms-services://?action=download-manifest&url=${process.env.API_SERVER}${artifactPlistSignedUrl}`}
+      value={`itms-services://?action=download-manifest&url=${process.env.REACT_APP_API_SERVER}${artifactPlistSignedUrl}`}
       // size={256}
       level="M"
       renderAs="svg"
       includeMargin
-      style={{ width: '100%' }}
+      style={{ width: "100%" }}
     />
   </QRCodeModal>
-)
+);
 
 export const SharableArtifactLink = ({ buildId, artifactKind, isBlock }) => (
   <AnchorLink
     target={`?build_id=${buildId}${
-      artifactKind ? `&artifact_kinds=${ARTIFACT_KIND_VALUE[artifactKind]}` : ''
+      artifactKind ? `&artifact_kinds=${ARTIFACT_KIND_VALUE[artifactKind]}` : ""
     }
     `}
     isBlock={isBlock}
   >
     <LinkIcon size={16} />
   </AnchorLink>
-)
+);
 
 const ArtifactDownloadButton = ({
-  artifactPlistSignedUrl = '',
-  artifactDlArtifactSignedUrl = '',
+  artifactPlistSignedUrl = "",
+  artifactDlArtifactSignedUrl = "",
 }) => {
-  const { theme } = useContext(ThemeContext)
-  const fullPlistSignedUrl = artifactPlistSignedUrl
-    && `itms-services://?action=download-manifest&url=${process.env.API_SERVER}${artifactPlistSignedUrl}`
-  const fullDlArtifactSignedUrl = artifactDlArtifactSignedUrl
-    && `${process.env.API_SERVER}${artifactDlArtifactSignedUrl}`
-  const hasDlUrl = fullPlistSignedUrl || fullDlArtifactSignedUrl
+  const { theme } = useContext(ThemeContext);
+  const fullPlistSignedUrl =
+    artifactPlistSignedUrl &&
+    `itms-services://?action=download-manifest&url=${process.env.REACT_APP_API_SERVER}${artifactPlistSignedUrl}`;
+  const fullDlArtifactSignedUrl =
+    artifactDlArtifactSignedUrl &&
+    `${process.env.REACT_APP_API_SERVER}${artifactDlArtifactSignedUrl}`;
+  const hasDlUrl = fullPlistSignedUrl || fullDlArtifactSignedUrl;
 
   return (
     hasDlUrl && (
@@ -71,18 +71,18 @@ const ArtifactDownloadButton = ({
         className="btn btn-large"
         style={{
           ...primaryButtonColors(theme),
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
         title={hasDlUrl}
       >
-        <Download size="1rem" style={{ marginRight: '0.3rem' }} />
+        <Download size="1rem" style={{ marginRight: "0.3rem" }} />
         Download
       </a>
     )
-  )
-}
+  );
+};
 
 const ArtifactQrButton = ({ onClick, theme }) => (
   <div
@@ -90,12 +90,12 @@ const ArtifactQrButton = ({ onClick, theme }) => (
     className="btn btn-large-icon"
     style={{
       ...primaryButtonColors(theme),
-      width: '2.2rem',
-      height: '2.2rem',
-      marginLeft: '1rem',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
+      width: "2.2rem",
+      height: "2.2rem",
+      marginLeft: "1rem",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
     }}
     title="Show QR code"
   >
@@ -107,25 +107,25 @@ const ArtifactQrButton = ({ onClick, theme }) => (
         marginTop: 0,
         marginBottom: 0,
         // transform: "scale(70%)"
-        width: '80%',
+        width: "80%",
       }}
     />
   </div>
-)
+);
 
 const ArtifactKindName = ({ artifactKind }) => (
-  <div style={{ marginRight: '0.4rem' }}>
-    {ARTIFACT_KIND_TO_PLATFORM[ARTIFACT_KIND_VALUE[artifactKind]]
-      || 'Unknown OS'}
+  <div style={{ marginRight: "0.4rem" }}>
+    {ARTIFACT_KIND_TO_PLATFORM[ARTIFACT_KIND_VALUE[artifactKind]] ||
+      "Unknown OS"}
   </div>
-)
+);
 
 const BuildIdentifier = ({ buildShortId }) => (
-  <div>{`#${buildShortId}` || ''}</div>
-)
+  <div>{`#${buildShortId}` || ""}</div>
+);
 
 const TimeSinceBuildUpdated = ({ buildMergeUpdatedAt }) => {
-  const timeSinceBuildUpdated = getRelativeTime(buildMergeUpdatedAt)
+  const timeSinceBuildUpdated = getRelativeTime(buildMergeUpdatedAt);
   return (
     timeSinceBuildUpdated && (
       <Tag
@@ -135,53 +135,55 @@ const TimeSinceBuildUpdated = ({ buildMergeUpdatedAt }) => {
         plainDisplay
       />
     )
-  )
-}
+  );
+};
 
 const BuildDuration = ({ buildStartedAt, buildFinishedAt }) => {
-  const buildDurationSeconds = getTimeDuration(buildStartedAt, buildFinishedAt)
+  const buildDurationSeconds = getTimeDuration(buildStartedAt, buildFinishedAt);
   const buildDurationShort = buildDurationSeconds
     ? `${parseInt(buildDurationSeconds / 60, 10)} minutes`
-    : ''
-  const buildDurationDetails = buildDurationSeconds > 0
-    ? `duration: ${parseInt(buildDurationSeconds / 60, 10)}m${
-      buildDurationSeconds % 60
-    }s`
-    : ''
+    : "";
+  const buildDurationDetails =
+    buildDurationSeconds > 0
+      ? `duration: ${parseInt(buildDurationSeconds / 60, 10)}m${
+          buildDurationSeconds % 60
+        }s`
+      : "";
   return (
     buildDurationShort && (
       <Tag
-        title={buildDurationDetails || ''}
+        title={buildDurationDetails || ""}
         icon={<Clock />}
         text={buildDurationShort}
         plainDisplay
       />
     )
-  )
-}
+  );
+};
 
-const ArtifactFileSize = ({ artifactFileSize }) => artifactFileSize
-  && !Number.isNaN(parseInt(artifactFileSize, 10)) && (
+const ArtifactFileSize = ({ artifactFileSize }) =>
+  artifactFileSize &&
+  !Number.isNaN(parseInt(artifactFileSize, 10)) && (
     <Tag title="File size" plainDisplay>
       <FontAwesomeIcon icon={faFile} size="lg" />
-      {Math.round(artifactFileSize / 1000)}
-      {' '}
-      kB
+      {Math.round(artifactFileSize / 1000)} kB
     </Tag>
-)
+  );
 
-const ArtifactLocalPathRow = ({ artifactLocalPath }) => artifactLocalPath && (
-<div className={styles.blockSectionDetailRow}>
-  <small className={styles.artifactLocalPath}>{artifactLocalPath}</small>
-</div>
-)
+const ArtifactLocalPathRow = ({ artifactLocalPath }) =>
+  artifactLocalPath && (
+    <div className={styles.blockSectionDetailRow}>
+      <small className={styles.artifactLocalPath}>{artifactLocalPath}</small>
+    </div>
+  );
 
-const ArtifactDriver = ({ artifactDriver, theme }) => artifactDriver && (
-<Tag title={`Artifact driver: ${artifactDriver}`} plainDisplay>
-  <FontAwesomeIcon icon={faHammer} color={theme.text.sectionText} />
-  <div>{artifactDriver}</div>
-</Tag>
-)
+const ArtifactDriver = ({ artifactDriver, theme }) =>
+  artifactDriver && (
+    <Tag title={`Artifact driver: ${artifactDriver}`} plainDisplay>
+      <FontAwesomeIcon icon={faHammer} color={theme.text.sectionText} />
+      <div>{artifactDriver}</div>
+    </Tag>
+  );
 
 const ArtifactRow = ({
   artifact,
@@ -192,20 +194,20 @@ const ArtifactRow = ({
   buildShortId,
   isLastArtifactOfLatestBuild,
 }) => {
-  const { theme } = useContext(ThemeContext)
-  const [showingQrModal, toggleShowQrModal] = useState(false)
+  const { theme } = useContext(ThemeContext);
+  const [showingQrModal, toggleShowQrModal] = useState(false);
   const {
-    plist_signed_url: artifactPlistSignedUrl = '',
-    dl_artifact_signed_url: artifactDlArtifactSignedUrl = '',
-    kind: artifactKind = '',
-    local_path: artifactLocalPath = '',
-    file_size: artifactFileSize = '',
-    driver: artifactDriver = '',
-  } = artifact
+    plist_signed_url: artifactPlistSignedUrl = "",
+    dl_artifact_signed_url: artifactDlArtifactSignedUrl = "",
+    kind: artifactKind = "",
+    local_path: artifactLocalPath = "",
+    file_size: artifactFileSize = "",
+    driver: artifactDriver = "",
+  } = artifact;
 
   const containerBorderBottomStyle = isLastArtifactOfLatestBuild
-    ? { borderBottom: 'none' }
-    : {}
+    ? { borderBottom: "none" }
+    : {};
 
   return (
     <>
@@ -258,7 +260,7 @@ const ArtifactRow = ({
         </div>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default ArtifactRow
+export default ArtifactRow;
