@@ -29,7 +29,7 @@ const ArtifactRowKindIcon = ({ color, kind = "" }) => (
 export const QrCode = ({ artifactPlistSignedUrl, closeAction }) => (
   <QRCodeModal closeAction={closeAction}>
     <QRCode
-      value={`itms-services://?action=download-manifest&url=${process.env.REACT_APP_API_SERVER}${artifactPlistSignedUrl}`}
+      value={`itms-services://?action=download-manifest&url=https://yolo.berty.io${artifactPlistSignedUrl}`}
       // size={256}
       level="M"
       renderAs="svg"
@@ -58,10 +58,10 @@ const ArtifactDownloadButton = ({
   const { theme } = useContext(ThemeContext);
   const fullPlistSignedUrl =
     artifactPlistSignedUrl &&
-    `itms-services://?action=download-manifest&url=${process.env.REACT_APP_API_SERVER}${artifactPlistSignedUrl}`;
+    `itms-services://?action=download-manifest&url=https://yolo.berty.io${artifactPlistSignedUrl}`;
   const fullDlArtifactSignedUrl =
     artifactDlArtifactSignedUrl &&
-    `${process.env.REACT_APP_API_SERVER}${artifactDlArtifactSignedUrl}`;
+    `${process.env.API_SERVER}${artifactDlArtifactSignedUrl}`;
   const hasDlUrl = fullPlistSignedUrl || fullDlArtifactSignedUrl;
 
   return (

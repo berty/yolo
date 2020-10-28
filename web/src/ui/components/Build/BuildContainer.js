@@ -111,11 +111,11 @@ const DlButtonSmall = ({ buildHasArtifacts, theme }) =>
 
         const fullPlistSignedUrl =
           artifactPlistSignedUrl &&
-          `itms-services://?action=download-manifest&url=${process.env.REACT_APP_API_SERVER}${artifactPlistSignedUrl}`;
+          `itms-services://?action=download-manifest&url=https://yolo.berty.io${artifactPlistSignedUrl}`;
 
         const fullDlArtifactSignedUrl =
           artifactDlArtifactSignedUrl &&
-          `${process.env.REACT_APP_API_SERVER}${artifactDlArtifactSignedUrl}`;
+          `https://yolo.berty.io${artifactDlArtifactSignedUrl}`;
 
         const hasDlUrl = fullPlistSignedUrl || fullDlArtifactSignedUrl;
         return (
