@@ -1,5 +1,5 @@
-import React from 'react'
-import MessageModal from './MessageModal/MessageModal'
+import React from "react";
+import MessageModal from "./MessageModal/MessageModal";
 
 const ProtocolDisclaimer = ({ closeAction }) => {
   const DisclaimerMessage = () => (
@@ -12,18 +12,15 @@ const ProtocolDisclaimer = ({ closeAction }) => {
           data-dismiss="modal"
           aria-label="Close"
           onClick={closeAction}
-          style={{ position: 'absolute', top: 15, right: 15 }}
+          style={{ position: "absolute", top: 15, right: 15 }}
         />
       </div>
       <div className="modal-body">
-        <h5 style={{ whiteSpace: 'nowrap', marginBottom: '30px' }}>
-          🚧 Disclaimer 🚧
+        <h5 style={{ whiteSpace: "nowrap", marginBottom: "30px" }}>
+          Disclaimer
         </h5>
-        Yolo does NOT use Berty Protocol yet.
-        {' '}
-        <br />
-        Don't send nudes
-        {' '}
+        Yolo does NOT use Berty Protocol yet. <br />
+        Don't send nudes{" "}
         <span role="img" aria-label="Wink">
           😉
         </span>
@@ -39,12 +36,12 @@ const ProtocolDisclaimer = ({ closeAction }) => {
         </button>
       </div>
     </>
-  )
+  );
   return (
     <MessageModal>
       <DisclaimerMessage />
     </MessageModal>
-  )
-}
+  );
+};
 
-export default ProtocolDisclaimer
+export default ProtocolDisclaimer;

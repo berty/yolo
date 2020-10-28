@@ -1,12 +1,12 @@
 [build]
     base = "web/"
-    publish = "dist"
-    command = "npm install && npm run build && ls -laR dist/"
+    publish = "build"
+    command = "yarn install && yarn build && ls -laR build/"
     ignore = "git diff --quiet HEAD^ HEAD -- ."
 
 [build.environment]
     YARN_FLAGS = "--no-ignore-optional"
-    API_SERVER = "https://yolo.berty.io"
+    REACT_APP_API_SERVER = "https://yolo.berty.io"
 
 [context.production.environment]
-    API_SERVER = "https://yolo.berty.io"
+    REACT_APP_API_SERVER = "https://yolo.berty.io"

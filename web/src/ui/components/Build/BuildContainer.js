@@ -1,31 +1,31 @@
-import { faQrcode } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { get } from 'lodash'
-import React, { useContext, useState } from 'react'
-import { Download } from 'react-feather'
-import { ARTIFACT_KIND_NAMES, BRANCH, BUILD_STATE } from '../../../constants'
-import { GlobalContext } from '../../../store/GlobalStore'
-import { ThemeContext } from '../../../store/ThemeStore'
+import { faQrcode } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { get } from "lodash";
+import React, { useContext, useState } from "react";
+import { Download } from "react-feather";
+import { ARTIFACT_KIND_NAMES, BRANCH, BUILD_STATE } from "../../../constants";
+import { GlobalContext } from "../../../store/GlobalStore";
+import { ThemeContext } from "../../../store/ThemeStore";
 import {
   getIsArray,
   getIsArrayWithN,
   getStrEquNormalized,
-} from '../../../util/getters'
-import { getArtifactKindIcon } from '../../styleTools/brandIcons'
+} from "../../../util/getters";
+import { getArtifactKindIcon } from "../../styleTools/brandIcons";
 import {
   primaryButtonColors,
   tagColorStyles,
-} from '../../styleTools/buttonStyler'
-import ShowingOlderBuildsTag from '../ShowingOlderBuildsTag'
-import Tag from '../Tag/Tag'
-import { QrCode } from './ArtifactRow'
-import styles from './Build.module.scss'
-import BuildAndMrContainer from './BuildAndMrContainer'
-import BuildBlockHeader from './BuildBlockHeader'
-import tablerOverrides from './BuildTablerOverrides'
-import { BuildStateTag } from './BuildWidgetsShared'
+} from "../../styleTools/buttonStyler";
+import ShowingOlderBuildsTag from "../ShowingOlderBuildsTag";
+import Tag from "../Tag/Tag";
+import { QrCode } from "./ArtifactRow";
+import styles from "./Build.module.scss";
+import BuildAndMrContainer from "./BuildAndMrContainer";
+import BuildBlockHeader from "./BuildBlockHeader";
+import tablerOverrides from "./BuildTablerOverrides";
+import { BuildStateTag } from "./BuildWidgetsShared";
 
-const ArtifactKindIcon = ({ color, kind = '' }) => (
+const ArtifactKindIcon = ({ color, kind = "" }) => (
   <div>
     <FontAwesomeIcon
       icon={getArtifactKindIcon(kind)}
@@ -34,27 +34,29 @@ const ArtifactKindIcon = ({ color, kind = '' }) => (
       size="lg"
     />
   </div>
-)
+);
 
-const LatestBuildArtifactsIcons = ({ buildHasArtifacts, theme }) => getIsArray(buildHasArtifacts) && (
-<>
-  {buildHasArtifacts.map((a, i) => (
-    <ArtifactKindIcon
-      kind={get(a, 'kind', ARTIFACT_KIND_NAMES.UnknownKind)}
-      color={theme.bg.tagGreen}
-      isFirst={i === 0}
-      key={i}
-    />
-  ))}
-</>
-)
+const LatestBuildArtifactsIcons = ({ buildHasArtifacts, theme }) =>
+  getIsArray(buildHasArtifacts) && (
+    <>
+      {buildHasArtifacts.map((a, i) => (
+        <ArtifactKindIcon
+          kind={get(a, "kind", ARTIFACT_KIND_NAMES.UnknownKind)}
+          color={theme.bg.tagGreen}
+          isFirst={i === 0}
+          key={i}
+        />
+      ))}
+    </>
+  );
 
-const AnyRunningBuildTags = ({ hasRunningBuilds, allBuildsForMr, theme }) => hasRunningBuilds
-  && getIsArrayWithN(hasRunningBuilds)
-  && getIsArrayWithN(allBuildsForMr, 2) && (
+const AnyRunningBuildTags = ({ hasRunningBuilds, allBuildsForMr, theme }) =>
+  hasRunningBuilds &&
+  getIsArrayWithN(hasRunningBuilds) &&
+  getIsArrayWithN(allBuildsForMr, 2) && (
     <Tag
       title={`${hasRunningBuilds.length} build${
-        hasRunningBuilds.length > 1 ? 's' : ''
+        hasRunningBuilds.length > 1 ? "s" : ""
       } running`}
       styles={{
         ...tagColorStyles({
@@ -64,78 +66,82 @@ const AnyRunningBuildTags = ({ hasRunningBuilds, allBuildsForMr, theme }) => has
       }}
     >
       {`${hasRunningBuilds.length} build${
-        hasRunningBuilds.length > 1 ? 's' : ''
+        hasRunningBuilds.length > 1 ? "s" : ""
       } running`}
     </Tag>
-)
+  );
 
-const LatestBuildQrButton = ({ onClick, theme, artifactPlistSignedUrl }) => artifactPlistSignedUrl && (
-<div
-  onClick={(e) => {
-    onClick()
-    e.stopPropagation()
-  }}
-  className="btn btn-sm"
-  style={{
-    ...primaryButtonColors(theme),
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  }}
-  title="Show QR code"
->
-  <FontAwesomeIcon
-    icon={faQrcode}
-    size="lg"
-    color={theme.text.btnPrimary}
-    style={{
-      marginTop: 0,
-      marginBottom: 0,
-    }}
-  />
-</div>
-)
+const LatestBuildQrButton = ({ onClick, theme, artifactPlistSignedUrl }) =>
+  artifactPlistSignedUrl && (
+    <div
+      onClick={(e) => {
+        onClick();
+        e.stopPropagation();
+      }}
+      className="btn btn-sm"
+      style={{
+        ...primaryButtonColors(theme),
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+      title="Show QR code"
+    >
+      <FontAwesomeIcon
+        icon={faQrcode}
+        size="lg"
+        color={theme.text.btnPrimary}
+        style={{
+          marginTop: 0,
+          marginBottom: 0,
+        }}
+      />
+    </div>
+  );
 
-const DlButtonSmall = ({ buildHasArtifacts, theme }) => buildHasArtifacts && (
-<>
-  {buildHasArtifacts.map((artifact, i) => {
-    const {
-      plist_signed_url: artifactPlistSignedUrl = '',
-      dl_artifact_signed_url: artifactDlArtifactSignedUrl = '',
-      kind: artifactKind = '',
-    } = artifact
+const DlButtonSmall = ({ buildHasArtifacts, theme }) =>
+  buildHasArtifacts && (
+    <>
+      {buildHasArtifacts.map((artifact, i) => {
+        const {
+          plist_signed_url: artifactPlistSignedUrl = "",
+          dl_artifact_signed_url: artifactDlArtifactSignedUrl = "",
+          kind: artifactKind = "",
+        } = artifact;
 
-    const fullPlistSignedUrl = artifactPlistSignedUrl
-          && `itms-services://?action=download-manifest&url=${process.env.API_SERVER}${artifactPlistSignedUrl}`
+        const fullPlistSignedUrl =
+          artifactPlistSignedUrl &&
+          `itms-services://?action=download-manifest&url=${process.env.REACT_APP_API_SERVER}${artifactPlistSignedUrl}`;
 
-    const fullDlArtifactSignedUrl = artifactDlArtifactSignedUrl
-          && `${process.env.API_SERVER}${artifactDlArtifactSignedUrl}`
+        const fullDlArtifactSignedUrl =
+          artifactDlArtifactSignedUrl &&
+          `${process.env.REACT_APP_API_SERVER}${artifactDlArtifactSignedUrl}`;
 
-    const hasDlUrl = fullPlistSignedUrl || fullDlArtifactSignedUrl
-    return (
-      <div
-        onClick={(e) => e.stopPropagation()}
-        key={`${artifactPlistSignedUrl}=${i}`}
-      >
-        <a
-          href={hasDlUrl}
-          className="btn btn-sm"
-          style={{
-            ...primaryButtonColors(theme),
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          title={hasDlUrl}
-        >
-          <Download size="1rem" style={{ marginRight: '0.3rem' }} />
-          {`.${ARTIFACT_KIND_NAMES[artifactKind]}`}
-        </a>
-      </div>
-    )
-  })}
-</>
-)
+        const hasDlUrl = fullPlistSignedUrl || fullDlArtifactSignedUrl;
+        return (
+          <div
+            onClick={(e) => e.stopPropagation()}
+            key={`${artifactPlistSignedUrl}=${i}`}
+          >
+            <a
+              href={hasDlUrl}
+              className="btn btn-sm"
+              style={{
+                ...primaryButtonColors(theme),
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              title={hasDlUrl}
+            >
+              <Download size="1rem" style={{ marginRight: "0.3rem" }} />
+              {`.${ARTIFACT_KIND_NAMES[artifactKind]}`}
+            </a>
+          </div>
+        );
+      })}
+    </>
+  );
 
 const LatestBuildStateTags = ({
   collapsed,
@@ -146,9 +152,10 @@ const LatestBuildStateTags = ({
   allBuildsForMr,
   hasRunningBuilds,
 }) => {
-  const [showingQrModal, toggleShowQrModal] = useState(false)
-  const firstArtifactPlistSignedUrl = buildHasArtifacts?.find((a) => a.kind === ARTIFACT_KIND_NAMES.IPA)
-      ?.plist_signed_url || null
+  const [showingQrModal, toggleShowQrModal] = useState(false);
+  const firstArtifactPlistSignedUrl =
+    buildHasArtifacts?.find((a) => a.kind === ARTIFACT_KIND_NAMES.IPA)
+      ?.plist_signed_url || null;
   return (
     collapsed && (
       <>
@@ -170,51 +177,49 @@ const LatestBuildStateTags = ({
         <ShowingOlderBuildsTag nOlderBuilds={allBuildsForMr.length - 1} />
       </>
     )
-  )
-}
+  );
+};
 
 const BuildContainer = React.memo(
-  ({
-    build, toCollapse, hasRunningBuilds, isLatestMaster = false,
-  }) => {
-    const { state } = useContext(GlobalContext)
-    const [collapsed, setCollapsed] = useState(toCollapse)
-    const [showingAllBuilds, toggleShowingAllBuilds] = useState(false)
+  ({ build, toCollapse, hasRunningBuilds, isLatestMaster = false }) => {
+    const { state } = useContext(GlobalContext);
+    const [collapsed, setCollapsed] = useState(toCollapse);
+    const [showingAllBuilds, toggleShowingAllBuilds] = useState(false);
 
-    const { theme } = useContext(ThemeContext)
+    const { theme } = useContext(ThemeContext);
 
-    const toggleCollapsed = () => setCollapsed(!collapsed)
+    const toggleCollapsed = () => setCollapsed(!collapsed);
 
     const {
-      short_id: buildShortId = '',
-      id: buildId = '',
-      branch: buildBranch = '',
-      state: buildState = '',
+      short_id: buildShortId = "",
+      id: buildId = "",
+      branch: buildBranch = "",
+      state: buildState = "",
       has_mergerequest: buildHasMr = null,
       has_artifacts: buildHasArtifacts = null,
       has_project: buildHasProject = null,
       has_mergerequest: {
-        short_id: mrShortId = '',
-        id: mrId = '',
-        title: mrTitle = '',
-        state: mrState = '',
+        short_id: mrShortId = "",
+        id: mrId = "",
+        title: mrTitle = "",
+        state: mrState = "",
         has_author: {
-          name: buildAuthorName = '',
-          id: buildAuthorId = '',
-          avatar_url: buildAuthorAvatarUrl = '',
+          name: buildAuthorName = "",
+          id: buildAuthorId = "",
+          avatar_url: buildAuthorAvatarUrl = "",
         } = {},
       } = {},
       allBuildsForMr = [],
-    } = build || {}
+    } = build || {};
 
     const {
       has_owner: {
-        id: projectOwnerId = '',
-        avatar_url: projectOwnerAvatarUrl = '',
+        id: projectOwnerId = "",
+        avatar_url: projectOwnerAvatarUrl = "",
       } = {},
-    } = buildHasProject || {}
+    } = buildHasProject || {};
 
-    const isMasterBuildBranch = getStrEquNormalized(buildBranch, BRANCH.MASTER)
+    const isMasterBuildBranch = getStrEquNormalized(buildBranch, BRANCH.MASTER);
 
     return (
       <>
@@ -229,7 +234,7 @@ const BuildContainer = React.memo(
             key={buildId}
             onClick={() => {
               if (collapsed) {
-                toggleCollapsed()
+                toggleCollapsed();
               }
             }}
           >
@@ -268,9 +273,11 @@ const BuildContainer = React.memo(
                 },
               }}
             />
-            {!collapsed
-              && allBuildsForMr
-                .filter((bIdx, i) => showingAllBuilds ? Number.isInteger(bIdx) : i === 0)
+            {!collapsed &&
+              allBuildsForMr
+                .filter((bIdx, i) =>
+                  showingAllBuilds ? Number.isInteger(bIdx) : i === 0
+                )
                 .map((buildidx, i) => (
                   <BuildAndMrContainer
                     build={state.builds[buildidx]}
@@ -290,10 +297,10 @@ const BuildContainer = React.memo(
           </div>
         </div>
       </>
-    )
-  },
-)
+    );
+  }
+);
 
 // BuildContainer.whyDidYouRender = true
 
-export default BuildContainer
+export default BuildContainer;

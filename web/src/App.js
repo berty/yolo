@@ -1,40 +1,39 @@
 /* eslint-disable import/no-named-as-default */
-import React, { useContext, useEffect } from 'react'
-import { hot } from 'react-hot-loader'
+import React, { useContext, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Redirect,
   Route,
   Switch,
-} from 'react-router-dom'
-import 'tabler-react/dist/Tabler.css'
-import './assets/main.scss'
-import { GlobalStore, GlobalContext } from './store/GlobalStore'
-import { ThemeContext, ThemeStore } from './store/ThemeStore'
-import Error404 from './ui/pages/Error404/Error404'
-import Home from './ui/pages/Home/Home'
-import { getMobileOperatingSystem } from './util/browser'
+} from "react-router-dom";
+import Error404 from "./ui/pages/Error404/Error404";
+import "tabler-react/dist/Tabler.css";
+import "./assets/main.scss";
+import { GlobalStore, GlobalContext } from "./store/GlobalStore";
+import { ThemeContext, ThemeStore } from "./store/ThemeStore";
+import Home from "./ui/pages/Home/Home";
+import { getMobileOperatingSystem } from "./util/browser";
 
 const AppRouter = () => {
   const {
     theme: {
       bg: { page: pageBgColor },
     },
-  } = useContext(ThemeContext)
+  } = useContext(ThemeContext);
   const {
     state: { userAgent },
     updateState,
-  } = useContext(GlobalContext)
+  } = useContext(GlobalContext);
   useEffect(() => {
-    document.body.style.backgroundColor = pageBgColor
-  }, [pageBgColor])
+    document.body.style.backgroundColor = pageBgColor;
+  }, [pageBgColor]);
   useEffect(() => {
     if (!userAgent) {
       updateState({
         userAgent: getMobileOperatingSystem(),
-      })
+      });
     }
-  }, [userAgent, updateState])
+  }, [userAgent, updateState]);
 
   return (
     <Router>
@@ -50,8 +49,8 @@ const AppRouter = () => {
         </Route>
       </Switch>
     </Router>
-  )
-}
+  );
+};
 
 const App = () => (
   <ThemeStore>
@@ -59,6 +58,6 @@ const App = () => (
       <AppRouter />
     </GlobalStore>
   </ThemeStore>
-)
+);
 
-export default hot(module)(App)
+export default App;

@@ -1,28 +1,18 @@
-/* eslint-disable import/default */
-/* eslint-disable global-require */
+import React from "react";
+import ReactDOM from "react-dom";
+// import "./index.css";
+import "./index.scss";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
 
-import './wdyr'
-import React from 'react'
-import { render } from 'react-dom'
-import { AppContainer } from 'react-hot-loader'
-import App from './App'
-import './index.scss'
-
-render(
-  <AppContainer>
+ReactDOM.render(
+  <React.StrictMode>
     <App />
-  </AppContainer>,
-  document.getElementById('app'),
-)
+  </React.StrictMode>,
+  document.getElementById("root")
+);
 
-if (module.hot) {
-  module.hot.accept('./App', () => {
-    const NewApp = require('./App').default
-    render(
-      <AppContainer>
-        <NewApp />
-      </AppContainer>,
-      document.getElementById('app'),
-    )
-  })
-}
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals();
