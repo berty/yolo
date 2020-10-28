@@ -1,0 +1,117 @@
+@value utils: "../../../assets/layout-utils.module.css";
+@value mobile_md, tablet, desktop from "../../../assets/breakpoints.module.css";
+
+@value space_md from "../../../assets/sizes.module.css";
+
+/* BUILD INFO (BUILD STATE, QR CODE, BUILD DRIVER...) - MULTIPLE PER MERGE REQUEST */
+
+@value _paddingContainer: 0.6rem;
+
+.buildContainerOuter {
+    composes: flexCol from utils;
+    position: relative;
+    width: 100%;
+    margin-bottom: 1.2rem;
+}
+
+.buildInfoTags {
+    composes: flexRow from utils;
+    flex: 1;
+    padding: _paddingContainer;
+    padding-bottom: calc(_paddingContainer - space_md);
+    border-radius: 0.2rem;
+    border: 3px solid var(--bg-block-highlight3, var(--bg-block-highlight));
+    background-color: var(--bg-block-highlight3, var(--bg-block-highlight));
+    color: var(--sectionText-highlight);
+}
+
+.buildInfoTags:not(:last-child) {
+    border-bottom-right-radius: 0px;
+    border-bottom-left-radius: 0px;
+}
+
+.buildInfoTagsInner1 {
+    composes: flexRow flexWrap aiWrapCenter childrenMrMd childrenMbMd from utils;
+    color: var(--text-sectionText-highlight);
+    flex: 1;
+}
+
+.buildInfoTagsInner2 {
+    flex: 0;
+}
+
+/* VERSION CONTROL AREA (USE INFO FROM LATEST BUILD IN MERGE REQUEST) */
+
+.latestBuildVcsInfoOuter {
+    composes: flexRow from utils;
+    padding: _paddingContainer;
+    flex-grow: 1;
+    border: 2px solid var(--bg-block-highlight);
+    border-top-width: 0;
+}
+
+.latestBuildVcsInfoInner {
+    composes: flexCol childrenMbMd from utils;
+    flex: 1;
+}
+
+.latestVcsLinkContainer {
+    /* Github and logs links */
+    composes: flexCol childrenMbMd from utils;
+    margin-left: 1rem;
+    flex: 0;
+}
+
+.latestBuildVcsTags {
+    composes: flexRow flexWrap aiWrapCenter childrenMbSm childrenMrSm from utils;
+}
+
+.latestBuildBranch {
+    composes: flexRow aiCenter from utils;
+}
+
+/* ARTIFACT AREA (MULTIPLE PER BUILD) */
+
+.artifactContainerOuter {
+    composes: flexRow flexWrap childrenMbMd from utils;
+    padding: _paddingContainer;
+    border: 2px solid var(--bg-block-highlight);
+    border-top-width: 0px;
+    /* margin-bottom: 1rem; */
+}
+
+.artifactContainerOuter:last-of-type {
+    border-bottom-left-radius: 0.2rem;
+    border-bottom-right-radius: 0.2rem;
+    margin-bottom: 1rem;
+}
+
+.artifactInfoContainerOuter {
+    composes: flexCol childrenMbMd from utils;
+    flex: 1 1;
+}
+
+.artifactInfoInner {
+    composes: flexRow flexWrap aiWrapCenter childrenMbSm childrenMrMd from utils;
+}
+
+.artifactActionButtons {
+    /* Download + QR button */
+    composes: flexRow childrenMrMd from utils;
+    justify-content: flex-end;
+    flex-basis: 100%;
+}
+
+@media (min-width: desktop) {
+    .artifactActionButtons {
+        flex: 0;
+        justify-content: flex-start;
+    }
+}
+
+/* SHOW/HIDE OLDER BUILDS */
+
+.containerShowingOlderBuilds {
+    composes: flexRow jcCenter from utils;
+    width: 100%;
+}

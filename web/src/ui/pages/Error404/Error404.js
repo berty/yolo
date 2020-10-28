@@ -1,33 +1,44 @@
-import React, { useContext } from 'react'
-import { useHistory } from 'react-router-dom'
-import Header from '../../components/Header/Header'
-import { ThemeContext } from '../../../store/ThemeStore'
+import React from "react";
+import { useHistory } from "react-router-dom";
+
+import ErrorDisplay from "../../components/ErrorDisplay/ErrorDisplay";
+import pageStyles from "../Page.module.css";
+import { buttonArea, emoji, message } from "./Error404.module.css";
+import { btnLg, primary } from "../../../assets/widget-snippets.module.css";
+import cn from "classnames";
 
 const Error404 = () => {
-  const history = useHistory()
-  const { themeStyles } = useContext(ThemeContext)
+  const history = useHistory();
 
   return (
-    <div>
-      <Header />
-      <div
-        style={{
-          width: '100%',
-          paddingTop: '4rem',
-          textAlign: 'center',
-          display: 'flex',
-          flexFlow: 'column nowrap',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <p>404 Not Found</p>
-        <div className="btn btn-primary" style={themeStyles.primaryButtonColors} onClick={() => history.goBack()} onKeyDown={() => history.goBack()} role="button" tabIndex={0}>
-          Back
-        </div>
-      </div>
-    </div>
-  )
-}
+    <main className={pageStyles.container}>
+      <ErrorDisplay error={{ status: 404, statusText: "Not found" }}>
+        <span role="img" aria-label="oh no!" className={emoji}>
+          😦
+        </span>
+        <p className={message}>{`We couldn't find the page you requested.`}</p>
+        <div className={buttonArea}>
+          <button
+            className={cn(btnLg, primary)}
+            onClick={() => history.goBack()}
+            onKeyDown={() => history.goBack()}
+            tabIndex={0}
+          >
+            Back
+          </button>
 
-export default Error404
+          <button
+            className={cn(btnLg, primary)}
+            onClick={() => history.push("/")}
+            onKeyDown={() => history.push("/")}
+            tabIndex={0}
+          >
+            Home
+          </button>
+        </div>
+      </ErrorDisplay>
+    </main>
+  );
+};
+
+export default Error404;

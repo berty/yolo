@@ -1,0 +1,24 @@
+.hr {
+    position: relative;
+    width: 900px;
+    max-width: 90vw;
+    margin: 1.2rem auto;
+    border-bottom: 1px solid var(--icon-filterUnselected);
+}
+
+.hrText {
+    position: absolute;
+    height: 1.2rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    line-height: 1;
+    font-size: 0.8rem;
+    left: 50%;
+    transform: translate(-50%, -0.6rem);
+    background-color: var(--bg-page);
+}
+
+.text {
+    vertical-align: middle;
+    text-align: center;
+}

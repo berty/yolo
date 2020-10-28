@@ -1,54 +1,44 @@
-import _ from 'lodash'
-import queryString from 'query-string'
-import React, { useContext, useState } from 'react'
-import { Check, LogOut } from 'react-feather'
-import { useHistory } from 'react-router-dom'
-import { removeAuthCookie } from '../../../api/cookies'
+import cn from "classnames";
+import pickBy from "lodash/pickBy";
+import queryString from "query-string";
+import React, { useContext, useState } from "react";
+import { Check, LogOut, X } from "react-feather";
+import { useHistory } from "react-router-dom";
+import widgetStyles from "../../../assets/widget-snippets.module.css";
 import {
   ARTIFACT_KINDS,
   BUILD_DRIVERS,
   BUILD_STATES,
-  PROJECT,
   PROJECTS,
-  actions,
-} from '../../../constants'
-import { GlobalContext } from '../../../store/GlobalStore'
-import { ThemeContext } from '../../../store/ThemeStore'
-import { getIsArrayWithN } from '../../../util/getters'
-import Tag from '../Tag/Tag'
-import ThemeToggler from '../ThemeToggler'
-import styles from './FilterModal.module.scss'
+} from "../../../constants";
+import { useRedirectHome } from "../../../hooks/queryHooks";
+import { GlobalContext } from "../../../store/GlobalStore";
+import { isNonEmptyArray, safeJsonParse } from "../../../util/getters";
+import Modal from "../Modal/Modal";
+import ThemeToggler from "../ThemeToggler";
+import styles from "./FilterModal.module.css";
 import {
   ArtifactFilter,
   BranchFilter,
   BuildDriverFilter,
   BuildStateFilter,
   ProjectFilter,
-} from './FilterModalWidgets'
-import FilterModalWrapper from './FilterModalWrapper'
-import { useRedirectHome } from '../../../hooks/queryHooks'
+} from "./FilterModalWidgets";
 
-const ProjectWidgets = ({
-  selectedArtifactKinds,
-  setSelectedArtifactKinds,
-  selectedProjects,
-  setSelectedProjects,
-}) => (
+const ProjectWidgets = ({ selectedProjects, setSelectedProjects }) => (
   <>
-    {PROJECTS.filter((p) => p !== PROJECTS.UnknownProject).map((p, i) => (
+    {PROJECTS.map((projectId, i) => (
       <ProjectFilter
         key={i}
-        project={PROJECT[p]}
+        project={projectId}
         {...{
-          selectedArtifactKinds,
-          setSelectedArtifactKinds,
           selectedProjects,
           setSelectedProjects,
         }}
       />
     ))}
   </>
-)
+);
 
 const ArtifactKindWidgets = ({
   setSelectedArtifactKinds,
@@ -63,7 +53,7 @@ const ArtifactKindWidgets = ({
       />
     ))}
   </>
-)
+);
 
 const BuildDriverWidgets = ({ selectedDrivers, setSelectedDrivers }) => (
   <>
@@ -75,7 +65,7 @@ const BuildDriverWidgets = ({ selectedDrivers, setSelectedDrivers }) => (
       />
     ))}
   </>
-)
+);
 
 const BuildStateWidgets = ({ selectedBuildStates, setSelectedBuildStates }) => (
   <>
@@ -87,161 +77,158 @@ const BuildStateWidgets = ({ selectedBuildStates, setSelectedBuildStates }) => (
       />
     ))}
   </>
-)
+);
 
-const FilterModal = ({ closeAction }) => {
-  const { theme, themeStyles } = useContext(ThemeContext)
-  const {
-    state, updateState, dispatch, logoutAction,
-  } = useContext(
-    GlobalContext,
-  )
-  const { redirectHome } = useRedirectHome()
+const BranchWidgets = ({ selectedBranches, setSelectedBranches }) => {
+  return (
+    <>
+      <BranchFilter
+        branchName={"All"}
+        {...{ selectedBranches, setSelectedBranches }}
+      />
+      <BranchFilter
+        branchName={"master"}
+        {...{ selectedBranches, setSelectedBranches }}
+      />
+      {safeJsonParse(window.localStorage.getItem("branchNames"), [])
+        .filter((branchName) => branchName !== "master")
+        .map((branchName) => {
+          return (
+            <BranchFilter
+              key={branchName}
+              {...{ branchName, setSelectedBranches, selectedBranches }}
+            />
+          );
+        })}
+    </>
+  );
+};
+
+const FilterModal = ({ closeAction: onClose = () => {} }) => {
+  const { state, updateState, logoutAction } = useContext(GlobalContext);
+  const { redirectHome } = useRedirectHome();
   const [selectedDrivers, setSelectedDrivers] = useState([
     ...state.uiFilters.build_driver,
-  ])
+  ]);
+
   const [selectedProjects, setSelectedProjects] = useState([
-    ...state.calculatedFilters.projects,
-  ])
+    ...state.uiFilters.project_id,
+  ]);
   const [selectedArtifactKinds, setSelectedArtifactKinds] = useState([
     ...state.uiFilters.artifact_kinds,
-  ])
+  ]);
   const [selectedBuildStates, setSelectedBuildStates] = useState([
     ...state.uiFilters.build_state,
-  ])
-  const [selectedBranches] = useState(['all'])
-  const history = useHistory()
+  ]);
+  const [selectedBranches, setSelectedBranches] = useState(
+    state.uiFilters.branch.length ? [...state.uiFilters.branch] : []
+  );
+  const history = useHistory();
 
-  const tablerOverrides = {
-    modalFooterStyle: { borderTop: 'none', justifyContent: 'center' },
-    modalFooterSettingsStyle: {
-      borderTop: 'none',
-      flexWrap: 'wrap',
-      justifyContent: 'flex-end',
-    },
-  }
+  const handleApplyFilters = () => {
+    updateState({
+      isLoaded: false,
+      needsRefresh: true,
+    });
+    onClose();
+    const queryObject = {
+      build_driver: selectedDrivers,
+      build_state: selectedBuildStates,
+      artifact_kinds: selectedArtifactKinds,
+      project_id: selectedProjects,
+      branch: selectedBranches,
+    };
 
-  return (
-    <FilterModalWrapper {...{ closeAction }}>
-      <div className="modal-body">
+    history.push({
+      path: "/",
+      search: queryString.stringify(pickBy(queryObject, isNonEmptyArray)),
+    });
+  };
+
+  const onLogout = () => {
+    logoutAction();
+    onClose();
+    redirectHome();
+  };
+
+  const Footer = (
+    <div className={styles.containerFooter}>
+      <div className={styles.footerAction}>
         <div
-          style={{ color: theme.text.sectionTitle }}
-          className={styles.subtitle}
-        >
-          Projects
-        </div>
-        <div className={styles.row}>
-          <ProjectWidgets
-            {...{
-              selectedDrivers,
-              setSelectedDrivers,
-              selectedArtifactKinds,
-              setSelectedArtifactKinds,
-              selectedProjects,
-              setSelectedProjects,
-            }}
-          />
-        </div>
-        <div
-          style={{ color: theme.text.sectionTitle }}
-          className={styles.subtitle}
-        >
-          Artifact Kinds
-        </div>
-        <div className={styles.row}>
-          <ArtifactKindWidgets
-            {...{ selectedArtifactKinds, setSelectedArtifactKinds }}
-          />
-        </div>
-        <div
-          style={{ color: theme.text.sectionTitle }}
-          className={styles.subtitle}
-        >
-          Build Drivers
-        </div>
-        <div className={styles.row}>
-          <BuildDriverWidgets {...{ selectedDrivers, setSelectedDrivers }} />
-        </div>
-        <div
-          style={{ color: theme.text.sectionTitle }}
-          className={styles.subtitle}
-        >
-          Branches
-        </div>
-        <div className={styles.row}>
-          <BranchFilter branchName="all" {...{ selectedBranches }} />
-          <BranchFilter branchName="master" {...{ selectedBranches }} />
-          <BranchFilter branchName="develop" {...{ selectedBranches }} />
-        </div>
-        <div
-          style={{ color: theme.text.sectionTitle }}
-          className={styles.subtitle}
-        >
-          Build State
-        </div>
-        <div className={styles.row}>
-          <BuildStateWidgets
-            {...{ selectedBuildStates, setSelectedBuildStates }}
-          />
-        </div>
-      </div>
-      <div className="modal-footer" style={tablerOverrides.modalFooterStyle}>
-        <div
-          roll="button"
-          className="btn btn-primary"
+          role="button"
           data-dismiss="modal"
-          onClick={() => {
-            window.localStorage.setItem(
-              'projects',
-              JSON.stringify(selectedProjects),
-            )
-            updateState({
-              isLoaded: false,
-              needsRefresh: true,
-              calculatedFilters: {
-                projects: [...selectedProjects],
-              },
-            })
-            closeAction()
-            const uiFilters = {
-              build_driver: selectedDrivers,
-              build_state: selectedBuildStates,
-              artifact_kinds: selectedArtifactKinds,
-            }
-            window.localStorage.setItem('uiFilters', JSON.stringify(uiFilters))
-            history.push({
-              path: '/',
-              search: queryString.stringify(
-                _.pickBy(uiFilters, (val) => getIsArrayWithN(val, 1)),
-              ),
-            })
-          }}
-          style={themeStyles.primaryButtonColors}
+          onClick={handleApplyFilters}
+          className={cn(widgetStyles.btnLg, widgetStyles.primary)}
         >
-          <Check style={{ height: '1rem', verticalAlign: 'sub' }} />
+          <Check />
           Apply Filters
         </div>
-      </div>
-      <div
-        className="modal-footer settings"
-        style={tablerOverrides.modalFooterSettingsStyle}
-      >
-        <ThemeToggler />
-        <Tag
-          onClick={() => {
-            removeAuthCookie()
-            dispatch({ type: actions.UPDATE_UI_FILTERS, payload: {} })
-            logoutAction()
-            closeAction()
-            redirectHome()
-          }}
-        >
-          <LogOut height="14" color={theme.icon.filterSelected} />
-          <div>Logout</div>
-        </Tag>
-      </div>
-    </FilterModalWrapper>
-  )
-}
 
-export default FilterModal
+        <div
+          role="button"
+          data-dismiss="modal"
+          aria-label="Close"
+          onClick={onClose}
+          className={cn(widgetStyles.btnLg, widgetStyles.primary)}
+        >
+          <X />
+          <span>Cancel</span>
+        </div>
+      </div>
+      <div className={styles.footerSettings}>
+        <ThemeToggler />
+        <div
+          role="button"
+          tabIndex={0}
+          className={cn(widgetStyles.tagGhostUpper, widgetStyles.tagLink)}
+          title="logout"
+          onClick={onLogout}
+        >
+          <LogOut />
+          <span>Logout</span>
+        </div>
+      </div>
+    </div>
+  );
+
+  const Body = (
+    <>
+      <span className={styles.rowTitle}>Projects</span>
+
+      <div className={styles.rowOfItems}>
+        <ProjectWidgets {...{ selectedProjects, setSelectedProjects }} />
+      </div>
+      <span className={styles.rowTitle}>Artifact Kinds</span>
+      <div className={styles.rowOfItems}>
+        <ArtifactKindWidgets
+          {...{ selectedArtifactKinds, setSelectedArtifactKinds }}
+        />
+      </div>
+      <span className={styles.rowTitle}>Build Drivers</span>
+      <div className={styles.rowOfItems}>
+        <BuildDriverWidgets {...{ selectedDrivers, setSelectedDrivers }} />
+      </div>
+      <span className={styles.rowTitle}>Branches</span>
+      <div className={styles.rowOfItems}>
+        <BranchWidgets {...{ selectedBranches, setSelectedBranches }} />
+      </div>
+      <span className={styles.rowTitle}>Build State</span>
+      <div className={styles.rowOfItems}>
+        <BuildStateWidgets
+          {...{ selectedBuildStates, setSelectedBuildStates }}
+        />
+      </div>
+    </>
+  );
+
+  return (
+    <Modal
+      Title="Filter builds"
+      Body={Body}
+      Footer={Footer}
+      onClose={onClose}
+    />
+  );
+};
+
+export default FilterModal;

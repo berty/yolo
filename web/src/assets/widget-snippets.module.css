@@ -1,0 +1,293 @@
+@value utils: "./layout-utils.module.css";
+
+.cursorPointer {
+    cursor: pointer;
+}
+
+/* COLOR STYLES */
+
+@value bgSuccess: var(--bg-tagGreen-highlight, var(--bg-tagGreen));
+@value accentSuccess: var(--text-tagGreen-highlight, var(--text-tagGreen));
+
+@value bgWarn: var(--bg-tagOrange-highlight, var(--bg-tagOrange));
+@value accentWarn: var(--text-tagOrange);
+
+@value bgFail: var(--bg-tagPink-highlight, var(--bg-tagPink));
+@value accentFail: var(--text-tagPink);
+
+.noFill {
+    background-color: transparent;
+    color: var(--text-sectionText);
+    border-color: currentColor;
+    stroke: currentColor;
+}
+
+.filled {
+    background-color: var(--text-sectionText);
+    color: var(--bg-page);
+    stroke: currentColor;
+    border-color: currentColor;
+}
+
+.noFill.success {
+    color: bgSuccess;
+}
+
+.noFill.warn {
+    color: bgFail;
+}
+
+.noFill.fail {
+    color: bgFail;
+}
+
+.noFill.link {
+    color: var(--text-link);
+}
+
+.noFill.fallback {
+    color: var(--text-sectionText);
+}
+
+.noFill.closed {
+    color: #bd3434;
+}
+
+.noFill.open {
+    color: #5bbc58;
+}
+
+.noFill.merged {
+    color: hsl(258.1, 46%, 60%);
+}
+
+.filled.open {
+    background-color: #5bbc58;
+}
+
+.filled.success {
+    background-color: bgSuccess;
+    color: accentSuccess;
+    stroke: currentColor;
+    border-color: currentColor;
+}
+
+.filled.merged {
+    background-color: hsl(258.1, 46%, 66.5%);
+}
+
+.fill.closed {
+    background-color: #bd3434;
+}
+
+.filled.fail {
+    background-color: bgFail;
+    color: accentFail;
+    stroke: currentColor;
+    border-color: currentColor;
+}
+
+.filled.warn {
+    background-color: bgWarn;
+    color: accentWarn;
+    stroke: currentColor;
+    border-color: currentColor;
+}
+
+.filled.fallback {
+    background-color: var(--text-sectionText);
+    color: var(--bg-page);
+    stroke: currentColor;
+    border-color: currentColor;
+}
+
+.filled.link {
+    background-color: var(--text-link);
+    color: var(--bg-page);
+    stroke: currentColor;
+    border-color: currentColor;
+}
+
+/* BG COLOR WITH ACCENT */
+
+.tagLink {
+    background-color: transparent;
+    color: var(--text-link);
+    border-color: currentColor;
+    stroke: currentColor;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.tagLink:disabled {
+    cursor: default;
+}
+
+.tagLink:active,
+.tagLink:hover,
+.tagLink:focus {
+    color: var(--text-link-hover);
+}
+
+.tagHighlight {
+    background-color: var(--bg-block-highlight);
+    color: var(--text-sectionText-highlight);
+    stroke: currentColor;
+    border-color: currentColor;
+}
+
+/* LAYOUT */
+
+._tagLayout {
+    composes: flexRow aiCenter jcCenter childrenMrXs from utils;
+    height: 1.6rem;
+    max-height: 1.6rem;
+    white-space: pre;
+}
+
+._tagLayout > svg {
+    display: block;
+    font-size: 1rem;
+    line-height: 1;
+    max-width: 0.8rem;
+    height: 0.8rem;
+}
+
+._tagIconOnlyLayout {
+    height: 1.5rem;
+    max-height: 1.5rem;
+}
+
+._tagIconOnlyLayout > svg {
+    display: block;
+    font-size: 1.5rem;
+    max-width: 1.5rem;
+    height: 100%;
+    line-height: 1;
+}
+
+._tagUpper {
+    text-transform: uppercase;
+    font-size: 0.88rem;
+    letter-spacing: 0.02rem;
+}
+
+._tagLayoutGhost {
+    composes: _tagLayout;
+    border-color: transparent;
+}
+
+._tagLayoutOutline {
+    composes: _tagLayout;
+    border-style: solid;
+    padding: 0 0.5rem;
+    border-radius: 1rem;
+}
+
+.tagGhost {
+    composes: _tagLayoutGhost;
+}
+
+.tagGhostUpper {
+    composes: _tagLayoutGhost;
+    composes: _tagUpper;
+}
+
+.tagOutline {
+    composes: _tagLayoutOutline;
+    composes: _tagUpper;
+    border-width: 1px;
+}
+
+.tagFilled {
+    composes: _tagLayoutOutline;
+    composes: _tagUpper;
+}
+
+.tagIconOnly {
+    composes: _tagIconOnlyLayout;
+}
+
+/* BUTTONS */
+
+._btnBase {
+    composes: flexRow aiCenter jcCenter childrenMrXs from utils;
+    border: 1px solid transparent;
+    text-transform: uppercase;
+    font: 600 0.95rem/1 var(--font-stack);
+}
+
+._btnLgSizes {
+    letter-spacing: 0.03rem;
+
+    border-radius: 1rem;
+
+    padding-left: 0.7rem;
+    padding-right: 0.7rem;
+
+    height: 2.3rem;
+    min-height: 2.3rem;
+}
+
+._btnLgSizes > svg {
+    font-size: 1.2rem;
+    max-width: 1.2rem;
+}
+
+.btnLg {
+    composes: _btnBase _btnLgSizes;
+}
+
+._btnSmSizes {
+    font-size: 0.8rem;
+    border-radius: 0.8rem;
+
+    height: 1.6rem;
+    max-height: 1.6rem;
+
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+._btnSmSizes > svg {
+    font-size: 1.1rem;
+    max-width: 1.1rem;
+}
+
+.btnSm {
+    composes: _btnBase _btnSmSizes;
+}
+
+.primary {
+    background-color: var(--bg-btnPrimary);
+    color: var(--text-btnPrimary);
+    box-shadow: var(--shadowSize-btn) var(--shadow-btnPrimary);
+    border: 1px solid var(--bg-btnPrimary);
+    transition: all 0.3s;
+}
+
+.primary:hover,
+.primary:active {
+    background-color: var(--bg-btnPrimary-hover);
+    color: var(--text-btnPrimary);
+    border-color: var(--bg-btnPrimary-hover);
+}
+
+.primary:disabled {
+    opacity: 0.8;
+    background-color: var(--bg-btnPrimary-disabled);
+    border-color: var(--bg-btnPrimary-disabled);
+    box-shadow: var(--shadowSize-btn) var(--shadow-btnPrimary-disabled);
+    color: var(--text-btnPrimary-disabled);
+    cursor: default;
+}
+
+.primary.flat,
+.primary.flat:hover,
+.primary.flat:active {
+    box-shadow: none;
+}
+
+.primary:focus:not(:disabled) {
+    border-color: var(--bg-btnPrimary);
+}

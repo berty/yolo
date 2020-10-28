@@ -1,49 +1,62 @@
-import React, { useContext } from 'react'
-import classNames from 'classnames'
-import styles from './OutlineWidget.module.scss'
-import { ThemeContext } from '../../../store/ThemeStore'
+import classNames from "classnames";
+import React from "react";
+import { onAccessibleClickHandler } from "../../../util/browser";
+import styles from "./OutlineWidget.module.css";
 
 const OutlineWidget = ({
   title = null,
-  selected = false,
+  selected = undefined,
   interactive = true,
-  hasSelectedState = true,
   notImplemented = false,
-  textUnderneath = false,
-  text = '',
-  iconComponent = '',
+  textIsUnderneath = false,
+  textCollapses = false,
+  text = "",
+  iconComponent = null,
+  iconCollapses = false,
   icons = [],
-  onClick = null,
+  onClick = undefined,
 }) => {
-  const { widgetStyles } = useContext(ThemeContext)
-  const containerClass = classNames([styles['widget-wrapper']], { [styles['is-interactive']]: interactive, [styles['not-implemented']]: notImplemented, [styles['text-underneath']]: textUnderneath })
-  const textClass = classNames([styles['widget-text']], { [styles['no-svg']]: !iconComponent })
-  const themedColorsState = selected ? widgetStyles.selectedWidgetAccent : widgetStyles.unselectedWidgetAccent
-  const themedColors = hasSelectedState ? themedColorsState : widgetStyles.noStateWidgetAccent
-  const validTitle = title || text || ''
-  const roll = interactive ? 'button' : null
-  const tabIndex = interactive ? 0 : null
+  const validTitle = title || text || "";
+  const role = interactive ? "button" : null;
+  const tabIndex = interactive ? 0 : null;
 
-  const TextContents = () => (text && <p className={textClass}>{text}</p>)
-  const Icon = () => <>{iconComponent}</>
-  const Icons = () => <>{icons}</>
+  const containerClass = classNames([
+    styles.widgetWrapper,
+    notImplemented && styles.notImplemented,
+    interactive && styles.interactive,
+    typeof selected !== "undefined" &&
+      (selected ? styles.selected : styles.unselected),
+  ]);
 
+  const textClass = classNames([
+    styles.widgetTextArea,
+    textIsUnderneath && styles.textIsUnderneath,
+    textCollapses && styles.textCollapses,
+  ]);
+
+  const iconClass = classNames([
+    styles.iconArea,
+    iconCollapses && styles.iconCollapses,
+  ]);
 
   return (
     <div
-      style={themedColors}
       className={containerClass}
       title={validTitle}
-      roll={roll}
-      onClick={onClick}
-      onKeyDown={onClick}
+      role={role}
+      onClick={!onClick ? undefined : onAccessibleClickHandler(onClick)}
+      onKeyDown={!onClick ? undefined : onAccessibleClickHandler(onClick)}
       tabIndex={tabIndex}
     >
-      <Icon />
-      <Icons />
-      <TextContents />
+      {iconComponent && <div className={iconClass}>{iconComponent}</div>}
+      {icons && icons.length > 0 && <div className={iconClass}>{icons}</div>}
+      {text && (
+        <p className={textClass}>
+          {text.length <= 30 ? text : text.slice(0, 30) + "..."}
+        </p>
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default OutlineWidget
+export default OutlineWidget;

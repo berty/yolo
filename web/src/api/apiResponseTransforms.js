@@ -1,7 +1,6 @@
-import { values, uniq } from 'lodash'
-import { getSafeStr, getStrEquNormalized } from '../util/getters'
-import { getIsNextDay } from '../util/date'
-import { BRANCH } from '../constants'
+import { uniq, values } from "lodash";
+import { getIsNextDay } from "../util/date";
+import { getIsArray, getSafeStr } from "../util/getters";
 
 /**
  * Adds entry {buildIsFirstOfDay: boolean} to each build
@@ -12,16 +11,17 @@ import { BRANCH } from '../constants'
  * @param  {Array<BuildObject>} sortedTopLevelBuilds
  * @return {Array<BuildObject>}
  */
-export const flagBuildsFirstOfDay = (sortedTopLevelBuilds) => Array.isArray(sortedTopLevelBuilds)
-  && sortedTopLevelBuilds.reduce((acc, build, i) => {
-    const { created_at: buildCreatedAt = null } = build
-    const { created_at: laterBuildCreatedAt = null } = acc[i - 1] || {}
+export const flagBuildsFirstOfDay = (sortedTopLevelBuilds) =>
+  getIsArray(sortedTopLevelBuilds) &&
+  sortedTopLevelBuilds.reduce((acc, build, i) => {
+    const { created_at: buildCreatedAt = null } = build;
+    const { created_at: laterBuildCreatedAt = null } = acc[i - 1] || {};
     acc[i] = {
       ...build,
       buildIsFirstOfDay: !!getIsNextDay(buildCreatedAt, laterBuildCreatedAt),
-    }
-    return acc
-  }, [])
+    };
+    return acc;
+  }, []);
 
 /**
  * Adds entry {allBuildsForMr: Array<int>} to each build,
@@ -29,7 +29,8 @@ export const flagBuildsFirstOfDay = (sortedTopLevelBuilds) => Array.isArray(sort
  * with the same merge request ID
  */
 export const groupByMr = (acc = {}, build, i) => {
-  const { has_mergerequest: hasMergeRequest, has_mergerequest_id: buildMrId } = build || {}
+  const { has_mergerequest: hasMergeRequest, has_mergerequest_id: buildMrId } =
+    build || {};
 
   if (!hasMergeRequest || !buildMrId) {
     return {
@@ -38,22 +39,22 @@ export const groupByMr = (acc = {}, build, i) => {
         ...build,
         allBuildsForMr: [i],
       },
-    }
+    };
   }
 
-  const matchingBuild = acc[buildMrId] || null
+  const matchingBuild = acc[buildMrId] || null;
   if (matchingBuild) {
     if (!matchingBuild.allBuildsForMr) {
-      acc[buildMrId].allBuildsForMr = [i]
+      acc[buildMrId].allBuildsForMr = [i];
     } else {
-      acc[buildMrId].allBuildsForMr = [...matchingBuild.allBuildsForMr, i]
+      acc[buildMrId].allBuildsForMr = [...matchingBuild.allBuildsForMr, i];
     }
   } else {
-    acc[buildMrId] = { ...build }
-    acc[buildMrId].allBuildsForMr = [i]
+    acc[buildMrId] = { ...build };
+    acc[buildMrId].allBuildsForMr = [i];
   }
-  return acc
-}
+  return acc;
+};
 
 /**
  * Returns a new copy of builds[],
@@ -62,7 +63,7 @@ export const groupByMr = (acc = {}, build, i) => {
  * @param  {Array<BuildObject>} builds
  * @return {Array<BuildObject>}
  */
-export const groupBuildsByMr = (builds) => values(builds.reduce(groupByMr, {}))
+export const groupBuildsByMr = (builds) => values(builds.reduce(groupByMr, {}));
 
 /**
  * Gets index of builds in the top-level builds you want to list
@@ -78,46 +79,39 @@ export const groupBuildsByMr = (builds) => values(builds.reduce(groupByMr, {}))
  */
 export const getLatestMasterBuildsForProjects = (sortedTopLevelBuilds) => {
   const uniqueProjects = uniq(
-    sortedTopLevelBuilds.map((b) => b.has_project_id),
-  )
+    sortedTopLevelBuilds.map((b) => b.has_project_id)
+  );
   const latestMasterBuildPerProject = uniqueProjects
-    .map((p) => sortedTopLevelBuilds.findIndex(
-      (build) => build.has_project_id
-          && build.has_project_id === p
-          && getStrEquNormalized(build.branch, BRANCH.MASTER),
-    ))
-    .filter((index) => index > -1)
-  return latestMasterBuildPerProject
-}
+    .map((p) =>
+      sortedTopLevelBuilds.findIndex(
+        (build) =>
+          build.has_project_id &&
+          build.has_project_id === p &&
+          build.branch === "master"
+      )
+    )
+    .filter((index) => index > -1);
+
+  return latestMasterBuildPerProject;
+};
 
 /**
- * Takes axios HTTP error and formats it
- * @param {axios-flavored HTTP error} error
+ * Takes object or axios HTTP error and formats it
+ * @param {Object<{message: string}>|axios-flavored HTTP error} error
  * @return {Object<{humanMessage: string, status: number, statusText: string}>}
  */
-export const validateError = ({ error }) => {
-  const { message: axiosMessage } = error.toJSON
-    ? error.toJSON()
-    : { error: error.toString() }
-  const {
-    response: { data: customTopLevelMessage = '', status, statusText } = {
-      data: '',
-      status: 0,
-      statusText: '',
-    },
-  } = error || {}
-  const { response = {} } = error || {}
-  const {
-    data: { message: customNestedMessage = '' } = {
-      data: { message: '' },
-    },
-  } = response || {}
-  const humanMessage = getSafeStr(customTopLevelMessage)
-    || getSafeStr(customNestedMessage)
-    || axiosMessage
+export const validateError = (error = { message: "Unknown error" }) => {
+  const axiosMessage = error.toJSON ? error.toJSON()["message"] : null;
+  const axiosResponse = error.response || {};
+  const { data = "", status = 0, statusText = "" } = axiosResponse;
+  const humanMessage =
+    getSafeStr(data) ||
+    getSafeStr(error.message) ||
+    axiosMessage ||
+    "Unknown error";
   return {
     humanMessage,
     status,
     statusText,
-  }
-}
+  };
+};

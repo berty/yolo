@@ -1,0 +1,30 @@
+@value utils: "../../../assets/layout-utils.module.css";
+@value modalContainer, modalOverlay, modalBody from "../../../assets/modal-snippets.module.css";
+
+@value mobile_md from "../../../assets/breakpoints.module.css";
+
+.messageModalOverlay {
+    composes: modalOverlay;
+    composes: flexCol from utils;
+}
+
+.messageModalContainer {
+    composes: modalContainer;
+}
+
+.messageModalBody {
+    composes: modalBody;
+}
+
+.messageModalBody p {
+    margin-bottom: 1rem;
+}
+
+@media (min-height: mobile_md) {
+    .messageModalOverlay {
+        justify-content: center;
+    }
+    .messageModalContainer {
+        margin-top: -2rem;
+    }
+}

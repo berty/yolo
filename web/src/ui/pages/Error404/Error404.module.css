@@ -1,0 +1,14 @@
+@value utils: "../../../assets/layout-utils.module.css";
+
+.emoji {
+    margin-bottom: 1.8rem;
+    font-size: 2rem;
+}
+
+.message {
+    margin-bottom: 2rem;
+}
+
+.buttonArea {
+    composes: flexRow childrenMrMd from utils;
+}

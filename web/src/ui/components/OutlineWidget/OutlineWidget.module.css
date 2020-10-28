@@ -1,0 +1,93 @@
+@value utils: "../../../assets/layout-utils.module.css";
+
+@value _iconHeight: 1.2rem;
+@value _fontSize: 0.8rem;
+@value _paddingVertical: 0.8rem;
+@value _paddingHorizontal: 1rem;
+@value _borderWidth: 2px;
+
+@value _height: calc(calc(_paddingVertical * 2) + calc(_borderWidth * 2) + _iconHeight);
+
+/* CONTAINER */
+
+.widgetWrapper {
+    composes: flexWrap aiWrapCenter jcCenter from utils;
+    position: relative;
+    padding: _paddingVertical _paddingHorizontal;
+    border-width: _borderWidth;
+    min-height: _height;
+
+    color: var(--accent-filterDefault);
+    border-color: currentColor;
+    border-style: solid;
+    border-radius: 1rem;
+    background-color: transparent;
+}
+
+.widgetWrapper:hover {
+    transition: all 0.3s;
+}
+
+.notImplemented {
+    border-style: dashed;
+    opacity: 0.6;
+}
+
+.interactive {
+    cursor: pointer;
+}
+
+.selected {
+    color: var(--accent-filterSelected);
+    stroke: currentColor;
+    fill: currentColor;
+    background-color: var(--bg-filter);
+    border-color: currentColor;
+}
+
+.unselected {
+    color: var(--accent-filterDefault);
+    border-color: currentColor;
+    fill: currentColor;
+    stroke: currentColor;
+    background-color: transparent;
+}
+
+/* TEXT */
+
+.widgetTextArea {
+    font-size: _fontSize;
+}
+
+.widgetTextArea:not(:first-child):not(.textIsUnderneath) {
+    margin-left: 0.6rem;
+}
+
+.textIsUnderneath {
+    flex-basis: 100%;
+    text-align: center;
+}
+
+.textIsUnderneath:not(:first-child) {
+    padding-top: 0.3rem;
+}
+
+/* ICON */
+
+.textCollapses,
+.iconCollapses {
+    composes: hideOnMobile from utils;
+}
+
+.iconArea {
+    composes: flexRow aiCenter childrenMrMd from utils;
+    height: _iconHeight;
+}
+
+.iconArea > svg,
+.iconArea > div > svg {
+    font-size: _iconHeight;
+    line-height: 1;
+    max-width: _iconHeight;
+    height: _iconHeight;
+}

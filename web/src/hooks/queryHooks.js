@@ -1,91 +1,127 @@
-import { useCallback, useContext, useEffect } from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
-import { requestBuilds } from '../api'
-import { actions } from '../constants'
-import { GlobalContext } from '../store/GlobalStore'
+import pickBy from "lodash/pickBy";
+import uniq from "lodash/uniq";
+import queryString from "query-string";
+import { useCallback, useContext, useEffect } from "react";
+import { useHistory, useLocation } from "react-router-dom";
+import { requestBuilds } from "../api";
+import { GlobalContext, INITIAL_STATE } from "../store/GlobalStore";
 import {
-  getFallbackQueryString,
-  getFiltersFromUrlQuery,
-} from '../store/globalStoreHelpers'
+  getIsEmpty,
+  isNonEmptyArray,
+  safeJsonParse,
+  singleItemToArray,
+} from "../util/getters";
+import Cookies from "js-cookie";
 
 export const useRedirectHome = () => {
-  const history = useHistory()
+  const history = useHistory();
   const redirectHome = useCallback(
-    () => history.push({
-      path: '/',
-    }),
-    [history],
-  )
-  return { redirectHome }
-}
+    () =>
+      history.push({
+        path: "/",
+        search: "",
+      }),
+    [history]
+  );
+  return { redirectHome };
+};
 
 /**
  * Adds query params to URL bar if there are none
  * Hacky; also sets userAgent and stores to global state
  */
 export const useRedirectOnEmptyQuery = () => {
-  const { search: locationSearch } = useLocation()
-  const {
-    state: { userAgent },
-    updateState,
-  } = useContext(GlobalContext)
-  const history = useHistory()
+  const { search: locationSearch } = useLocation();
+
+  const history = useHistory();
+
   useEffect(
     () => {
       if (!locationSearch) {
-        const fallbackQueryString = getFallbackQueryString({
-          userAgent,
-          updateState,
-        })
+        const localStorageFilters = pickBy(
+          safeJsonParse(window.localStorage.getItem("uiFilters"), {}),
+          isNonEmptyArray
+        );
+
+        const fallbackQueryString = !getIsEmpty(localStorageFilters)
+          ? queryString.stringify(localStorageFilters)
+          : queryString.stringify(INITIAL_STATE.uiFilters);
+
         history.push({
-          pathname: '/',
+          pathname: "/",
           search: fallbackQueryString,
-        })
+        });
       }
     },
     // TODO: Refactor to follow hook rules
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [locationSearch],
-  )
-}
+    [locationSearch]
+  );
+};
 
 /**
  * Call API if query in URL bar changes and state.needsRefresh is true
  */
 export const useRequestOnQueryChange = () => {
   const {
-    state: { needsRefresh, apiKey },
+    state: { needsRefresh },
     updateState,
-  } = useContext(GlobalContext)
-  const { search: locationSearch } = useLocation()
+  } = useContext(GlobalContext);
+  const { search: locationSearch } = useLocation();
 
   useEffect(() => {
     if (locationSearch && needsRefresh) {
-      requestBuilds({ updateState, locationSearch, apiKey })
+      requestBuilds({
+        updateState,
+        locationSearch,
+        apiKey: Cookies.get("apiKey"),
+      });
     }
     // TODO: Refactor to follow hook rules
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [locationSearch, needsRefresh])
-}
+  }, [locationSearch, needsRefresh]);
+};
 
 /**
  * Parse URL query params for filters so we can update the UI
  */
 export const useSetFiltersOnQueryChange = () => {
-  const { dispatch } = useContext(GlobalContext)
-  const { search: locationSearch } = useLocation()
-  useEffect(() => {
-    const updateFilters = () => {
-      const { artifact_kinds, build_driver, build_state } = JSON.parse(window.localStorage.getItem('uiFilters'))
-        || getFiltersFromUrlQuery({ locationSearch })
-        || {}
-      dispatch({
-        type: actions.UPDATE_UI_FILTERS,
-        payload: { artifact_kinds, build_driver, build_state },
-      })
+  const { updateState } = useContext(GlobalContext);
+  const { search: locationSearch } = useLocation();
+
+  const getSafeUiFiltersFromSearch = useCallback(() => {
+    const searchObject = queryString.parse(locationSearch);
+    const validQueryParam = (v) => !!v && typeof v === "string";
+
+    let safeUiFiltersFromSearch = {};
+    for (let key in INITIAL_STATE.uiFilters) {
+      safeUiFiltersFromSearch[key] = singleItemToArray(
+        searchObject[key] || []
+      ).filter(validQueryParam);
     }
-    if (locationSearch) updateFilters()
+    return safeUiFiltersFromSearch;
+  }, [locationSearch]);
+
+  useEffect(() => {
+    if (locationSearch) {
+      const uiFilters = getSafeUiFiltersFromSearch();
+
+      const availableBranchNames = uniq([
+        "master",
+        ...safeJsonParse(window.localStorage.getItem("branchNames"), []),
+        ...(uiFilters.branch || []),
+      ]);
+
+      window.localStorage.setItem("uiFilters", JSON.stringify(uiFilters));
+      window.localStorage.setItem(
+        "branchNames",
+        JSON.stringify(availableBranchNames)
+      );
+      updateState({
+        uiFilters,
+      });
+    }
     // TODO: Bad; refactor
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [locationSearch])
-}
+  }, [locationSearch]);
+};

@@ -1,0 +1,100 @@
+@value utils: "./layout-utils.module.css";
+@value sizes: "./sizes.module.css";
+
+@value space_xs, space_sm, space_md, space_lg, space_xl, space_xxl from sizes;
+@value tablet from "./breakpoints.module.css";
+
+@value headerFont: 1.7rem/1.5 var(--font-stack);
+
+.faded {
+    top: -40px;
+    left: -10%;
+    right: 110%;
+    position: fixed;
+    width: 120vw;
+    min-height: 200vmax;
+    height: 200%;
+    z-index: 9;
+
+    background-color: black;
+    opacity: 0.4;
+}
+
+.modalOverlay {
+    width: 120vw;
+    position: fixed;
+    top: 0;
+    right: 110%;
+    bottom: 0;
+    left: -10%;
+    z-index: 10;
+    outline: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 100%;
+    margin-bottom: 100px;
+}
+
+.modalContainer {
+    composes: flexCol aiCenter from utils;
+    position: relative;
+    margin: 1.75rem auto;
+    margin-bottom: 2rem;
+    border-radius: 1rem;
+    padding: 1rem;
+    z-index: 11;
+
+    width: 500px;
+    max-width: 85vw;
+    outline: 0;
+    background-color: var(--bg-page);
+
+    box-shadow: -3rem 0.5rem 20px rgba(14, 16, 45, 0.2),
+        3rem 0.5rem 20px rgba(14, 16, 45, 0.2);
+}
+
+@media (min-width: tablet) {
+    .modalContainer {
+        box-shadow: none;
+    }
+}
+
+.modalHeader {
+    composes: flexRow aiCenter jcCenter from utils;
+    position: relative;
+    width: 100%;
+    margin: 0.6rem auto;
+}
+
+.modalClose {
+    position: absolute;
+    top: 50%;
+    right: 0.3rem;
+    transform: translateY(-50%);
+    color: var(--text-link);
+}
+
+.modalClose:hover {
+    cursor: pointer;
+    color: var(--text-link-hover);
+}
+
+.modalBody {
+    composes: flexCol aiCenter from utils;
+    margin: auto;
+    width: 100%;
+    padding: 0.6rem 0rem 1rem;
+}
+
+.modalFooter {
+    composes: flexRow jcCenter aiCenter from utils;
+    margin: auto;
+    width: 100%;
+    padding: 0.6rem 0rem 1rem;
+}
+
+.modalTitle {
+    font: headerFont;
+    display: block;
+    color: var(--text-sectionTitle);
+}

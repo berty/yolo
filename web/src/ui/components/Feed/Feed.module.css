@@ -1,0 +1,21 @@
+@value utils: "../../../assets/layout-utils.module.css";
+@value sizes: "../../../assets/sizes.module.css";
+
+@value space_xs, space_sm, space_md, space_lg, space_xl, space_xxl from sizes;
+
+.container {
+    composes: flexCol aiCenter from utils;
+    width: 100%;
+    margin-bottom: space_xl;
+    padding-bottom: space_xl;
+}
+
+.togglerContainer {
+    padding-top: space_md;
+    padding-bottom: space_lg;
+}
+
+.noResults {
+    composes: childrenMbLg from utils;
+    font-size: 0.8rem;
+}

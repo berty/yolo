@@ -1,0 +1,77 @@
+:root {
+    /* https://hackmd.io/tzpwxFMRQU-21pSW7vfVyg */
+
+    /* BACKGROUND COLORS - SPEC */
+    --bg-block: hsla(236, 27%, 31%, 1);
+    --bg-branch: hsl(235.4, 20.2%, 38.9%);
+    --bg-btnDlMaster: hsl(166.4, 62.8%, 51.6%);
+    --bg-btnDlPull: hsl(250.4, 55.4%, 65.7%);
+    --bg-btnPrimary: hsl(240, 66.3%, 59.4%);
+    --bg-filter: transparent;
+    --bg-page: hsla(235, 28%, 24%, 1);
+    --bg-tagGreen: hsl(166.7, 80.8%, 69.2%);
+    --bg-tagOrange: hsl(42, 100%, 79.2%);
+    --bg-tagPink: hsl(336.6, 100%, 75.9%);
+
+    /* BACKGROUND COLORS - CUSTOM */
+    --bg-block-highlight: hsla(236, 27%, 38%, 1);
+    --bg-block-highlight2: hsla(236, 17%, 42%, 1);
+    --bg-btnPrimary-disabled: hsl(240, 0%, 59.4%);
+    --bg-btnPrimary-disabled: hsl(240, 10%, 40%);
+    --bg-filter-disabled: hsl(240, 0%, 50%, 0.1);
+    --bg-btnPrimary-hover: hsl(240, 66.3%, 63%);
+
+    /* TEXT COLORS - SPEC */
+    --text-author: hsl(236.2, 46.8%, 86.7%);
+    --text-blockTitle: hsl(236.2, 46.8%, 86.7%);
+    --text-filterSelectedTitle: hsl(240, 88%, 70.8%);
+    --text-filterUnselectedTitle: hsl(236.7, 16.4%, 55.9%);
+    --text-sectionText: hsl(236.7, 17%, 57.5%);
+    --text-sectionTitle: hsl(234.6, 27.1%, 75.3%);
+    --text-tagGreen: hsl(177.8, 61.4%, 35.5%);
+    --text-tagOrange: hsl(35.2, 100%, 52.2%);
+    --text-tagPink: hsl(340.8, 64.4%, 50.6%);
+
+    /* TEXT COLORS - CUSTOM */
+    --text-sectionText-highlight: hsl(234.6, 27.1%, 80.3%);
+    --text-btnPrimary: rgb(205, 207, 237);
+    --text-btnPrimary-disabled: rgba(205, 207, 237, 0.6);
+    --text-link: hsl(236.2, 46.8%, 77%);
+    --text-link-hover: hsl(236.2, 46.8%, 88%);
+
+    /* BORDER COLORS - SPEC */
+    --border-filterSelected: hsl(240, 88%, 70.8%);
+    --border-filterUnselected: hsl(235.4, 20.2%, 38.9%);
+    --border-item: hsl(234.6, 23.9%, 35.1%);
+
+    /* ICON/WIDGET/TAG COLORS - SPEC */
+    --icon-branchPurple: hsl(250.6, 100%, 78.8%);
+    --icon-btnLogs: hsl(235.4, 20.2%, 38.9%);
+    --icon-dashboardBlue: hsl(240, 88%, 70.8%);
+    --icon-filterSelected: hsl(240, 88%, 70.8%);
+    --icon-filterUnselected: hsl(235.4, 20.2%, 38.9%);
+    --icon-masterGreen: hsl(166.8, 100%, 70.6%);
+
+    /* ICON/WIDGET/TAG COLORS - CUSTOM */
+    --accent-filterUnselected: hsl(234.6, 27.1%, 75.3%);
+    --accent-filterDefault: hsla(234.6, 27.1%, 71%, 0.7);
+    --accent-filterDefaultHover: hsl(232.9, 60.2%, 88.6%);
+    --accent-filterSelected: hsl(240, 88%, 70.8%);
+    --accent-filterSelectedHover: hsl(240, 88%, 90%);
+
+    /* SHADOW COLORS - SPEC */
+    --shadow-btnDlMaster: hsl(166.2, 66.5%, 40.9%);
+    --shadow-btnDlPull: hsl(249.8, 46%, 53.6%);
+    --shadow-btnPrimary: hsl(240, 45.6%, 44.7%);
+
+    /* SHADOW COLORS - CUSTOM */
+    --shadow-btnPrimary-disabled: hsl(240, 0%, 44.7%);
+    --shadow-btnPrimary-disabled: hsl(240, 0%, 25%);
+    --shadow-btnPrimary-hover: hsl(240, 45.6%, 50%);
+
+    /* SHADOW-STYLES - SPEC */
+    --shadowStyle-block: none;
+
+    /* YOLO LOGO COLORS (FROM SVG) */
+    --color-logo-accent: hsl(236.5, 80.4%, 58%);
+}

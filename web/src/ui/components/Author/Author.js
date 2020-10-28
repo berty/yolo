@@ -1,78 +1,28 @@
-import React, { useContext } from 'react'
-import { User } from 'react-feather'
-import styles from './Author.module.scss'
-import ConditionallyWrappedComponent from '../ConditionallyWrappedComponent'
-import { ThemeContext } from '../../../store/ThemeStore'
-
-const Avatar = ({
-  theme,
-  buildAuthorAvatarUrl,
-  buildAuthorId,
-  buildAuthorName,
-}) => buildAuthorId && buildAuthorAvatarUrl ? (
-  <a href={buildAuthorId} title={buildAuthorId}>
-    <img src={buildAuthorAvatarUrl} alt={buildAuthorId} />
-  </a>
-) : (
-  <User
-    color={theme.text.sectionTitle}
-    title={buildAuthorName || 'Unknown author'}
-  />
-)
-
-const AuthorName = ({ theme, buildAuthorId, buildAuthorName }) => (
-  <ConditionallyWrappedComponent
-    condition={!!buildAuthorId}
-    wrapper={(children) => (
-      <a
-        href={buildAuthorId}
-        className={styles['author-url-name']}
-        style={{ color: theme.text.sectionTitle }}
-      >
-        {children}
-      </a>
-    )}
-  >
-    <small>{buildAuthorName}</small>
-  </ConditionallyWrappedComponent>
-)
+import React from "react";
+import { User } from "react-feather";
+import styles from "../FeedItem/FeedItemWidgets.module.css";
 
 const Author = ({
-  buildAuthorName = '',
-  buildAuthorId = '',
-  buildAuthorAvatarUrl = '',
+  buildAuthorName = "",
+  buildAuthorId = "",
+  buildAuthorAvatarUrl = "",
 }) => {
-  const { theme } = useContext(ThemeContext)
-
-  return (
-    <div
-      className={styles['author-wrapper']}
-      onClick={(e) => {
-        e.stopPropagation()
-      }}
+  return !buildAuthorId || !buildAuthorName ? null : (
+    <a
+      className={styles.authorWrapper}
+      href={buildAuthorId}
+      title={buildAuthorId}
     >
-      <div className={styles['author-name-wrapper']}>
-        <AuthorName
-          {...{
-            buildAuthorId,
-            buildAuthorName,
-            buildAuthorAvatarUrl,
-            theme,
-          }}
-        />
+      {<span className={styles.authorName}>{buildAuthorName}</span>}
+      <div className={styles.avatar}>
+        {buildAuthorAvatarUrl ? (
+          <img src={buildAuthorAvatarUrl} alt={buildAuthorName} />
+        ) : (
+          <User title={buildAuthorName} />
+        )}
       </div>
-      <div className={styles['author-avatar-wrapper']}>
-        <Avatar
-          {...{
-            buildAuthorAvatarUrl,
-            buildAuthorId,
-            buildAuthorName,
-            theme,
-          }}
-        />
-      </div>
-    </div>
-  )
-}
+    </a>
+  );
+};
 
-export default Author
+export default Author;

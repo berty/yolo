@@ -1,0 +1,150 @@
+@value utils: "../../../assets/layout-utils.module.css";
+@value widgets: "../../../assets/widget-snippets.module.css";
+
+@value mobile_md, tablet from "../../../assets/breakpoints.module.css";
+
+@value _widthHeaderStartIcon: 1.25rem;
+@value _widthProjectIcon: 1rem;
+@value _small: 0.9rem;
+@value _smaller: 0.8rem;
+@value _heightProjectIcon: 1rem;
+@value _heightAvatar: 1.2rem;
+
+.star {
+    display: block;
+    font-size: _smaller;
+}
+
+.headerProjectIcon {
+    composes: aiCenter childrenMrSm from utils;
+    color: var(--text-link);
+    stroke: currentColor;
+    border-color: currentColor;
+    display: none;
+}
+
+@media (min-width: tablet) {
+    .headerProjectIcon {
+        display: flex;
+        flex: 0;
+        font-size: _small;
+    }
+
+    .headerProjectIcon > svg,
+    .headerProjectIcon > img {
+        height: 100%;
+        height: _heightProjectIcon;
+        max-width: _heightProjectIcon;
+        display: block;
+    }
+}
+
+/* AUTHOR */
+
+.authorWrapper {
+    composes: flexRow aiCenter childrenMrSm from utils;
+    height: 100%;
+    flex: 0;
+}
+
+.authorName {
+    color: var(--text-author);
+    font-size: _small;
+    line-height: 1;
+}
+
+.author-url-name,
+.author-url-name:hover,
+.author-url-name:active {
+    text-decoration: none;
+}
+
+.avatar {
+    composes: flexRow aiCenter from utils;
+    height: _heightAvatar;
+}
+
+.avatar > img,
+.avatar > svg {
+    display: block;
+    height: 100%;
+    border-radius: 15%;
+}
+
+/* MISC */
+
+.wrapperChevronBig {
+    color: var(--text-link);
+    flex: 0;
+}
+
+.headerBlockIcon {
+    flex: 0;
+}
+
+.headerBlockIcon > svg {
+    height: 1.25rem;
+    max-width: 1.25rem;
+    display: block;
+}
+
+/* LONG TEXT WIDGETS */
+
+.branchName {
+    composes: wrapText from utils;
+    border-radius: 1rem;
+    padding: 0.2rem 0.5rem 0.3rem;
+    display: block;
+    font-size: _smaller;
+    color: var(--accent-filterUnselected);
+    border: 2px solid currentColor;
+    cursor: pointer;
+}
+
+.branchName.selected {
+    color: var(--accent-filterSelected);
+    border-color: currentColor;
+}
+
+.branchName.selected:hover,
+.branchName.selected:focus,
+.branchName.selected:active {
+    color: var(--accent-filterSelectedHover);
+    border-color: currentColor;
+}
+
+.branchName:not(.selected):hover,
+.branchName:not(.selected).selected:focus,
+.branchName:not(.selected).selected:active {
+    color: var(--accent-filterDefaultHover);
+    border-color: currentColor;
+}
+
+.messageLine {
+    composes: wrapText from utils;
+    padding: 0.5rem;
+    font-size: _smaller;
+    line-height: 1.5;
+    margin-bottom: 0.3rem;
+}
+
+.messageLineTruncated:last-child::after,
+.messageLineExpanded:last-child::after {
+    margin-left: 0.4rem;
+    color: var(--text-link);
+    white-space: nowrap;
+}
+
+.messageLineTruncated:last-child::after {
+    content: "...[show more]";
+}
+
+.messageLineExpanded:last-child::after {
+    content: "[show less]";
+}
+
+.artifactLocalPathText {
+    word-break: break-all;
+    font-size: smaller;
+    padding: 0.5rem;
+}
