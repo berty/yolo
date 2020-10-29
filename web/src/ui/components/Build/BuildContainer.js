@@ -181,9 +181,9 @@ const LatestBuildStateTags = ({
 };
 
 const BuildContainer = React.memo(
-  ({ build, toCollapse, hasRunningBuilds, isLatestMaster = false }) => {
+  ({ build, hasRunningBuilds, isLatestMaster = false }) => {
     const { state } = useContext(GlobalContext);
-    const [collapsed, setCollapsed] = useState(toCollapse);
+    const [collapsed, setCollapsed] = useState(true);
     const [showingAllBuilds, toggleShowingAllBuilds] = useState(false);
 
     const { theme } = useContext(ThemeContext);

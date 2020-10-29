@@ -59,7 +59,6 @@ const Feed = ({
             {!indexOfLatestMasterBuildsForProjects.includes(i) && (
               <BuildContainer
                 build={build}
-                toCollapse={indexOfLatestMasterBuildsForProjects.length > 0}
                 hasRunningBuilds={buildsStateIsRunning(
                   build.allBuildsForMr,
                   builds,
@@ -194,7 +193,6 @@ const BuildList = ({ builds = [], loaded }) => {
             <BuildContainer
               key={`${build.id}-${i}`}
               build={build}
-              toCollapse={false}
               isLatestMaster
               hasRunningBuilds={buildsStateIsRunning(
                 build.allBuildsForMr,
