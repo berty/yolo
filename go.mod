@@ -3,7 +3,7 @@ module berty.tech/yolo/v2
 go 1.13
 
 require (
-	github.com/bearer/go-agent v1.0.1
+	github.com/bearer/go-agent v1.0.2
 	github.com/buildkite/go-buildkite v2.2.0+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/go-chi/chi v4.1.2+incompatible
