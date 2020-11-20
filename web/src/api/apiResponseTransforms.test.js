@@ -68,7 +68,7 @@ describe("groupBuildsByMr (no params in query)", () => {
   it("should have an allBuildsForMr to each item", () => {
     const everyItemHasAKey = (array, key) =>
       !!array.every(
-        (el) => typeof el === "object" && Object.keys(el).includes(key)
+        (el) => _.isPlainObject(el) && Object.keys(el).includes(key)
       );
     expect(
       everyItemHasAKey(realGroupedByMrBuildList, "allBuildsForMr")

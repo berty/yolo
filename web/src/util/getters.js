@@ -1,44 +1,75 @@
-export const strUpper = (val) =>
+/**
+ * Bundle these since they are used abundantly
+ */
+
+import keys from "lodash/keys";
+import isPlainObject from "lodash/isPlainObject";
+import pickBy from "lodash/pickBy";
+import uniq from "lodash/uniq";
+import values from "lodash/values";
+
+export { isPlainObject, keys, pickBy, uniq, values };
+
+export const isArray = Array.isArray;
+export const toUpper = (val) =>
   val && typeof val === "string" ? val.toUpperCase() : "";
+export const toString = (val) =>
+  val === undefined || val === null ? "" : val.toString();
+export const isString = (val) => typeof val === "string";
 
-export const getSafeStr = (val) => (val && typeof val === "string" ? val : "");
+const conditionOrFalse = (condition) => (val) => condition(val) && val;
 
-export const equalsIgnoreCase = (str1, str2) =>
-  strUpper(str1) === strUpper(str2);
+export const stringOrFalse = conditionOrFalse(isString);
 
-export const getIsArray = (val) => val && Array.isArray(val);
+export const equalsIgnoreCase = (str1, str2) => toUpper(str1) === toUpper(str2);
 
-export const isNonEmptyArray = (val) => getIsArray(val) && val.length >= 1;
-
+export const isNonEmptyArray = (val) => isArray(val) && val.length >= 1;
 export const isArrayWithMin = (val, min = 1) =>
-  getIsArray(val) && val.length >= min;
+  isArray(val) && val.length >= min;
 
-export const getIsEmptyArr = (val) => getIsArray(val) && val.length === 0;
-
-export const getIsObject = (val) => val && typeof val === "object";
-
-export const getIsEmpty = (val) =>
+export const isFalseyOrEmpty = (val) =>
   !val ||
-  (getIsArray(val) && !val.length) ||
-  (getIsObject(val) && !Object.keys(val).length);
+  (isArray(val) && !val.length) ||
+  (isPlainObject(val) && !Object.keys(val).length);
 
-export const singleItemToArray = (val) => (!getIsArray(val) ? [val] : val);
+export const upsertToArray = (val) => (!isArray(val) ? [val] : val);
 
 export const safeJsonParse = (val, fallback = {}) => {
-  if (!!val) {
-    try {
-      const parsed = JSON.parse(val);
-      return getIsArray(parsed) || getIsObject(parsed) ? parsed : fallback;
-    } catch (e) {
-      console.warn(`${e}`);
-      return fallback;
-    }
+  try {
+    const parsed = JSON.parse(val);
+    return !parsed
+      ? fallback
+      : isArray(fallback) !== isArray(parsed) ||
+        isPlainObject(fallback) !== isPlainObject(parsed) ||
+        typeof parsed !== typeof fallback
+      ? fallback
+      : parsed;
+  } catch (e) {
+    return fallback;
   }
-  return fallback;
+};
+
+export const safeBase64 = {
+  decode: (val) => {
+    try {
+      return atob(val);
+    } catch (e) {
+      console.warn(e.toString());
+      return "";
+    }
+  },
+  encode: (val) => {
+    try {
+      return btoa(val);
+    } catch (e) {
+      console.warn(e.toString());
+      return "";
+    }
+  },
 };
 
 export const addOrRemoveFromArray = (val, array = []) =>
-  !getIsArray(array)
+  !isArray(array)
     ? []
     : array.includes(val)
     ? array.filter((el) => el !== val)

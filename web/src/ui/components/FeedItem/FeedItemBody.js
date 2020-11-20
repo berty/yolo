@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getIsArray } from "../../../util/getters";
+import { isArray } from "../../../util/getters";
 import ShowingOlderBuildsTag from "../ShowingOlderBuildsTag";
 import bodyStyles from "./FeedItemBody.module.css";
 import {
@@ -197,7 +197,7 @@ const FeedItemBody = ({
         </div>
       )}
       {showingArtifacts &&
-        getIsArray(buildHasArtifacts) &&
+        isArray(buildHasArtifacts) &&
         buildHasArtifacts.map((artifact, i) => (
           <Artifact
             artifact={artifact}

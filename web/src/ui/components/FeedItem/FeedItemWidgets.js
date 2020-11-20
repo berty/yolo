@@ -8,7 +8,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import cn from "classnames";
-import pickBy from "lodash/pickBy";
 import QRCode from "qrcode.react";
 import queryString from "query-string";
 import React, { useContext, useState } from "react";
@@ -40,9 +39,10 @@ import {
 } from "../../../util/date";
 import {
   addOrRemoveFromArray,
-  getIsArray,
+  isArray,
   isArrayWithMin,
   isNonEmptyArray,
+  pickBy,
 } from "../../../util/getters";
 import { getTagColorStyle } from "../../styleTools/colorTools";
 import { ArtifactKindComponent, ProjectIcon } from "../../styleTools/iconTools";
@@ -150,7 +150,7 @@ export const ArtifactKindIcon = ({ artifactKind = "", artifactState = "" }) => (
 );
 
 export const LatestBuildArtifactsIcons = ({ buildHasArtifacts }) =>
-  getIsArray(buildHasArtifacts) && (
+  isArray(buildHasArtifacts) && (
     <>
       {buildHasArtifacts.map((a, i) => (
         <ArtifactKindIcon

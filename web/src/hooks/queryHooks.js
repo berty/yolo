@@ -1,15 +1,15 @@
-import pickBy from "lodash/pickBy";
-import uniq from "lodash/uniq";
 import queryString from "query-string";
 import { useCallback, useContext, useEffect } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { requestBuilds } from "../api";
 import { GlobalContext, INITIAL_STATE } from "../store/GlobalStore";
 import {
-  getIsEmpty,
+  isFalseyOrEmpty,
   isNonEmptyArray,
   safeJsonParse,
-  singleItemToArray,
+  upsertToArray,
+  pickBy,
+  uniq,
 } from "../util/getters";
 import Cookies from "js-cookie";
 
@@ -43,7 +43,7 @@ export const useRedirectOnEmptyQuery = () => {
           isNonEmptyArray
         );
 
-        const fallbackQueryString = !getIsEmpty(localStorageFilters)
+        const fallbackQueryString = !isFalseyOrEmpty(localStorageFilters)
           ? queryString.stringify(localStorageFilters)
           : queryString.stringify(INITIAL_STATE.uiFilters);
 
@@ -95,7 +95,7 @@ export const useSetFiltersOnQueryChange = () => {
 
     let safeUiFiltersFromSearch = {};
     for (let key in INITIAL_STATE.uiFilters) {
-      safeUiFiltersFromSearch[key] = singleItemToArray(
+      safeUiFiltersFromSearch[key] = upsertToArray(
         searchObject[key] || []
       ).filter(validQueryParam);
     }

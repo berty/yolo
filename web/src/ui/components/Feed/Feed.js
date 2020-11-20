@@ -13,7 +13,7 @@ import {
 } from "../../../api/apiResponseTransforms";
 import { btnLg, primary } from "../../../assets/widget-snippets.module.css";
 import { getDateDividerFormat } from "../../../util/date";
-import { getIsEmpty, isArrayWithMin } from "../../../util/getters";
+import { isFalseyOrEmpty, isArrayWithMin } from "../../../util/getters";
 import { usePrevious } from "../../../util/misc";
 import DateDivider from "../DateDivider/DateDivider";
 import FeedItem from "../FeedItem/FeedItem";
@@ -37,7 +37,7 @@ const ExtendedFeed = ({
   return (
     <>
       {(displayFeed === true ||
-        getIsEmpty(indexOfLatestMasterBuildsForProjects)) &&
+        isFalseyOrEmpty(indexOfLatestMasterBuildsForProjects)) &&
         buildsByMrWithDateFlags.map((
           build,
           i // The i is important to get day dividers, so don't change length of this array

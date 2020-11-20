@@ -7,7 +7,7 @@ import {
   KIND_TO_PLATFORM,
   PROJECTS,
 } from "../constants";
-import { singleItemToArray } from "../util/getters";
+import { upsertToArray } from "../util/getters";
 import { GlobalContext } from "./GlobalStore";
 
 export const useIsMobile = () => {
@@ -34,23 +34,23 @@ export const getFiltersFromUrlQuery = ({ locationSearch = "" }) => {
     branch: queryBranches = [],
   } = locationObject;
 
-  const artifactKinds = singleItemToArray(
+  const artifactKinds = upsertToArray(
     queryArtifactKinds
   ).filter((artifactKind) => ARTIFACT_KINDS.includes(artifactKind));
 
-  const buildDrivers = singleItemToArray(
-    queryBuildDrivers
-  ).filter((buildDriver) => BUILD_DRIVERS.includes(buildDriver));
+  const buildDrivers = upsertToArray(queryBuildDrivers).filter((buildDriver) =>
+    BUILD_DRIVERS.includes(buildDriver)
+  );
 
-  const buildStates = singleItemToArray(
+  const buildStates = upsertToArray(
     queryBuildState.toString()
   ).filter((buildState) => BUILD_STATES.includes(buildState));
 
-  const projects = singleItemToArray(queryProjects).filter((p) =>
+  const projects = upsertToArray(queryProjects).filter((p) =>
     PROJECTS.includes(p)
   );
 
-  const branch = singleItemToArray(queryBranches);
+  const branch = upsertToArray(queryBranches);
 
   return {
     artifact_kinds: artifactKinds,

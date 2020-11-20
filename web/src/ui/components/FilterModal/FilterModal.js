@@ -1,5 +1,4 @@
 import cn from "classnames";
-import pickBy from "lodash/pickBy";
 import queryString from "query-string";
 import React, { useContext, useState } from "react";
 import { Check, LogOut, X } from "react-feather";
@@ -13,7 +12,7 @@ import {
 } from "../../../constants";
 import { useRedirectHome } from "../../../hooks/queryHooks";
 import { GlobalContext } from "../../../store/GlobalStore";
-import { isNonEmptyArray, safeJsonParse } from "../../../util/getters";
+import { isNonEmptyArray, safeJsonParse, pickBy } from "../../../util/getters";
 import Modal from "../Modal/Modal";
 import ThemeToggler from "../ThemeToggler";
 import styles from "./FilterModal.module.css";

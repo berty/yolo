@@ -1,6 +1,5 @@
-import { uniq, values } from "lodash";
 import { getIsNextDay } from "../util/date";
-import { getIsArray, getSafeStr } from "../util/getters";
+import { uniq, values, isArray, stringOrFalse } from "../util/getters";
 
 /**
  * Adds entry {buildIsFirstOfDay: boolean} to each build
@@ -12,7 +11,7 @@ import { getIsArray, getSafeStr } from "../util/getters";
  * @return {Array<BuildObject>}
  */
 export const flagBuildsFirstOfDay = (sortedTopLevelBuilds) =>
-  getIsArray(sortedTopLevelBuilds) &&
+  isArray(sortedTopLevelBuilds) &&
   sortedTopLevelBuilds.reduce((acc, build, i) => {
     const { created_at: buildCreatedAt = null } = build;
     const { created_at: laterBuildCreatedAt = null } = acc[i - 1] || {};
@@ -105,8 +104,8 @@ export const validateError = (error = { message: "Unknown error" }) => {
   const axiosResponse = error.response || {};
   const { data = "", status = 0, statusText = "" } = axiosResponse;
   const humanMessage =
-    getSafeStr(data) ||
-    getSafeStr(error.message) ||
+    stringOrFalse(data) ||
+    stringOrFalse(error.message) ||
     axiosMessage ||
     "Unknown error";
   return {

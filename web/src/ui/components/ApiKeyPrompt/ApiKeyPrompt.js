@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Lock } from "react-feather";
 import { useHistory, useLocation } from "react-router-dom";
-import { getSafeStr } from "../../../util/getters";
+import { safeBase64 } from "../../../util/getters";
 
 import styles from "./ApiKeyPrompt.module.css";
 import { btnLg, primary } from "../../../assets/widget-snippets.module.css";
@@ -20,7 +20,7 @@ const ApiKeyPrompt = ({ failedKey, authIsPending, updateState }) => {
 
   const onFormSubmit = (e) => {
     e.preventDefault();
-    Cookies.set("apiKey", btoa(getSafeStr(formApiKey)), { expires: 365 });
+    Cookies.set("apiKey", safeBase64.encode(formApiKey), { expires: 365 });
     updateState({
       needsRefresh: true,
       authIsPending: true,
@@ -46,7 +46,7 @@ const ApiKeyPrompt = ({ failedKey, authIsPending, updateState }) => {
           ref={inputEl}
           type="text"
           placeholder={`Current key: ${
-            (failedKey && atob(getSafeStr(failedKey))) || "no key set"
+            (failedKey && safeBase64.decode(failedKey)) || "no key set"
           }`}
           className={styles.input}
           onChange={(e) => {

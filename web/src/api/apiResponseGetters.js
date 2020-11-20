@@ -1,8 +1,8 @@
 import { BUILD_STATE } from "../constants";
-import { getIsArray, isNonEmptyArray } from "../util/getters";
+import { isArray, isNonEmptyArray } from "../util/getters";
 
 export const oneBuildResultHasBranchMaster = (builds) =>
-  getIsArray(builds) && builds.find((build) => build.branch === "master");
+  isArray(builds) && builds.find((build) => build.branch === "master");
 
 export const buildStateIsRunning = (build) =>
   build &&
@@ -10,7 +10,7 @@ export const buildStateIsRunning = (build) =>
   build.state.toString() === BUILD_STATE.Running.toString();
 
 export const buildsStateIsRunning = (allBuildsForMr, originalBuildList) =>
-  getIsArray(allBuildsForMr) && isNonEmptyArray(originalBuildList)
+  isArray(allBuildsForMr) && isNonEmptyArray(originalBuildList)
     ? allBuildsForMr
         .filter(
           (buildIndex) =>
