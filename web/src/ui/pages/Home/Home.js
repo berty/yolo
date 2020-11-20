@@ -15,7 +15,6 @@
  */
 
 import Cookies from "js-cookie";
-// import _ from "lodash";
 import React, { useContext, useEffect, useState } from "react";
 import {
   useRedirectOnEmptyQuery,

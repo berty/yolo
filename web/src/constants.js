@@ -4,8 +4,6 @@ export const USERAGENT = {
   "Unknown OS": "Unknown OS",
 };
 
-export const DEFAULT_RESULT_REQUEST_LIMIT = 25;
-
 export const KIND_TO_PLATFORM = {
   IPA: "iOS",
   APK: "Android",
