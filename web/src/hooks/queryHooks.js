@@ -1,26 +1,16 @@
+import Cookies from "js-cookie";
 import queryString from "query-string";
 import { useCallback, useContext, useEffect } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { requestBuilds } from "../api";
 import { GlobalContext, INITIAL_STATE } from "../store/GlobalStore";
-import {
-  isFalseyOrEmpty,
-  isNonEmptyArray,
-  safeJsonParse,
-  upsertToArray,
-  pickBy,
-  uniq,
-} from "../util/getters";
-import Cookies from "js-cookie";
+import { getUiFiltersFromUrlQuery } from "../store/globalStoreHelpers";
+import { safeJsonParse, uniq } from "../util/getters";
 
 export const useRedirectHome = () => {
   const history = useHistory();
   const redirectHome = useCallback(
-    () =>
-      history.push({
-        path: "/",
-        search: "",
-      }),
+    () => history.push({ path: "/", search: "" }),
     [history]
   );
   return { redirectHome };
@@ -38,14 +28,9 @@ export const useRedirectOnEmptyQuery = () => {
   useEffect(
     () => {
       if (!locationSearch) {
-        const localStorageFilters = pickBy(
-          safeJsonParse(window.localStorage.getItem("uiFilters"), {}),
-          isNonEmptyArray
-        );
-
-        const fallbackQueryString = !isFalseyOrEmpty(localStorageFilters)
-          ? queryString.stringify(localStorageFilters)
-          : queryString.stringify(INITIAL_STATE.uiFilters);
+        const fallbackQueryString =
+          window.localStorage.getItem("lastNonEmptyRequest") ||
+          queryString.stringify(INITIAL_STATE.uiFilters);
 
         history.push({
           pathname: "/",
@@ -89,30 +74,17 @@ export const useSetFiltersOnQueryChange = () => {
   const { updateState } = useContext(GlobalContext);
   const { search: locationSearch } = useLocation();
 
-  const getSafeUiFiltersFromSearch = useCallback(() => {
-    const searchObject = queryString.parse(locationSearch);
-    const validQueryParam = (v) => !!v && typeof v === "string";
-
-    let safeUiFiltersFromSearch = {};
-    for (let key in INITIAL_STATE.uiFilters) {
-      safeUiFiltersFromSearch[key] = upsertToArray(
-        searchObject[key] || []
-      ).filter(validQueryParam);
-    }
-    return safeUiFiltersFromSearch;
-  }, [locationSearch]);
-
   useEffect(() => {
     if (locationSearch) {
-      const uiFilters = getSafeUiFiltersFromSearch();
+      const uiFilters = getUiFiltersFromUrlQuery({ locationSearch });
 
       const availableBranchNames = uniq([
         "master",
         ...safeJsonParse(window.localStorage.getItem("branchNames"), []),
-        ...(uiFilters.branch || []),
+        ...uiFilters.branch,
       ]);
 
-      window.localStorage.setItem("uiFilters", JSON.stringify(uiFilters));
+      window.localStorage.setItem("lastNonEmptyRequest", locationSearch);
       window.localStorage.setItem(
         "branchNames",
         JSON.stringify(availableBranchNames)

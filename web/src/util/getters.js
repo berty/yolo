@@ -16,6 +16,7 @@ export const toUpper = (val) =>
 export const toString = (val) =>
   val === undefined || val === null ? "" : val.toString();
 export const isString = (val) => typeof val === "string";
+export const isNonEmptyString = (val) => isString(val) && val.length > 0;
 
 const conditionOrFalse = (condition) => (val) => condition(val) && val;
 
@@ -24,6 +25,7 @@ export const stringOrFalse = conditionOrFalse(isString);
 export const equalsIgnoreCase = (str1, str2) => toUpper(str1) === toUpper(str2);
 
 export const isNonEmptyArray = (val) => isArray(val) && val.length >= 1;
+
 export const isArrayWithMin = (val, min = 1) =>
   isArray(val) && val.length >= min;
 

@@ -1,56 +1,38 @@
 import queryString from "query-string";
-import { useContext } from "react";
 import {
   ARTIFACT_KINDS,
   BUILD_DRIVERS,
   BUILD_STATES,
-  KIND_TO_PLATFORM,
   PROJECTS,
 } from "../constants";
-import { upsertToArray } from "../util/getters";
-import { GlobalContext } from "./GlobalStore";
+import { isNonEmptyString, upsertToArray } from "../util/getters";
 
-export const useIsMobile = () => {
-  const {
-    state: { userAgent },
-  } = useContext(GlobalContext);
-  return (
-    userAgent === KIND_TO_PLATFORM.IPA || userAgent === KIND_TO_PLATFORM.APK
-  );
-};
-
-export const getFiltersFromUrlQuery = ({ locationSearch = "" }) => {
-  const locationObject = queryString.parse(locationSearch);
-
-  if (!locationSearch || !locationObject) {
-    return {};
-  }
-
+export const getUiFiltersFromUrlQuery = ({ locationSearch = "" }) => {
   const {
     artifact_kinds: queryArtifactKinds = [],
     build_driver: queryBuildDrivers = [],
     build_state: queryBuildState = [],
     project_id: queryProjects = [],
     branch: queryBranches = [],
-  } = locationObject;
+  } = queryString.parse(locationSearch) || {};
 
-  const artifactKinds = upsertToArray(
-    queryArtifactKinds
-  ).filter((artifactKind) => ARTIFACT_KINDS.includes(artifactKind));
-
-  const buildDrivers = upsertToArray(queryBuildDrivers).filter((buildDriver) =>
-    BUILD_DRIVERS.includes(buildDriver)
+  const artifactKinds = upsertToArray(queryArtifactKinds).filter((val) =>
+    ARTIFACT_KINDS.includes(val)
   );
 
-  const buildStates = upsertToArray(
-    queryBuildState.toString()
-  ).filter((buildState) => BUILD_STATES.includes(buildState));
-
-  const projects = upsertToArray(queryProjects).filter((p) =>
-    PROJECTS.includes(p)
+  const buildDrivers = upsertToArray(queryBuildDrivers).filter((val) =>
+    BUILD_DRIVERS.includes(val)
   );
 
-  const branch = upsertToArray(queryBranches);
+  const buildStates = upsertToArray(queryBuildState).filter((val) =>
+    BUILD_STATES.includes(val)
+  );
+
+  const projects = upsertToArray(queryProjects).filter((val) =>
+    PROJECTS.includes(val)
+  );
+
+  const branch = upsertToArray(queryBranches).filter(isNonEmptyString);
 
   return {
     artifact_kinds: artifactKinds,

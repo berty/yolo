@@ -3,16 +3,13 @@ import React, { useContext } from "react";
 import { PullToRefresh } from "react-js-pull-to-refresh";
 import { useLocation } from "react-router-dom";
 import { requestBuilds } from "../../api";
-import { GlobalContext } from "../../store/GlobalStore";
-import { useIsMobile } from "../../store/globalStoreHelpers";
+import { GlobalContext, userAgent } from "../../store/GlobalStore";
 import { sleep } from "../../util/misc";
 import ConditionallyWrappedComponent from "./ConditionallyWrappedComponent";
 
 export const PullToRefreshWrapper = ({ children }) => {
   const { state, updateState } = useContext(GlobalContext);
   const { search: locationSearch } = useLocation();
-
-  const isMobileUA = useIsMobile();
 
   function onRefreshHandler() {
     requestBuilds({
@@ -27,7 +24,7 @@ export const PullToRefreshWrapper = ({ children }) => {
     <>
       <ConditionallyWrappedComponent
         condition={
-          isMobileUA &&
+          (userAgent === "iOS" || userAgent === "Android") &&
           !!Cookies.get("disclaimerAccepted") &&
           !state.showingFilterModal
         }

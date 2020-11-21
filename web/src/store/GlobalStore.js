@@ -82,6 +82,7 @@ export const GlobalStore = ({ children }) => {
   const logoutAction = () => {
     Cookies.remove("apiKey");
     window.localStorage.removeItem("uiFilters");
+    window.localStorage.removeItem("lastNonEmptyRequest");
     window.localStorage.removeItem("branchNames");
     window.localStorage.removeItem("displayFeed");
     window.localStorage.removeItem("builds");

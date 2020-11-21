@@ -1,7 +1,35 @@
-import classNames from "classnames";
+import cn from "classnames";
 import React from "react";
 import { onAccessibleClickHandler } from "../../../util/browser";
 import styles from "./OutlineWidget.module.css";
+
+const Icon = ({ iconComponent, iconCollapses }) => {
+  return (
+    iconComponent && (
+      <div
+        className={cn(styles.iconArea, iconCollapses && styles.iconCollapses)}
+      >
+        {iconComponent}
+      </div>
+    )
+  );
+};
+
+const Text = ({ text, textIsUnderneath, textCollapses }) => {
+  const textClass = () =>
+    cn([
+      styles.widgetTextArea,
+      textIsUnderneath && styles.textIsUnderneath,
+      textCollapses && styles.textCollapses,
+    ]);
+  return (
+    text && (
+      <p className={textClass()}>
+        {text.length <= 30 ? text : text.slice(0, 30) + "..."}
+      </p>
+    )
+  );
+};
 
 const OutlineWidget = ({
   title = null,
@@ -13,14 +41,13 @@ const OutlineWidget = ({
   text = "",
   iconComponent = null,
   iconCollapses = false,
-  icons = [],
   onClick = undefined,
 }) => {
   const validTitle = title || text || "";
   const role = interactive ? "button" : null;
   const tabIndex = interactive ? 0 : null;
 
-  const containerClass = classNames([
+  const containerClass = cn([
     styles.widgetWrapper,
     notImplemented && styles.notImplemented,
     interactive && styles.interactive,
@@ -28,33 +55,17 @@ const OutlineWidget = ({
       (selected ? styles.selected : styles.unselected),
   ]);
 
-  const textClass = classNames([
-    styles.widgetTextArea,
-    textIsUnderneath && styles.textIsUnderneath,
-    textCollapses && styles.textCollapses,
-  ]);
-
-  const iconClass = classNames([
-    styles.iconArea,
-    iconCollapses && styles.iconCollapses,
-  ]);
-
   return (
     <div
       className={containerClass}
       title={validTitle}
       role={role}
-      onClick={!onClick ? undefined : onAccessibleClickHandler(onClick)}
-      onKeyDown={!onClick ? undefined : onAccessibleClickHandler(onClick)}
+      onClick={onAccessibleClickHandler(onClick)}
+      onKeyDown={onAccessibleClickHandler(onClick)}
       tabIndex={tabIndex}
     >
-      {iconComponent && <div className={iconClass}>{iconComponent}</div>}
-      {icons && icons.length > 0 && <div className={iconClass}>{icons}</div>}
-      {text && (
-        <p className={textClass}>
-          {text.length <= 30 ? text : text.slice(0, 30) + "..."}
-        </p>
-      )}
+      <Icon {...{ iconComponent, iconCollapses }} />
+      <Text {...{ text, textIsUnderneath, textCollapses }} />
     </div>
   );
 };

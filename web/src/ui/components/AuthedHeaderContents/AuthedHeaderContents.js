@@ -68,7 +68,7 @@ const AuthedHeaderContents = () => {
         interactive
         selected
         onClick={openFilterModal}
-        icons={artifactKinds.map((artifactKind) => (
+        iconComponent={artifactKinds.map((artifactKind) => (
           <ArtifactKindComponent
             artifactKind={artifactKind}
             key={artifactKind}
@@ -153,7 +153,7 @@ const AuthedHeaderContents = () => {
         <button
           className={styles.settingsItem}
           onClick={() => {
-            window.localStorage.removeItem("uiFilters");
+            window.localStorage.removeItem("lastNonEmptyRequest");
             updateState({
               needsRefresh: true,
               isLoaded: false,

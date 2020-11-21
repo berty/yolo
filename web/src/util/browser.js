@@ -6,12 +6,6 @@
  */
 export const getMobileOperatingSystem = () => {
   const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-
-  // Windows Phone must come first because its UA also contains "Android"
-  // if (/windows phone/i.test(userAgent)) {
-  //   return "Windows Phone";
-  // }
-
   if (/android/i.test(userAgent)) {
     return "Android";
   }
@@ -24,9 +18,12 @@ export const getMobileOperatingSystem = () => {
   return "Unknown OS";
 };
 
-export const onAccessibleClickHandler = (onClick) => (e) => {
-  e.stopPropagation();
-  if (e.type === "click" || e.key === "Enter") {
-    return onClick(e);
-  }
-};
+export const onAccessibleClickHandler = (onClick) =>
+  !onClick
+    ? undefined
+    : (e) => {
+        e.stopPropagation();
+        if (e.type === "click" || e.key === "Enter") {
+          return onClick(e);
+        }
+      };

@@ -19,6 +19,7 @@ export const requestBuilds = ({
       error: validateError({ message: "No query provided" }),
       isLoaded: true,
       needsRefresh: false,
+      autoRefreshOn: false,
     });
     return Promise.resolve();
   }

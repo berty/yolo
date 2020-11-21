@@ -12,6 +12,7 @@ import {
 } from "../../../constants";
 import { useRedirectHome } from "../../../hooks/queryHooks";
 import { GlobalContext } from "../../../store/GlobalStore";
+import { onAccessibleClickHandler } from "../../../util/browser";
 import { isNonEmptyArray, safeJsonParse, pickBy } from "../../../util/getters";
 import Modal from "../Modal/Modal";
 import ThemeToggler from "../ThemeToggler";
@@ -156,8 +157,10 @@ const FilterModal = ({ closeAction: onClose = () => {} }) => {
         <div
           role="button"
           data-dismiss="modal"
-          onClick={handleApplyFilters}
+          onClick={onAccessibleClickHandler(handleApplyFilters)}
+          onKeyDown={onAccessibleClickHandler(handleApplyFilters)}
           className={cn(widgetStyles.btnLg, widgetStyles.primary)}
+          tabIndex={0}
         >
           <Check />
           Apply Filters
