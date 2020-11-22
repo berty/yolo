@@ -1,75 +1,44 @@
-import queryString from 'query-string'
-import { isEqual } from 'lodash'
-import { useContext } from 'react'
+import queryString from "query-string";
 import {
   ARTIFACT_KINDS,
   BUILD_DRIVERS,
   BUILD_STATES,
-  KIND_TO_PLATFORM,
-  PLATFORM_TO_ARTIFACT_KIND,
-  PROJECT_ARTIFACT_KINDS,
-} from '../constants'
-import { singleItemToArray } from '../util/getters'
-import { getMobileOperatingSystem } from '../util/browser'
-import { GlobalContext } from './GlobalStore'
+  PROJECTS,
+} from "../constants";
+import { isNonEmptyString, upsertToArray } from "../util/getters";
 
-export const useIsMobile = () => {
-  const {
-    state: { userAgent },
-  } = useContext(GlobalContext)
-  return (
-    userAgent === KIND_TO_PLATFORM.IPA || userAgent === KIND_TO_PLATFORM.APK
-  )
-}
-
-export const getFiltersFromUrlQuery = ({ locationSearch = '', uiFilters }) => {
-  if (!locationSearch) {
-    return null
-  }
-  const locationObject = queryString.parse(locationSearch)
-  if (isEqual(locationObject, uiFilters)) return null
+export const getUiFiltersFromUrlQuery = ({ locationSearch = "" }) => {
   const {
     artifact_kinds: queryArtifactKinds = [],
     build_driver: queryBuildDrivers = [],
     build_state: queryBuildState = [],
-  } = locationObject
-  const artifactKinds = (!Array.isArray(queryArtifactKinds)
-    ? [queryArtifactKinds]
-    : queryArtifactKinds
-  ).filter((artifactKind) => ARTIFACT_KINDS.includes(artifactKind))
-  const buildDrivers = (!Array.isArray(queryBuildDrivers)
-    ? [queryBuildDrivers]
-    : queryBuildDrivers
-  ).filter((buildDriver) => BUILD_DRIVERS.includes(buildDriver))
+    project_id: queryProjects = [],
+    branch: queryBranches = [],
+  } = queryString.parse(locationSearch) || {};
 
-  const buildStates = queryBuildState
-    ? singleItemToArray(queryBuildState.toString()).filter((buildState) => BUILD_STATES.includes(buildState))
-    : []
+  const artifactKinds = upsertToArray(queryArtifactKinds).filter((val) =>
+    ARTIFACT_KINDS.includes(val)
+  );
+
+  const buildDrivers = upsertToArray(queryBuildDrivers).filter((val) =>
+    BUILD_DRIVERS.includes(val)
+  );
+
+  const buildStates = upsertToArray(queryBuildState).filter((val) =>
+    BUILD_STATES.includes(val)
+  );
+
+  const projects = upsertToArray(queryProjects).filter((val) =>
+    PROJECTS.includes(val)
+  );
+
+  const branch = upsertToArray(queryBranches).filter(isNonEmptyString);
 
   return {
     artifact_kinds: artifactKinds,
     build_driver: buildDrivers,
     build_state: buildStates,
-  }
-}
-
-// Set default query string:
-// project_id=__BERTY MESSENGER ID__
-// artifact_kinds=__MOBILE USER AGENT APP KIND || IPA__
-export const getFallbackQueryString = ({ userAgent = '', updateState }) => {
-  const defaultArtifactKinds = [PROJECT_ARTIFACT_KINDS.messenger]
-  const updatedUserAgent = userAgent || getMobileOperatingSystem()
-  const isMobile = updatedUserAgent === KIND_TO_PLATFORM.IPA
-    || updatedUserAgent === KIND_TO_PLATFORM.APK
-  const defaultKind = isMobile
-    ? [PLATFORM_TO_ARTIFACT_KIND[updatedUserAgent]]
-    : defaultArtifactKinds
-
-  updateState({
-    userAgent,
-  })
-  const fallbackQueryString = queryString
-    .stringify({ artifact_kinds: defaultKind })
-    .concat('&project_id=https://github.com/berty/berty')
-  return fallbackQueryString
-}
+    project_id: projects,
+    branch,
+  };
+};

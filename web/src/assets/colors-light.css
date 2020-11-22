@@ -1,0 +1,75 @@
+[data-theme="light"] {
+    /* BACKGROUND COLORS - SPEC */
+
+    --bg-block: hsl(0, 0%, 100%);
+    --bg-branch: hsl(216, 39.2%, 94.9%);
+    --bg-btnDlMaster: hsl(166.4, 62.8%, 51.6%);
+    --bg-btnDlPull: hsl(250.4, 55.4%, 65.7%);
+    --bg-btnPrimary: hsl(236.5, 80.4%, 58.3%);
+    --bg-filter: hsl(235.9, 100%, 97.1%);
+    --bg-page: hsl(240, 100%, 99.4%);
+    --bg-tagGreen: hsl(170.1, 73%, 90%);
+    --bg-tagOrange: hsl(39.1, 100%, 91.6%);
+    --bg-tagPink: hsl(348.2, 92.7%, 94.5%);
+
+    /* BACKGROUND COLORS - CUSTOM */
+    --bg-tagGreen-highlight: hsl(170.1, 73%, 70%);
+    --bg-block-highlight: hsl(235.9, 30%, 97%);
+    --bg-block-highlight2: hsla(240, 100%, 87%, 0.8);
+    --bg-btnPrimary-disabled: hsl(236.5, 10%, 58.3%);
+    --bg-btnPrimary-disabled2: hsl(236.5, 10%, 58.3%);
+    --bg-filter-disabled: hsl(235.9, 0%, 97.1%);
+
+    /* TEXT COLORS - SPEC */
+    --text-author: hsl(236, 27.2%, 30.2%);
+    --text-blockTitle: hsl(236, 27.2%, 30.2%);
+    --text-filterSelectedTitle: hsl(236.5, 80.4%, 58.3%);
+    --text-filterUnselectedTitle: hsl(235.1, 11.7%, 58.2%);
+    --text-sectionText: hsl(219, 19.4%, 65.5%);
+    --text-sectionTitle: hsl(236.3, 14.7%, 44.1%);
+    --text-tagGreen: hsl(169.2, 74.1%, 48.2%);
+    --text-tagOrange: hsl(35.3, 100%, 61.4%);
+    --text-tagPink: hsl(342.1, 98.9%, 64.1%);
+
+    /* TEXT COLORS - CUSTOM */
+    --text-tagGreen-highlight: hsl(169.2, 74.1%, 35%);
+    --text-sectionText-highlight: hsla(219, 19.4%, 45%, 1);
+    --text-btnPrimary: rgb(205, 207, 237);
+    --text-btnPrimary-disabled: hsla(255, 0%, 90%, 1);
+    --text-link: hsl(236, 27.2%, 40.2%);
+    --text-link-hover: hsl(236, 27.2%, 50.2%);
+
+    /* BORDER COLORS - SPEC */
+    --border-filterSelected: hsl(236.5, 80.4%, 58.3%);
+    --border-filterUnselected: hsl(216, 39.2%, 94.9%);
+    --border-item: hsl(216, 39.2%, 94.9%);
+
+    /* ICON/WIDGET/TAG COLORS - SPEC */
+    --icon-branchPurple: hsl(250.4, 55.4%, 65.7%);
+    --icon-btnLogs: hsl(236.2, 23.2%, 89.9%);
+    --icon-dashboardBlue: hsl(236.7, 77.3%, 58.7%);
+    --icon-filterSelected: hsl(236.5, 80.4%, 58.3%);
+    --icon-filterUnselected: hsl(233.1, 12.5%, 86.1%);
+    --icon-masterGreen: hsl(166.4, 62.8%, 51.6%);
+
+    /* ICON/WIDGET/TAG COLORS - CUSTOM */
+    --accent-filterUnselected: hsl(236.3, 14.7%, 44.1%);
+    --accent-filterDefault: hsla(236.3, 14.7%, 44%, 0.7);
+    --accent-filterDefaultHover: hsla(236.3, 14.7%, 44%, 1);
+    --accent-filterSelected: hsl(236.5, 80.4%, 58.3%);
+    --accent-filterSelectedHover: hsla(236.5, 20%, 58.3%, 1);
+    --color-logo-accent: hsl(236.3, 73.3%, 48.4%);
+
+    /* SHADOW COLORS - SPEC */
+    --shadow-btnDlMaster: hsl(166.2, 66.5%, 40.9%);
+    --shadow-btnDlPull: hsl(249.8, 46%, 53.6%);
+    --shadow-btnPrimary: hsl(236.4, 68.8%, 43.9%);
+
+    /* SHADOW COLORS - CUSTOM */
+    --shadow-btnPrimary-disabled: hsl(236.5, 10%, 50%);
+    --shadow-btnPrimary-disabled2: hsl(236.5, 10%, 40%);
+    --shadow-btnPrimary-hover: hsl(236.4, 68.8%, 47%);
+
+    /* SHADOW STYLES */
+    --shadowStyle-block: 0 4px 12px 2px rgba(171, 174, 209, 0.2);
+}

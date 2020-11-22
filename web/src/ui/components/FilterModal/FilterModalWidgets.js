@@ -1,141 +1,135 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { uniq } from 'lodash'
-import React from 'react'
+import React from "react";
 import {
   ARTIFACT_KIND_TO_PLATFORM,
   BRANCH_TO_DISPLAY_NAME,
   BUILD_DRIVER_TO_NAME,
   BUILD_STATE_VALUE_TO_NAME,
-  PROJECT,
-  PROJECT_ARTIFACT_KINDS,
-  PROJECT_NAME,
-} from '../../../constants'
-import { addOrRemoveFromArray } from '../../../util/getters'
-import { getArtifactKindIcon } from '../../styleTools/brandIcons'
-import { getOwnerIcon } from '../../styleTools/ownerIcons'
-import { getVcsIcon } from '../../styleTools/vcsIcons'
-import OutlineWidget from '../OutlineWidget/OutlineWidget'
+  PROJECT_ID_TO_NAME,
+} from "../../../constants";
+import { addOrRemoveFromArray } from "../../../util/getters";
+import {
+  ArtifactKindComponent,
+  VcsIcon,
+  ProjectIcon,
+} from "../../styleTools/iconTools";
+import OutlineWidget from "../OutlineWidget/OutlineWidget";
 
 export const ArtifactFilter = ({
   artifact_kind: artifactKind,
   selectedArtifactKinds,
   setSelectedArtifactKinds,
 }) => {
-  const selected = selectedArtifactKinds.includes(artifactKind)
+  const selected = selectedArtifactKinds.includes(artifactKind);
   return (
     <OutlineWidget
-      onClick={() => setSelectedArtifactKinds(
-        addOrRemoveFromArray(artifactKind, selectedArtifactKinds),
-      )}
-      selected={selected}
-      textUnderneath
-      interactive
-      iconComponent={
-        <FontAwesomeIcon icon={getArtifactKindIcon(artifactKind)} size="lg" />
+      onClick={() =>
+        setSelectedArtifactKinds(
+          addOrRemoveFromArray(artifactKind, selectedArtifactKinds)
+        )
       }
+      selected={selected}
+      textIsUnderneath
+      interactive
+      iconComponent={<ArtifactKindComponent {...{ artifactKind }} />}
       text={ARTIFACT_KIND_TO_PLATFORM[artifactKind]}
     />
-  )
-}
+  );
+};
 
 export const ProjectFilter = ({
   project,
   selectedProjects,
   setSelectedProjects,
-  selectedArtifactKinds,
-  setSelectedArtifactKinds,
 }) => {
-  const selected = selectedProjects.includes(project)
-  const artifactKindsForProject = !!PROJECT_ARTIFACT_KINDS[project]
-  const projectValue = PROJECT[project] || 'Unknown Project'
-  const ownerIcon = getOwnerIcon(projectValue)
-
-  const addProjectFilter = () => {
-    artifactKindsForProject
-      && setSelectedArtifactKinds(
-        uniq([
-          ...selectedArtifactKinds,
-          ...PROJECT_ARTIFACT_KINDS[projectValue],
-        ]),
-      )
-    setSelectedProjects(uniq([...selectedProjects, projectValue]))
-  }
-
-  const removeProjectFilter = () => {
-    setSelectedProjects(selectedProjects.filter((p) => p !== projectValue))
-  }
+  const selected = selectedProjects.includes(project);
+  const projectValue = project;
 
   return (
     <OutlineWidget
-      text={PROJECT_NAME[projectValue]}
-      iconComponent={
-        <span style={{ opacity: selected ? 1 : 0.3 }}>{ownerIcon()}</span>
+      text={PROJECT_ID_TO_NAME[projectValue]}
+      iconComponent={<ProjectIcon projectId={projectValue} />}
+      onClick={() =>
+        setSelectedProjects(addOrRemoveFromArray(project, selectedProjects))
       }
-      onClick={selected ? removeProjectFilter : addProjectFilter}
       selected={selected}
       interactive
-      textUnderneath
+      textIsUnderneath
     />
-  )
-}
+  );
+};
 
 export const BuildDriverFilter = ({
   buildDriverValue,
   selectedDrivers,
   setSelectedDrivers,
 }) => {
-  const selected = selectedDrivers.includes(buildDriverValue)
+  const selected = selectedDrivers.includes(buildDriverValue);
   return (
     <OutlineWidget
-      textUnderneath
+      textIsUnderneath
       selected={selected}
       text={
-        BUILD_DRIVER_TO_NAME[buildDriverValue]
-        || `Unknown Driver :${buildDriverValue}`
+        BUILD_DRIVER_TO_NAME[buildDriverValue] ||
+        `Unknown Driver :${buildDriverValue}`
       }
-      onClick={() => setSelectedDrivers(
-        addOrRemoveFromArray(buildDriverValue, selectedDrivers),
-      )}
+      onClick={() =>
+        setSelectedDrivers(
+          addOrRemoveFromArray(buildDriverValue, selectedDrivers)
+        )
+      }
     />
-  )
-}
+  );
+};
 
 export const BuildStateFilter = ({
   buildStateValue,
   selectedBuildStates,
   setSelectedBuildStates,
 }) => {
-  const selected = selectedBuildStates.includes(buildStateValue)
+  const selected = selectedBuildStates.includes(buildStateValue);
   return (
     <OutlineWidget
-      textUnderneath
+      textIsUnderneath
       selected={selected}
       text={
-        BUILD_STATE_VALUE_TO_NAME[buildStateValue]
-        || `Unknown Driver :${buildStateValue}`
+        BUILD_STATE_VALUE_TO_NAME[buildStateValue] ||
+        `Unknown Driver :${buildStateValue}`
       }
-      onClick={() => setSelectedBuildStates(
-        addOrRemoveFromArray(buildStateValue, selectedBuildStates),
-      )}
+      onClick={() =>
+        setSelectedBuildStates(
+          addOrRemoveFromArray(buildStateValue, selectedBuildStates)
+        )
+      }
     />
-  )
-}
+  );
+};
 
-export const BranchFilter = ({ branchName, selectedBranches }) => {
-  const selected = selectedBranches.includes(branchName)
-  const implemented = branchName.toUpperCase() === 'ALL'
-  const branchIcon = getVcsIcon(branchName)
+export const BranchFilter = ({
+  branchName,
+  selectedBranches = [],
+  setSelectedBranches = () => {},
+}) => {
+  const selected =
+    selectedBranches.includes(branchName) ||
+    (!selectedBranches.length && branchName === "All");
+  const interactive = !(branchName === "All" && selected);
+
+  const onToggleBranch = () => {
+    if (branchName === "All" && !selected) {
+      setSelectedBranches([]);
+    } else {
+      setSelectedBranches(addOrRemoveFromArray(branchName, selectedBranches));
+    }
+  };
 
   return (
     <OutlineWidget
-      iconComponent={branchIcon()}
-      text={
-        BRANCH_TO_DISPLAY_NAME[branchName.toUpperCase()] || 'Unknown Branch'
-      }
+      iconComponent={<VcsIcon {...{ branchName }} />}
+      text={BRANCH_TO_DISPLAY_NAME[branchName] || branchName}
       selected={selected}
-      notImplemented={!implemented}
-      textUnderneath
-      interactive={false}
+      textIsUnderneath
+      interactive={interactive}
+      onClick={!interactive ? undefined : onToggleBranch}
     />
-  )
-}
+  );
+};

@@ -1,0 +1,57 @@
+@value utils: "../../../assets/layout-utils.module.css";
+@value sizes: "../../../assets/sizes.module.css";
+
+@value space_md from sizes;
+
+@value _titleFontSize: 1.4rem;
+@value _subtitleFontSize: 1rem;
+@value _widthHeaderStartIcon from "./FeedItemWidgets.module.css";
+
+.container {
+    composes: flexCol childrenMbSm from utils;
+    width: 100%;
+}
+
+/* TITLE / AUTHOR / PROJECT */
+
+.titleRow {
+    composes: flexRow aiCenter from utils;
+    width: 100%;
+}
+
+.textTitle {
+    font-size: _titleFontSize;
+    display: block;
+}
+
+.titleLeftArea {
+    composes: flexRow flexWrap aiWrapCenter childrenMbSm childrenMrMd from utils;
+    flex: 1;
+}
+
+.titleRightArea {
+    composes: flexRow aiCenter childrenMbSm childrenMrMd from utils;
+    flex: 0;
+}
+
+/* SUBTITLE (MERGE REQUEST TITLE) */
+
+.subtitleRow {
+    composes: flexRow flexWrap aiWrapCenter childrenMbMd from utils;
+    stroke: currentColor;
+    color: var(--text-sectionText);
+    flex: 1;
+
+    /* Indent subtitle so it's directly below title */
+    margin-left: calc(_widthHeaderStartIcon + space_md);
+}
+
+.textSubtitle {
+    composes: wrapText from utils;
+    font-size: _subtitleFontSize;
+    line-height: 1.35;
+}
+
+.textSubtitle a {
+    color: var(--text-link);
+}

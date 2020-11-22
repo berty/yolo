@@ -1,0 +1,32 @@
+@value utils: "../../../assets/layout-utils.module.css";
+
+.rowTitle {
+    display: flex;
+    width: 100%;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: var(--text-sectionText);
+}
+
+.rowOfItems {
+    composes: flexRow flexWrap aiWrapCenter childrenMbSm childrenMrMd from utils;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.containerFooter {
+    composes: flexRow flexWrap from utils;
+    width: 100%;
+}
+
+.footerSettings {
+    composes: flexRow flexWrap aiWrapCenter childrenMbSm childrenMrMd from utils;
+    width: 100%;
+    justify-content: flex-end;
+}
+
+.footerAction {
+    composes: flexRow flexWrap jcCenter aiWrapCenter childrenMbSm childrenMrXl from utils;
+    margin-bottom: 1.2rem;
+    width: 100%;
+}

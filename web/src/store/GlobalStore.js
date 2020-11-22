@@ -10,83 +10,84 @@
  * Tell ekelen to refactor me
  */
 
-import React, { useReducer } from 'react'
-import { retrieveAuthCookie } from '../api/cookies'
-import { actions, PROJECT } from '../constants'
-import { getMobileOperatingSystem } from '../util/browser'
+import cloneDeep from "lodash/cloneDeep";
+import React, { useReducer } from "react";
+import { ARTIFACT_KIND_VALUE, PROJECT } from "../constants";
+import { getMobileOperatingSystem } from "../util/browser";
+import Cookies from "js-cookie";
 
-export const GlobalContext = React.createContext()
+const actions = {
+  UPDATE_STATE: "UPDATE_STATE",
+  LOGOUT: "LOGOUT",
+};
+
+export const GlobalContext = React.createContext();
+
+export const userAgent = getMobileOperatingSystem();
+
+const defaultArtifactKinds =
+  userAgent === "iOS" || userAgent === "Unknown OS"
+    ? [ARTIFACT_KIND_VALUE.IPA]
+    : userAgent === "Android"
+    ? [ARTIFACT_KIND_VALUE.APK]
+    : [];
 
 export const INITIAL_STATE = {
-  apiKey: retrieveAuthCookie() || null,
   authIsPending: false,
   builds: [],
   error: null,
   isAuthed: false,
   isLoaded: false,
   needsRefresh: true,
-  userAgent: getMobileOperatingSystem(),
+  userAgent,
   uiFilters: {
-    artifact_kinds: [],
+    artifact_kinds: defaultArtifactKinds,
     build_driver: [],
     build_state: [],
-  },
-  calculatedFilters: {
-    projects: JSON.parse(window.localStorage.getItem('projects')) || [
-      PROJECT.messenger,
-    ],
-    order: 'created_at',
+    project_id: [PROJECT.messenger],
+    branch: [],
   },
   showingFilterModal: false,
-  testProperty: 'ignore me',
-}
+  resultSource: "Undetermined",
+};
 
 function reducer(state, action) {
+  const stateCopy = cloneDeep(state);
   switch (action.type) {
     case actions.UPDATE_STATE:
-      return { ...state, ...action.payload }
-    case actions.UPDATE_UI_FILTERS: {
-      const { artifact_kinds = [], build_driver = [], build_state = [] } = action.payload || {}
-      return {
-        ...state,
-        uiFilters: {
-          artifact_kinds,
-          build_driver,
-          build_state,
-        },
-      }
-    }
+      return { ...stateCopy, ...action.payload };
     case actions.LOGOUT:
       return {
-        ...state,
+        ...stateCopy,
         autoRefreshOn: false,
         isAuthed: false,
         builds: [],
-        apiKey: '',
         needsRefresh: true,
-        calculatedFilters: INITIAL_STATE.calculatedFilters,
-      }
+      };
     default:
-      return { ...state }
+      return state;
   }
 }
 
 export const GlobalStore = ({ children }) => {
-  const [state, dispatch] = useReducer(reducer, INITIAL_STATE)
+  const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
 
   // custom actions can go here; for now we just have one
   // 🚧 not cool, we need to split this so we don't get redundant re-renders
   //     or have to do a slow deep equality check to prevent it
   const updateState = (payload) => {
-    dispatch({ type: actions.UPDATE_STATE, payload })
-  }
+    dispatch({ type: actions.UPDATE_STATE, payload });
+  };
 
   const logoutAction = () => {
-    window.localStorage.removeItem('projects')
-    window.localStorage.removeItem('uiFilters')
-    window.localStorage.removeItem('displayFeed')
-    dispatch({ type: actions.LOGOUT })
-  }
+    Cookies.remove("apiKey");
+    window.localStorage.removeItem("uiFilters");
+    window.localStorage.removeItem("lastNonEmptyRequest");
+    window.localStorage.removeItem("branchNames");
+    window.localStorage.removeItem("displayFeed");
+    window.localStorage.removeItem("builds");
+    dispatch({ type: actions.LOGOUT });
+  };
 
   return (
     <GlobalContext.Provider
@@ -99,5 +100,5 @@ export const GlobalStore = ({ children }) => {
     >
       {children}
     </GlobalContext.Provider>
-  )
-}
+  );
+};

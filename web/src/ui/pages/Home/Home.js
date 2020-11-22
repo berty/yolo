@@ -15,10 +15,7 @@
  */
 
 import Cookies from "js-cookie";
-// import _ from "lodash";
 import React, { useContext, useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-import { requestBuilds } from "../../../api";
 import {
   useRedirectOnEmptyQuery,
   useRequestOnQueryChange,
@@ -26,37 +23,30 @@ import {
 } from "../../../hooks/queryHooks";
 import { useRecursiveTimeout } from "../../../hooks/useRecursiveTimeout";
 import { GlobalContext } from "../../../store/GlobalStore";
-import { useIsMobile } from "../../../store/globalStoreHelpers";
-// import { ThemeContext } from "../../../store/ThemeStore";
-import ApiKeyPrompt from "../../components/ApiKeyPrompt";
-import BuildList from "../../components/BuildList";
-import ConditionallyWrappedComponent from "../../components/ConditionallyWrappedComponent";
+import ApiKeyPrompt from "../../components/ApiKeyPrompt/ApiKeyPrompt";
+import Feed from "../../components/Feed/Feed";
 import ErrorDisplay from "../../components/ErrorDisplay/ErrorDisplay";
 import FilterModal from "../../components/FilterModal/FilterModal";
-import Header from "../../components/Header/Header";
 import ProtocolDisclaimer from "../../components/ProtocolDisclaimer";
-import { PullToRefreshWrapper } from "../../components/PullToRefresh";
-import ShowFiltersButton from "../../components/ShowFiltersButton";
+import ShowFilterModalButton from "../../components/ShowFilterModalButton/ShowFilterModalButton";
 import Spinner from "../../components/Spinner/Spinner";
-import styles from "./Home.module.scss";
+import pageStyles from "../Page.module.css";
+import { faded } from "../../../assets/modal-snippets.module.css";
 
 const Home = () => {
-  // const { theme } = useContext(ThemeContext);
-  const {
-    state,
-    state: { isLoaded },
-    updateState,
-  } = useContext(GlobalContext);
-  const [showingFilterModal, toggleShowFilters] = useState(false);
-  const [showingDisclaimerModal, toggleShowDisclaimer] = useState(false);
-  const { search: locationSearch } = useLocation();
-  const isMobile = useIsMobile();
+  const { state, updateState } = useContext(GlobalContext);
+  const [disclaimerAccepted, acceptDisclaimer] = useState(true);
 
   // Hide protocol warning popup
-  const setDisclaimerAccepted = (accepted) => {
+  const onAcceptDisclaimer = () => {
     Cookies.set("disclaimerAccepted", 1, { expires: 21 });
-    toggleShowDisclaimer(!accepted);
+    acceptDisclaimer(true);
   };
+
+  // Show protocol warning modal + agreement on component render
+  useEffect(() => {
+    acceptDisclaimer(!!Cookies.get("disclaimerAccepted"));
+  }, []);
 
   useRedirectOnEmptyQuery();
   useSetFiltersOnQueryChange();
@@ -64,89 +54,72 @@ const Home = () => {
 
   // Fetch data every 10 sec if state.autoRefeshOn is true
   useRecursiveTimeout(() => {
-    if (state.autoRefreshOn && !showingFilterModal && !showingDisclaimerModal) {
+    if (
+      state.autoRefreshOn &&
+      !state.showingFilterModal &&
+      disclaimerAccepted
+    ) {
       updateState({
         needsRefresh: true,
       });
     }
   }, 10 * 1000);
 
-  // Show protocol warning modal + agreement on component render
   useEffect(() => {
-    const disclaimerAccepted = Cookies.get("disclaimerAccepted");
-    toggleShowDisclaimer(!disclaimerAccepted);
-  }, []);
+    if (state.showingFilterModal) {
+      document.body.style.position = "fixed";
+    } else {
+      document.body.style.position = "initial";
+    }
+  }, [state.showingFilterModal]);
 
-  const Page = () => (
-    <>
-      <Header
-        onFilterClick={() => {
-          toggleShowFilters(true);
-        }}
-      />
+  const Main = () => (
+    <main className={pageStyles.container}>
       {state.error && <ErrorDisplay error={state.error} />}
       {state.error && state.error.status === 401 && (
         <ApiKeyPrompt
-          failedKey={state.apiKey}
+          failedKey={Cookies.get("apiKey")}
           updateState={updateState}
           authIsPending={state.authIsPending}
         />
       )}
-      {!state.error && (
-        <BuildList builds={state.builds} loaded={state.isLoaded} />
-      )}
-    </>
+      {!state.error && <Feed builds={state.builds} loaded={state.isLoaded} />}
+    </main>
   );
 
   return (
     <>
-      <div className={styles.homeContainer}>
-        <ConditionallyWrappedComponent
-          condition={isMobile && state.isAuthed && !state.authIsPending}
-          wrapper={(children) => (
-            <PullToRefreshWrapper
-              onRefresh={() =>
-                requestBuilds({
-                  updateState,
-                  locationSearch,
-                  apiKey: state.apiKey,
-                  // apiKey: "42",
-                })
-              }
-            >
-              {children}
-            </PullToRefreshWrapper>
-          )}
-        >
-          <div className={styles.homepageWrapper}>
-            <Page />
-          </div>
-        </ConditionallyWrappedComponent>
-        {showingDisclaimerModal && (
-          <ProtocolDisclaimer closeAction={() => setDisclaimerAccepted(true)} />
+      <>
+        <Main />
+        {!disclaimerAccepted && (
+          <ProtocolDisclaimer closeAction={onAcceptDisclaimer} />
         )}
-        {!showingFilterModal && state.isAuthed && (
-          <ShowFiltersButton clickAction={() => toggleShowFilters(true)} />
-        )}
-        {showingFilterModal && state.isAuthed && (
+        <ShowFilterModalButton
+          onClick={() => updateState({ showingFilterModal: true })}
+          isAuthed={state.isAuthed}
+          isLoaded={state.isLoaded}
+          showingFilterModal={state.showingFilterModal}
+        />
+
+        {state.showingFilterModal && state.isAuthed && (
           <FilterModal
-            closeAction={() => toggleShowFilters(false)}
+            closeAction={() => updateState({ showingFilterModal: false })}
             needsFilterColors
           />
         )}
-        {!isLoaded && (
+        {!state.isLoaded && (
           <>
-            <div className="faded" />
+            <div
+              className={faded}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            />
             <Spinner />
           </>
         )}
-      </div>
-      {/* {!isMobile && (
-        <div
-          className={styles.footer}
-          style={{ backgroundColor: theme.bg.block }}
-        />
-      )} */}
+      </>
+      {/* TODO: Footer */}
     </>
   );
 };

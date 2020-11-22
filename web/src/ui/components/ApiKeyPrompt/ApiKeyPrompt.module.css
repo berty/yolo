@@ -1,0 +1,74 @@
+@value utils: "../../../assets/layout-utils.module.css";
+@value sizes: "../../../assets/sizes.module.css";
+
+@value space_lg, space_xl from sizes;
+
+@value tablet from "../../../assets/breakpoints.module.css";
+@value _zoomSafeFontSize: 16px;
+
+.container {
+    composes: flexCol jcCenter aiCenter childrenMbXl from utils;
+    margin-left: auto;
+    margin-right: auto;
+    width: 400px;
+    max-width: 100%;
+    padding: space_lg;
+    margin-bottom: space_xl;
+}
+
+.form {
+    composes: flexCol childrenMbXl jcCenter aiCenter from utils;
+    width: 100%;
+    font-size: _zoomSafeFontSize;
+}
+
+.icon {
+    height: 100%;
+    width: 2rem;
+}
+
+label {
+    line-height: 1.5;
+    text-align: center;
+}
+
+pre {
+    display: inline;
+    padding: 0.2rem;
+    margin-left: 0.3rem;
+    border-radius: 5px;
+
+    background-color: var(--bg-block);
+    color: var(--text-blockTitle);
+}
+
+.input {
+    box-sizing: content-box;
+    position: relative;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+
+    width: 300px;
+    max-width: 80%;
+
+    background-color: var(--bg-block-highlight);
+    color: var(--accent-filterUnselected);
+    border: 2px solid var(--accent-filterSelected);
+
+    font: 600 _zoomSafeFontSize/1.5 var(--font-stack);
+
+    opacity: 0.7;
+    transition: all 0.3s;
+}
+
+.input:focus,
+.input:active {
+    opacity: 1;
+    font-size: _zoomSafeFontSize;
+}
+
+@media (min-width: tablet) {
+    .input {
+        width: 75%;
+    }
+}

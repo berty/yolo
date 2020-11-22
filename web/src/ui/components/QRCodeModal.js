@@ -1,29 +1,24 @@
-import React from 'react'
-import MessageModal from './MessageModal/MessageModal'
+import React from "react";
+import MessageModal from "./MessageModal/MessageModal";
+import { btnLg, primary } from "../../assets/widget-snippets.module.css";
+import cn from "classnames";
 
 const QRCodeModal = ({ closeAction, children }) => (
-  <MessageModal onClose={closeAction}>
-    <h2 style={{ color: 'darkgoldenrod', fontSize: '1.4rem' }}>
-      Scan me!
-      {' '}
-      <span role="img" aria-label="a cellular phone">
-        📱
-      </span>
-    </h2>
-    <div style={{ width: 'auto' }}>
-      {children}
-      <div className="modal-footer">
-        <button
-          type="button"
-          className="btn btn-sm btn-shadow"
-          data-dismiss="modal"
-          onClick={closeAction}
-        >
-          Close
-        </button>
-      </div>
-    </div>
-  </MessageModal>
-)
+  <MessageModal
+    onClose={closeAction}
+    Header="Scan me!"
+    Body={children}
+    Footer={
+      <button
+        type="button"
+        className={cn(btnLg, primary)}
+        data-dismiss="modal"
+        onClick={closeAction}
+      >
+        Close
+      </button>
+    }
+  />
+);
 
-export default QRCodeModal
+export default QRCodeModal;

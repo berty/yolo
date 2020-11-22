@@ -1,0 +1,14 @@
+@value utils: "../../../assets/layout-utils.module.css";
+
+.container {
+    composes: flexCol from utils;
+    padding: calc(1.7rem * var(--compact-multiplier));
+    padding-left: calc(1rem * var(--compact-multiplier));
+    padding-right: calc(1rem * var(--compact-multiplier));
+    margin-bottom: calc(1.2rem * var(--compact-multiplier));
+    border-radius: 1rem;
+    width: 100%;
+    background-color: var(--bg-block);
+    color: var(--text-sectionText);
+    box-shadow: var(--shadowStyle-block);
+}

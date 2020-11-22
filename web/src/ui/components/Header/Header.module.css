@@ -1,0 +1,85 @@
+@value utils: "../../../assets/layout-utils.module.css";
+@value desktop from "../../../assets/breakpoints.module.css";
+
+.container {
+    composes: flexRow flexWrap aiWrapCenter childrenMrMd childrenMbSm from utils;
+    margin-top: 1rem;
+    margin-bottom: 0.6rem;
+    margin-right: auto;
+    margin-left: auto;
+    width: 1024px;
+    max-width: 90vw;
+}
+
+/* LOGO/ATTRIBUTION TOP BAR */
+
+@value _homeBarHeight: 1.4rem;
+
+.homeBar {
+    composes: flexRow aiCenter from utils;
+    flex-basis: 100%;
+    height: _homeBarHeight;
+    margin-bottom: 0.8rem;
+}
+
+.settingsBar {
+    composes: flexRow flexWrap aiWrapCenter childrenMrLg childrenMbSm from utils;
+    flex-basis: 100%;
+    margin-bottom: 0;
+    margin-top: 1rem;
+    justify-content: flex-end;
+    font-size: 0.9rem;
+}
+
+.settingsItem.selected {
+    color: var(--accent-filterSelected);
+}
+
+.settingsItem.selected:hover {
+    color: var(--accent-filterSelectedHover);
+}
+
+.settingsItem {
+    composes: flexRow aiCenter from utils;
+    color: var(--text-link);
+    transition: all 0.3s;
+}
+
+.settingsItem:hover,
+.settingsItem:active {
+    cursor: pointer;
+    color: var(--text-link-hover);
+}
+
+.settingsItem > svg {
+    max-height: 1rem;
+    max-width: 1.3rem;
+}
+
+.homeBarLogo {
+    background-image: url("../../../assets/svg/yolo.svg");
+    padding-top: _homeBarHeight;
+    padding-left: calc(_homeBarHeight * 3.5);
+    background-repeat: no-repeat;
+    background-size: contain;
+    cursor: pointer;
+}
+
+.attr {
+    composes: flexRow aiCenter childrenMrMd from utils;
+    margin-left: auto;
+}
+
+.attrLink > svg {
+    display: block;
+    height: _homeBarHeight;
+    font-size: _homeBarHeight;
+    color: var(--color-logo-accent);
+    fill: currentColor;
+}
+
+@media (min-width: desktop) {
+    .container {
+        max-width: 80vw;
+    }
+}

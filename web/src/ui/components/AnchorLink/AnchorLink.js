@@ -1,41 +1,33 @@
-import React, { useState, useContext } from 'react'
-import { CopyToClipboard } from 'react-copy-to-clipboard'
-import classNames from 'classnames'
+import React, { useState } from "react";
+import { CopyToClipboard } from "react-copy-to-clipboard";
+import { Link } from "react-feather";
+import { useLocation } from "react-router-dom";
+import styles from "./AnchorLink.module.css";
 
-import { useLocation } from 'react-router-dom'
-import styles from './AnchorLink.module.scss'
-import { ThemeContext } from '../../../store/ThemeStore'
-
-const AnchorLink = ({
-  children, target, isBlock = true,
-}) => {
-  const [confirmCopyMessage, setConfirmCopyMessage] = useState('')
-  const { theme } = useContext(ThemeContext)
-  const confirmationPopupClass = classNames(
-    'badge',
-    'badge-secondary',
-    styles.badge,
-  )
-  const iconClasses = classNames(styles.copyLinkIcon, isBlock ? styles.block : styles.inline)
-  const location = useLocation()
+const AnchorLink = ({ target }) => {
+  const [confirmCopyMessage, setConfirmCopyMessage] = useState("");
+  const location = useLocation();
 
   return (
-    <div title={`Copy to clipboard: ${window.location.protocol}//${window.location.host}${location.pathname}${target}`} className={iconClasses} style={{ color: theme.text.blockTitle }}>
+    <div
+      title={`Copy to clipboard: ${window.location.protocol}//${window.location.host}${location.pathname}${target}`}
+      className={styles.container}
+    >
       {confirmCopyMessage && (
-        <div className={confirmationPopupClass}>{confirmCopyMessage}</div>
+        <div className={styles.badge}>{confirmCopyMessage}</div>
       )}
       <CopyToClipboard
         text={`${window.location.protocol}//${window.location.host}${location.pathname}${target}`}
         title={`Copy to clipboard: ${window.location.protocol}//${window.location.host}${location.pathname}${target}`}
         onCopy={() => {
-          setConfirmCopyMessage('Link copied')
-          setTimeout(() => setConfirmCopyMessage(''), 1000)
+          setConfirmCopyMessage("Link copied");
+          setTimeout(() => setConfirmCopyMessage(""), 1000);
         }}
       >
-        {children}
+        <Link className={styles.link} />
       </CopyToClipboard>
     </div>
-  )
-}
+  );
+};
 
-export default AnchorLink
+export default AnchorLink;

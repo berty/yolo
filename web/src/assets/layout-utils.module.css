@@ -1,0 +1,119 @@
+@value tablet from "./breakpoints.module.css";
+@value sizes: "./sizes.module.css";
+
+@value space_xs, space_sm, space_md, space_lg, space_xl, space_xxl from sizes;
+
+/* FLEXBOX UTILITIES */
+
+.flex {
+    display: flex;
+}
+
+.flexRow {
+    display: flex;
+}
+
+.flexWrap {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.flexCol {
+    display: flex;
+    flex-direction: column;
+}
+
+.aiCenter {
+    align-items: center;
+}
+
+.aiWrapCenter {
+    align-content: space-around;
+    align-items: center;
+}
+
+.jcCenter {
+    justify-content: center;
+}
+
+/* CHILD MARGIN UTILS */
+
+.childrenMbSm > * {
+    margin-bottom: space_sm;
+}
+
+.childrenMbMd > * {
+    margin-bottom: space_md;
+}
+
+.childrenMbLg > * {
+    margin-bottom: space_lg;
+}
+
+.childrenMbXl > * {
+    margin-bottom: space_xl;
+}
+.childrenMbXxl > * {
+    margin-bottom: space_xxl;
+}
+
+.childrenMrXs > *:not(:last-child) {
+    margin-right: space_xs;
+}
+
+.childrenMrSm > *:not(:last-child) {
+    margin-right: space_sm;
+}
+
+.childrenMrMd > *:not(:last-child) {
+    margin-right: space_md;
+}
+
+.childrenMrLg > *:not(:last-child) {
+    margin-right: space_lg;
+}
+
+.childrenMrXl > *:not(:last-child) {
+    margin-right: space_xl;
+}
+
+.childrenMrXs > *:not(:last-child) {
+    margin-right: space_xs;
+}
+
+.childrenMrSm > *:not(:last-child) {
+    margin-right: space_sm;
+}
+
+.childrenMrMd > *:not(:last-child) {
+    margin-right: space_md;
+}
+
+.childrenMrLg > *:not(:last-child) {
+    margin-right: space_lg;
+}
+
+.childrenMrXl > *:not(:last-child) {
+    margin-right: space_xl;
+}
+
+.childrenMrXxl > *:not(:last-child) {
+    margin-right: space_xxl;
+}
+
+/* HIDING AND SHOWING */
+
+.hideOnMobile {
+    display: none;
+}
+
+@media (min-width: tablet) {
+    .hideOnMobile {
+        display: initial;
+    }
+}
+
+.wrapText {
+    word-break: break-word;
+    overflow-wrap: break-word;
+}

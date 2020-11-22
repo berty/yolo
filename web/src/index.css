@@ -1,13 +1,72 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@import-normalize;
+@import "./assets/vars.css";
+@import "./assets/colors-dark.css";
+@import "./assets/colors-light.css";
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+html {
+    font-size: calc(16px * var(--compact-multiplier));
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    font-family: var(--font-stack);
+    font-weight: 600;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    width: 100%;
+
+    color: var(--text-sectionText);
+    background-color: var(--bg-page);
+}
+
+button {
+    all: unset;
+}
+
+a,
+[role="link"],
+[role="switch"] {
+    color: var(--text-link);
+    text-decoration: none;
+}
+
+a:hover,
+a:focus,
+[role="link"]:hover,
+[role="switch"]:hover {
+    cursor: pointer;
+    color: var(--text-link-hover);
+}
+
+#root {
+    min-height: 100vh;
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* Exists for PullToRefresh */
+.rootInner {
+    min-height: 100vh;
+    width: 1024px;
+    max-width: 90vw;
+    margin: 0 auto;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    position: relative;
+
+    /* Hack for PullToRefresh on Safari iOS */
+    top: -40px;
+    padding-top: 40px;
 }

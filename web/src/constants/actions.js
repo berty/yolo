@@ -1,3 +1,0 @@
-export const UPDATE_STATE = 'UPDATE_STATE'
-export const LOGOUT = 'LOGOUT'
-export const UPDATE_UI_FILTERS = 'UPDATE_UI_FILTERS'

@@ -1,50 +1,47 @@
-
-import React, { useContext } from 'react'
-import { ChevronDown, ChevronUp } from 'react-feather'
-import Tag from './Tag/Tag'
-import { ThemeContext } from '../../store/ThemeStore'
+import React from "react";
+import { ChevronDown, ChevronUp } from "react-feather";
+import {
+  tagGhostUpper,
+  tagLink,
+} from "../../assets/widget-snippets.module.css";
+import cn from "classnames";
 
 const ShowingOlderBuildsTag = ({
   nOlderBuilds,
   showingAllBuilds = null,
   toggleShowingAllBuilds = null,
 }) => {
-  const { theme } = useContext(ThemeContext)
+  const multipleOlderBuilds = nOlderBuilds > 1;
+  const isInteractive = !!toggleShowingAllBuilds;
 
-  const multipleOlderBuilds = nOlderBuilds > 1
-  const isInteractive = !!toggleShowingAllBuilds
-  const marginRight = isInteractive ? 0 : undefined
+  const messagePrefix = showingAllBuilds ? "hide" : "show";
 
-  const messagePrefix = showingAllBuilds ? 'hide' : 'show'
+  const message =
+    nOlderBuilds > 0
+      ? `${isInteractive ? messagePrefix : ""} ${nOlderBuilds} older build${
+          multipleOlderBuilds ? "s" : ""
+        }`
+      : "";
 
-  const message = nOlderBuilds > 0
-    ? `${isInteractive ? messagePrefix : ''} ${nOlderBuilds} older build${
-      multipleOlderBuilds ? 's' : ''
-    }`
-    : ''
+  const Icon = () => (showingAllBuilds ? <ChevronUp /> : <ChevronDown />);
 
-  const Icon = () => (showingAllBuilds ? <ChevronUp />
-    : <ChevronDown />
-  )
-
-  return (message
-    && (
-      <Tag
+  return (
+    message && (
+      <div
         title={message}
-        styles={{
-          color: theme.text.blockTitle,
-          borderWidth: '1px',
-          borderStyle: 'solid',
-          borderColor: isInteractive ? theme.text.blockTitle : theme.text.sectionText,
-          marginRight,
-        }}
-        onClick={!isInteractive ? undefined : () => toggleShowingAllBuilds(!showingAllBuilds)}
+        role={isInteractive ? "button" : "contentinfo"}
+        className={cn(tagGhostUpper, isInteractive && tagLink)}
+        onClick={
+          !isInteractive
+            ? undefined
+            : () => toggleShowingAllBuilds(!showingAllBuilds)
+        }
       >
         {isInteractive && <Icon />}
-        {message}
-      </Tag>
+        <span>{message}</span>
+      </div>
     )
-  )
-}
+  );
+};
 
-export default ShowingOlderBuildsTag
+export default ShowingOlderBuildsTag;

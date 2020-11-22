@@ -1,34 +1,26 @@
-import React from 'react'
-import './MessageModal.scss'
+import React from "react";
+import Modal from "../Modal/Modal";
+import {
+  messageModalOverlay,
+  messageModalContainer,
+  messageModalBody,
+} from "./MessageModal.module.css";
 
-const MessageModal = ({ children, onClose = () => {} }) => (
-  <>
-    <div
-      className="faded"
-      onClick={(e) => {
-        e.stopPropagation()
-        onClose()
-      }}
-    />
-    <div className="MessageModal">
-      <div
-        className="modal modal-blur fade show"
-        onClick={(e) => {
-          e.stopPropagation()
-          onClose()
-        }}
-      >
-        <div
-          className="modal-dialog"
-          onClick={(e) => {
-            e.stopPropagation()
-          }}
-        >
-          <div className="modal-content">{children}</div>
-        </div>
-      </div>
-    </div>
-  </>
-)
+const MessageModal = ({
+  Header = null,
+  Body = null,
+  Footer = null,
+  onClose = () => {},
+}) => (
+  <Modal
+    Title={Header}
+    Body={Body}
+    modalContainerClassName={messageModalContainer}
+    modalOverlayClassName={messageModalOverlay}
+    modalBodyClassName={messageModalBody}
+    Footer={Footer}
+    onClose={onClose}
+  />
+);
 
-export default MessageModal
+export default MessageModal;

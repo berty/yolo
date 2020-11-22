@@ -1,0 +1,16 @@
+@value space_xs: 0.2rem;
+@value space_sm: 0.4rem;
+@value space_md: 0.6rem;
+@value space_lg: 1rem;
+@value space_xl: 1.2rem;
+@value space_xxl: 1.5rem;
+
+@value size_xxs: 0.7rem;
+@value size_xs: 0.75rem;
+@value size_sm: 0.9rem;
+@value size_md: 1rem;
+@value size_lg: 1.2rem;
+@value size_xl: 1.5rem;
+@value size_xxl: 2rem;
+
+@value compact: var(--compact-multiplier);

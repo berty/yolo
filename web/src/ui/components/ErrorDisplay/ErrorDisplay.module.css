@@ -1,0 +1,26 @@
+@value utils: "../../../assets/layout-utils.module.css";
+@value sizes: "../../../assets/sizes.module.css";
+
+@value space_lg, space_xl, space_xxl from sizes;
+@value size_lg, size_xl from sizes;
+
+.container {
+    composes: flexCol jcCenter aiCenter from utils;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding: space_lg;
+    margin-bottom: space_xl;
+    text-align: center;
+}
+
+.container > p {
+    font-size: size_lg;
+}
+
+.header {
+    margin-bottom: space_lg;
+    color: var(--text-sectionTitle);
+    display: block;
+    font-size: size_xl;
+}

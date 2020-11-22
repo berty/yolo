@@ -1,49 +1,73 @@
-import React, { useContext } from 'react'
-import classNames from 'classnames'
-import styles from './OutlineWidget.module.scss'
-import { ThemeContext } from '../../../store/ThemeStore'
+import cn from "classnames";
+import React from "react";
+import { onAccessibleClickHandler } from "../../../util/browser";
+import styles from "./OutlineWidget.module.css";
+
+const Icon = ({ iconComponent, iconCollapses }) => {
+  return (
+    iconComponent && (
+      <div
+        className={cn(styles.iconArea, iconCollapses && styles.iconCollapses)}
+      >
+        {iconComponent}
+      </div>
+    )
+  );
+};
+
+const Text = ({ text, textIsUnderneath, textCollapses }) => {
+  const textClass = () =>
+    cn([
+      styles.widgetTextArea,
+      textIsUnderneath && styles.textIsUnderneath,
+      textCollapses && styles.textCollapses,
+    ]);
+  return (
+    text && (
+      <p className={textClass()}>
+        {text.length <= 30 ? text : text.slice(0, 30) + "..."}
+      </p>
+    )
+  );
+};
 
 const OutlineWidget = ({
   title = null,
-  selected = false,
+  selected = undefined,
   interactive = true,
-  hasSelectedState = true,
   notImplemented = false,
-  textUnderneath = false,
-  text = '',
-  iconComponent = '',
-  icons = [],
-  onClick = null,
+  textIsUnderneath = false,
+  textCollapses = false,
+  text = "",
+  iconComponent = null,
+  iconCollapses = false,
+  onClick = undefined,
 }) => {
-  const { widgetStyles } = useContext(ThemeContext)
-  const containerClass = classNames([styles['widget-wrapper']], { [styles['is-interactive']]: interactive, [styles['not-implemented']]: notImplemented, [styles['text-underneath']]: textUnderneath })
-  const textClass = classNames([styles['widget-text']], { [styles['no-svg']]: !iconComponent })
-  const themedColorsState = selected ? widgetStyles.selectedWidgetAccent : widgetStyles.unselectedWidgetAccent
-  const themedColors = hasSelectedState ? themedColorsState : widgetStyles.noStateWidgetAccent
-  const validTitle = title || text || ''
-  const roll = interactive ? 'button' : null
-  const tabIndex = interactive ? 0 : null
+  const validTitle = title || text || "";
+  const role = interactive ? "button" : null;
+  const tabIndex = interactive ? 0 : null;
 
-  const TextContents = () => (text && <p className={textClass}>{text}</p>)
-  const Icon = () => <>{iconComponent}</>
-  const Icons = () => <>{icons}</>
-
+  const containerClass = cn([
+    styles.widgetWrapper,
+    notImplemented && styles.notImplemented,
+    interactive && styles.interactive,
+    typeof selected !== "undefined" &&
+      (selected ? styles.selected : styles.unselected),
+  ]);
 
   return (
     <div
-      style={themedColors}
       className={containerClass}
       title={validTitle}
-      roll={roll}
-      onClick={onClick}
-      onKeyDown={onClick}
+      role={role}
+      onClick={onAccessibleClickHandler(onClick)}
+      onKeyDown={onAccessibleClickHandler(onClick)}
       tabIndex={tabIndex}
     >
-      <Icon />
-      <Icons />
-      <TextContents />
+      <Icon {...{ iconComponent, iconCollapses }} />
+      <Text {...{ text, textIsUnderneath, textCollapses }} />
     </div>
-  )
-}
+  );
+};
 
-export default OutlineWidget
+export default OutlineWidget;

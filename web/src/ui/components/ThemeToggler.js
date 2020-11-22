@@ -1,30 +1,31 @@
-import React, { useContext, useState } from 'react'
-import { ThemeContext } from '../../store/ThemeStore'
-import Tag from './Tag/Tag'
+import cn from "classnames";
+import throttle from "lodash/throttle";
+import React, { useContext, useRef } from "react";
+import {
+  tagGhostUpper,
+  tagLink,
+} from "../../assets/widget-snippets.module.css";
+import { ThemeContext } from "../../store/ThemeStore";
 
 const ThemeToggler = () => {
-  const { theme, changeTheme } = useContext(ThemeContext)
-  const [themeChangePending, setThemeChangePending] = useState(false)
-  const onChangeTheme = () => {
-    if (!themeChangePending) {
-      setThemeChangePending(true)
-      changeTheme(theme.name === 'light' ? 'dark' : 'light')
-      setTimeout(() => setThemeChangePending(false), 250)
-    }
-  }
+  const { theme, changeTheme } = useContext(ThemeContext);
+
+  const onChangeHandler = useRef(
+    throttle((newTheme) => {
+      changeTheme(newTheme);
+    }, 500)
+  ).current;
 
   return (
-    <Tag
-      onClick={onChangeTheme}
-      tabIndex={0}
+    <div
+      className={cn(tagGhostUpper, tagLink)}
+      onClick={() => onChangeHandler(theme === "light" ? "dark" : "light")}
       role="button"
-      disabled={!!themeChangePending}
+      tabIndex={0}
     >
-      {theme.name === 'light'
-        ? '🌙 Dark mode'
-        : '☀️ light mode'}
-    </Tag>
-  )
-}
+      <span>{theme === "light" ? "🌙  Dark mode" : "☀️  light mode"}</span>
+    </div>
+  );
+};
 
-export default ThemeToggler
+export default ThemeToggler;
