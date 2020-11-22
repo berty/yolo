@@ -215,6 +215,7 @@
     border: 1px solid transparent;
     text-transform: uppercase;
     font: 600 0.95rem/1 var(--font-stack);
+    cursor: pointer;
 }
 
 ._btnLgSizes {

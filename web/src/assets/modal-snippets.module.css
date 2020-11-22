@@ -14,7 +14,7 @@
     width: 120vw;
     min-height: 200vmax;
     height: 200%;
-    z-index: 9;
+    z-index: 30;
 
     background-color: black;
     opacity: 0.4;
@@ -27,7 +27,7 @@
     right: 110%;
     bottom: 0;
     left: -10%;
-    z-index: 10;
+    z-index: 33;
     outline: 0;
     overflow-x: hidden;
     overflow-y: auto;
@@ -42,7 +42,7 @@
     margin-bottom: 2rem;
     border-radius: 1rem;
     padding: 1rem;
-    z-index: 11;
+    z-index: 36;
 
     width: 500px;
     max-width: 85vw;
