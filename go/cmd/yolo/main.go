@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"strings"
 	"syscall"
 	"time"
 
@@ -29,11 +30,11 @@ import (
 	"github.com/peterbourgon/ff/v2/ffcli"
 	"github.com/tevino/abool"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"golang.org/x/oauth2"
 	"moul.io/godev"
 	"moul.io/hcfilters"
 	"moul.io/u"
+	"moul.io/zapconfig"
 )
 
 func main() {
@@ -48,6 +49,7 @@ func yolo(args []string) error {
 	log.SetFlags(0)
 	var (
 		verbose            bool
+		logFormat          string
 		devMode            bool
 		withCache          bool
 		maxBuilds          int
@@ -83,6 +85,7 @@ func yolo(args []string) error {
 	rand.Seed(time.Now().UnixNano())
 	rootFlagSet.SetOutput(os.Stderr)
 	rootFlagSet.BoolVar(&verbose, "v", false, "increase log verbosity")
+	rootFlagSet.StringVar(&logFormat, "log-format", "console", strings.Join(zapconfig.AvailablePresets, ", "))
 	serverFlagSet.BoolVar(&devMode, "dev-mode", false, "enable insecure helpers")
 	serverFlagSet.BoolVar(&withCache, "with-cache", false, "enable API caching")
 	serverFlagSet.StringVar(&buildkiteToken, "buildkite-token", "", "BuildKite API Token")
@@ -117,7 +120,7 @@ func yolo(args []string) error {
 		FlagSet:   serverFlagSet,
 		Options:   []ff.Option{ff.WithEnvVarNoPrefix()},
 		Exec: func(ctx context.Context, _ []string) error {
-			logger, err := loggerFromArgs(verbose)
+			logger, err := loggerFromArgs(verbose, logFormat)
 			if err != nil {
 				return err
 			}
@@ -245,7 +248,7 @@ func yolo(args []string) error {
 		FlagSet: storeFlagSet,
 		Options: []ff.Option{ff.WithEnvVarNoPrefix()},
 		Exec: func(_ context.Context, _ []string) error {
-			logger, err := loggerFromArgs(verbose)
+			logger, err := loggerFromArgs(verbose, logFormat)
 			if err != nil {
 				return err
 			}
@@ -282,7 +285,7 @@ func yolo(args []string) error {
 		FlagSet: storeFlagSet,
 		Options: []ff.Option{ff.WithEnvVarNoPrefix()},
 		Exec: func(_ context.Context, _ []string) error {
-			logger, err := loggerFromArgs(verbose)
+			logger, err := loggerFromArgs(verbose, logFormat)
 			if err != nil {
 				return err
 			}
@@ -359,15 +362,16 @@ func buildkiteClientFromArgs(token string) (*buildkite.Client, error) {
 	return bkc, nil
 }
 
-func loggerFromArgs(verbose bool) (*zap.Logger, error) {
-	config := zap.NewDevelopmentConfig()
+func loggerFromArgs(verbose bool, logFormat string) (*zap.Logger, error) {
+	config := zapconfig.Configurator{}
 	if verbose {
-		config.Level.SetLevel(zap.DebugLevel)
+		config.SetLevel(zap.DebugLevel)
 	} else {
-		config.Level.SetLevel(zap.InfoLevel)
+		config.SetLevel(zap.InfoLevel)
 	}
-	config.DisableStacktrace = true
-	config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	if logFormat != "" {
+		config.SetPreset(logFormat)
+	}
 	return config.Build()
 }
 
