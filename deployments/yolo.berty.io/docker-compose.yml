@@ -23,7 +23,7 @@ services:
       - IOS_PROV
       - IOS_PRIVKEY
     command:
-      - -v
+      - -log-format=json
       - server
       - --cors-allowed-origins=*
       - --max-builds=30
@@ -36,12 +36,12 @@ services:
       - 'com.centurylinklabs.watchtower.enable=true'
       # traefik specific labels
       - 'traefik.enable=true'
-      - 'traefik.http.routers.yolo.rule=Host(`yolo.berty.io`)'
+      - "traefik.http.routers.yolo.rule=Host(`${DOMAIN_SANS}`)"
       - 'traefik.http.routers.yolo.service=yolo'
       - 'traefik.http.routers.yolo.entryPoints=https'
       - 'traefik.http.routers.yolo.tls=true'
       - 'traefik.http.routers.yolo.tls.certresolver=cf'
-      - 'traefik.http.routers.yolo.tls.domains[0].main=berty.io'
-      - 'traefik.http.routers.yolo.tls.domains[0].sans=yolo.berty.io'
+      - "traefik.http.routers.yolo.tls.domains[0].main=${DOMAIN_MAIN}"
+      - "traefik.http.routers.yolo.tls.domains[0].sans=${DOMAIN_SANS}"
       - 'traefik.http.services.yolo.loadbalancer.server.port=8000'
-      - 'traefik.http.services.yolo.loadbalancer.healthcheck.port=9090'
+      - 'com.datadoghq.ad.logs=[{"source": "go", "service": "yolo"}]'
