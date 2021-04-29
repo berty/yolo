@@ -8,10 +8,11 @@ import (
 
 	"berty.tech/yolo/v2/go/pkg/bintray"
 	"berty.tech/yolo/v2/go/pkg/yolopb"
+	"berty.tech/yolo/v2/go/pkg/yolostore"
 	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/google/go-github/v32/github"
 	"github.com/jinzhu/gorm"
-	circleci "github.com/jszwedko/go-circleci"
+	"github.com/jszwedko/go-circleci"
 	"github.com/tevino/abool"
 	"go.uber.org/zap"
 	"moul.io/u"
@@ -33,7 +34,7 @@ type Service interface {
 
 type service struct {
 	startTime              time.Time
-	db                     *gorm.DB
+	store                  yolostore.Store
 	logger                 *zap.Logger
 	bkc                    *buildkite.Client
 	btc                    *bintray.Client
@@ -75,7 +76,7 @@ func NewService(db *gorm.DB, opts ServiceOpts) (Service, error) {
 
 	return &service{
 		startTime:              time.Now(),
-		db:                     db,
+		store:                  db,
 		logger:                 opts.Logger,
 		bkc:                    opts.BuildkiteClient,
 		btc:                    opts.BintrayClient,
