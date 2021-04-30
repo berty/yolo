@@ -29,8 +29,9 @@ import (
 func (svc *service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
 
 	id := chi.URLParam(r, "artifactID")
-	var artifact yolopb.Artifact
-	if err := svc.db.First(&artifact, "ID = ?", id).Error; err != nil {
+
+	artifact, err := svc.store.GetArtifactByID(id)
+	if err != nil {
 		httpError(w, err, codes.InvalidArgument)
 		return
 	}

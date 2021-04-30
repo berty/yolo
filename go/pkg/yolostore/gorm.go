@@ -8,11 +8,12 @@ import (
 )
 
 type Store interface {
-	GetArtifactByID(id string) (*yolopb.Artifact, error)
+	GetArtifactAndBuildByID(id string) (*yolopb.Artifact, error)
 	GetBuildListFilters() (*yolopb.BuildListFilters_Response, error)
 	GetBatchWithPreloading() (*yolopb.Batch, error)
 	GetBatch() (*yolopb.Batch, error)
 	GetDevDumpObjectDownloads() ([]*yolopb.Download, error)
+	GetArtifactByID(id string) (*yolopb.Artifact, error)
 }
 
 type store struct {
@@ -25,7 +26,7 @@ func NewStore(db *gorm.DB) Store {
 	}
 }
 
-func (s *store) GetArtifactByID(id string) (*yolopb.Artifact, error) {
+func (s *store) GetArtifactAndBuildByID(id string) (*yolopb.Artifact, error) {
 	var artifact *yolopb.Artifact
 	err := s.db.
 		Preload("HasBuild").
@@ -33,6 +34,16 @@ func (s *store) GetArtifactByID(id string) (*yolopb.Artifact, error) {
 		Preload("HasBuild.HasProject.HasOwner").
 		First(&artifact, "ID = ?", id).
 		Error
+	if err != nil {
+		return nil, fmt.Errorf("store: GetArtifactByID :%w", err)
+	}
+
+	return artifact, nil
+}
+
+func (s *store) GetArtifactByID(id string) (*yolopb.Artifact, error) {
+	var artifact *yolopb.Artifact
+	err := s.db.First(&artifact, "ID = ?", id).Error
 	if err != nil {
 		return nil, fmt.Errorf("store: GetArtifactByID :%w", err)
 	}

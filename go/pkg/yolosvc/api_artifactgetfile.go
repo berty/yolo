@@ -16,7 +16,7 @@ func (svc *service) ArtifactGetFile(w http.ResponseWriter, r *http.Request) {
 	filePath := chi.URLParam(r, "*")
 	fmt.Println("id", id, "path", filePath)
 
-	artifact, err := svc.store.GetArtifactByID(id)
+	artifact, err := svc.store.GetArtifactAndBuildByID(id)
 	if err != nil {
 		httpError(w, err, codes.InvalidArgument)
 		return
