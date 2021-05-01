@@ -76,7 +76,7 @@ func NewService(db *gorm.DB, opts ServiceOpts) (Service, error) {
 
 	return &service{
 		startTime:              time.Now(),
-		store:                  db,
+		store:                  yolostore.NewStore(db),
 		logger:                 opts.Logger,
 		bkc:                    opts.BuildkiteClient,
 		btc:                    opts.BintrayClient,
