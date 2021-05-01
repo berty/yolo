@@ -14,6 +14,7 @@ type Store interface {
 	GetBatch() (*yolopb.Batch, error)
 	GetDevDumpObjectDownloads() ([]*yolopb.Download, error)
 	GetArtifactByID(id string) (*yolopb.Artifact, error)
+	CreateDownload(download *yolopb.Download) error
 }
 
 type store struct {
@@ -174,4 +175,8 @@ func (s *store) GetDevDumpObjectDownloads() ([]*yolopb.Download, error) {
 	}
 
 	return resp.Downloads, nil
+}
+
+func (s *store) CreateDownload(download *yolopb.Download) error {
+	return s.db.Create(download).Error
 }
