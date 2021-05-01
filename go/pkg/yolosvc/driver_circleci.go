@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"berty.tech/yolo/v2/go/pkg/yolopb"
-	circleci "github.com/jszwedko/go-circleci"
+	"github.com/jszwedko/go-circleci"
 	"github.com/tevino/abool"
 	"go.uber.org/zap"
 )
@@ -28,7 +28,7 @@ func (svc *service) CircleciWorker(ctx context.Context, opts CircleciWorkerOpts)
 	var logger = opts.Logger.Named("circ")
 
 	for iteration := 0; ; iteration++ {
-		since, err := lastBuildCreatedTime(ctx, svc.db, yolopb.Driver_CircleCI)
+		since, err := lastBuildCreatedTime(ctx, svc.store, yolopb.Driver_CircleCI)
 		if err != nil {
 			logger.Warn("get last circleci build created time", zap.Error(err))
 		}

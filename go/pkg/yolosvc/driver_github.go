@@ -60,7 +60,7 @@ func (svc *service) GitHubWorker(ctx context.Context, opts GithubWorkerOpts) err
 
 	// fetch recent activity in a loop
 	for iteration := 0; ; iteration++ {
-		since, err := lastBuildCreatedTime(ctx, svc.db, yolopb.Driver_GitHub)
+		since, err := lastBuildCreatedTime(ctx, svc.store, yolopb.Driver_GitHub)
 		if err != nil {
 			svc.logger.Warn("get last github build created time", zap.Error(err))
 		}

@@ -15,6 +15,9 @@ type Store interface {
 	GetDevDumpObjectDownloads() ([]*yolopb.Download, error)
 	GetArtifactByID(id string) (*yolopb.Artifact, error)
 	CreateDownload(download *yolopb.Download) error
+	GetLastBuild() (*yolopb.Build, error)
+	GetAllArtifacts() ([]yolopb.Artifact, error)
+	SaveArtifact(artifact *yolopb.Artifact) error
 }
 
 type store struct {
@@ -179,4 +182,32 @@ func (s *store) GetDevDumpObjectDownloads() ([]*yolopb.Download, error) {
 
 func (s *store) CreateDownload(download *yolopb.Download) error {
 	return s.db.Create(download).Error
+}
+
+// GetLastBuild returns last finished build
+func (s *store) GetLastBuild() (*yolopb.Build, error) {
+	var build *yolopb.Build
+
+	err := s.db.Order("finished_at desc").Where(build).Select("finished_at").First(build).Error
+	if err != nil {
+		return nil, err
+	}
+	return build, err
+}
+
+// GetAllArtifacts fixme: better naming -- since it's all artifacts where bundle id is null or empty
+func (s *store) GetAllArtifacts() ([]yolopb.Artifact, error) {
+	var artifacts []yolopb.Artifact
+	err := s.db.
+		Where("bundle_id IS NULL OR bundle_id = ''").
+		Find(&artifacts).
+		Error
+	if err != nil {
+		return nil, err
+	}
+	return artifacts, nil
+}
+
+func (s *store) SaveArtifact(artifact *yolopb.Artifact) error {
+	return s.db.Save(artifact).Error
 }

@@ -33,6 +33,7 @@ type Service interface {
 }
 
 type service struct {
+	db                     *gorm.DB
 	startTime              time.Time
 	store                  yolostore.Store
 	logger                 *zap.Logger
@@ -75,6 +76,7 @@ func NewService(db *gorm.DB, opts ServiceOpts) (Service, error) {
 	}
 
 	return &service{
+		db:                     db,
 		startTime:              time.Now(),
 		store:                  yolostore.NewStore(db),
 		logger:                 opts.Logger,

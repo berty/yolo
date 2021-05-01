@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"berty.tech/yolo/v2/go/pkg/plistgen"
-	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"github.com/go-chi/chi"
 	"github.com/stretchr/signature"
 	"google.golang.org/grpc/codes"
@@ -16,13 +15,7 @@ import (
 func (svc *service) PlistGenerator(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "artifactID")
 
-	var artifact yolopb.Artifact
-	err := svc.db.
-		Preload("HasBuild").
-		Preload("HasBuild.HasProject").
-		Preload("HasBuild.HasProject.HasOwner").
-		First(&artifact, "ID = ?", id).
-		Error
+	artifact, err := svc.store.GetArtifactAndBuildByID(id)
 	if err != nil {
 		httpError(w, err, codes.InvalidArgument)
 		return

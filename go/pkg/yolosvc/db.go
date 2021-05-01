@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"berty.tech/yolo/v2/go/pkg/yolopb"
+	"berty.tech/yolo/v2/go/pkg/yolostore"
 	"github.com/jinzhu/gorm"
 	"github.com/mr-tron/base58"
 	"go.uber.org/zap"
@@ -80,14 +81,13 @@ func (svc *service) saveBatch(ctx context.Context, batch *yolopb.Batch) error {
 	return nil
 }
 
-func lastBuildCreatedTime(ctx context.Context, db *gorm.DB, driver yolopb.Driver) (time.Time, error) {
-	build := yolopb.Build{
-		Driver: driver,
-	}
-	err := db.Order("finished_at desc").Where(&build).Select("finished_at").First(&build).Error
+func lastBuildCreatedTime(ctx context.Context, store yolostore.Store, driver yolopb.Driver) (time.Time, error) {
+
+	build, err := store.GetLastBuild()
 	if err != nil {
 		return time.Time{}, err
 	}
+	build.Driver = driver
 
 	if build.FinishedAt == nil {
 		return time.Time{}, nil
