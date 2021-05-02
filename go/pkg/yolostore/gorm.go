@@ -8,16 +8,24 @@ import (
 )
 
 type Store interface {
+
+	// artifacts store
 	GetArtifactAndBuildByID(id string) (*yolopb.Artifact, error)
-	GetBuildListFilters() (*BuildListFilters, error)
-	GetBatchWithPreloading() (*yolopb.Batch, error)
-	GetBatch() (*yolopb.Batch, error)
-	GetDevDumpObjectDownloads() ([]*yolopb.Download, error)
 	GetArtifactByID(id string) (*yolopb.Artifact, error)
-	CreateDownload(download *yolopb.Download) error
-	GetLastBuild() (*yolopb.Build, error)
 	GetAllArtifacts() ([]yolopb.Artifact, error)
 	SaveArtifact(artifact *yolopb.Artifact) error
+
+	// build store
+	GetBuildListFilters() (*BuildListFilters, error)
+	GetLastBuild() (*yolopb.Build, error)
+
+	// batch store
+	GetBatchWithPreloading() (*yolopb.Batch, error)
+	GetBatch() (*yolopb.Batch, error)
+
+	// download store
+	GetDevDumpObjectDownloads() ([]*yolopb.Download, error)
+	CreateDownload(download *yolopb.Download) error
 }
 
 type store struct {
