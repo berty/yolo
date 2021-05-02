@@ -3,14 +3,13 @@ package yolostore
 import (
 	"fmt"
 
-	"berty.tech/yolo/v2/go/pkg/entities"
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"github.com/jinzhu/gorm"
 )
 
 type Store interface {
 	GetArtifactAndBuildByID(id string) (*yolopb.Artifact, error)
-	GetBuildListFilters() (*entities.BuildListFilters, error)
+	GetBuildListFilters() (*BuildListFilters, error)
 	GetBatchWithPreloading() (*yolopb.Batch, error)
 	GetBatch() (*yolopb.Batch, error)
 	GetDevDumpObjectDownloads() ([]*yolopb.Download, error)
@@ -56,8 +55,13 @@ func (s *store) GetArtifactByID(id string) (*yolopb.Artifact, error) {
 	return artifact, nil
 }
 
-func (s *store) GetBuildListFilters() (*entities.BuildListFilters, error) {
-	blFilters := entities.BuildListFilters{}
+type BuildListFilters struct {
+	Entities []*yolopb.Entity
+	Projects []*yolopb.Project
+}
+
+func (s *store) GetBuildListFilters() (*BuildListFilters, error) {
+	blFilters := BuildListFilters{}
 
 	err := s.db.Find(&blFilters.Entities).Error
 	if err != nil {
