@@ -70,15 +70,14 @@ type ServiceOpts struct {
 func NewService(db *gorm.DB, opts ServiceOpts) (Service, error) {
 	opts.applyDefaults()
 
-	db, err := initDB(db, opts.Logger)
+	store, err := yolostore.NewStore(db, opts.Logger)
 	if err != nil {
 		return nil, err
 	}
 
 	return &service{
-		db:                     db,
 		startTime:              time.Now(),
-		store:                  yolostore.NewStore(db),
+		store:                  store,
 		logger:                 opts.Logger,
 		bkc:                    opts.BuildkiteClient,
 		btc:                    opts.BintrayClient,
