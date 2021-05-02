@@ -11,10 +11,13 @@ func (svc *service) BuildListFilters(ctx context.Context, req *yolopb.BuildListF
 	// FIXME: sort entries by "popularity" or "freshness"
 	// FIXME: add available branches
 
-	resp, err := svc.store.GetBuildListFilters()
+	blFilters, err := svc.store.GetBuildListFilters()
 	if err != nil {
 		return nil, err
 	}
 
-	return resp, nil
+	return &yolopb.BuildListFilters_Response{
+		Entities: blFilters.Entities,
+		Projects: blFilters.Projects,
+	}, nil
 }
