@@ -18,6 +18,19 @@ type Store interface {
 	// build store
 	GetBuildListFilters() (*BuildListFilters, error)
 	GetLastBuild() (*yolopb.Build, error)
+	GetBuildList(artifactID []string,
+		artifactKinds []yolopb.Artifact_Kind,
+		withArtifact bool,
+		buildID []string,
+		buildState []yolopb.Build_State,
+		buildDriver []yolopb.Driver,
+		projectID []string,
+		mergeRequestID []string,
+		mergeRequestAuthorID []string,
+		mergeRequestState []yolopb.MergeRequest_State,
+		branch []string,
+		limit int32,
+	) ([]*yolopb.Build, error)
 
 	// batch store
 	GetBatchWithPreloading() (*yolopb.Batch, error)
@@ -26,6 +39,7 @@ type Store interface {
 	// download store
 	GetDevDumpObjectDownloads() ([]*yolopb.Download, error)
 	CreateDownload(download *yolopb.Download) error
+	GetArtifactDownload(artifactMap map[string]int64) (map[string]int64, error)
 }
 
 type store struct {
@@ -223,4 +237,135 @@ func (s *store) GetAllArtifacts() ([]yolopb.Artifact, error) {
 
 func (s *store) SaveArtifact(artifact *yolopb.Artifact) error {
 	return s.db.Save(artifact).Error
+}
+
+func (s *store) GetBuildList(artifactID []string,
+	artifactKinds []yolopb.Artifact_Kind,
+	withArtifact bool,
+	buildID []string,
+	buildState []yolopb.Build_State,
+	buildDriver []yolopb.Driver,
+	projectID []string,
+	mergeRequestID []string,
+	mergeRequestAuthorID []string,
+	mergeRequestState []yolopb.MergeRequest_State,
+	branch []string,
+	limit int32,
+) ([]*yolopb.Build, error) {
+
+	var builds []*yolopb.Build
+
+	noMoreFilters := false
+	withMergeRequest := false
+
+	query := s.db.Model(builds)
+
+	switch {
+	case len(artifactID) > 0:
+		query = query.
+			Joins("JOIN artifact ON artifact.has_build_id = build.id AND (artifact.id IN (?) OR artifact.yolo_id IN (?))", artifactID, artifactID).
+			Preload("HasArtifacts")
+		noMoreFilters = true
+	case len(artifactKinds) > 0:
+		query = query.
+			Joins("JOIN artifact ON artifact.has_build_id = build.id AND artifact.kind IN (?)", artifactKinds).
+			Preload("HasArtifacts", "kind IN (?)", artifactKinds)
+	case withArtifact:
+		query = query.
+			Joins("JOIN artifact ON artifact.has_build_id = build.id", artifactKinds).
+			Preload("HasArtifacts")
+	default:
+		query = query.
+			Preload("HasArtifacts")
+	}
+
+	if !noMoreFilters {
+		if len(buildID) > 0 {
+			query = query.Where("build.id IN (?) OR build.yolo_id IN (?)", buildID, buildID)
+		}
+		if len(buildState) > 0 {
+			query = query.Where("build.state IN (?)", buildState)
+		}
+		if len(buildDriver) > 0 {
+			query = query.Where("build.driver IN (?)", buildDriver)
+		}
+		if len(projectID) > 0 {
+			query = query.Joins("JOIN project ON project.id = build.has_project_id AND (project.id IN (?) OR project.yolo_id IN (?))", projectID, projectID)
+		}
+		if len(mergeRequestID) > 0 {
+			query = query.Where("build.has_mergerequest_id IN (?)", mergeRequestID)
+		}
+
+		if len(mergeRequestAuthorID) > 0 || len(mergeRequestState) > 0 {
+			withMergeRequest = true
+		}
+		if withMergeRequest {
+			query = query.Joins("JOIN merge_request ON merge_request.id = build.has_mergerequest_id")
+		}
+		if len(mergeRequestAuthorID) > 0 {
+			query = query.Where("merge_request.has_author_id IN (?)", mergeRequestAuthorID)
+		}
+		if len(mergeRequestState) > 0 {
+			query = query.Where("merge_request.state IN (?)", mergeRequestState)
+		}
+		if !withMergeRequest {
+			query = query.Where("build.has_mergerequest_id IS NOT NULL AND build.has_mergerequest_id != ''")
+		}
+		if len(branch) > 0 {
+			if withMergeRequest {
+				query = query.Where("merge_request.branch IN (?) OR build.branch IN (?)", branch, branch)
+			} else {
+				query = query.Where("build.branch IN (?)", branch)
+			}
+		}
+	}
+
+	query = query.
+		Preload("HasCommit").
+		Preload("HasProject").
+		Preload("HasProject.HasOwner").
+		Preload("HasMergerequest").
+		Preload("HasMergerequest.HasProject").
+		Preload("HasMergerequest.HasAuthor").
+		Preload("HasMergerequest.HasCommit").
+		Limit(limit).
+		Order("created_at desc")
+
+	err := query.Find(builds).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return builds, nil
+
+}
+
+func (s *store) GetArtifactDownload(artifactMap map[string]int64) (map[string]int64, error) {
+
+	artifactIDs := make([]string, len(artifactMap))
+	idx := 0
+	for id := range artifactMap {
+		artifactIDs[idx] = id
+		idx++
+	}
+	rows, err := s.db.
+		Model(&yolopb.Download{}).
+		Group("has_artifact_id").
+		Select("has_artifact_id, count(id)").
+		Where("has_artifact_id IN (?)", artifactIDs).
+		Rows()
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var (
+			artifactID string
+			count      int64
+		)
+		if err := rows.Scan(&artifactID, &count); err != nil {
+			return nil, err
+		}
+		artifactMap[artifactID] = count
+	}
+	return artifactMap, nil
 }
