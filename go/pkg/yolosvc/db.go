@@ -6,11 +6,8 @@ import (
 
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"berty.tech/yolo/v2/go/pkg/yolostore"
-	"github.com/jinzhu/gorm"
 	"go.uber.org/zap"
 )
-
-
 
 func (svc *service) saveBatch(ctx context.Context, batch *yolopb.Batch) error {
 	if batch.Empty() {
@@ -44,15 +41,7 @@ func (svc *service) saveBatch(ctx context.Context, batch *yolopb.Batch) error {
 		log.Debug("saveBatch")
 	}
 
-	err := svc.store.DB().Transaction(func(tx *gorm.DB) error {
-		// FIXME: use this for Entities (users, orgs): db.Model(&entity).Update(&entity)?
-		for _, object := range batch.AllObjects() {
-			if err := tx.Set("gorm:association_autocreate", true).Save(object).Error; err != nil {
-				return err
-			}
-		}
-		return nil
-	})
+	err := svc.store.SaveBatch(batch)
 	if err != nil {
 		return err
 	}
@@ -80,4 +69,3 @@ func lastBuildCreatedTime(ctx context.Context, store yolostore.Store, driver yol
 	}
 	return since, nil
 }
-

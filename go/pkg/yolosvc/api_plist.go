@@ -15,7 +15,7 @@ import (
 func (svc *service) PlistGenerator(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "artifactID")
 
-	artifact, err := svc.store.GetArtifactAndBuildByID(id)
+	artifact, err := svc.store.GetArtifactByID(id)
 	if err != nil {
 		httpError(w, err, codes.InvalidArgument)
 		return

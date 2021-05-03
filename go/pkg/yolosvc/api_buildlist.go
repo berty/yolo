@@ -20,7 +20,7 @@ func (svc *service) BuildList(ctx context.Context, req *yolopb.BuildList_Request
 	}
 	var err error
 	resp := yolopb.BuildList_Response{}
-	bl := yolostore.BuildList{
+	bl := yolostore.GetBuildListOpts{
 		ArtifactID:           req.ArtifactID,
 		ArtifactKinds:        req.ArtifactKinds,
 		WithArtifact:         req.WithArtifacts,
