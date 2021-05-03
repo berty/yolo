@@ -33,7 +33,6 @@ type Service interface {
 }
 
 type service struct {
-	db                     *gorm.DB
 	startTime              time.Time
 	store                  yolostore.Store
 	logger                 *zap.Logger

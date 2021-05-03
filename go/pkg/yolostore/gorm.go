@@ -17,25 +17,13 @@ type Store interface {
 	// artifacts store
 	GetArtifactAndBuildByID(id string) (*yolopb.Artifact, error)
 	GetArtifactByID(id string) (*yolopb.Artifact, error)
-	GetAllArtifacts() ([]yolopb.Artifact, error)
+	GetAllArtifactsWithoutBundleID() ([]yolopb.Artifact, error)
 	SaveArtifact(artifact *yolopb.Artifact) error
 
 	// build store
 	GetBuildListFilters() (*BuildListFilters, error)
 	GetLastBuild() (*yolopb.Build, error)
-	GetBuildList(artifactID []string,
-		artifactKinds []yolopb.Artifact_Kind,
-		withArtifact bool,
-		buildID []string,
-		buildState []yolopb.Build_State,
-		buildDriver []yolopb.Driver,
-		projectID []string,
-		mergeRequestID []string,
-		mergeRequestAuthorID []string,
-		mergeRequestState []yolopb.MergeRequest_State,
-		branch []string,
-		limit int32,
-	) ([]*yolopb.Build, error)
+	GetBuildList(bl BuildList) ([]*yolopb.Build, error)
 
 	// batch store
 	GetBatchWithPreloading() (*yolopb.Batch, error)
@@ -275,8 +263,7 @@ func (s *store) GetLastBuild() (*yolopb.Build, error) {
 	return build, err
 }
 
-// GetAllArtifacts fixme: better naming -- since it's all artifacts where bundle id is null or empty
-func (s *store) GetAllArtifacts() ([]yolopb.Artifact, error) {
+func (s *store) GetAllArtifactsWithoutBundleID() ([]yolopb.Artifact, error) {
 	var artifacts []yolopb.Artifact
 	err := s.db.
 		Where("bundle_id IS NULL OR bundle_id = ''").
@@ -292,19 +279,22 @@ func (s *store) SaveArtifact(artifact *yolopb.Artifact) error {
 	return s.db.Save(artifact).Error
 }
 
-func (s *store) GetBuildList(artifactID []string,
-	artifactKinds []yolopb.Artifact_Kind,
-	withArtifact bool,
-	buildID []string,
-	buildState []yolopb.Build_State,
-	buildDriver []yolopb.Driver,
-	projectID []string,
-	mergeRequestID []string,
-	mergeRequestAuthorID []string,
-	mergeRequestState []yolopb.MergeRequest_State,
-	branch []string,
-	limit int32,
-) ([]*yolopb.Build, error) {
+type BuildList struct {
+	ArtifactID           []string
+	ArtifactKinds        []yolopb.Artifact_Kind
+	WithArtifact         bool
+	BuildID              []string
+	BuildState           []yolopb.Build_State
+	BuildDriver          []yolopb.Driver
+	ProjectID            []string
+	MergeRequestID       []string
+	MergeRequestAuthorID []string
+	MergeRequestState    []yolopb.MergeRequest_State
+	Branch               []string
+	Limit                int32
+}
+
+func (s *store) GetBuildList(bl BuildList) ([]*yolopb.Build, error) {
 
 	var builds []*yolopb.Build
 
@@ -314,18 +304,18 @@ func (s *store) GetBuildList(artifactID []string,
 	query := s.db.Model(builds)
 
 	switch {
-	case len(artifactID) > 0:
+	case len(bl.ArtifactID) > 0:
 		query = query.
-			Joins("JOIN artifact ON artifact.has_build_id = build.id AND (artifact.id IN (?) OR artifact.yolo_id IN (?))", artifactID, artifactID).
+			Joins("JOIN artifact ON artifact.has_build_id = build.id AND (artifact.id IN (?) OR artifact.yolo_id IN (?))", bl.ArtifactID, bl.ArtifactID).
 			Preload("HasArtifacts")
 		noMoreFilters = true
-	case len(artifactKinds) > 0:
+	case len(bl.ArtifactKinds) > 0:
 		query = query.
-			Joins("JOIN artifact ON artifact.has_build_id = build.id AND artifact.kind IN (?)", artifactKinds).
-			Preload("HasArtifacts", "kind IN (?)", artifactKinds)
-	case withArtifact:
+			Joins("JOIN artifact ON artifact.has_build_id = build.id AND artifact.kind IN (?)", bl.ArtifactKinds).
+			Preload("HasArtifacts", "kind IN (?)", bl.ArtifactKinds)
+	case bl.WithArtifact:
 		query = query.
-			Joins("JOIN artifact ON artifact.has_build_id = build.id", artifactKinds).
+			Joins("JOIN artifact ON artifact.has_build_id = build.id", bl.ArtifactKinds).
 			Preload("HasArtifacts")
 	default:
 		query = query.
@@ -333,42 +323,42 @@ func (s *store) GetBuildList(artifactID []string,
 	}
 
 	if !noMoreFilters {
-		if len(buildID) > 0 {
-			query = query.Where("build.id IN (?) OR build.yolo_id IN (?)", buildID, buildID)
+		if len(bl.BuildID) > 0 {
+			query = query.Where("build.id IN (?) OR build.yolo_id IN (?)", bl.BuildID, bl.BuildID)
 		}
-		if len(buildState) > 0 {
-			query = query.Where("build.state IN (?)", buildState)
+		if len(bl.BuildState) > 0 {
+			query = query.Where("build.state IN (?)", bl.BuildState)
 		}
-		if len(buildDriver) > 0 {
-			query = query.Where("build.driver IN (?)", buildDriver)
+		if len(bl.BuildDriver) > 0 {
+			query = query.Where("build.driver IN (?)", bl.BuildDriver)
 		}
-		if len(projectID) > 0 {
-			query = query.Joins("JOIN project ON project.id = build.has_project_id AND (project.id IN (?) OR project.yolo_id IN (?))", projectID, projectID)
+		if len(bl.ProjectID) > 0 {
+			query = query.Joins("JOIN project ON project.id = build.has_project_id AND (project.id IN (?) OR project.yolo_id IN (?))", bl.ProjectID, bl.ProjectID)
 		}
-		if len(mergeRequestID) > 0 {
-			query = query.Where("build.has_mergerequest_id IN (?)", mergeRequestID)
+		if len(bl.MergeRequestID) > 0 {
+			query = query.Where("build.has_mergerequest_id IN (?)", bl.MergeRequestID)
 		}
 
-		if len(mergeRequestAuthorID) > 0 || len(mergeRequestState) > 0 {
+		if len(bl.MergeRequestAuthorID) > 0 || len(bl.MergeRequestState) > 0 {
 			withMergeRequest = true
 		}
 		if withMergeRequest {
 			query = query.Joins("JOIN merge_request ON merge_request.id = build.has_mergerequest_id")
 		}
-		if len(mergeRequestAuthorID) > 0 {
-			query = query.Where("merge_request.has_author_id IN (?)", mergeRequestAuthorID)
+		if len(bl.MergeRequestAuthorID) > 0 {
+			query = query.Where("merge_request.has_author_id IN (?)", bl.MergeRequestAuthorID)
 		}
-		if len(mergeRequestState) > 0 {
-			query = query.Where("merge_request.state IN (?)", mergeRequestState)
+		if len(bl.MergeRequestState) > 0 {
+			query = query.Where("merge_request.state IN (?)", bl.MergeRequestState)
 		}
 		if !withMergeRequest {
 			query = query.Where("build.has_mergerequest_id IS NOT NULL AND build.has_mergerequest_id != ''")
 		}
-		if len(branch) > 0 {
+		if len(bl.Branch) > 0 {
 			if withMergeRequest {
-				query = query.Where("merge_request.branch IN (?) OR build.branch IN (?)", branch, branch)
+				query = query.Where("merge_request.branch IN (?) OR build.branch IN (?)", bl.Branch, bl.Branch)
 			} else {
-				query = query.Where("build.branch IN (?)", branch)
+				query = query.Where("build.branch IN (?)", bl.Branch)
 			}
 		}
 	}
@@ -381,7 +371,7 @@ func (s *store) GetBuildList(artifactID []string,
 		Preload("HasMergerequest.HasProject").
 		Preload("HasMergerequest.HasAuthor").
 		Preload("HasMergerequest.HasCommit").
-		Limit(limit).
+		Limit(bl.Limit).
 		Order("created_at desc")
 
 	err := query.Find(builds).Error

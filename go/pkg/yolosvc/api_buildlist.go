@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"berty.tech/yolo/v2/go/pkg/yolopb"
+	"berty.tech/yolo/v2/go/pkg/yolostore"
 )
 
 func (svc *service) BuildList(ctx context.Context, req *yolopb.BuildList_Request) (*yolopb.BuildList_Response, error) {
@@ -19,8 +20,22 @@ func (svc *service) BuildList(ctx context.Context, req *yolopb.BuildList_Request
 	}
 	var err error
 	resp := yolopb.BuildList_Response{}
+	bl := yolostore.BuildList{
+		ArtifactID:           req.ArtifactID,
+		ArtifactKinds:        req.ArtifactKinds,
+		WithArtifact:         req.WithArtifacts,
+		BuildID:              req.BuildID,
+		BuildState:           req.BuildState,
+		BuildDriver:          req.BuildDriver,
+		ProjectID:            req.ProjectID,
+		MergeRequestID:       req.MergeRequestID,
+		MergeRequestAuthorID: req.MergeRequestAuthorID,
+		MergeRequestState:    req.MergerequestState,
+		Branch:               req.Branch,
+		Limit:                req.Limit,
+	}
 
-	resp.Builds, err = svc.store.GetBuildList(req.ArtifactID, req.ArtifactKinds, req.WithArtifacts, req.BuildID, req.BuildState, req.BuildDriver, req.ProjectID, req.MergeRequestID, req.MergeRequestAuthorID, req.MergerequestState, req.Branch, req.Limit)
+	resp.Builds, err = svc.store.GetBuildList(bl)
 	if err != nil {
 		return nil, err
 	}
