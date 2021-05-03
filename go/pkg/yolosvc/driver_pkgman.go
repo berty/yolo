@@ -29,7 +29,7 @@ func (svc *service) PkgmanWorker(ctx context.Context, opts PkgmanWorkerOpts) err
 	// FIXME: handle pkgman version to recompute already computed artifacts with new filters
 	var logger = opts.Logger.Named("pman")
 	for iteration := 0; ; iteration++ {
-		artifacts, err := svc.store.GetAllArtifacts()
+		artifacts, err := svc.store.GetAllArtifactsWithoutBundleID()
 		if err != nil {
 			logger.Warn("get artifacts", zap.Error(err))
 		}
