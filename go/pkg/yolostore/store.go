@@ -18,7 +18,7 @@ type Store interface {
 	// build store
 	GetBuildListFilters() (*BuildListFilters, error)
 	GetLastBuild() (*yolopb.Build, error)
-	GetBuildList(bl GetBuildListOpts) ([]*yolopb.Build, error)
+	GetBuildList(bl GetBuildListOpts, salt string) ([]*yolopb.Build, error)
 
 	// batch store
 	GetBatchWithPreloading() (*yolopb.Batch, error)
@@ -28,7 +28,6 @@ type Store interface {
 	// download store
 	GetDevDumpObjectDownloads() ([]*yolopb.Download, error)
 	CreateDownload(download *yolopb.Download) error
-	GetArtifactDownload(artifactMap map[string]int64) (map[string]int64, error)
 
 	// internal
 	DB() *gorm.DB
@@ -242,7 +241,7 @@ type GetBuildListOpts struct {
 	Limit                int32
 }
 
-func (s *store) GetBuildList(bl GetBuildListOpts) ([]*yolopb.Build, error) {
+func (s *store) GetBuildList(bl GetBuildListOpts, salt string) ([]*yolopb.Build, error) {
 
 	var builds []*yolopb.Build
 
@@ -322,42 +321,60 @@ func (s *store) GetBuildList(bl GetBuildListOpts) ([]*yolopb.Build, error) {
 		Limit(bl.Limit).
 		Order("created_at desc")
 
-	err := query.Find(builds).Error
+	err := query.Find(&builds).Error
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("store: GetBuildList: find builds: %w", err)
+	}
+
+	// compute download stats
+	artifactMap := map[string]int64{}
+	for _, build := range builds {
+		for _, artifact := range build.HasArtifacts {
+			artifactMap[artifact.ID] = 0
+		}
+	}
+	if len(artifactMap) > 0 {
+		artifactIDs := make([]string, len(artifactMap))
+		idx := 0
+		for id := range artifactMap {
+			artifactIDs[idx] = id
+			idx++
+		}
+		rows, err := s.db.
+			Model(&yolopb.Download{}).
+			Group("has_artifact_id").
+			Select("has_artifact_id, count(id)").
+			Where("has_artifact_id IN (?)", artifactIDs).
+			Rows()
+		if err != nil {
+			return nil, fmt.Errorf("store: GetBuildList: find download: %w", err)
+		}
+		for rows.Next() {
+			var (
+				artifactID string
+				count      int64
+			)
+			if err := rows.Scan(&artifactID, &count); err != nil {
+				return nil, err
+			}
+			artifactMap[artifactID] = count
+		}
+	}
+
+	// prepare response
+	for _, build := range builds {
+		if err := build.PrepareOutput(salt); err != nil {
+			return nil, fmt.Errorf("store: GetBuildList: failed preparing output %w", err)
+		}
+		for _, artifact := range build.HasArtifacts {
+			if count, found := artifactMap[artifact.ID]; found {
+				artifact.DownloadsCount = count
+			}
+		}
 	}
 
 	return builds, nil
 
-}
-
-func (s *store) GetArtifactDownload(artifactMap map[string]int64) (map[string]int64, error) {
-	artifactIDs := make([]string, len(artifactMap))
-	idx := 0
-	for id := range artifactMap {
-		artifactIDs[idx] = id
-		idx++
-	}
-	rows, err := s.db.
-		Model(&yolopb.Download{}).
-		Group("has_artifact_id").
-		Select("has_artifact_id, count(id)").
-		Where("has_artifact_id IN (?)", artifactIDs).
-		Rows()
-	if err != nil {
-		return nil, err
-	}
-	for rows.Next() {
-		var (
-			artifactID string
-			count      int64
-		)
-		if err := rows.Scan(&artifactID, &count); err != nil {
-			return nil, err
-		}
-		artifactMap[artifactID] = count
-	}
-	return artifactMap, nil
 }
 
 func (s *store) SaveBatch(batch *yolopb.Batch) error {
