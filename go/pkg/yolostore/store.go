@@ -37,7 +37,6 @@ type store struct {
 	db *gorm.DB
 }
 
-
 func NewStore(db *gorm.DB, logger *zap.Logger) (Store, error) {
 	db, err := initDB(db, logger)
 	if err != nil {
