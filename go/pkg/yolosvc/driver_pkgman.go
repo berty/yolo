@@ -39,7 +39,7 @@ func (svc *service) PkgmanWorker(ctx context.Context, opts PkgmanWorkerOpts) err
 			if !u.FileExists(cache) {
 				continue
 			}
-			err = svc.pkgmanParseArtifactFile(&artifact, cache)
+			err = svc.pkgmanParseArtifactFile(artifact, cache)
 			if err != nil {
 				logger.Warn("failed to parse package", zap.String("path", cache), zap.Error(err))
 			}
