@@ -37,10 +37,6 @@ type store struct {
 	db *gorm.DB
 }
 
-// From creates a new store object.
-func From(db *gorm.DB) Store {
-	return &store{db}
-}
 
 func NewStore(db *gorm.DB, logger *zap.Logger) (Store, error) {
 	db, err := initDB(db, logger)
