@@ -204,7 +204,7 @@ func (s *store) CreateDownload(download *yolopb.Download) error {
 	return s.db.Create(download).Error
 }
 
-// GetLastBuild returns last finished build
+// GetLastBuild returns last finished build with driver filter
 func (s *store) GetLastBuild(driver yolopb.Driver) (*yolopb.Build, error) {
 	build := yolopb.Build{Driver: driver}
 
