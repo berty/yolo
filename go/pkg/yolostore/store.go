@@ -12,14 +12,13 @@ type Store interface {
 
 	// artifacts store
 	GetArtifactByID(id string) (*yolopb.Artifact, error)
-	GetAllArtifactsWithoutBundleID() ([]yolopb.Artifact, error)
+	GetAllArtifactsWithoutBundleID() ([]*yolopb.Artifact, error)
 	SaveArtifact(artifact *yolopb.Artifact) error
 
 	// build store
 	GetBuildListFilters() (*BuildListFilters, error)
-	GetLastBuild() (*yolopb.Build, error)
-	GetBuildList(bl GetBuildListOpts, salt string) ([]*yolopb.Build, error)
-
+	GetLastBuild(driver yolopb.Driver) (*yolopb.Build, error)
+	GetBuildList(bl GetBuildListOpts) ([]*yolopb.Build, error)
 	// batch store
 	GetBatchWithPreloading() (*yolopb.Batch, error)
 	GetBatch() (*yolopb.Batch, error)
@@ -42,12 +41,10 @@ func NewStore(db *gorm.DB, logger *zap.Logger) (Store, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return &store{
 		db: db,
 	}, nil
 }
-
 func (s *store) DB() *gorm.DB { return s.db }
 
 func (s *store) GetArtifactByID(id string) (*yolopb.Artifact, error) {
@@ -61,7 +58,6 @@ func (s *store) GetArtifactByID(id string) (*yolopb.Artifact, error) {
 	if err != nil {
 		return nil, fmt.Errorf("store: GetArtifactByID :%w", err)
 	}
-
 	return &artifact, nil
 }
 
@@ -72,23 +68,19 @@ type BuildListFilters struct {
 
 func (s *store) GetBuildListFilters() (*BuildListFilters, error) {
 	blFilters := BuildListFilters{}
-
 	err := s.db.Find(&blFilters.Entities).Error
 	if err != nil {
 		return nil, fmt.Errorf("store: GetBuildListFilters: find: %w", err)
 	}
-
 	err = s.db.Preload("HasOwner").Find(&blFilters.Projects).Error
 	if err != nil {
 		return nil, fmt.Errorf("store: GetBuildListFilters: preload has owner: %w", err)
 	}
-
 	return &blFilters, nil
 }
 
 func (s *store) GetBatchWithPreloading() (*yolopb.Batch, error) {
 	batch := yolopb.NewBatch()
-
 	err := s.db.
 		Preload("HasOwner").
 		Find(&batch.Projects).Error
@@ -145,13 +137,11 @@ func (s *store) GetBatchWithPreloading() (*yolopb.Batch, error) {
 	if err != nil {
 		return nil, fmt.Errorf("store: GetBatchWithPreloading: find Commits: %w", err)
 	}
-
 	return batch, nil
 }
 
 func (s *store) GetBatch() (*yolopb.Batch, error) {
 	batch := yolopb.NewBatch()
-
 	err := s.db.Find(&batch.Projects).Error
 	if err != nil {
 		return nil, fmt.Errorf("store: GetBatch: find Projects :%w", err)
@@ -180,18 +170,15 @@ func (s *store) GetBatch() (*yolopb.Batch, error) {
 	if err != nil {
 		return nil, fmt.Errorf("store: GetBatch: find Commits :%w", err)
 	}
-
 	return batch, nil
 }
 
 func (s *store) GetDevDumpObjectDownloads() ([]*yolopb.Download, error) {
 	resp := yolopb.DevDumpObjects_Response{}
-
 	err := s.db.Find(&resp.Downloads).Error
 	if err != nil {
 		return nil, fmt.Errorf("store: GetDevDumpObjectDownloads: find Downloads: %w", err)
 	}
-
 	return resp.Downloads, nil
 }
 
@@ -200,18 +187,17 @@ func (s *store) CreateDownload(download *yolopb.Download) error {
 }
 
 // GetLastBuild returns last finished build
-func (s *store) GetLastBuild() (*yolopb.Build, error) {
-	var build *yolopb.Build
-
+func (s *store) GetLastBuild(driver yolopb.Driver) (*yolopb.Build, error) {
+	build := yolopb.Build{Driver: driver}
 	err := s.db.Order("finished_at desc").Where(build).Select("finished_at").First(build).Error
 	if err != nil {
 		return nil, err
 	}
-	return build, err
+	return &build, err
 }
 
-func (s *store) GetAllArtifactsWithoutBundleID() ([]yolopb.Artifact, error) {
-	var artifacts []yolopb.Artifact
+func (s *store) GetAllArtifactsWithoutBundleID() ([]*yolopb.Artifact, error) {
+	var artifacts []*yolopb.Artifact
 	err := s.db.
 		Where("bundle_id IS NULL OR bundle_id = ''").
 		Find(&artifacts).
@@ -241,15 +227,12 @@ type GetBuildListOpts struct {
 	Limit                int32
 }
 
-func (s *store) GetBuildList(bl GetBuildListOpts, salt string) ([]*yolopb.Build, error) {
-
+func (s *store) GetBuildList(bl GetBuildListOpts) ([]*yolopb.Build, error) {
 	var builds []*yolopb.Build
-
 	noMoreFilters := false
 	withMergeRequest := false
 
 	query := s.db.Model(builds)
-
 	switch {
 	case len(bl.ArtifactID) > 0:
 		query = query.
@@ -285,7 +268,6 @@ func (s *store) GetBuildList(bl GetBuildListOpts, salt string) ([]*yolopb.Build,
 		if len(bl.MergeRequestID) > 0 {
 			query = query.Where("build.has_mergerequest_id IN (?)", bl.MergeRequestID)
 		}
-
 		if len(bl.MergeRequestAuthorID) > 0 || len(bl.MergeRequestState) > 0 {
 			withMergeRequest = true
 		}
@@ -320,12 +302,10 @@ func (s *store) GetBuildList(bl GetBuildListOpts, salt string) ([]*yolopb.Build,
 		Preload("HasMergerequest.HasCommit").
 		Limit(bl.Limit).
 		Order("created_at desc")
-
 	err := query.Find(&builds).Error
 	if err != nil {
 		return nil, fmt.Errorf("store: GetBuildList: find builds: %w", err)
 	}
-
 	// compute download stats
 	artifactMap := map[string]int64{}
 	for _, build := range builds {
@@ -349,6 +329,7 @@ func (s *store) GetBuildList(bl GetBuildListOpts, salt string) ([]*yolopb.Build,
 		if err != nil {
 			return nil, fmt.Errorf("store: GetBuildList: find download: %w", err)
 		}
+
 		for rows.Next() {
 			var (
 				artifactID string
@@ -361,20 +342,7 @@ func (s *store) GetBuildList(bl GetBuildListOpts, salt string) ([]*yolopb.Build,
 		}
 	}
 
-	// prepare response
-	for _, build := range builds {
-		if err := build.PrepareOutput(salt); err != nil {
-			return nil, fmt.Errorf("store: GetBuildList: failed preparing output %w", err)
-		}
-		for _, artifact := range build.HasArtifacts {
-			if count, found := artifactMap[artifact.ID]; found {
-				artifact.DownloadsCount = count
-			}
-		}
-	}
-
 	return builds, nil
-
 }
 
 func (s *store) SaveBatch(batch *yolopb.Batch) error {

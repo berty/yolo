@@ -52,17 +52,13 @@ func (svc *service) saveBatch(ctx context.Context, batch *yolopb.Batch) error {
 }
 
 func lastBuildCreatedTime(ctx context.Context, store yolostore.Store, driver yolopb.Driver) (time.Time, error) {
-
-	build, err := store.GetLastBuild()
+	build, err := store.GetLastBuild(driver)
 	if err != nil {
 		return time.Time{}, err
 	}
-	build.Driver = driver
-
 	if build.FinishedAt == nil {
 		return time.Time{}, nil
 	}
-
 	since := *build.FinishedAt
 	if !since.IsZero() {
 		since = since.Add(time.Second) // in order to skip the last one

@@ -2,6 +2,7 @@ package yolosvc
 
 import (
 	"context"
+	"fmt"
 
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"berty.tech/yolo/v2/go/pkg/yolostore"
@@ -34,9 +35,22 @@ func (svc *service) BuildList(ctx context.Context, req *yolopb.BuildList_Request
 		Limit:                req.Limit,
 	}
 
-	resp.Builds, err = svc.store.GetBuildList(bl, svc.authSalt)
+	resp.Builds, err = svc.store.GetBuildList(bl)
 	if err != nil {
 		return nil, err
+	}
+
+	// prepare response
+	for _, build := range resp.Builds {
+		if err := build.PrepareOutput(svc.authSalt); err != nil {
+			return nil, fmt.Errorf("failed preparing output")
+		}
+		artifactMap := map[string]int64{}
+		for _, artifact := range build.HasArtifacts {
+			if count, found := artifactMap[artifact.ID]; found {
+				artifact.DownloadsCount = count
+			}
+		}
 	}
 
 	return &resp, nil
