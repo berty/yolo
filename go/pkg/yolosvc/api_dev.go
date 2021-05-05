@@ -31,12 +31,11 @@ func (svc *service) DevDumpObjects(ctx context.Context, req *yolopb.DevDumpObjec
 		}
 
 	}
-	downloads, err := svc.store.GetDevDumpObjectDownloads()
+	resp.Downloads, err = svc.store.GetDevDumpObjectDownloads()
 	if err != nil {
 		return nil, err
 	}
 
-	resp.Downloads = downloads
 	resp.Batch = batch
 	return &resp, nil
 }

@@ -185,14 +185,14 @@ func (s *store) GetBatch() (*yolopb.Batch, error) {
 }
 
 func (s *store) GetDevDumpObjectDownloads() ([]*yolopb.Download, error) {
-	resp := yolopb.DevDumpObjects_Response{}
+	var downloads []*yolopb.Download
 
-	err := s.db.Find(&resp.Downloads).Error
+	err := s.db.Find(&downloads).Error
 	if err != nil {
 		return nil, fmt.Errorf("store: GetDevDumpObjectDownloads: find Downloads: %w", err)
 	}
 
-	return resp.Downloads, nil
+	return downloads, nil
 }
 
 func (s *store) CreateDownload(download *yolopb.Download) error {
