@@ -60,34 +60,52 @@ func TestingDB(t *testing.T) *gorm.DB {
 
 	logger, _ := zap.NewProduction()
 
-	dbInit, err := initDB(db, logger)
+	db, err = initDB(db, logger)
 	if err != nil {
 		t.Fatalf("init in-memory db: %v", err)
 	}
 
-	TestingCreateEntities(t, dbInit)
+	TestingCreateEntities(t, db)
 
-	return dbInit
+	return db
 }
 
 func TestingCreateEntities(t *testing.T, db *gorm.DB) {
 	if err := db.Transaction(func(tx *gorm.DB) error {
 
-	// create artifact
-		artifact := &yolopb.Artifact{
-			ID:                  "artif1",
-			YoloID:              "yolo1",
-			FileSize:            80,
-			LocalPath:           "js/packages/bla",
-			DownloadURL:         "https://api.buildkite.com",
-			MimeType:            "application/octet-stream",
-			State:               1,
-			Kind:                2,
-			Driver:              1,
-			HasBuildID:          "https://buildkite.com/berty/berty/builds/2738",
+		// create artifact
+		var artifact *yolopb.Artifact
+		artifact = &yolopb.Artifact{
+			ID:          "artif1",
+			YoloID:      "yolo1",
+			FileSize:    80,
+			LocalPath:   "js/packages/bla",
+			DownloadURL: "https://api.buildkite.com",
+			MimeType:    "application/octet-stream",
+			State:       1,
+			Kind:        2,
+			Driver:      1,
+			HasBuildID:  "https://buildkite.com/berty/berty/builds/2738",
 		}
 		if err := db.Create(artifact); err != nil {
 			t.Fatalf("create artifact: %v", err)
+		}
+		// create build
+		var build *yolopb.Build
+		build = &yolopb.Build{
+			ID:                "https://buildkite.com/berty/berty/builds/2738",
+			YoloID:            "yolo1",
+			State:             1,
+			Message:           "feat: tests",
+			Branch:            "feat/tests",
+			Driver:            1,
+			ShortID:           "1000",
+			HasCommitID:       "commit1",
+			HasProjectID:      "https://github.com/berty/berty",
+			HasMergerequestID: "https://github.com/berty/berty/pull/2438",
+		}
+		if err := db.Create(build); err != nil {
+			t.Fatalf("create build: %v", err)
 		}
 
 		return nil
