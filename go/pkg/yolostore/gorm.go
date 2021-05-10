@@ -87,7 +87,7 @@ func TestingCreateEntities(t *testing.T, db *gorm.DB) {
 			Driver:      1,
 			HasBuildID:  "https://buildkite.com/berty/berty/builds/2738",
 		}
-		if err := db.Create(artifact); err != nil {
+		if err := db.Create(artifact).Error; err != nil {
 			t.Fatalf("create artifact: %v", err)
 		}
 		// create build
