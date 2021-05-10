@@ -30,14 +30,14 @@ func TestingService(t *testing.T, opts ServiceOpts) (Service, func()) {
 	return api, cleanup
 }
 
-func testingArtifacts(t *testing.T, svc Service) *yolopb.Artifact {
-	t.Helper()
-
+func testingBuilds(t *testing.T, svc Service) []*yolopb.Build {
 	store := testingSvcDB(t, svc)
-	var artifact yolopb.Artifact
-	err := store.DB().Set("gorm:auto_preload", true).Find(&artifact).Error
-	assert.NoError(t, err, "find artifact")
-	return &artifact
+	var build yolopb.Build
+	var builds []*yolopb.Build
+	err := store.DB().Preload("HasArtifacts").Find(&build).Error
+	assert.Nil(t, err)
+	builds = append(builds, &build)
+	return builds
 }
 
 func testingSvcDB(t *testing.T, svc Service) yolostore.Store {

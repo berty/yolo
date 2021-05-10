@@ -53,7 +53,7 @@ func beforeCreate(scope *gorm.Scope) {
 }
 
 func TestingDB(t *testing.T) *gorm.DB {
-	db, err := gorm.Open("sqlite3", ":memory:")
+	db, err := gorm.Open("sqlite3", "file::memory:?cache=shared")
 	if err != nil {
 		t.Fatalf("init in-memory sqlite server: %v", err)
 	}
@@ -104,7 +104,7 @@ func TestingCreateEntities(t *testing.T, db *gorm.DB) {
 			HasProjectID:      "https://github.com/berty/berty",
 			HasMergerequestID: "https://github.com/berty/berty/pull/2438",
 		}
-		if err := db.Create(build); err != nil {
+		if err := db.Create(build).Error; err != nil {
 			t.Fatalf("create build: %v", err)
 		}
 
