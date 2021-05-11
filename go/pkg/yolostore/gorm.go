@@ -77,7 +77,6 @@ func TestingCreateEntities(t *testing.T, db *gorm.DB) {
 		var artifact *yolopb.Artifact
 		artifact = &yolopb.Artifact{
 			ID:          "artif1",
-			YoloID:      "yolo1",
 			FileSize:    80,
 			LocalPath:   "js/packages/bla",
 			DownloadURL: "https://api.buildkite.com",
@@ -94,7 +93,6 @@ func TestingCreateEntities(t *testing.T, db *gorm.DB) {
 		var build *yolopb.Build
 		build = &yolopb.Build{
 			ID:                "https://buildkite.com/berty/berty/builds/2738",
-			YoloID:            "yolo1",
 			State:             1,
 			Message:           "feat: tests",
 			Branch:            "feat/tests",
@@ -107,7 +105,29 @@ func TestingCreateEntities(t *testing.T, db *gorm.DB) {
 		if err := db.Create(build).Error; err != nil {
 			t.Fatalf("create build: %v", err)
 		}
-
+		var entity *yolopb.Entity
+		entity = &yolopb.Entity{
+			ID:          "entity1",
+			Name:        "entity1",
+			Driver:      1,
+			AvatarURL:   "url",
+			Kind:        1,
+			Description: "description",
+		}
+		if err := db.Create(entity).Error; err != nil {
+			t.Fatalf("create entity: %v", err)
+		}
+		var project *yolopb.Project
+		project = &yolopb.Project{
+			ID:          "proj1",
+			Driver:      1,
+			Name:        "proj1",
+			Description: "description",
+			HasOwnerID:  "1",
+		}
+		if err := db.Create(project).Error; err != nil {
+			t.Fatalf("create entity: %v", err)
+		}
 		return nil
 	}); err != nil {
 		t.Fatalf("create testing entities: %v", err)
