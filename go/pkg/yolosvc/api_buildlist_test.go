@@ -33,9 +33,28 @@ func TestBuildList(t *testing.T) {
 	var artifacts []*yolopb.Artifact
 	artifacts = append(artifacts, artifact)
 
+	entity := &yolopb.Entity{
+		ID:          "https://github.com/berty",
+		YoloID:      "e:8oXfGsnFJiPXZ4uDPwMJ7SmNUTNSuQvkg5dkDq51j9Pj",
+		Name:        "berty",
+		Driver:      1,
+		AvatarURL:   "https://avatars1.githubusercontent.com/u/22157871?v=4",
+		Kind:        1,
+		Description: "",
+	}
+
+	project := &yolopb.Project{
+		ID:          "https://github.com/berty/berty",
+		YoloID:      "p:GG9RMxYQk1oVptrTJZ8JQCeBhzLmHDzQSuXfx8MydCT6",
+		Driver:      1,
+		Name:        "berty",
+		Description: "Berty is a secure peer-to-peer messaging app that works with or without internet access, cellular data or trust in the network",
+		HasOwnerID:  "https://github.com/berty",
+		HasOwner:    entity,
+	}
+
 	// build from data insert
 	build := &yolopb.Build{
-
 		ID:                "https://buildkite.com/berty/berty/builds/2738",
 		YoloID:            "b:n5SDir9UzvDbis4sYVB97f1EiAdnv784AAGWwZHWWkN",
 		State:             1,
@@ -47,6 +66,7 @@ func TestBuildList(t *testing.T) {
 		HasCommitID:       "commit1",
 		HasProjectID:      "https://github.com/berty/berty",
 		HasMergerequestID: "https://github.com/berty/berty/pull/2438",
+		HasProject:        project,
 	}
 
 	assert.Equal(t, len(resp.Builds), 1)

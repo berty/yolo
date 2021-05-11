@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"berty.tech/yolo/v2/go/pkg/testutil"
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3"
@@ -53,29 +54,32 @@ func beforeCreate(scope *gorm.Scope) {
 }
 
 func TestingDB(t *testing.T) *gorm.DB {
+	t.Helper()
+
 	db, err := gorm.Open("sqlite3", "file::memory:?cache=shared")
 	if err != nil {
 		t.Fatalf("init in-memory sqlite server: %v", err)
 	}
 
-	logger, _ := zap.NewProduction()
+	logger := testutil.Logger(t)
 
 	db, err = initDB(db, logger)
 	if err != nil {
 		t.Fatalf("init in-memory db: %v", err)
 	}
 
-	TestingCreateEntities(t, db)
+	testingCreateEntities(t, db)
 
 	return db
 }
 
-func TestingCreateEntities(t *testing.T, db *gorm.DB) {
+func testingCreateEntities(t *testing.T, db *gorm.DB) {
+	t.Helper()
+
 	if err := db.Transaction(func(tx *gorm.DB) error {
 
 		// create artifact
-		var artifact *yolopb.Artifact
-		artifact = &yolopb.Artifact{
+		artifact := &yolopb.Artifact{
 			ID:          "artif1",
 			FileSize:    80,
 			LocalPath:   "js/packages/bla",
@@ -86,12 +90,11 @@ func TestingCreateEntities(t *testing.T, db *gorm.DB) {
 			Driver:      1,
 			HasBuildID:  "https://buildkite.com/berty/berty/builds/2738",
 		}
-		if err := db.Create(artifact).Error; err != nil {
-			t.Fatalf("create artifact: %v", err)
+		if err := tx.Create(artifact).Error; err != nil {
+			return fmt.Errorf("failed to create artifact %w", err)
 		}
 		// create build
-		var build *yolopb.Build
-		build = &yolopb.Build{
+		build := &yolopb.Build{
 			ID:                "https://buildkite.com/berty/berty/builds/2738",
 			State:             1,
 			Message:           "feat: tests",
@@ -102,31 +105,31 @@ func TestingCreateEntities(t *testing.T, db *gorm.DB) {
 			HasProjectID:      "https://github.com/berty/berty",
 			HasMergerequestID: "https://github.com/berty/berty/pull/2438",
 		}
-		if err := db.Create(build).Error; err != nil {
-			t.Fatalf("create build: %v", err)
+		if err := tx.Create(build).Error; err != nil {
+			return fmt.Errorf("failed to create build %w", err)
 		}
-		var entity *yolopb.Entity
-		entity = &yolopb.Entity{
-			ID:          "entity1",
-			Name:        "entity1",
+		entity := &yolopb.Entity{
+			ID:          "https://github.com/berty",
+			YoloID:      "",
+			Name:        "berty",
 			Driver:      1,
-			AvatarURL:   "url",
+			AvatarURL:   "https://avatars1.githubusercontent.com/u/22157871?v=4",
 			Kind:        1,
-			Description: "description",
+			Description: "",
 		}
-		if err := db.Create(entity).Error; err != nil {
-			t.Fatalf("create entity: %v", err)
+		if err := tx.Create(entity).Error; err != nil {
+			return fmt.Errorf("failed to create entity %w", err)
 		}
-		var project *yolopb.Project
-		project = &yolopb.Project{
-			ID:          "proj1",
+		project := &yolopb.Project{
+			ID:          "https://github.com/berty/berty",
+			YoloID:      "",
 			Driver:      1,
-			Name:        "proj1",
-			Description: "description",
-			HasOwnerID:  "1",
+			Name:        "berty",
+			Description: "Berty is a secure peer-to-peer messaging app that works with or without internet access, cellular data or trust in the network",
+			HasOwnerID:  "https://github.com/berty",
 		}
-		if err := db.Create(project).Error; err != nil {
-			t.Fatalf("create entity: %v", err)
+		if err := tx.Create(project).Error; err != nil {
+			return fmt.Errorf("failed to create project %w", err)
 		}
 		return nil
 	}); err != nil {

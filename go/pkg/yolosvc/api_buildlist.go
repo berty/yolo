@@ -18,9 +18,8 @@ func (svc *service) BuildList(ctx context.Context, req *yolopb.BuildList_Request
 	if !req.WithArtifacts {
 		req.WithArtifacts = len(req.ArtifactKinds) > 0
 	}
-	var err error
 	resp := yolopb.BuildList_Response{}
-	bl := yolostore.GetBuildListOpts{
+	opts := yolostore.GetBuildListOpts{
 		ArtifactID:           req.ArtifactID,
 		ArtifactKinds:        req.ArtifactKinds,
 		WithArtifact:         req.WithArtifacts,
@@ -35,7 +34,8 @@ func (svc *service) BuildList(ctx context.Context, req *yolopb.BuildList_Request
 		Limit:                req.Limit,
 	}
 
-	resp.Builds, err = svc.store.GetBuildList(bl)
+	var err error
+	resp.Builds, err = svc.store.GetBuildList(opts)
 	if err != nil {
 		return nil, err
 	}
@@ -44,12 +44,6 @@ func (svc *service) BuildList(ctx context.Context, req *yolopb.BuildList_Request
 	for _, build := range resp.Builds {
 		if err := build.PrepareOutput(svc.authSalt); err != nil {
 			return nil, fmt.Errorf("failed preparing output")
-		}
-		artifactMap := map[string]int64{}
-		for _, artifact := range build.HasArtifacts {
-			if count, found := artifactMap[artifact.ID]; found {
-				artifact.DownloadsCount = count
-			}
 		}
 	}
 

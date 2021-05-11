@@ -360,6 +360,14 @@ func (s *store) GetBuildList(bl GetBuildListOpts) ([]*yolopb.Build, error) {
 		}
 	}
 
+	for _, build := range builds {
+		for _, artifact := range build.HasArtifacts {
+			if count, found := artifactMap[artifact.ID]; found {
+				artifact.DownloadsCount = count
+			}
+		}
+	}
+
 	return builds, nil
 }
 

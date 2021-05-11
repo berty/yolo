@@ -18,22 +18,23 @@ func TestBuildListFilters(t *testing.T) {
 
 	var entities []*yolopb.Entity
 	entity := &yolopb.Entity{
-		ID:          "entity1",
-		YoloID:      "e:GYFZKgji4FRAFgDzrvD6gQiwfJubQsVTq653yGjGYP9d",
-		Name:        "entity1",
+		ID:          "https://github.com/berty",
+		YoloID:      "e:8oXfGsnFJiPXZ4uDPwMJ7SmNUTNSuQvkg5dkDq51j9Pj",
+		Name:        "berty",
 		Driver:      1,
-		AvatarURL:   "url",
+		AvatarURL:   "https://avatars1.githubusercontent.com/u/22157871?v=4",
 		Kind:        1,
-		Description: "description",
+		Description: "",
 	}
 	var projects []*yolopb.Project
 	project := &yolopb.Project{
-		ID:          "proj1",
-		YoloID:      "p:CmRc5SFoS5ebh8g5USzMBBRzAToku7mit2F8qSbN6nxe",
+		ID:          "https://github.com/berty/berty",
+		YoloID:      "p:GG9RMxYQk1oVptrTJZ8JQCeBhzLmHDzQSuXfx8MydCT6",
 		Driver:      1,
-		Name:        "proj1",
-		Description: "description",
-		HasOwnerID:  "1",
+		Name:        "berty",
+		Description: "Berty is a secure peer-to-peer messaging app that works with or without internet access, cellular data or trust in the network",
+		HasOwnerID:  "https://github.com/berty",
+		HasOwner:    entity,
 	}
 	expResp := &yolopb.BuildListFilters_Response{
 		Entities: append(entities, entity),
