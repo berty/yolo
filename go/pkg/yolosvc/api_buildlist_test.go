@@ -14,7 +14,13 @@ func TestBuildList(t *testing.T) {
 	svc, cleanup := TestingService(t, ServiceOpts{Logger: testutil.Logger(t)})
 	defer cleanup()
 
-	resp, err := svc.BuildList(context.Background(), nil)
+	resp, err := svc.BuildList(context.Background(), &yolopb.BuildList_Request{
+		Limit:              1,
+		ArtifactKinds:      nil,
+		WithArtifacts:      true,
+		WithMergerequest:   true,
+		WithNoMergerequest: false,
+	})
 	require.NoError(t, err)
 
 	// artifact from data insert
@@ -30,6 +36,7 @@ func TestBuildList(t *testing.T) {
 		HasBuildID:          "https://buildkite.com/berty/berty/builds/2738",
 		DLArtifactSignedURL: "/api/artifact-dl/artif1?sign=08998d42d07339b70870e0e39043844c31831419",
 		DownloadURL:         "https://api.buildkite.com",
+		DownloadsCount:      1,
 	}
 	var artifacts []*yolopb.Artifact
 	artifacts = append(artifacts, artifact)

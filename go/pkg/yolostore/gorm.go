@@ -131,6 +131,65 @@ func testingCreateEntities(t *testing.T, db *gorm.DB) {
 		if err := tx.Create(project).Error; err != nil {
 			return fmt.Errorf("failed to create project %w", err)
 		}
+
+		download := &yolopb.Download{
+			HasArtifact: artifact,
+		}
+		if err := tx.Create(download).Error; err != nil {
+			return fmt.Errorf("failed to create download %w", err)
+		}
+
+		commit := &yolopb.Commit{
+			Message:    "fix: test",
+			Driver:     1,
+			Branch:     "chore/tests",
+			HasBuilds:  append([]*yolopb.Build{}, build),
+			HasProject: project,
+			HasAuthor:  entity,
+		}
+		if err := tx.Create(commit).Error; err != nil {
+			return fmt.Errorf("failed to create commit %w", err)
+		}
+
+		mergerequest := &yolopb.MergeRequest{
+			Title:        "Storage Interface",
+			Message:      "Implement Storage Interface",
+			Driver:       1,
+			Branch:       "Name/feat/storage-interface",
+			State:        3,
+			CommitURL:    "https://github.com/berty/berty/commit/0831f0e0c65f431976f1307757484ec8e6ae7feb",
+			BranchURL:    "",
+			ShortID:      "2413",
+			IsWIP:        false,
+			HasBuilds:    append([]*yolopb.Build{}, build),
+			HasAssignees: append([]*yolopb.Entity{}, entity),
+			HasReviewers: append([]*yolopb.Entity{}, entity),
+			HasProject:   project,
+			HasProjectID: "https://github.com/berty/berty",
+			HasAuthor:    nil,
+			HasAuthorID:  "https://github.com/Dzalevski",
+			HasCommit:    commit,
+			HasCommitID:  "578800a41fce965b4e1af28f42412b053238da34",
+		}
+		if err := tx.Create(mergerequest).Error; err != nil {
+			return fmt.Errorf("failed to create merge request %w", err)
+		}
+
+		relase := &yolopb.Release{
+			Message:         "Implemented Storage Interface",
+			Driver:          1,
+			CommitURL:       "https://github.com/berty/berty/commit/0831f0e0c65f431976f1307757484ec8e6ae7feb",
+			ShortID:         "2341",
+			HasArtifacts:    append([]*yolopb.Artifact{}, artifact),
+			HasCommit:       commit,
+			HasProject:      project,
+			HasMergerequest: mergerequest,
+		}
+
+		if err := tx.Create(relase).Error; err != nil {
+			return fmt.Errorf("failed to create relase %w", err)
+		}
+
 		return nil
 	}); err != nil {
 		t.Fatalf("create testing entities: %v", err)
