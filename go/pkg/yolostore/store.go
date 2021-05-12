@@ -26,7 +26,7 @@ type Store interface {
 	SaveBatch(batch *yolopb.Batch) error
 
 	// download store
-	GetDevDumpObjectDownloads() ([]*yolopb.Download, error)
+	GetDumpWithPreloading() ([]*yolopb.Download, error)
 	CreateDownload(download *yolopb.Download) error
 
 	// internal
@@ -184,12 +184,12 @@ func (s *store) GetBatch() (*yolopb.Batch, error) {
 	return batch, nil
 }
 
-func (s *store) GetDevDumpObjectDownloads() ([]*yolopb.Download, error) {
+func (s *store) GetDumpWithPreloading() ([]*yolopb.Download, error) {
 	var downloads []*yolopb.Download
 
 	err := s.db.Find(&downloads).Error
 	if err != nil {
-		return nil, fmt.Errorf("store: GetDevDumpObjectDownloads: find Downloads: %w", err)
+		return nil, fmt.Errorf("store: GetDumpWithPreloading: find Downloads: %w", err)
 	}
 
 	return downloads, nil

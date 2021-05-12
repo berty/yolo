@@ -31,7 +31,7 @@ func (svc *service) DevDumpObjects(ctx context.Context, req *yolopb.DevDumpObjec
 		}
 
 	}
-	resp.Downloads, err = svc.store.GetDevDumpObjectDownloads()
+	resp.Downloads, err = svc.store.GetDumpWithPreloading()
 	if err != nil {
 		return nil, err
 	}

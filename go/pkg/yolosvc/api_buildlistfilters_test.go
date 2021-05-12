@@ -7,6 +7,7 @@ import (
 	"berty.tech/yolo/v2/go/pkg/testutil"
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBuildListFilters(t *testing.T) {
@@ -14,7 +15,7 @@ func TestBuildListFilters(t *testing.T) {
 	defer cleanup()
 
 	resp, err := svc.BuildListFilters(context.Background(), nil)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	var entities []*yolopb.Entity
 	entity := &yolopb.Entity{
