@@ -10,6 +10,8 @@ import (
 func TestingService(t *testing.T, opts ServiceOpts) (Service, func()) {
 	t.Helper()
 
+	opts.DevMode = true
+
 	if opts.Logger == nil {
 		opts.Logger = zap.NewNop()
 	}
