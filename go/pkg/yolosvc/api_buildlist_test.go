@@ -18,7 +18,7 @@ func TestServiceBuildList(t *testing.T) {
 		Limit:              1,
 		ArtifactKinds:      nil,
 		WithArtifacts:      true,
-		WithMergerequest:   true,
+		WithMergerequest:   false,
 		WithNoMergerequest: false,
 	})
 	require.NoError(t, err)
