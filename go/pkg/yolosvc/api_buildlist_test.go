@@ -41,6 +41,7 @@ func TestServiceBuildList(t *testing.T) {
 	var artifacts []*yolopb.Artifact
 	artifacts = append(artifacts, artifact)
 
+	// entity expected data
 	entity := &yolopb.Entity{
 		ID:          "https://github.com/berty",
 		YoloID:      "e:8oXfGsnFJiPXZ4uDPwMJ7SmNUTNSuQvkg5dkDq51j9Pj",
@@ -51,6 +52,7 @@ func TestServiceBuildList(t *testing.T) {
 		Description: "",
 	}
 
+	// project expected data
 	project := &yolopb.Project{
 		ID:          "https://github.com/berty/berty",
 		YoloID:      "p:GG9RMxYQk1oVptrTJZ8JQCeBhzLmHDzQSuXfx8MydCT6",
