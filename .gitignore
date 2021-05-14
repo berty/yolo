@@ -34,3 +34,4 @@ tmp*
 
 # IDE
 .vscode/
+.idea
