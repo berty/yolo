@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBuildListFilters(t *testing.T) {
+func TestServiceBuildListFilter(t *testing.T) {
 	svc, cleanup := TestingService(t, ServiceOpts{Logger: testutil.Logger(t)})
 	defer cleanup()
 

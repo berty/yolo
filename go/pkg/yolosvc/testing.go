@@ -71,7 +71,8 @@ func testingCreateEntities(t *testing.T, db *gorm.DB) {
 			Driver:      1,
 			HasBuildID:  "https://buildkite.com/berty/berty/builds/2738",
 		}
-		if err := tx.Create(artifact).Error; err != nil {
+		err := tx.Create(artifact).Error
+		if err != nil {
 			return fmt.Errorf("failed to create artifact %w", err)
 		}
 		// create build
@@ -86,7 +87,8 @@ func testingCreateEntities(t *testing.T, db *gorm.DB) {
 			HasProjectID:      "https://github.com/berty/berty",
 			HasMergerequestID: "https://github.com/berty/berty/pull/2438",
 		}
-		if err := tx.Create(build).Error; err != nil {
+		err = tx.Create(build).Error
+		if err != nil {
 			return fmt.Errorf("failed to create build %w", err)
 		}
 		entity := &yolopb.Entity{
@@ -98,7 +100,8 @@ func testingCreateEntities(t *testing.T, db *gorm.DB) {
 			Kind:        1,
 			Description: "",
 		}
-		if err := tx.Create(entity).Error; err != nil {
+		err = tx.Create(entity).Error
+		if err != nil {
 			return fmt.Errorf("failed to create entity %w", err)
 		}
 		project := &yolopb.Project{
@@ -109,14 +112,16 @@ func testingCreateEntities(t *testing.T, db *gorm.DB) {
 			Description: "Berty is a secure peer-to-peer messaging app that works with or without internet access, cellular data or trust in the network",
 			HasOwnerID:  "https://github.com/berty",
 		}
-		if err := tx.Create(project).Error; err != nil {
+		err = tx.Create(project).Error
+		if err != nil {
 			return fmt.Errorf("failed to create project %w", err)
 		}
 
 		download := &yolopb.Download{
 			HasArtifact: artifact,
 		}
-		if err := tx.Create(download).Error; err != nil {
+		err = tx.Create(download).Error
+		if err != nil {
 			return fmt.Errorf("failed to create download %w", err)
 		}
 
@@ -128,7 +133,8 @@ func testingCreateEntities(t *testing.T, db *gorm.DB) {
 			HasProject: project,
 			HasAuthor:  entity,
 		}
-		if err := tx.Create(commit).Error; err != nil {
+		err = tx.Create(commit).Error
+		if err != nil {
 			return fmt.Errorf("failed to create commit %w", err)
 		}
 
@@ -152,7 +158,8 @@ func testingCreateEntities(t *testing.T, db *gorm.DB) {
 			HasCommit:    commit,
 			HasCommitID:  "578800a41fce965b4e1af28f42412b053238da34",
 		}
-		if err := tx.Create(mergerequest).Error; err != nil {
+		err = tx.Create(mergerequest).Error
+		if err != nil {
 			return fmt.Errorf("failed to create merge request %w", err)
 		}
 
@@ -167,7 +174,8 @@ func testingCreateEntities(t *testing.T, db *gorm.DB) {
 			HasMergerequest: mergerequest,
 		}
 
-		if err := tx.Create(relase).Error; err != nil {
+		err = tx.Create(relase).Error
+		if err != nil {
 			return fmt.Errorf("failed to create relase %w", err)
 		}
 

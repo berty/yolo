@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestDevDump(t *testing.T) {
+func TestServiceDevDumpObjects(t *testing.T) {
 	svc, cleanup := TestingService(t, ServiceOpts{Logger: testutil.Logger(t)})
 	defer cleanup()
 
@@ -123,7 +123,7 @@ func TestDevDump(t *testing.T) {
 
 }
 
-func TestDevDumpWithPreloading(t *testing.T) {
+func TestServiceDevDumpObjects_withPreloading(t *testing.T) {
 	svc, cleanup := TestingService(t, ServiceOpts{Logger: testutil.Logger(t)})
 	defer cleanup()
 
