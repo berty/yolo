@@ -11,7 +11,7 @@ import (
 	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/google/go-github/v32/github"
 	"github.com/jinzhu/gorm"
-	circleci "github.com/jszwedko/go-circleci"
+	"github.com/jszwedko/go-circleci"
 	"github.com/tevino/abool"
 	"go.uber.org/zap"
 	"moul.io/u"
@@ -68,7 +68,7 @@ type ServiceOpts struct {
 func NewService(db *gorm.DB, opts ServiceOpts) (Service, error) {
 	opts.applyDefaults()
 
-	db, err := initDB(db, opts.Logger)
+	db, err := InitDB(db, opts.Logger)
 	if err != nil {
 		return nil, err
 	}

@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	_ "github.com/mattn/go-sqlite3"
+
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"github.com/jinzhu/gorm"
 	"github.com/mr-tron/base58"
@@ -14,7 +16,7 @@ import (
 	"moul.io/zapgorm"
 )
 
-func initDB(db *gorm.DB, logger *zap.Logger) (*gorm.DB, error) {
+func InitDB(db *gorm.DB, logger *zap.Logger) (*gorm.DB, error) {
 	db.SetLogger(zapgorm.New(logger.Named("gorm")))
 	db.Callback().Create().Remove("gorm:update_time_stamp")
 	db.Callback().Update().Remove("gorm:update_time_stamp")
