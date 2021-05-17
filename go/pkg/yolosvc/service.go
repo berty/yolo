@@ -11,7 +11,7 @@ import (
 	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/google/go-github/v32/github"
 	"github.com/jinzhu/gorm"
-	circleci "github.com/jszwedko/go-circleci"
+	"github.com/jszwedko/go-circleci"
 	"github.com/tevino/abool"
 	"go.uber.org/zap"
 	"moul.io/u"

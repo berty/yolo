@@ -7,6 +7,9 @@ import (
 	"strings"
 	"time"
 
+	// for sqlite inmemory test db
+	_ "github.com/mattn/go-sqlite3"
+
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"github.com/jinzhu/gorm"
 	"github.com/mr-tron/base58"
