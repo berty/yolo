@@ -68,7 +68,7 @@ type ServiceOpts struct {
 func NewService(db *gorm.DB, opts ServiceOpts) (Service, error) {
 	opts.applyDefaults()
 
-	db, err := InitDB(db, opts.Logger)
+	db, err := initDB(db, opts.Logger)
 	if err != nil {
 		return nil, err
 	}
