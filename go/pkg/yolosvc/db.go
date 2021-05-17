@@ -4,6 +4,9 @@ import (
 	"context"
 	"time"
 
+	// for sqlite inmemory test db
+	_ "github.com/mattn/go-sqlite3"
+
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"berty.tech/yolo/v2/go/pkg/yolostore"
 	"go.uber.org/zap"
