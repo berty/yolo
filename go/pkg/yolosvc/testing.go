@@ -43,7 +43,7 @@ func testingDB(t *testing.T) *gorm.DB {
 
 	logger := testutil.Logger(t)
 
-	db, err = InitDB(db, logger)
+	db, err = initDB(db, logger)
 	if err != nil {
 		t.Fatalf("init in-memory db: %v", err)
 	}
