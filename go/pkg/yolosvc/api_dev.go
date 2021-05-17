@@ -16,7 +16,7 @@ func (svc *service) DevDumpObjects(ctx context.Context, req *yolopb.DevDumpObjec
 		return nil, status.Error(codes.PermissionDenied, "Permission Denied")
 	}
 	var (
-		batch = &yolopb.Batch{}
+		batch *yolopb.Batch
 		err   error
 	)
 
