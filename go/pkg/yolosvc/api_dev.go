@@ -15,10 +15,10 @@ func (svc *service) DevDumpObjects(ctx context.Context, req *yolopb.DevDumpObjec
 	if !svc.devMode {
 		return nil, status.Error(codes.PermissionDenied, "Permission Denied")
 	}
-	var err error
-	batch := yolopb.NewBatch()
+	batch := &yolopb.Batch{}
 	resp := yolopb.DevDumpObjects_Response{}
 
+	var err error
 	if req.WithPreloading {
 		batch, err = svc.store.GetBatchWithPreloading()
 		if err != nil {
