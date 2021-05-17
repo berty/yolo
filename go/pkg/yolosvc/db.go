@@ -17,7 +17,7 @@ import (
 	"moul.io/zapgorm"
 )
 
-func InitDB(db *gorm.DB, logger *zap.Logger) (*gorm.DB, error) {
+func initDB(db *gorm.DB, logger *zap.Logger) (*gorm.DB, error) {
 	db.SetLogger(zapgorm.New(logger.Named("gorm")))
 	db.Callback().Create().Remove("gorm:update_time_stamp")
 	db.Callback().Update().Remove("gorm:update_time_stamp")
