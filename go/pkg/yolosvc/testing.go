@@ -44,11 +44,11 @@ func testingDB(t *testing.T) *gorm.DB {
 
 	logger := testutil.Logger(t)
 
-	db, err = yolostore.InitDB(db, logger)
+	store, err := yolostore.NewStore(db, logger)
 	if err != nil {
 		t.Fatalf("init in-memory db: %v", err)
 	}
-
+	db = store.DB()
 	testingCreateEntities(t, db)
 
 	return db
