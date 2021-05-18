@@ -7,6 +7,7 @@ import (
 	"berty.tech/yolo/v2/go/pkg/testutil"
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"berty.tech/yolo/v2/go/pkg/yolostore"
+
 	"github.com/jinzhu/gorm"
 	"go.uber.org/zap"
 )
