@@ -29,11 +29,7 @@ func (svc *service) PkgmanWorker(ctx context.Context, opts PkgmanWorkerOpts) err
 	// FIXME: handle pkgman version to recompute already computed artifacts with new filters
 	var logger = opts.Logger.Named("pman")
 	for iteration := 0; ; iteration++ {
-		var artifacts []*yolopb.Artifact
-		err := svc.db.
-			Where("bundle_id IS NULL OR bundle_id = ''").
-			Find(&artifacts).
-			Error
+		artifacts, err := svc.store.GetAllArtifactsWithoutBundleID()
 		if err != nil {
 			logger.Warn("get artifacts", zap.Error(err))
 		}
@@ -100,7 +96,7 @@ func (svc *service) pkgmanParseArtifactFile(artifact *yolopb.Artifact, artifactP
 		} else {
 			artifact.BundleIcon = appIcon
 		}
-		err = svc.db.Save(artifact).Error
+		err = svc.store.SaveArtifact(artifact)
 		if err != nil {
 			return err
 		}
@@ -120,7 +116,7 @@ func (svc *service) pkgmanParseArtifactFile(artifact *yolopb.Artifact, artifactP
 			artifact.BundleVersion = manifest.VersionName
 		}
 		// FIXME: extract icon
-		err = svc.db.Save(artifact).Error
+		err = svc.store.SaveArtifact(artifact)
 		if err != nil {
 			return err
 		}

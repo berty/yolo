@@ -16,7 +16,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 
 	"berty.tech/yolo/v2/go/pkg/bintray"
 	"berty.tech/yolo/v2/go/pkg/yolopb"
@@ -29,8 +28,9 @@ import (
 func (svc *service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
 
 	id := chi.URLParam(r, "artifactID")
-	var artifact yolopb.Artifact
-	if err := svc.db.First(&artifact, "ID = ?", id).Error; err != nil {
+
+	artifact, err := svc.store.GetArtifactByID(id)
+	if err != nil {
 		httpError(w, err, codes.InvalidArgument)
 		return
 	}
@@ -38,13 +38,11 @@ func (svc *service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
 
 	// save download
 	{
-		now := time.Now()
 		download := yolopb.Download{
 			HasArtifactID: artifact.ID,
-			CreatedAt:     &now,
 			// FIXME: user agent for analytics?
 		}
-		err := svc.db.Create(&download).Error
+		err := svc.store.CreateDownload(&download)
 		if err != nil {
 			svc.logger.Warn("failed to add download log entry", zap.Error(err))
 		}
@@ -72,7 +70,7 @@ func (svc *service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
 			filesize = int64(0) // will be automatically computed if using cache
 		)
 		err := svc.sendFileMayCache(filename, cacheKey, mimetype, filesize, w, func(w io.Writer) error {
-			return svc.signAndStreamIPA(artifact, w)
+			return svc.signAndStreamIPA(*artifact, w)
 		})
 		if err != nil {
 			httpError(w, err, codes.Internal)
@@ -85,7 +83,7 @@ func (svc *service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
 			filesize = artifact.FileSize
 		)
 		err := svc.sendFileMayCache(filename, cacheKey, mimetype, filesize, w, func(w io.Writer) error {
-			return svc.artifactDownloadFromProvider(&artifact, w)
+			return svc.artifactDownloadFromProvider(artifact, w)
 		})
 		if err != nil {
 			httpError(w, err, codes.Internal)

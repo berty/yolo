@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"github.com/go-chi/chi"
 	"google.golang.org/grpc/codes"
 	"moul.io/pkgman/pkg/ipa"
@@ -17,13 +16,7 @@ func (svc *service) ArtifactGetFile(w http.ResponseWriter, r *http.Request) {
 	filePath := chi.URLParam(r, "*")
 	fmt.Println("id", id, "path", filePath)
 
-	var artifact yolopb.Artifact
-	err := svc.db.
-		Preload("HasBuild").
-		Preload("HasBuild.HasProject").
-		Preload("HasBuild.HasProject.HasOwner").
-		First(&artifact, "ID = ?", id).
-		Error
+	artifact, err := svc.store.GetArtifactByID(id)
 	if err != nil {
 		httpError(w, err, codes.InvalidArgument)
 		return

@@ -31,7 +31,7 @@ func (svc *service) BuildkiteWorker(ctx context.Context, opts BuildkiteWorkerOpt
 	)
 
 	for iteration := 0; ; iteration++ {
-		since, err := lastBuildCreatedTime(ctx, svc.db, yolopb.Driver_Buildkite)
+		since, err := lastBuildCreatedTime(ctx, svc.store, yolopb.Driver_Buildkite)
 		if err != nil {
 			logger.Warn("get last buildkite build created time", zap.Error(err))
 		}

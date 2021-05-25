@@ -6,6 +6,8 @@ import (
 
 	"berty.tech/yolo/v2/go/pkg/testutil"
 	"berty.tech/yolo/v2/go/pkg/yolopb"
+	"berty.tech/yolo/v2/go/pkg/yolostore"
+
 	"github.com/jinzhu/gorm"
 	"go.uber.org/zap"
 )
@@ -43,11 +45,11 @@ func testingDB(t *testing.T) *gorm.DB {
 
 	logger := testutil.Logger(t)
 
-	db, err = initDB(db, logger)
+	store, err := yolostore.NewStore(db, logger)
 	if err != nil {
 		t.Fatalf("init in-memory db: %v", err)
 	}
-
+	db = store.DB()
 	testingCreateEntities(t, db)
 
 	return db
