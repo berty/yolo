@@ -396,8 +396,8 @@ honnef.co/go/tools v0.0.0-20190523083050-ea95bdfd59fc/go.mod h1:rf3lG4BRIbNafJWh
 honnef.co/go/tools v0.0.1-2019.2.3/go.mod h1:a3bituU0lyd329TUQxRnasdCoJDkEUEAqEt0JzvZhAg=
 howett.net/plist v0.0.0-20200419221736-3b63eb3a43b5 h1:AQkaJpH+/FmqRjmXZPELom5zIERYZfwTjnHpfoVMQEc=
 howett.net/plist v0.0.0-20200419221736-3b63eb3a43b5/go.mod h1:vMygbs4qMhSZSc4lCUl2OEE+rDiIIJAIdR4m7MiMcm0=
-moul.io/chizap v1.0.0 h1:gqZnTJo9eeFq1omv5sdqv/2A0lNAFFLLpF9G2kpC6xQ=
-moul.io/chizap v1.0.0/go.mod h1:/6wOel7HBaC3vDQwPEgzAWL8IVv1R75OVk0JF+Bm9Ts=
+moul.io/chizap v1.0.1 h1:7tdxN9fbGv+v9AvzaLGkGVfvepHWi7o8RMFrMdh4iZM=
+moul.io/chizap v1.0.1/go.mod h1:/6wOel7HBaC3vDQwPEgzAWL8IVv1R75OVk0JF+Bm9Ts=
 moul.io/godev v1.6.0 h1:ms1aI6o9k+PhmMdTR7Aw5iDHPu56xtnmrUgdfLKPspc=
 moul.io/godev v1.6.0/go.mod h1:5lgSpI1oH7xWpLl2Ew/Nsgk8DiNM6FzN9WV9+lgW8RQ=
 moul.io/hcfilters v1.3.1 h1:5+/qXU5+uf2f+s9fpwAQC850/3JJ6aLl+ztQAFkLdZ0=

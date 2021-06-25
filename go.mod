@@ -37,7 +37,7 @@ require (
 	google.golang.org/genproto v0.0.0-20200617032506-f1bdc9086088
 	google.golang.org/grpc v1.29.1
 	howett.net/plist v0.0.0-20200419221736-3b63eb3a43b5
-	moul.io/chizap v1.0.0
+	moul.io/chizap v1.0.1
 	moul.io/godev v1.6.0
 	moul.io/hcfilters v1.3.1
 	moul.io/pkgman v1.3.1
