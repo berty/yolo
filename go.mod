@@ -3,7 +3,6 @@ module berty.tech/yolo/v2
 go 1.13
 
 require (
-	github.com/bearer/go-agent v1.0.2
 	github.com/buildkite/go-buildkite v2.2.0+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/go-chi/chi v4.1.2+incompatible
@@ -19,7 +18,7 @@ require (
 	github.com/jinzhu/gorm v1.9.13
 	github.com/jszwedko/go-circleci v0.3.0
 	github.com/karrick/godirwalk v1.15.6 // indirect
-	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
+	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/mr-tron/base58 v1.2.0
 	github.com/oklog/run v1.1.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
