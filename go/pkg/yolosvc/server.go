@@ -24,11 +24,11 @@ import (
 	"github.com/rs/cors"
 	"github.com/stretchr/signature"
 	"github.com/tevino/abool"
-	chilogger "github.com/treastech/logger"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"moul.io/chizap"
 	"moul.io/u"
 )
 
@@ -123,7 +123,7 @@ func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, erro
 		})
 		r.Use(cors.Handler)
 	}
-	r.Use(chilogger.Logger(srv.logger))
+	r.Use(chizap.New(srv.logger, &chizap.Opts{WithUserAgent: true, WithReferer: true}))
 	r.Use(middleware.Timeout(opts.RequestTimeout))
 	r.Use(middleware.Recoverer)
 
