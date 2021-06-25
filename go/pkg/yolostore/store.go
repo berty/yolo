@@ -203,7 +203,7 @@ func (s *store) CreateDownload(download *yolopb.Download) error {
 func (s *store) GetLastBuild(driver yolopb.Driver) (*yolopb.Build, error) {
 	build := yolopb.Build{Driver: driver}
 
-	err := s.db.Order("finished_at desc").Where(build).Select("finished_at").First(build).Error
+	err := s.db.Order("finished_at desc").Where(&build).Select("finished_at").First(&build).Error
 	if err != nil {
 		return nil, err
 	}
