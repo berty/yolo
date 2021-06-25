@@ -17,7 +17,6 @@ services:
       - GITHUB_TOKEN
       - BINTRAY_TOKEN
       - BINTRAY_USERNAME
-      - BEARER_SECRETKEY
       - BASIC_AUTH_PASSWORD
       - IOS_PASS
       - IOS_PROV

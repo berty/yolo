@@ -173,7 +173,6 @@ USAGE
 FLAGS
   -auth-salt ...             salt used to generate authentication tokens at the end of the URLs
   -basic-auth-password ...   if set, enables basic authentication
-  -bearer-secretkey ...      optional Bearer.sh Secret Key
   -bintray-token ...         Bintray API Token
   -bintray-username ...      Bintray username
   -buildkite-token ...       BuildKite API Token
