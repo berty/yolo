@@ -344,10 +344,15 @@ func (worker *githubWorker) batchFromWorkflowRun(run *github.WorkflowRun, prs []
 	}
 	// state
 	{
-		status := run.GetStatus()
-		conclusion := run.GetConclusion()
-
+		var (
+			event      = run.GetEvent()
+			status     = run.GetStatus()
+			conclusion = run.GetConclusion()
+		)
 		switch {
+		case event == "schedule":
+			// skip
+			return batch
 		case status == "queued":
 			newBuild.State = yolopb.Build_Scheduled
 		case status == "in_progress":
@@ -367,7 +372,13 @@ func (worker *githubWorker) batchFromWorkflowRun(run *github.WorkflowRun, prs []
 		//case conclusion == "state":
 		default:
 			newBuild.State = yolopb.Build_UnknownState
-			fmt.Printf("unsupported status (%q) or conclusion (%q)\n", status, conclusion)
+			worker.logger.Error(
+				"unsupported event, status, or conclusion",
+				zap.String("event", event),
+				zap.String("status", status),
+				zap.String("conclusion", conclusion),
+				zap.String("url", run.GetURL()),
+			)
 		}
 	}
 
