@@ -44,10 +44,9 @@ const ApiKeyPrompt = ({ failedKey, authIsPending, updateState }) => {
         </label>
         <input
           ref={inputEl}
+          autoComplete="false"
           type="text"
-          placeholder={`Current key: ${
-            (failedKey && safeBase64.decode(failedKey)) || "no key set"
-          }`}
+          placeholder={`Current key: ${(failedKey && safeBase64.decode(failedKey)) || "no key set"}`}
           className={styles.input}
           onChange={(e) => {
             updateFormApiKey(e.target.value);
