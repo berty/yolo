@@ -4,7 +4,7 @@ RUN             apk add --no-cache --virtual .build-deps g++ clang clang-static 
                 apk add --no-cache zip unzip git
 RUN             git clone https://github.com/zhlynn/zsign && \
                 cd zsign && \
-                git reset --hard 241606322dad83485d75cfeb0cbc72ef274bc1c7
+                git reset --hard eeec1810f7b437d46d623c94c010c4ffafe26fd6
 WORKDIR         zsign
 RUN             clang++ ./*.cpp ./common/*.cpp /usr/lib/libcrypto.a -O3 -o zsign -static
 #RUN             g++ ./*.cpp common/*.cpp -lcrypto -O3 -o zsign
