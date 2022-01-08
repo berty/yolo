@@ -156,6 +156,10 @@ func (worker *githubWorker) fetchBaseObjects(ctx context.Context) (*yolopb.Batch
 				owner: "berty", repo: "berty",
 				// workflows: map[int64]githubWorkflowConfig{2598412: githubWorkflowConfig{}},
 			},
+			{
+				owner: "berty", repo: "labs",
+				// workflows: map[int64]githubWorkflowConfig{2598412: githubWorkflowConfig{}},
+			},
 		}
 	}
 
