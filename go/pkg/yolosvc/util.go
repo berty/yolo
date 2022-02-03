@@ -18,7 +18,7 @@ func artifactKindByPath(path string) yolopb.Artifact_Kind {
 	switch filepath.Ext(path) {
 	case ".ipa", ".unsigned-ipa", ".dummy-signed-ipa":
 		return yolopb.Artifact_IPA
-	case ".dmg":
+	case ".dmg", ".unsigned-dmg" , ".dummy-signed-dmg":
 		return yolopb.Artifact_DMG
 	case ".apk":
 		return yolopb.Artifact_APK
@@ -32,7 +32,7 @@ func mimetypeByPath(path string) string {
 		return "application/octet-stream"
 	case ".apk":
 		return "application/vnd.android.package-archive"
-	case ".dmg":
+	case ".dmg", ".unsigned-dmg", ".dummy-signed-dmg":
 		return "application/x-apple-diskimage"
 	case ".jar":
 		return "application/java-archive"
