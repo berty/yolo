@@ -52,14 +52,17 @@ export const ARTIFACT_KINDS = Object.values(ARTIFACT_KIND_VALUE).map((kind) =>
 
 export const PROJECT = {
   messenger: "https://github.com/berty/berty",
+  labs: "https://github.com/berty/labs",
 };
 
 export const PROJECT_ID_TO_NAME = {
   "https://github.com/berty/berty": "messenger",
+  "https://github.com/berty/labs": "labs",
 };
 
 export const PROJECT_NAMES = {
   messenger: "messenger",
+  labs: "labs",
 };
 
 export const PROJECTS = Object.values(PROJECT);

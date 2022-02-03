@@ -19,8 +19,8 @@ RUN             yarn build
 
 # go build
 FROM            golang:1.17-alpine as go-build
-RUN             apk add --update --no-cache git gcc musl-dev make perl-utils
-RUN             GO111MODULE=off go get github.com/gobuffalo/packr/v2/packr2
+RUN             apk add --update --no-cache git gcc musl-dev make perl-utils bash
+RUN             GO111MODULE=on go install github.com/gobuffalo/packr/v2/packr2@v2.8.3
 WORKDIR         /go/src/berty.tech/yolo
 ENV             GO111MODULE=on \
                 GOPROXY=proxy.golang.org
