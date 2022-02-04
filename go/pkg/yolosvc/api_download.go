@@ -75,6 +75,21 @@ func (svc *service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			httpError(w, err, codes.Internal)
 		}
+	case ".unsigned-dmg", ".dummy-signed-dmg":
+		// TODO: implement à-la-zsign (re)signature
+		// TODO: patch the .dmg to append some additional context
+		var (
+			cacheKey = artifact.ID
+			filename = strings.TrimSuffix(path.Base(artifact.LocalPath), ext) + ".dmg"
+			mimetype = artifact.MimeType
+			filesize = artifact.FileSize
+		)
+		err := svc.sendFileMayCache(filename, cacheKey, mimetype, filesize, w, func(w io.Writer) error {
+			return svc.artifactDownloadFromProvider(artifact, w)
+		})
+		if err != nil {
+			httpError(w, err, codes.Internal)
+		}
 	default:
 		var (
 			cacheKey = artifact.ID
