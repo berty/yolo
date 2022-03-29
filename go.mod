@@ -9,7 +9,7 @@ require (
 	github.com/go-chi/jsonp v0.0.0-20170809160916-b971022286e2
 	github.com/gobuffalo/packr/v2 v2.8.0
 	github.com/gogo/gateway v1.1.0
-	github.com/gogo/protobuf v1.3.1
+	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.4.2
 	github.com/google/go-github/v32 v32.1.0
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79
