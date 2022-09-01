@@ -18,6 +18,7 @@ type GithubWorkerOpts struct {
 	LoopAfter  time.Duration
 	ClearCache *abool.AtomicBool
 	Once       bool
+	Repos      string
 }
 
 type githubWorker struct {
@@ -38,9 +39,10 @@ func (svc *service) GitHubWorker(ctx context.Context, opts GithubWorkerOpts) err
 	opts.applyDefaults()
 
 	worker := githubWorker{
-		svc:    svc,
-		opts:   opts,
-		logger: opts.Logger.Named("ghub"),
+		svc:         svc,
+		opts:        opts,
+		logger:      opts.Logger.Named("ghub"),
+		repoConfigs: parseRepoConfigs(opts.Repos),
 	}
 
 	// fetch GitHub base objects (the ones that don't change very often).
@@ -103,6 +105,27 @@ func (svc *service) GitHubWorker(ctx context.Context, opts GithubWorkerOpts) err
 	}
 }
 
+func parseRepoConfigs(repos string) []githubRepoConfig {
+	if repos == "" {
+		return []githubRepoConfig{}
+	}
+
+	var repoConfigs []githubRepoConfig
+	for _, repo := range strings.Split(repos, ",") {
+		parts := strings.Split(repo, "/")
+		if len(parts) != 2 {
+			panic(fmt.Sprintf("invalid repo config: %s", repo))
+		}
+		// TODO: support filters (e.g. "yolo/*")
+		repoConfigs = append(repoConfigs, githubRepoConfig{
+			owner: parts[0],
+			repo:  parts[1],
+		})
+	}
+
+	return repoConfigs
+}
+
 func (worker *githubWorker) fetchBaseObjects(ctx context.Context) (*yolopb.Batch, error) {
 	batch := yolopb.NewBatch()
 
@@ -150,17 +173,6 @@ func (worker *githubWorker) fetchBaseObjects(ctx context.Context) (*yolopb.Batch
 				fmt.Println(u.PrettyJSON(workflows))
 			}
 		*/
-
-		worker.repoConfigs = []githubRepoConfig{
-			{
-				owner: "berty", repo: "berty",
-				// workflows: map[int64]githubWorkflowConfig{2598412: githubWorkflowConfig{}},
-			},
-			{
-				owner: "berty", repo: "labs",
-				// workflows: map[int64]githubWorkflowConfig{2598412: githubWorkflowConfig{}},
-			},
-		}
 	}
 
 	return batch, nil

@@ -53,6 +53,7 @@ func yolo(args []string) error {
 		maxBuilds          int
 		buildkiteToken     string
 		githubToken        string
+		githubRepos        string
 		bintrayUsername    string
 		bintrayToken       string
 		artifactsCachePath string
@@ -89,6 +90,7 @@ func yolo(args []string) error {
 	serverFlagSet.StringVar(&bintrayToken, "bintray-token", "", "Bintray API Token")
 	serverFlagSet.StringVar(&circleciToken, "circleci-token", "", "CircleCI API Token")
 	serverFlagSet.StringVar(&githubToken, "github-token", "", "GitHub API Token")
+	serverFlagSet.StringVar(&githubRepos, "github-repos", "", "GitHub repositories to watch")
 	serverFlagSet.StringVar(&dbStorePath, "db-path", ":memory:", "DB Store path")
 	serverFlagSet.StringVar(&artifactsCachePath, "artifacts-cache-path", "", "Artifacts caching path")
 	serverFlagSet.IntVar(&maxBuilds, "max-builds", 100, "maximum builds to fetch from external services (pagination)")
@@ -209,7 +211,7 @@ func yolo(args []string) error {
 				gr.Add(func() error { return svc.PkgmanWorker(ctx, opts) }, func(_ error) { cancel() })
 			}
 			if githubToken != "" {
-				opts := yolosvc.GithubWorkerOpts{Logger: logger, MaxBuilds: maxBuilds, ClearCache: cc, Once: once}
+				opts := yolosvc.GithubWorkerOpts{Logger: logger, MaxBuilds: maxBuilds, ClearCache: cc, Once: once, Repos: githubRepos}
 				gr.Add(func() error { return svc.GitHubWorker(ctx, opts) }, func(_ error) { cancel() })
 			}
 
