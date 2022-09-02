@@ -34,17 +34,28 @@ type githubWorker struct {
 	repoConfigs []githubRepoConfig
 }
 
-func (worker githubWorker) ValidateConfig() (bool, error) {
+func (worker githubWorker) ParseConfig() (bool, error) {
 	if worker.opts.ReposFilter == "" {
-		return true, fmt.Errorf("no repos filter provided")
+		return true, fmt.Errorf("missing repos filter")
 	}
+
+	var repoConfigs []githubRepoConfig
 
 	for _, repo := range strings.Split(worker.opts.ReposFilter, ",") {
 		parts := strings.Split(repo, "/")
 		if len(parts) != 2 {
-			return false, fmt.Errorf("invalid repo config: %s", repo)
+			return false, fmt.Errorf("invalid repo config")
 		}
+		repoConfigs = append(repoConfigs, githubRepoConfig{
+			owner: parts[0],
+			repo:  parts[1],
+		})
 	}
+	if len(repoConfigs) == 0 {
+		return false, fmt.Errorf("invalid repo filter")
+	}
+
+	worker.repoConfigs = repoConfigs
 	return true, nil
 }
 
@@ -53,15 +64,15 @@ func (svc *service) GitHubWorker(ctx context.Context, opts GithubWorkerOpts) err
 	opts.applyDefaults()
 
 	worker := githubWorker{
-		svc:         svc,
-		opts:        opts,
-		logger:      opts.Logger.Named("ghub"),
-		repoConfigs: parseRepoFilter(opts.ReposFilter),
+		svc:    svc,
+		opts:   opts,
+		logger: opts.Logger.Named("ghub"),
 	}
 
-	shouldRun, err := worker.ValidateConfig()
+	shouldRun, err := worker.ParseConfig()
 	if err != nil {
-		return err
+		svc.logger.Error("invalid config", zap.Error(err))
+		return fmt.Errorf("%w", err)
 	}
 
 	if !shouldRun {
@@ -126,20 +137,6 @@ func (svc *service) GitHubWorker(ctx context.Context, opts GithubWorkerOpts) err
 		case <-time.After(opts.LoopAfter):
 		}
 	}
-}
-
-func parseRepoFilter(filter string) []githubRepoConfig {
-	var repoConfigs []githubRepoConfig
-	for _, repo := range strings.Split(filter, ",") {
-		parts := strings.Split(repo, "/")
-		// TODO: support filters (e.g. "yolo/*")
-		repoConfigs = append(repoConfigs, githubRepoConfig{
-			owner: parts[0],
-			repo:  parts[1],
-		})
-	}
-
-	return repoConfigs
 }
 
 func (worker *githubWorker) fetchBaseObjects(ctx context.Context) (*yolopb.Batch, error) {
