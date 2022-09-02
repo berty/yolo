@@ -36,7 +36,7 @@ type githubWorker struct {
 
 func (worker githubWorker) ParseConfig() (bool, error) {
 	if worker.opts.ReposFilter == "" {
-		return true, fmt.Errorf("missing repos filter")
+		return false, nil
 	}
 
 	var repoConfigs []githubRepoConfig
@@ -50,9 +50,6 @@ func (worker githubWorker) ParseConfig() (bool, error) {
 			owner: parts[0],
 			repo:  parts[1],
 		})
-	}
-	if len(repoConfigs) == 0 {
-		return false, fmt.Errorf("invalid repo filter")
 	}
 
 	worker.repoConfigs = repoConfigs
@@ -74,7 +71,6 @@ func (svc *service) GitHubWorker(ctx context.Context, opts GithubWorkerOpts) err
 		svc.logger.Error("invalid config", zap.Error(err))
 		return fmt.Errorf("%w", err)
 	}
-
 	if !shouldRun {
 		return nil
 	}
