@@ -13,11 +13,18 @@ import (
 )
 
 type GithubWorkerOpts struct {
-	Logger     *zap.Logger
-	MaxBuilds  int
-	LoopAfter  time.Duration
-	ClearCache *abool.AtomicBool
-	Once       bool
+	Logger      *zap.Logger
+	MaxBuilds   int
+	LoopAfter   time.Duration
+	ClearCache  *abool.AtomicBool
+	Once        bool
+	ReposFilter string
+}
+
+type githubRepoConfig struct {
+	owner string
+	repo  string
+	// workflows map[int64]struct{}
 }
 
 type githubWorker struct {
@@ -27,13 +34,29 @@ type githubWorker struct {
 	repoConfigs []githubRepoConfig
 }
 
-type githubRepoConfig struct {
-	owner string
-	repo  string
-	// workflows map[int64]struct{}
+func (worker githubWorker) ParseConfig() (bool, error) {
+	if worker.opts.ReposFilter == "" {
+		return false, nil
+	}
+
+	var repoConfigs []githubRepoConfig
+
+	for _, repo := range strings.Split(worker.opts.ReposFilter, ",") {
+		parts := strings.Split(repo, "/")
+		if len(parts) != 2 {
+			return false, fmt.Errorf("invalid repo config")
+		}
+		repoConfigs = append(repoConfigs, githubRepoConfig{
+			owner: parts[0],
+			repo:  parts[1],
+		})
+	}
+
+	worker.repoConfigs = repoConfigs
+	return true, nil
 }
 
-// GithubWorker goals is to manage the github update routine, it should try to support as much errors as possible by itself
+// GitHubWorker goals is to manage the github update routine, it should try to support as much errors as possible by itself
 func (svc *service) GitHubWorker(ctx context.Context, opts GithubWorkerOpts) error {
 	opts.applyDefaults()
 
@@ -41,6 +64,15 @@ func (svc *service) GitHubWorker(ctx context.Context, opts GithubWorkerOpts) err
 		svc:    svc,
 		opts:   opts,
 		logger: opts.Logger.Named("ghub"),
+	}
+
+	shouldRun, err := worker.ParseConfig()
+	if err != nil {
+		svc.logger.Error("invalid config", zap.Error(err))
+		return fmt.Errorf("%w", err)
+	}
+	if !shouldRun {
+		return nil
 	}
 
 	// fetch GitHub base objects (the ones that don't change very often).
@@ -150,17 +182,6 @@ func (worker *githubWorker) fetchBaseObjects(ctx context.Context) (*yolopb.Batch
 				fmt.Println(u.PrettyJSON(workflows))
 			}
 		*/
-
-		worker.repoConfigs = []githubRepoConfig{
-			{
-				owner: "berty", repo: "berty",
-				// workflows: map[int64]githubWorkflowConfig{2598412: githubWorkflowConfig{}},
-			},
-			{
-				owner: "berty", repo: "labs",
-				// workflows: map[int64]githubWorkflowConfig{2598412: githubWorkflowConfig{}},
-			},
-		}
 	}
 
 	return batch, nil
