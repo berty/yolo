@@ -13,12 +13,18 @@ import (
 )
 
 type GithubWorkerOpts struct {
-	Logger     *zap.Logger
-	MaxBuilds  int
-	LoopAfter  time.Duration
-	ClearCache *abool.AtomicBool
-	Once       bool
-	Repos      string
+	Logger      *zap.Logger
+	MaxBuilds   int
+	LoopAfter   time.Duration
+	ClearCache  *abool.AtomicBool
+	Once        bool
+	ReposFilter string
+}
+
+type githubRepoConfig struct {
+	owner string
+	repo  string
+	// workflows map[int64]struct{}
 }
 
 type githubWorker struct {
@@ -28,13 +34,21 @@ type githubWorker struct {
 	repoConfigs []githubRepoConfig
 }
 
-type githubRepoConfig struct {
-	owner string
-	repo  string
-	// workflows map[int64]struct{}
+func (worker githubWorker) ValidateConfig() (bool, error) {
+	if worker.opts.ReposFilter == "" {
+		return true, fmt.Errorf("no repos filter provided")
+	}
+
+	for _, repo := range strings.Split(worker.opts.ReposFilter, ",") {
+		parts := strings.Split(repo, "/")
+		if len(parts) != 2 {
+			return false, fmt.Errorf("invalid repo config: %s", repo)
+		}
+	}
+	return true, nil
 }
 
-// GithubWorker goals is to manage the github update routine, it should try to support as much errors as possible by itself
+// GitHubWorker goals is to manage the github update routine, it should try to support as much errors as possible by itself
 func (svc *service) GitHubWorker(ctx context.Context, opts GithubWorkerOpts) error {
 	opts.applyDefaults()
 
@@ -42,7 +56,16 @@ func (svc *service) GitHubWorker(ctx context.Context, opts GithubWorkerOpts) err
 		svc:         svc,
 		opts:        opts,
 		logger:      opts.Logger.Named("ghub"),
-		repoConfigs: parseRepoConfigs(opts.Repos),
+		repoConfigs: parseRepoFilter(opts.ReposFilter),
+	}
+
+	shouldRun, err := worker.ValidateConfig()
+	if err != nil {
+		return err
+	}
+
+	if !shouldRun {
+		return nil
 	}
 
 	// fetch GitHub base objects (the ones that don't change very often).
@@ -105,17 +128,10 @@ func (svc *service) GitHubWorker(ctx context.Context, opts GithubWorkerOpts) err
 	}
 }
 
-func parseRepoConfigs(repos string) []githubRepoConfig {
-	if repos == "" {
-		return []githubRepoConfig{}
-	}
-
+func parseRepoFilter(filter string) []githubRepoConfig {
 	var repoConfigs []githubRepoConfig
-	for _, repo := range strings.Split(repos, ",") {
+	for _, repo := range strings.Split(filter, ",") {
 		parts := strings.Split(repo, "/")
-		if len(parts) != 2 {
-			panic(fmt.Sprintf("invalid repo config: %s", repo))
-		}
 		// TODO: support filters (e.g. "yolo/*")
 		repoConfigs = append(repoConfigs, githubRepoConfig{
 			owner: parts[0],
