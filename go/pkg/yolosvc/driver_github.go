@@ -34,7 +34,7 @@ type githubWorker struct {
 	repoConfigs []githubRepoConfig
 }
 
-func (worker githubWorker) ParseConfig() (bool, error) {
+func (worker *githubWorker) ParseConfig() (bool, error) {
 	if worker.opts.ReposFilter == "" {
 		return false, nil
 	}
