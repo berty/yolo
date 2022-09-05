@@ -120,6 +120,12 @@ message BuildListFilters {
 // DB Schemas
 //
 
+message BuildMetadataOverride {
+  string has_project_id = 1;
+  string has_commit_id = 2;
+  string has_mergerequest_id = 3;
+}
+
 message Build {
   /// fields
 
@@ -138,7 +144,7 @@ message Build {
   string short_id = 13 [(gogoproto.customname) = "ShortID"];
   string vcs_tag = 14 [(gogoproto.customname) = "VCSTag"];
   string vcs_tag_url = 15 [(gogoproto.customname) = "VCSTagURL"];
-
+  
   /// relationships
 
   repeated Artifact has_artifacts = 101 [(gogoproto.moretags) = "gorm:\"foreignkey:HasBuildID\""];
@@ -148,6 +154,14 @@ message Build {
   string has_project_id = 105 [(gogoproto.customname) = "HasProjectID"];
   MergeRequest has_mergerequest = 106;
   string has_mergerequest_id = 107 [(gogoproto.customname) = "HasMergerequestID"];
+
+  Commit has_commit_override = 102;
+  string has_commit_override_id = 103 [(gogoproto.customname) = "HasCommitOverrideID"];
+  Project has_project_override = 104;
+  string has_project_override_id = 105 [(gogoproto.customname) = "HasProjectOverrideID"];
+  MergeRequest has_mergerequest_override = 106;
+  string has_mergereques_overridet_id = 107 [(gogoproto.customname) = "HasMergerequestOverrideID"];
+
 
   /// enums
 
