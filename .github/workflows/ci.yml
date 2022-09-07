@@ -69,6 +69,7 @@ jobs:
       matrix:
         golang:
           - 1.18.x
+          - 1.19.x
     steps:
       - uses: actions/checkout@v2
       - name: Install Go
