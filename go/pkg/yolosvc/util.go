@@ -10,15 +10,13 @@ import (
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 )
 
-var (
-	githubMasterMerge = regexp.MustCompile(`Merge pull request #([0-9]+) from (.*)`)
-)
+var githubMasterMerge = regexp.MustCompile(`Merge pull request #([0-9]+) from (.*)`)
 
 func artifactKindByPath(path string) yolopb.Artifact_Kind {
 	switch filepath.Ext(path) {
 	case ".ipa", ".unsigned-ipa", ".dummy-signed-ipa":
 		return yolopb.Artifact_IPA
-	case ".dmg", ".unsigned-dmg" , ".dummy-signed-dmg":
+	case ".dmg", ".unsigned-dmg", ".dummy-signed-dmg":
 		return yolopb.Artifact_DMG
 	case ".apk":
 		return yolopb.Artifact_APK

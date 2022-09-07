@@ -9,6 +9,8 @@ import (
 	"berty.tech/yolo/v2/go/pkg/plistgen"
 	"github.com/go-chi/chi"
 	"github.com/stretchr/signature"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"google.golang.org/grpc/codes"
 )
 
@@ -36,9 +38,10 @@ func (svc *service) PlistGenerator(w http.ResponseWriter, r *http.Request) {
 		url           = "/api/artifact-dl/" + id
 	)
 	if artifact.HasBuild != nil && artifact.HasBuild.HasProject != nil {
-		title = strings.Title(artifact.HasBuild.HasProject.Name)
+		c := cases.Title(language.Und)
+		title = c.String(artifact.HasBuild.HasProject.Name)
 		if artifact.HasBuild.HasProject.HasOwner != nil {
-			subtitle = strings.Title(artifact.HasBuild.HasProject.HasOwner.Name)
+			subtitle = c.String(artifact.HasBuild.HasProject.HasOwner.Name)
 		}
 	}
 	pkgURL, err := signature.GetSignedURL("GET", url, "", svc.authSalt)

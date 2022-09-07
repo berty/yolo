@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/subtle"
 	"fmt"
+	"google.golang.org/grpc/credentials/insecure"
 	"net"
 	"net/http"
 	"strings"
@@ -131,7 +132,7 @@ func NewServer(ctx context.Context, svc Service, opts ServerOpts) (*Server, erro
 		runtime.WithMarshalerOption(runtime.MIMEWildcard, &gateway.JSONPb{EmitDefaults: false, Indent: "  ", OrigName: true}),
 		runtime.WithProtoErrorHandler(runtime.DefaultHTTPProtoErrorHandler),
 	)
-	grpcDialOpts := []grpc.DialOption{grpc.WithInsecure()}
+	grpcDialOpts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	if err := yolopb.RegisterYoloServiceHandlerFromEndpoint(ctx, gwmux, srv.grpcListenerAddr, grpcDialOpts); err != nil {
 		return nil, err
 	}

@@ -25,7 +25,6 @@ func (b *Build) PrepareOutput(salt string) error {
 
 // AddSignedURLs adds new fields containing URLs with a signature
 func (a *Artifact) AddSignedURLs(key string) error {
-
 	var err error
 	a.DLArtifactSignedURL, err = signature.GetSignedURL("GET", "/api/artifact-dl/"+a.ID, "", key)
 	if err != nil {

@@ -120,7 +120,6 @@ func TestServiceDevDumpObjects(t *testing.T) {
 
 	assert.Equal(t, expectedDownloads, resp.Downloads)
 	assert.Equal(t, expectedBatch, resp.Batch)
-
 }
 
 func TestServiceDevDumpObjects_withPreloading(t *testing.T) {
@@ -244,5 +243,4 @@ func TestServiceDevDumpObjects_withPreloading(t *testing.T) {
 
 	assert.Equal(t, expectedDownloads, resp.Downloads)
 	assert.Equal(t, expectedBatch, resp.Batch)
-
 }

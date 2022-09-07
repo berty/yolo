@@ -9,7 +9,6 @@ import (
 )
 
 type Store interface {
-
 	// artifacts store
 	GetArtifactByID(id string) (*yolopb.Artifact, error)
 	GetAllArtifactsWithoutBundleID() ([]*yolopb.Artifact, error)

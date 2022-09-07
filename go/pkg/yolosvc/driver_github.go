@@ -34,7 +34,7 @@ type githubWorker struct {
 	repoConfigs []githubRepoConfig
 }
 
-func (worker githubWorker) ParseConfig() (bool, error) {
+func (worker *githubWorker) ParseConfig() (bool, error) {
 	if worker.opts.ReposFilter == "" {
 		return false, nil
 	}
@@ -392,9 +392,9 @@ func (worker *githubWorker) batchFromWorkflowRun(run *github.WorkflowRun, prs []
 			newBuild.State = yolopb.Build_Skipped
 		case conclusion == "timed_out":
 			newBuild.State = yolopb.Build_Timedout
-		//case conclusion == "action_required":
-		//case conclusion == "neutral":
-		//case conclusion == "state":
+		// case conclusion == "action_required":
+		// case conclusion == "neutral":
+		// case conclusion == "state":
 		default:
 			newBuild.State = yolopb.Build_UnknownState
 			worker.logger.Error(

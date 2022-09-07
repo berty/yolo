@@ -6,7 +6,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -26,7 +25,6 @@ import (
 )
 
 func (svc *service) ArtifactDownloader(w http.ResponseWriter, r *http.Request) {
-
 	id := chi.URLParam(r, "artifactID")
 
 	artifact, err := svc.store.GetArtifactByID(id)
@@ -200,7 +198,7 @@ func (svc *service) signAndStreamIPA(artifact yolopb.Artifact, w io.Writer) erro
 	// sign ipa
 	var signed string
 	{
-		tempdir, err := ioutil.TempDir("", "yolo")
+		tempdir, err := os.MkdirTemp("", "yolo")
 		if err != nil {
 			return err
 		}
@@ -209,7 +207,7 @@ func (svc *service) signAndStreamIPA(artifact yolopb.Artifact, w io.Writer) erro
 		// write unsigned-file to tempdir
 		unsigned := filepath.Join(tempdir, "unsigned.ipa")
 		signed = filepath.Join(tempdir, "signed.ipa")
-		f, err := os.OpenFile(unsigned, os.O_RDWR|os.O_CREATE, 0755)
+		f, err := os.OpenFile(unsigned, os.O_RDWR|os.O_CREATE, 0o755)
 		if err != nil {
 			return err
 		}
@@ -308,7 +306,7 @@ func (svc *service) artifactDownloadFromProvider(artifact *yolopb.Artifact, w io
 				return fmt.Errorf("failed to download artifact: %w", err)
 			}
 			defer resp.Body.Close()
-			zipContent, err = ioutil.ReadAll(resp.Body)
+			zipContent, err = io.ReadAll(resp.Body)
 			if err != nil {
 				return fmt.Errorf("failed to download artifact stream: %w", err)
 			}

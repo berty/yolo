@@ -25,7 +25,7 @@ const circleciMaxPerPage = 30
 func (svc *service) CircleciWorker(ctx context.Context, opts CircleciWorkerOpts) error {
 	opts.applyDefaults()
 
-	var logger = opts.Logger.Named("circ")
+	logger := opts.Logger.Named("circ")
 
 	for iteration := 0; ; iteration++ {
 		since, err := lastBuildCreatedTime(ctx, svc.store, yolopb.Driver_CircleCI)

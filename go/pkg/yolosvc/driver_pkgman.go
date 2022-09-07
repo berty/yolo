@@ -27,7 +27,7 @@ type PkgmanWorkerOpts struct {
 func (svc *service) PkgmanWorker(ctx context.Context, opts PkgmanWorkerOpts) error {
 	opts.applyDefaults()
 	// FIXME: handle pkgman version to recompute already computed artifacts with new filters
-	var logger = opts.Logger.Named("pman")
+	logger := opts.Logger.Named("pman")
 	for iteration := 0; ; iteration++ {
 		artifacts, err := svc.store.GetAllArtifactsWithoutBundleID()
 		if err != nil {
@@ -142,7 +142,7 @@ func (svc *service) pkgmanExtractIPAAppIcon(app *ipa.App) (string, error) {
 
 	icon := md5Sum(b) + ".png"
 	iconsPath := filepath.Join(svc.artifactsCachePath, "icons")
-	if err := os.MkdirAll(iconsPath, 0755); err != nil {
+	if err := os.MkdirAll(iconsPath, 0o755); err != nil {
 		return "", err
 	}
 	iconPath := filepath.Join(iconsPath, icon)

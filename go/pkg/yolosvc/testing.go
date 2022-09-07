@@ -59,7 +59,6 @@ func testingCreateEntities(t *testing.T, db *gorm.DB) {
 	t.Helper()
 
 	if err := db.Transaction(func(tx *gorm.DB) error {
-
 		// create artifact
 		artifact := &yolopb.Artifact{
 			ID:          "artif1",
