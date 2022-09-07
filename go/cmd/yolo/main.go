@@ -1,6 +1,7 @@
 package main
 
 import (
+	"berty.tech/yolo/v2/go/pkg/yolotree"
 	"context"
 	"flag"
 	"fmt"
@@ -276,6 +277,43 @@ func yolo(args []string) error {
 		},
 	}
 
+	tree := &ffcli.Command{
+		Name:    `tree`,
+		FlagSet: storeFlagSet,
+		Options: []ff.Option{ff.WithEnvVarNoPrefix()},
+		Exec: func(_ context.Context, _ []string) error {
+			logger, err := loggerFromArgs(verbose, logFormat)
+			if err != nil {
+				return err
+			}
+			db, err := dbFromArgs(dbStorePath, logger)
+			if err != nil {
+				return err
+			}
+			defer db.Close()
+
+			svc, err := yolosvc.NewService(db, yolosvc.ServiceOpts{
+				Logger:  logger,
+				DevMode: true,
+			})
+			if err != nil {
+				return err
+			}
+
+			ctx := context.Background()
+			input := &yolopb.DevDumpObjects_Request{
+				WithPreloading: withPreloading,
+			}
+			ret, err := svc.DevDumpObjects(ctx, input)
+			if err != nil {
+				return err
+			}
+			yolotree.DisplayTreeFormat(ret.Batch)
+
+			return nil
+		},
+	}
+
 	info := &ffcli.Command{
 		Name:    `info`,
 		FlagSet: storeFlagSet,
@@ -313,7 +351,7 @@ func yolo(args []string) error {
 	root := &ffcli.Command{
 		ShortUsage:  `server [flags] <subcommand>`,
 		FlagSet:     rootFlagSet,
-		Subcommands: []*ffcli.Command{server, dumpObjects, info},
+		Subcommands: []*ffcli.Command{server, dumpObjects, info, tree},
 		Options:     []ff.Option{ff.WithEnvVarNoPrefix()},
 		Exec: func(_ context.Context, _ []string) error {
 			return flag.ErrHelp
