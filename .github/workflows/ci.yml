@@ -23,7 +23,7 @@ jobs:
         uses: golangci/golangci-lint-action@v2
         with:
           args: --timeout=10m
-          version: v1.28
+          version: v1.49
           github-token: ${{ secrets.GITHUB_TOKEN }}
   tests-on-windows:
     needs: golangci-lint # run after golangci-lint action to not produce duplicated errors

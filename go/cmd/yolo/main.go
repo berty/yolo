@@ -170,7 +170,7 @@ func yolo(args []string) error {
 			}
 
 			if artifactsCachePath != "" {
-				if err := os.MkdirAll(artifactsCachePath, 0755); err != nil {
+				if err := os.MkdirAll(artifactsCachePath, 0o755); err != nil {
 					return err
 				}
 			}

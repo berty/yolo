@@ -23,7 +23,7 @@ type BintrayWorkerOpts struct {
 func (svc *service) BintrayWorker(ctx context.Context, opts BintrayWorkerOpts) error {
 	opts.applyDefaults()
 
-	var logger = opts.Logger.Named("btry")
+	logger := opts.Logger.Named("btry")
 
 	for iteration := 0; ; iteration++ {
 		logger.Debug("bintray: refresh", zap.Int("iteration", iteration))

@@ -5,9 +5,7 @@ import (
 	"strings"
 )
 
-var (
-	signedOffByLine = regexp.MustCompile(`Signed-off-by: (.*)`)
-)
+var signedOffByLine = regexp.MustCompile(`Signed-off-by: (.*)`)
 
 func cleanupCommitMessage(msg string) string {
 	if msg == "" {
