@@ -31,7 +31,7 @@ jobs:
     strategy:
       matrix:
         golang:
-          - 1.15.x
+          - 1.18.x
     steps:
       - uses: actions/checkout@v2
       - name: Install Go
