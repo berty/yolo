@@ -3,6 +3,7 @@ package yolopb
 import (
 	"net/url"
 
+	"github.com/gogo/protobuf/proto"
 	"github.com/stretchr/signature"
 )
 
@@ -38,4 +39,17 @@ func (a *Artifact) AddSignedURLs(key string) error {
 		a.PListSignedURL = url.QueryEscape(a.PListSignedURL)
 	}
 	return nil
+}
+
+func (b *Build) ApplyMetadataOverride(override *MetadataOverride) {
+	bytes, err := override.Marshal()
+	if err != nil {
+		return
+	}
+	o := &Build{}
+	err = proto.Unmarshal(bytes, o)
+	if err != nil {
+		return
+	}
+	proto.Merge(b, o)
 }

@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/gogo/protobuf/jsonpb"
-	"github.com/gogo/protobuf/proto"
 	//nolint:staticcheck
 
 	"berty.tech/yolo/v2/go/pkg/yolopb"
@@ -390,7 +389,7 @@ func (worker *githubWorker) getOverridepb(ctx context.Context, repo githubRepoCo
 		return nil, err
 	}
 	for _, arti := range retArti.Artifacts {
-		if *arti.Name == "yolo.json" {
+		if arti.GetName() == "yolo.json" {
 			return getOverrideBuildpb(repo.owner, repo.repo, *arti.ID, worker.opts.Token)
 		}
 	}
@@ -442,20 +441,8 @@ func (worker *githubWorker) batchFromWorkflowRun(run *github.WorkflowRun, prs []
 	}
 
 	if override != nil {
-		b, err := override.Marshal()
-		if err != nil {
-			// supposed to be impossible
-			goto skip
-		}
-		o := &yolopb.Build{}
-		err = proto.Unmarshal(b, o)
-		if err != nil {
-			// supposed to be impossible
-			goto skip
-		}
-		proto.Merge(&newBuild, o)
+		newBuild.ApplyMetadataOverride(override)
 	}
-skip:
 	if run.GetConclusion() != "" {
 		newBuild.FinishedAt = &updatedAt // maybe we can have a more accurate date?
 	}
