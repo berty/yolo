@@ -304,7 +304,6 @@ func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRe
 
 			// FIXME: parallelize?
 			for _, run := range ret.WorkflowRuns {
-				fmt.Println(run.GetURL(), run.HeadCommit, run.ID)
 				var overridepb *yolopb.MetadataOverride
 				// check for yolo.json
 				opts := &github.ListOptions{}
@@ -442,7 +441,6 @@ func (worker *githubWorker) batchFromWorkflowRun(run *github.WorkflowRun, prs []
 
 	if override != nil {
 		b, err := override.Marshal()
-		fmt.Println("SALAM LES REUFS ICI C4EST MOI", string(b), err)
 		if err != nil {
 			// supposed to be impossible
 			goto skip
