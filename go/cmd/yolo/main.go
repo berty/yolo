@@ -301,7 +301,7 @@ func yolo(args []string) error {
 			}
 
 			input := &yolopb.DevDumpObjects_Request{
-				WithPreloading: withPreloading,
+				WithPreloading: true,
 			}
 			ret, err := svc.DevDumpObjects(ctx, input)
 			if err != nil {
