@@ -1,9 +1,11 @@
 package yolosvc
 
 import (
+	"archive/zip"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"io"
 	"path/filepath"
 	"regexp"
 
@@ -66,4 +68,13 @@ func guessMissingBuildInfo(build *yolopb.Build) {
 		// FIXME: check if the build.project.driver is GitHub
 		build.VCSTagURL = fmt.Sprintf("%s/tree/%s", build.HasProjectID, build.VCSTag)
 	}
+}
+
+func readZipFile(zf *zip.File) ([]byte, error) {
+	f, err := zf.Open()
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	return io.ReadAll(f)
 }

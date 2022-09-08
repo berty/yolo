@@ -141,6 +141,10 @@ message Build {
 
   /// relationships
 
+  string raw_branch = 21;
+  string has_raw_commit_id = 22 [(gogoproto.customname) = "HasRawCommitID"];
+  string has_raw_project_id = 23 [(gogoproto.customname) = "HasRawProjectID"];
+
   repeated Artifact has_artifacts = 101 [(gogoproto.moretags) = "gorm:\"foreignkey:HasBuildID\""];
   Commit has_commit = 102;
   string has_commit_id = 103 [(gogoproto.customname) = "HasCommitID"];
