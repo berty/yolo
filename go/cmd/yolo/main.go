@@ -1,7 +1,6 @@
 package main
 
 import (
-	"berty.tech/yolo/v2/go/pkg/yolotree"
 	"context"
 	"flag"
 	"fmt"
@@ -16,6 +15,12 @@ import (
 	"berty.tech/yolo/v2/go/pkg/bintray"
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"berty.tech/yolo/v2/go/pkg/yolosvc"
+	"go.uber.org/zap"
+	"golang.org/x/oauth2"
+	"moul.io/godev"
+	"moul.io/hcfilters"
+	"moul.io/zapconfig"
+
 	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/google/go-github/v32/github"
 	"github.com/gregjones/httpcache"
@@ -29,11 +34,6 @@ import (
 	ff "github.com/peterbourgon/ff/v2"
 	"github.com/peterbourgon/ff/v2/ffcli"
 	"github.com/tevino/abool"
-	"go.uber.org/zap"
-	"golang.org/x/oauth2"
-	"moul.io/godev"
-	"moul.io/hcfilters"
-	"moul.io/zapconfig"
 )
 
 func main() {
@@ -265,7 +265,7 @@ func yolo(args []string) error {
 
 			ctx := context.Background()
 			input := &yolopb.DevDumpObjects_Request{
-				WithPreloading: withPreloading,
+				WithPreloading: true,
 			}
 			ret, err := svc.DevDumpObjects(ctx, input)
 			if err != nil {
@@ -281,7 +281,7 @@ func yolo(args []string) error {
 		Name:    `tree`,
 		FlagSet: storeFlagSet,
 		Options: []ff.Option{ff.WithEnvVarNoPrefix()},
-		Exec: func(_ context.Context, _ []string) error {
+		Exec: func(ctx context.Context, _ []string) error {
 			logger, err := loggerFromArgs(verbose, logFormat)
 			if err != nil {
 				return err
@@ -300,7 +300,6 @@ func yolo(args []string) error {
 				return err
 			}
 
-			ctx := context.Background()
 			input := &yolopb.DevDumpObjects_Request{
 				WithPreloading: withPreloading,
 			}
@@ -308,7 +307,7 @@ func yolo(args []string) error {
 			if err != nil {
 				return err
 			}
-			yolotree.DisplayTreeFormat(ret.Batch)
+			fmt.Println(ret.Batch.DisplayTreeFormat())
 
 			return nil
 		},

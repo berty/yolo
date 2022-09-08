@@ -1,5 +1,10 @@
 package yolopb
 
+import (
+	"fmt"
+	"sort"
+)
+
 func NewBatch() *Batch {
 	return &Batch{
 		Builds:        []*Build{},
@@ -135,4 +140,20 @@ func (b *Batch) AllObjects() []interface{} {
 		all = append(all, object)
 	}
 	return all
+}
+
+func (b *Batch) DisplayTreeFormat() (res string) {
+	sort.Slice(b.Builds, func(i, j int) bool {
+		return b.Builds[i].FinishedAt.Before(*b.Builds[j].FinishedAt)
+	})
+	for _, build := range b.Builds {
+		res += fmt.Sprintf(" - builds: %s from %s\n", build.ShortID, build.GetHasProjectID())
+		for _, a := range b.Artifacts {
+			if a.HasBuildID == build.ID {
+				res += fmt.Sprintf(" - > artifacts: %s\n", a.LocalPath)
+			}
+		}
+		res += "\n"
+	}
+	return
 }
