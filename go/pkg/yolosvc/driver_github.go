@@ -226,18 +226,17 @@ func getOverrideBuildpb(owner string, repo string, artifactID int64, token strin
 		return nil, err
 	}
 
-	for _, file := range zipReader.File {
-		if file.Name == "yolo.json" {
-			unzippedFileBytes, err := readZipFile(file)
-			if err != nil {
-				return nil, fmt.Errorf("fetch yolo.json: %w", err)
-			}
-			err = jsonpb.Unmarshal(bytes.NewReader(unzippedFileBytes), override)
-			if err != nil {
-				return nil, fmt.Errorf("fetch yolo.json: %w", err)
-			}
-			return override, nil
+	file := zipReader.File[0]
+	if file != nil && file.Name == "yolo.json" {
+		unzippedFileBytes, err := readZipFile(file)
+		if err != nil {
+			return nil, fmt.Errorf("fetch yolo.json: %w", err)
 		}
+		err = jsonpb.Unmarshal(bytes.NewReader(unzippedFileBytes), override)
+		if err != nil {
+			return nil, fmt.Errorf("fetch yolo.json: %w", err)
+		}
+		return override, nil
 	}
 	return nil, fmt.Errorf("fetch yolo.json: missing yolo.json inside artifact")
 }
