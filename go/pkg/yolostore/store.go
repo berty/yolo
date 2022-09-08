@@ -4,8 +4,9 @@ import (
 	"fmt"
 
 	"berty.tech/yolo/v2/go/pkg/yolopb"
-	"github.com/jinzhu/gorm"
 	"go.uber.org/zap"
+
+	"github.com/jinzhu/gorm"
 )
 
 type Store interface {
@@ -310,7 +311,9 @@ func (s *store) GetBuildList(bl GetBuildListOpts) ([]*yolopb.Build, error) {
 
 	query = query.
 		Preload("HasCommit").
+		Preload("HasRawCommit").
 		Preload("HasProject").
+		Preload("HasRawProject").
 		Preload("HasProject.HasOwner").
 		Preload("HasMergerequest").
 		Preload("HasMergerequest.HasProject").

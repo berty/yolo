@@ -212,7 +212,7 @@ func yolo(args []string) error {
 				gr.Add(func() error { return svc.PkgmanWorker(ctx, opts) }, func(_ error) { cancel() })
 			}
 			if githubToken != "" {
-				opts := yolosvc.GithubWorkerOpts{Logger: logger, MaxBuilds: maxBuilds, ClearCache: cc, Once: once, ReposFilter: githubRepos}
+				opts := yolosvc.GithubWorkerOpts{Logger: logger, MaxBuilds: maxBuilds, ClearCache: cc, Once: once, ReposFilter: githubRepos, Token: githubToken}
 				gr.Add(func() error { return svc.GitHubWorker(ctx, opts) }, func(_ error) { cancel() })
 			}
 

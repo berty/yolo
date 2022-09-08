@@ -1,15 +1,23 @@
 package yolosvc
 
 import (
+	"archive/zip"
+	"bytes"
 	"context"
 	"fmt"
+	"io"
+	"net/http"
 	"strings"
 	"time"
 
+	"github.com/gogo/protobuf/jsonpb"
+	//nolint:staticcheck
+
 	"berty.tech/yolo/v2/go/pkg/yolopb"
+	"go.uber.org/zap"
+
 	"github.com/google/go-github/v32/github"
 	"github.com/tevino/abool"
-	"go.uber.org/zap"
 )
 
 type GithubWorkerOpts struct {
@@ -19,6 +27,7 @@ type GithubWorkerOpts struct {
 	ClearCache  *abool.AtomicBool
 	Once        bool
 	ReposFilter string
+	Token       string
 }
 
 type githubRepoConfig struct {
@@ -34,7 +43,7 @@ type githubWorker struct {
 	repoConfigs []githubRepoConfig
 }
 
-func (worker *githubWorker) ParseConfig() (bool, error) {
+func (worker *githubWorker) parseConfig() (bool, error) {
 	if worker.opts.ReposFilter == "" {
 		return false, nil
 	}
@@ -66,7 +75,7 @@ func (svc *service) GitHubWorker(ctx context.Context, opts GithubWorkerOpts) err
 		logger: opts.Logger.Named("ghub"),
 	}
 
-	shouldRun, err := worker.ParseConfig()
+	shouldRun, err := worker.parseConfig()
 	if err != nil {
 		svc.logger.Error("invalid config", zap.Error(err))
 		return fmt.Errorf("%w", err)
@@ -187,6 +196,50 @@ func (worker *githubWorker) fetchBaseObjects(ctx context.Context) (*yolopb.Batch
 	return batch, nil
 }
 
+func getOverrideBuildpb(owner string, repo string, artifactID int64, token string) (*yolopb.MetadataOverride, error) {
+	override := &yolopb.MetadataOverride{}
+
+	// https://github.com/actions/upload-artifact#zipped-artifact-downloads
+	req, err := http.NewRequest("GET", fmt.Sprintf("https://api.github.com/repos/%s/%s/actions/artifacts/%d/zip", owner, repo, artifactID), nil)
+	if err != nil {
+		return nil, fmt.Errorf("fetch yolo.json: %w", err)
+	}
+
+	req.Header.Set("Accept", "application/vnd.github+json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("fetch yolo.json: %w", err)
+	}
+	defer res.Body.Close()
+
+	zipFile, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	bytesReader := bytes.NewReader(zipFile)
+	zipReader, err := zip.NewReader(bytesReader, int64(len(zipFile)))
+	if err != nil {
+		return nil, err
+	}
+
+	file := zipReader.File[0]
+	if file != nil && file.Name == "yolo.json" {
+		unzippedFileBytes, err := readZipFile(file)
+		if err != nil {
+			return nil, fmt.Errorf("fetch yolo.json: %w", err)
+		}
+		err = jsonpb.Unmarshal(bytes.NewReader(unzippedFileBytes), override)
+		if err != nil {
+			return nil, fmt.Errorf("fetch yolo.json: %w", err)
+		}
+		return override, nil
+	}
+	return nil, fmt.Errorf("fetch yolo.json: missing yolo.json inside artifact")
+}
+
 func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRepoConfig, iteration int, lastFinishedBuild time.Time) (*yolopb.Batch, error) {
 	batch := yolopb.NewBatch()
 
@@ -240,6 +293,7 @@ func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRe
 			if err != nil {
 				return nil, err
 			}
+
 			worker.logger.Debug("github.Actions.ListRepositoryWorkflowRuns",
 				zap.Int("total", len(ret.WorkflowRuns)),
 				zap.Duration("duration", time.Since(before)),
@@ -249,6 +303,10 @@ func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRe
 
 			// FIXME: parallelize?
 			for _, run := range ret.WorkflowRuns {
+				overridepb, err := worker.getOverridepb(ctx, repo, *run.ID)
+				if err != nil {
+					worker.svc.logger.Warn("parsing yolo.json", zap.Error(err))
+				}
 				// FIXME: compare updated_at before doing next calls
 				runs = append(runs, run)
 
@@ -268,9 +326,9 @@ func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRe
 					if err != nil {
 						return nil, err
 					}
-					batch.Merge(worker.batchFromWorkflowRun(run, ret))
+					batch.Merge(worker.batchFromWorkflowRun(run, ret, overridepb))
 				} else {
-					batch.Merge(worker.batchFromWorkflowRun(run, nil))
+					batch.Merge(worker.batchFromWorkflowRun(run, nil, overridepb))
 				}
 			}
 		}
@@ -323,6 +381,21 @@ func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRe
 	return batch, nil
 }
 
+func (worker *githubWorker) getOverridepb(ctx context.Context, repo githubRepoConfig, runID int64) (*yolopb.MetadataOverride, error) {
+	// check for yolo.json
+	opts := &github.ListOptions{}
+	retArti, _, err := worker.svc.ghc.Actions.ListWorkflowRunArtifacts(ctx, repo.owner, repo.repo, runID, opts)
+	if err != nil {
+		return nil, err
+	}
+	for _, arti := range retArti.Artifacts {
+		if arti.GetName() == "yolo.json" {
+			return getOverrideBuildpb(repo.owner, repo.repo, *arti.ID, worker.opts.Token)
+		}
+	}
+	return nil, nil
+}
+
 func (worker *githubWorker) batchFromWorkflowRunArtifact(run *github.WorkflowRun, artifact *github.Artifact) *yolopb.Batch {
 	batch := yolopb.NewBatch()
 
@@ -345,25 +418,31 @@ func (worker *githubWorker) batchFromWorkflowRunArtifact(run *github.WorkflowRun
 	return batch
 }
 
-func (worker *githubWorker) batchFromWorkflowRun(run *github.WorkflowRun, prs []*github.PullRequest) *yolopb.Batch {
+func (worker *githubWorker) batchFromWorkflowRun(run *github.WorkflowRun, prs []*github.PullRequest, override *yolopb.MetadataOverride) *yolopb.Batch {
 	batch := yolopb.NewBatch()
 	createdAt := run.GetCreatedAt().Time
 	updatedAt := run.GetUpdatedAt().Time
 	commitURL := run.GetHeadRepository().GetHTMLURL() + "/commit/" + run.GetHeadSHA()
 
 	newBuild := yolopb.Build{
-		ID:           run.GetHTMLURL(),
-		ShortID:      fmt.Sprintf("%d", run.GetID()),
-		CreatedAt:    &createdAt,
-		UpdatedAt:    &updatedAt,
-		HasCommitID:  run.GetHeadSHA(),
-		Branch:       run.GetHeadBranch(),
-		Driver:       yolopb.Driver_GitHub,
-		CommitURL:    commitURL,
-		HasProjectID: run.GetRepository().GetHTMLURL(),
-		Message:      run.GetHeadCommit().GetMessage(),
+		ID:              run.GetHTMLURL(),
+		ShortID:         fmt.Sprintf("%d", run.GetID()),
+		CreatedAt:       &createdAt,
+		UpdatedAt:       &updatedAt,
+		HasRawCommitID:  run.GetHeadSHA(),
+		HasCommitID:     run.GetHeadSHA(),
+		RawBranch:       run.GetHeadBranch(),
+		Branch:          run.GetHeadBranch(),
+		Driver:          yolopb.Driver_GitHub,
+		CommitURL:       commitURL,
+		HasRawProjectID: run.GetRepository().GetHTMLURL(),
+		HasProjectID:    run.GetRepository().GetHTMLURL(),
+		Message:         run.GetHeadCommit().GetMessage(),
 	}
 
+	if override != nil {
+		newBuild.ApplyMetadataOverride(override)
+	}
 	if run.GetConclusion() != "" {
 		newBuild.FinishedAt = &updatedAt // maybe we can have a more accurate date?
 	}

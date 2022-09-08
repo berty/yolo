@@ -120,6 +120,13 @@ message BuildListFilters {
 // DB Schemas
 //
 
+message MetadataOverride {
+  string branch = 11;
+  Commit has_commit = 102;
+  string has_commit_id = 103 [(gogoproto.customname) = "HasCommitID"];
+  string has_project_id = 105 [(gogoproto.customname) = "HasProjectID"];
+}
+
 message Build {
   /// fields
 
@@ -140,6 +147,12 @@ message Build {
   string vcs_tag_url = 15 [(gogoproto.customname) = "VCSTagURL"];
 
   /// relationships
+
+  string raw_branch = 21;
+  Commit has_raw_commit = 22;
+  Project has_raw_project = 23;
+  string has_raw_commit_id = 24 [(gogoproto.customname) = "HasRawCommitID"];
+  string has_raw_project_id = 25 [(gogoproto.customname) = "HasRawProjectID"];
 
   repeated Artifact has_artifacts = 101 [(gogoproto.moretags) = "gorm:\"foreignkey:HasBuildID\""];
   Commit has_commit = 102;
