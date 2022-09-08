@@ -4,19 +4,21 @@ import (
 	"archive/zip"
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/golang/protobuf/jsonpb" //nolint:staticcheck
+	"github.com/gogo/protobuf/jsonpb"
+	"github.com/gogo/protobuf/proto"
+	//nolint:staticcheck
 
 	"berty.tech/yolo/v2/go/pkg/yolopb"
+	"go.uber.org/zap"
+
 	"github.com/google/go-github/v32/github"
 	"github.com/tevino/abool"
-	"go.uber.org/zap"
 )
 
 type GithubWorkerOpts struct {
@@ -174,7 +176,7 @@ func (worker *githubWorker) fetchBaseObjects(ctx context.Context) (*yolopb.Batch
 		// FIXME: list last branches, commits etc for each repo
 	}
 
-    	// configure repo configs
+	// configure repo configs
 	{
 		// FIXME: automatically configure repo configs based on .github/yolo.yml
 		/*
@@ -195,46 +197,46 @@ func (worker *githubWorker) fetchBaseObjects(ctx context.Context) (*yolopb.Batch
 	return batch, nil
 }
 
-func getOverrideBuildpb(owner string, repo string, artiID int64, token string) (*yolopb.OverrideBuild, error) {
-	override := &yolopb.OverrideBuild{}
-	// FIXME: is it always .zip files ?
-	req, err := http.NewRequest("GET", fmt.Sprintf("https://api.github.com/repos/%s/%s/actions/artifacts/%d/zip", owner, repo, artiID), nil)
+func getOverrideBuildpb(owner string, repo string, artifactID int64, token string) (*yolopb.MetadataOverride, error) {
+	override := &yolopb.MetadataOverride{}
+
+	// https://github.com/actions/upload-artifact#zipped-artifact-downloads
+	req, err := http.NewRequest("GET", fmt.Sprintf("https://api.github.com/repos/%s/%s/actions/artifacts/%d/zip", owner, repo, artifactID), nil)
 	if err != nil {
-		return nil, errors.New("getOverrideBuildpb: " + err.Error())
+		return nil, fmt.Errorf("fetch yolo.json: %w", err)
 	}
 
 	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 
-	do, err := http.DefaultClient.Do(req)
+	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, errors.New("getOverrideBuildpb: " + err.Error())
+		return nil, fmt.Errorf("fetch yolo.json: %w", err)
 	}
-	body, err := io.ReadAll(do.Body)
+	defer res.Body.Close()
+
+	zipFile, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	zipReader, err := zip.NewReader(bytes.NewReader(body), int64(len(body)))
-	if err != nil {
-		return nil, errors.New("getOverrideBuildpb: " + err.Error())
-	}
+	bytesReader := bytes.NewReader(zipFile)
+	zipReader, err := zip.NewReader(bytesReader, int64(len(zipFile)))
 
-	for _, zipFile := range zipReader.File {
-		if zipFile.Name == "yolo.json" {
-			unzippedFileBytes, err := readZipFile(zipFile)
+	for _, file := range zipReader.File {
+		if file.Name == "yolo.json" {
+			unzippedFileBytes, err := readZipFile(file)
 			if err != nil {
-				return nil, errors.New("getOverrideBuildpb: " + err.Error())
+				return nil, fmt.Errorf("fetch yolo.json: %w", err)
 			}
-
 			err = jsonpb.Unmarshal(bytes.NewReader(unzippedFileBytes), override)
 			if err != nil {
-				return nil, errors.New("getOverrideBuildpb: " + err.Error())
+				return nil, fmt.Errorf("fetch yolo.json: %w", err)
 			}
 			return override, nil
 		}
 	}
-	return nil, nil
+	return nil, fmt.Errorf("fetch yolo.json: missing yolo.json inside artifact")
 }
 
 func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRepoConfig, iteration int, lastFinishedBuild time.Time) (*yolopb.Batch, error) {
@@ -300,7 +302,7 @@ func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRe
 
 			// FIXME: parallelize?
 			for _, run := range ret.WorkflowRuns {
-				var overridepb *yolopb.OverrideBuild
+				var overridepb *yolopb.MetadataOverride
 				// check for yolo.json
 				opts := &github.ListOptions{}
 				retArti, _, err := worker.svc.ghc.Actions.ListWorkflowRunArtifacts(ctx, repo.owner, repo.repo, *run.ID, opts)
@@ -413,7 +415,7 @@ func (worker *githubWorker) batchFromWorkflowRunArtifact(run *github.WorkflowRun
 	return batch
 }
 
-func (worker *githubWorker) batchFromWorkflowRun(run *github.WorkflowRun, prs []*github.PullRequest, overrideRun *yolopb.OverrideBuild) *yolopb.Batch {
+func (worker *githubWorker) batchFromWorkflowRun(run *github.WorkflowRun, prs []*github.PullRequest, override *yolopb.MetadataOverride) *yolopb.Batch {
 	batch := yolopb.NewBatch()
 	createdAt := run.GetCreatedAt().Time
 	updatedAt := run.GetUpdatedAt().Time
@@ -435,21 +437,21 @@ func (worker *githubWorker) batchFromWorkflowRun(run *github.WorkflowRun, prs []
 		Message:         run.GetHeadCommit().GetMessage(),
 	}
 
-	if overrideRun != nil {
-		// override project ID
-		if overrideRun.HasProjectID != "" {
-			newBuild.HasProjectID = overrideRun.HasProjectID
+	if override != nil {
+		b, err := override.Marshal()
+		if err != nil {
+			// supposed to be impossible
+			goto skip
 		}
-		// override commit ID
-		if overrideRun.HasCommitID != "" {
-			newBuild.HasCommitID = overrideRun.HasCommitID
+		o := &yolopb.Build{}
+		err = proto.Unmarshal(b, o)
+		if err != nil {
+			// supposed to be impossible
+			goto skip
 		}
-		// override branch
-		if overrideRun.Branch != "" {
-			newBuild.Branch = overrideRun.Branch
-		}
+		proto.Merge(&newBuild, o)
 	}
-
+skip:
 	if run.GetConclusion() != "" {
 		newBuild.FinishedAt = &updatedAt // maybe we can have a more accurate date?
 	}
