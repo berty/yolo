@@ -222,6 +222,9 @@ func getOverrideBuildpb(owner string, repo string, artifactID int64, token strin
 
 	bytesReader := bytes.NewReader(zipFile)
 	zipReader, err := zip.NewReader(bytesReader, int64(len(zipFile)))
+	if err != nil {
+		return nil, err
+	}
 
 	for _, file := range zipReader.File {
 		if file.Name == "yolo.json" {
@@ -302,6 +305,7 @@ func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRe
 
 			// FIXME: parallelize?
 			for _, run := range ret.WorkflowRuns {
+				fmt.Println(run.GetURL(), run.HeadCommit, run.ID)
 				var overridepb *yolopb.MetadataOverride
 				// check for yolo.json
 				opts := &github.ListOptions{}
@@ -439,6 +443,7 @@ func (worker *githubWorker) batchFromWorkflowRun(run *github.WorkflowRun, prs []
 
 	if override != nil {
 		b, err := override.Marshal()
+		fmt.Println("SALAM LES REUFS ICI C4EST MOI", string(b), err)
 		if err != nil {
 			// supposed to be impossible
 			goto skip
