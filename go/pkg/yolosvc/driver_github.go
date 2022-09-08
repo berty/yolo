@@ -304,21 +304,9 @@ func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRe
 
 			// FIXME: parallelize?
 			for _, run := range ret.WorkflowRuns {
-				// check for yolo.json
-				opts := &github.ListOptions{}
-				retArti, _, err := worker.svc.ghc.Actions.ListWorkflowRunArtifacts(ctx, repo.owner, repo.repo, *run.ID, opts)
+				overridepb, err := worker.getOverridepb(ctx, repo, *run.ID)
 				if err != nil {
-					return nil, err
-				}
-				var overridepb *yolopb.MetadataOverride
-				for _, arti := range retArti.Artifacts {
-					if *arti.Name == "yolo.json" {
-						// download the override config
-						overridepb, err = getOverrideBuildpb(repo.owner, repo.repo, *arti.ID, worker.opts.Token)
-						if err != nil {
-							worker.svc.logger.Warn("parsing yolo.json", zap.Error(err))
-						}
-					}
+					worker.svc.logger.Warn("parsing yolo.json", zap.Error(err))
 				}
 				// FIXME: compare updated_at before doing next calls
 				runs = append(runs, run)
@@ -392,6 +380,21 @@ func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRe
 	// FIXME: subscribe to organization events
 
 	return batch, nil
+}
+
+func (worker *githubWorker) getOverridepb(ctx context.Context, repo githubRepoConfig, runID int64) (*yolopb.MetadataOverride, error) {
+	// check for yolo.json
+	opts := &github.ListOptions{}
+	retArti, _, err := worker.svc.ghc.Actions.ListWorkflowRunArtifacts(ctx, repo.owner, repo.repo, runID, opts)
+	if err != nil {
+		return nil, err
+	}
+	for _, arti := range retArti.Artifacts {
+		if *arti.Name == "yolo.json" {
+			return getOverrideBuildpb(repo.owner, repo.repo, *arti.ID, worker.opts.Token)
+		}
+	}
+	return nil, nil
 }
 
 func (worker *githubWorker) batchFromWorkflowRunArtifact(run *github.WorkflowRun, artifact *github.Artifact) *yolopb.Batch {
