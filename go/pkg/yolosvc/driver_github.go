@@ -1,10 +1,17 @@
 package yolosvc
 
 import (
+	"archive/zip"
+	"bytes"
 	"context"
+	"errors"
 	"fmt"
+	"io"
+	"net/http"
 	"strings"
 	"time"
+
+	"github.com/golang/protobuf/jsonpb" //nolint:staticcheck
 
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"github.com/google/go-github/v32/github"
@@ -19,6 +26,7 @@ type GithubWorkerOpts struct {
 	ClearCache  *abool.AtomicBool
 	Once        bool
 	ReposFilter string
+	Token       string
 }
 
 type githubRepoConfig struct {
@@ -34,7 +42,7 @@ type githubWorker struct {
 	repoConfigs []githubRepoConfig
 }
 
-func (worker *githubWorker) ParseConfig() (bool, error) {
+func (worker *githubWorker) parseConfig() (bool, error) {
 	if worker.opts.ReposFilter == "" {
 		return false, nil
 	}
@@ -66,7 +74,7 @@ func (svc *service) GitHubWorker(ctx context.Context, opts GithubWorkerOpts) err
 		logger: opts.Logger.Named("ghub"),
 	}
 
-	shouldRun, err := worker.ParseConfig()
+	shouldRun, err := worker.parseConfig()
 	if err != nil {
 		svc.logger.Error("invalid config", zap.Error(err))
 		return fmt.Errorf("%w", err)
@@ -166,7 +174,7 @@ func (worker *githubWorker) fetchBaseObjects(ctx context.Context) (*yolopb.Batch
 		// FIXME: list last branches, commits etc for each repo
 	}
 
-	// configure repo configs
+    	// configure repo configs
 	{
 		// FIXME: automatically configure repo configs based on .github/yolo.yml
 		/*
@@ -185,6 +193,48 @@ func (worker *githubWorker) fetchBaseObjects(ctx context.Context) (*yolopb.Batch
 	}
 
 	return batch, nil
+}
+
+func getOverrideBuildpb(owner string, repo string, artiID int64, token string) (*yolopb.OverrideBuild, error) {
+	override := &yolopb.OverrideBuild{}
+	// FIXME: is it always .zip files ?
+	req, err := http.NewRequest("GET", fmt.Sprintf("https://api.github.com/repos/%s/%s/actions/artifacts/%d/zip", owner, repo, artiID), nil)
+	if err != nil {
+		return nil, errors.New("getOverrideBuildpb: " + err.Error())
+	}
+
+	req.Header.Set("Accept", "application/vnd.github+json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+
+	do, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, errors.New("getOverrideBuildpb: " + err.Error())
+	}
+	body, err := io.ReadAll(do.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	zipReader, err := zip.NewReader(bytes.NewReader(body), int64(len(body)))
+	if err != nil {
+		return nil, errors.New("getOverrideBuildpb: " + err.Error())
+	}
+
+	for _, zipFile := range zipReader.File {
+		if zipFile.Name == "yolo.json" {
+			unzippedFileBytes, err := readZipFile(zipFile)
+			if err != nil {
+				return nil, errors.New("getOverrideBuildpb: " + err.Error())
+			}
+
+			err = jsonpb.Unmarshal(bytes.NewReader(unzippedFileBytes), override)
+			if err != nil {
+				return nil, errors.New("getOverrideBuildpb: " + err.Error())
+			}
+			return override, nil
+		}
+	}
+	return nil, nil
 }
 
 func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRepoConfig, iteration int, lastFinishedBuild time.Time) (*yolopb.Batch, error) {
@@ -240,6 +290,7 @@ func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRe
 			if err != nil {
 				return nil, err
 			}
+
 			worker.logger.Debug("github.Actions.ListRepositoryWorkflowRuns",
 				zap.Int("total", len(ret.WorkflowRuns)),
 				zap.Duration("duration", time.Since(before)),
@@ -249,28 +300,45 @@ func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRe
 
 			// FIXME: parallelize?
 			for _, run := range ret.WorkflowRuns {
-				// FIXME: compare updated_at before doing next calls
-				runs = append(runs, run)
-
-				isFork := run.GetHeadRepository().GetOwner().GetLogin() != repo.owner ||
-					run.GetHeadRepository().GetName() != repo.repo
-
-				// fetch PRs associated to this run
-				if isFork || run.GetHeadBranch() != "master" {
-					opts := &github.PullRequestListOptions{}
-					ret, _, err := worker.svc.ghc.PullRequests.ListPullRequestsWithCommit(
-						ctx,
-						run.GetHeadRepository().GetOwner().GetLogin(),
-						run.GetHeadRepository().GetName(),
-						run.GetHeadSHA(),
-						opts,
-					)
-					if err != nil {
-						return nil, err
+				var overridepb *yolopb.OverrideBuild
+				// check for yolo.json
+				opts := &github.ListOptions{}
+				retArti, _, err := worker.svc.ghc.Actions.ListWorkflowRunArtifacts(ctx, repo.owner, repo.repo, *run.ID, opts)
+				if err != nil {
+					return nil, err
+				}
+				for _, arti := range retArti.Artifacts {
+					if *arti.Name == "yolo.json" {
+						// download the override config
+						overridepb, err = getOverrideBuildpb(repo.owner, repo.repo, *arti.ID, worker.opts.Token)
+						if err != nil {
+							worker.svc.logger.Warn("parsing yolo.json", zap.Error(err))
+						}
 					}
-					batch.Merge(worker.batchFromWorkflowRun(run, ret))
-				} else {
-					batch.Merge(worker.batchFromWorkflowRun(run, nil))
+
+					// FIXME: compare updated_at before doing next calls
+					runs = append(runs, run)
+
+					isFork := run.GetHeadRepository().GetOwner().GetLogin() != repo.owner ||
+						run.GetHeadRepository().GetName() != repo.repo
+
+					// fetch PRs associated to this run
+					if isFork || run.GetHeadBranch() != "master" {
+						opts := &github.PullRequestListOptions{}
+						ret, _, err := worker.svc.ghc.PullRequests.ListPullRequestsWithCommit(
+							ctx,
+							run.GetHeadRepository().GetOwner().GetLogin(),
+							run.GetHeadRepository().GetName(),
+							run.GetHeadSHA(),
+							opts,
+						)
+						if err != nil {
+							return nil, err
+						}
+						batch.Merge(worker.batchFromWorkflowRun(run, ret, overridepb))
+					} else {
+						batch.Merge(worker.batchFromWorkflowRun(run, nil, overridepb))
+					}
 				}
 			}
 		}
@@ -345,23 +413,41 @@ func (worker *githubWorker) batchFromWorkflowRunArtifact(run *github.WorkflowRun
 	return batch
 }
 
-func (worker *githubWorker) batchFromWorkflowRun(run *github.WorkflowRun, prs []*github.PullRequest) *yolopb.Batch {
+func (worker *githubWorker) batchFromWorkflowRun(run *github.WorkflowRun, prs []*github.PullRequest, overrideRun *yolopb.OverrideBuild) *yolopb.Batch {
 	batch := yolopb.NewBatch()
 	createdAt := run.GetCreatedAt().Time
 	updatedAt := run.GetUpdatedAt().Time
 	commitURL := run.GetHeadRepository().GetHTMLURL() + "/commit/" + run.GetHeadSHA()
 
 	newBuild := yolopb.Build{
-		ID:           run.GetHTMLURL(),
-		ShortID:      fmt.Sprintf("%d", run.GetID()),
-		CreatedAt:    &createdAt,
-		UpdatedAt:    &updatedAt,
-		HasCommitID:  run.GetHeadSHA(),
-		Branch:       run.GetHeadBranch(),
-		Driver:       yolopb.Driver_GitHub,
-		CommitURL:    commitURL,
-		HasProjectID: run.GetRepository().GetHTMLURL(),
-		Message:      run.GetHeadCommit().GetMessage(),
+		ID:              run.GetHTMLURL(),
+		ShortID:         fmt.Sprintf("%d", run.GetID()),
+		CreatedAt:       &createdAt,
+		UpdatedAt:       &updatedAt,
+		HasRawCommitID:  run.GetHeadSHA(),
+		HasCommitID:     run.GetHeadSHA(),
+		RawBranch:       run.GetHeadBranch(),
+		Branch:          run.GetHeadBranch(),
+		Driver:          yolopb.Driver_GitHub,
+		CommitURL:       commitURL,
+		HasRawProjectID: run.GetRepository().GetHTMLURL(),
+		HasProjectID:    run.GetRepository().GetHTMLURL(),
+		Message:         run.GetHeadCommit().GetMessage(),
+	}
+
+	if overrideRun != nil {
+		// override project ID
+		if overrideRun.HasProjectID != "" {
+			newBuild.HasProjectID = overrideRun.HasProjectID
+		}
+		// override commit ID
+		if overrideRun.HasCommitID != "" {
+			newBuild.HasCommitID = overrideRun.HasCommitID
+		}
+		// override branch
+		if overrideRun.Branch != "" {
+			newBuild.Branch = overrideRun.Branch
+		}
 	}
 
 	if run.GetConclusion() != "" {
