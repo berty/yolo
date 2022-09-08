@@ -304,13 +304,13 @@ func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRe
 
 			// FIXME: parallelize?
 			for _, run := range ret.WorkflowRuns {
-				var overridepb *yolopb.MetadataOverride
 				// check for yolo.json
 				opts := &github.ListOptions{}
 				retArti, _, err := worker.svc.ghc.Actions.ListWorkflowRunArtifacts(ctx, repo.owner, repo.repo, *run.ID, opts)
 				if err != nil {
 					return nil, err
 				}
+				var overridepb *yolopb.MetadataOverride
 				for _, arti := range retArti.Artifacts {
 					if *arti.Name == "yolo.json" {
 						// download the override config
@@ -319,30 +319,29 @@ func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRe
 							worker.svc.logger.Warn("parsing yolo.json", zap.Error(err))
 						}
 					}
+				}
+				// FIXME: compare updated_at before doing next calls
+				runs = append(runs, run)
 
-					// FIXME: compare updated_at before doing next calls
-					runs = append(runs, run)
+				isFork := run.GetHeadRepository().GetOwner().GetLogin() != repo.owner ||
+					run.GetHeadRepository().GetName() != repo.repo
 
-					isFork := run.GetHeadRepository().GetOwner().GetLogin() != repo.owner ||
-						run.GetHeadRepository().GetName() != repo.repo
-
-					// fetch PRs associated to this run
-					if isFork || run.GetHeadBranch() != "master" {
-						opts := &github.PullRequestListOptions{}
-						ret, _, err := worker.svc.ghc.PullRequests.ListPullRequestsWithCommit(
-							ctx,
-							run.GetHeadRepository().GetOwner().GetLogin(),
-							run.GetHeadRepository().GetName(),
-							run.GetHeadSHA(),
-							opts,
-						)
-						if err != nil {
-							return nil, err
-						}
-						batch.Merge(worker.batchFromWorkflowRun(run, ret, overridepb))
-					} else {
-						batch.Merge(worker.batchFromWorkflowRun(run, nil, overridepb))
+				// fetch PRs associated to this run
+				if isFork || run.GetHeadBranch() != "master" {
+					opts := &github.PullRequestListOptions{}
+					ret, _, err := worker.svc.ghc.PullRequests.ListPullRequestsWithCommit(
+						ctx,
+						run.GetHeadRepository().GetOwner().GetLogin(),
+						run.GetHeadRepository().GetName(),
+						run.GetHeadSHA(),
+						opts,
+					)
+					if err != nil {
+						return nil, err
 					}
+					batch.Merge(worker.batchFromWorkflowRun(run, ret, overridepb))
+				} else {
+					batch.Merge(worker.batchFromWorkflowRun(run, nil, overridepb))
 				}
 			}
 		}
