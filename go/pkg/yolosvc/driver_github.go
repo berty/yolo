@@ -440,9 +440,18 @@ func (worker *githubWorker) batchFromWorkflowRun(run *github.WorkflowRun, prs []
 		Message:         run.GetHeadCommit().GetMessage(),
 	}
 
+	if len(prs) > 0 {
+		pr := prs[0] // only take the first one
+		newBuild.HasMergerequestID = pr.GetHTMLURL()
+		newBuild.HasRawMergerequestID = pr.GetHTMLURL()
+	}
+
 	if override != nil {
 		newBuild.ApplyMetadataOverride(override)
 	}
+
+	fmt.Println("override", override)
+
 	if run.GetConclusion() != "" {
 		newBuild.FinishedAt = &updatedAt // maybe we can have a more accurate date?
 	}
@@ -484,11 +493,6 @@ func (worker *githubWorker) batchFromWorkflowRun(run *github.WorkflowRun, prs []
 				zap.String("url", run.GetURL()),
 			)
 		}
-	}
-
-	if len(prs) > 0 {
-		pr := prs[0] // only take the first one
-		newBuild.HasMergerequestID = pr.GetHTMLURL()
 	}
 
 	guessMissingBuildInfo(&newBuild)
