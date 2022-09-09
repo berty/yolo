@@ -122,7 +122,6 @@ message BuildListFilters {
 
 message MetadataOverride {
   string branch = 11;
-  Commit has_commit = 102;
   string has_commit_id = 103 [(gogoproto.customname) = "HasCommitID"];
   string has_project_id = 105 [(gogoproto.customname) = "HasProjectID"];
 }
