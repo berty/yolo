@@ -450,8 +450,6 @@ func (worker *githubWorker) batchFromWorkflowRun(run *github.WorkflowRun, prs []
 		newBuild.ApplyMetadataOverride(override)
 	}
 
-	fmt.Println("override", override)
-
 	if run.GetConclusion() != "" {
 		newBuild.FinishedAt = &updatedAt // maybe we can have a more accurate date?
 	}
