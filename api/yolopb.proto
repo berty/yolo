@@ -124,6 +124,7 @@ message MetadataOverride {
   string branch = 11;
   string has_commit_id = 103 [(gogoproto.customname) = "HasCommitID"];
   string has_project_id = 105 [(gogoproto.customname) = "HasProjectID"];
+  string has_mergerequest_id = 107 [(gogoproto.customname) = "HasMergeRequestID"];
 }
 
 message Build {
@@ -150,8 +151,10 @@ message Build {
   string raw_branch = 21;
   Commit has_raw_commit = 22;
   Project has_raw_project = 23;
-  string has_raw_commit_id = 24 [(gogoproto.customname) = "HasRawCommitID"];
-  string has_raw_project_id = 25 [(gogoproto.customname) = "HasRawProjectID"];
+  MergeRequest has_raw_mergerequest = 24;
+  string has_raw_commit_id = 25 [(gogoproto.customname) = "HasRawCommitID"];
+  string has_raw_project_id = 26 [(gogoproto.customname) = "HasRawProjectID"];
+  string has_raw_mergerequest_id = 27 [(gogoproto.customname) = "HasRawMergerequestID"];
 
   repeated Artifact has_artifacts = 101 [(gogoproto.moretags) = "gorm:\"foreignkey:HasBuildID\""];
   Commit has_commit = 102;

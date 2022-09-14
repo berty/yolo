@@ -316,6 +316,7 @@ func (s *store) GetBuildList(bl GetBuildListOpts) ([]*yolopb.Build, error) {
 		Preload("HasRawProject").
 		Preload("HasProject.HasOwner").
 		Preload("HasMergerequest").
+		Preload("HasRawMergerequest").
 		Preload("HasMergerequest.HasProject").
 		Preload("HasMergerequest.HasAuthor").
 		Preload("HasMergerequest.HasCommit").
