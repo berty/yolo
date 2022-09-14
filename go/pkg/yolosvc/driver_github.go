@@ -424,6 +424,8 @@ func (worker *githubWorker) batchFromWorkflowRun(run *github.WorkflowRun, prs []
 	updatedAt := run.GetUpdatedAt().Time
 	commitURL := run.GetHeadRepository().GetHTMLURL() + "/commit/" + run.GetHeadSHA()
 
+	commitCreatedAt := run.GetHeadCommit().GetTimestamp().Time
+
 	newBuild := yolopb.Build{
 		ID:              run.GetHTMLURL(),
 		ShortID:         fmt.Sprintf("%d", run.GetID()),
@@ -438,6 +440,17 @@ func (worker *githubWorker) batchFromWorkflowRun(run *github.WorkflowRun, prs []
 		HasRawProjectID: run.GetRepository().GetHTMLURL(),
 		HasProjectID:    run.GetRepository().GetHTMLURL(),
 		Message:         run.GetHeadCommit().GetMessage(),
+	}
+
+	newCommit := yolopb.Commit{}
+	if run.GetHeadCommit() != nil {
+		newCommit = yolopb.Commit{
+			ID:        run.GetHeadCommit().GetID(),
+			CreatedAt: &commitCreatedAt,
+			Message:   run.GetHeadCommit().GetMessage(),
+			Driver:    yolopb.Driver_GitHub,
+			Branch:    run.GetHeadBranch(),
+		}
 	}
 
 	if len(prs) > 0 {
@@ -495,6 +508,7 @@ func (worker *githubWorker) batchFromWorkflowRun(run *github.WorkflowRun, prs []
 
 	guessMissingBuildInfo(&newBuild)
 	batch.Builds = append(batch.Builds, &newBuild)
+	batch.Commits = append(batch.Commits, &newCommit)
 	return batch
 }
 
