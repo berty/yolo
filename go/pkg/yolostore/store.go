@@ -2,6 +2,7 @@ package yolostore
 
 import (
 	"fmt"
+	"strings"
 
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"go.uber.org/zap"
@@ -241,6 +242,17 @@ type GetBuildListOpts struct {
 	Limit                int32
 }
 
+//  i.e, has_project=berty/berty -> has_project=https://github.com/berty/berty
+func formatProjectIDs(projectIDs []string) []string {
+	for i, p := range projectIDs {
+		if strings.Count(p, "/") == 1 {
+			projectIDs[i] = fmt.Sprintf("https://github.com/%s", p)
+			continue
+		}
+	}
+	return projectIDs
+}
+
 func (s *store) GetBuildList(bl GetBuildListOpts) ([]*yolopb.Build, error) {
 	var builds []*yolopb.Build
 
@@ -279,7 +291,8 @@ func (s *store) GetBuildList(bl GetBuildListOpts) ([]*yolopb.Build, error) {
 			query = query.Where("build.driver IN (?)", bl.BuildDriver)
 		}
 		if len(bl.ProjectID) > 0 {
-			query = query.Joins("JOIN project ON project.id = build.has_project_id AND (project.id IN (?) OR project.yolo_id IN (?))", bl.ProjectID, bl.ProjectID)
+			formattedProjectsID := formatProjectIDs(bl.ProjectID)
+			query = query.Joins("JOIN project ON project.id = build.has_project_id AND (project.id IN (?) OR project.yolo_id IN (?))", formattedProjectsID, formattedProjectsID)
 		}
 		if len(bl.MergeRequestID) > 0 {
 			query = query.Where("build.has_mergerequest_id IN (?)", bl.MergeRequestID)
