@@ -100,6 +100,9 @@ message BuildList {
 
     // filter builds with merge requests
     bool with_no_mergerequest = 14;
+
+    // sort by commit date
+    bool sort_by_commit_date = 15;
   }
   message Response {
     repeated Build builds = 1;

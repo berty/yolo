@@ -32,6 +32,7 @@ func (svc *service) BuildList(ctx context.Context, req *yolopb.BuildList_Request
 		MergeRequestState:    req.MergerequestState,
 		Branch:               req.Branch,
 		Limit:                req.Limit,
+		SortByCommitDate:     req.SortByCommitDate,
 	}
 
 	var err error
