@@ -196,7 +196,7 @@ func (worker *githubWorker) fetchBaseObjects(ctx context.Context) (*yolopb.Batch
 	return batch, nil
 }
 
-func getOverrideBuildpb(owner string, repo string, artifactID int64, token string) (*yolopb.MetadataOverride, error) {
+func getOverridedBuildpb(owner string, repo string, artifactID int64, token string) (*yolopb.MetadataOverride, error) {
 	override := &yolopb.MetadataOverride{}
 
 	// https://github.com/actions/upload-artifact#zipped-artifact-downloads
@@ -303,7 +303,7 @@ func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRe
 
 			// FIXME: parallelize?
 			for _, run := range ret.WorkflowRuns {
-				overridepb, err := worker.getOverridepb(ctx, repo, *run.ID)
+				overridedpb, err := worker.getOverridedpb(ctx, repo, *run.ID)
 				if err != nil {
 					worker.svc.logger.Warn("parsing yolo.json", zap.Error(err))
 				}
@@ -326,9 +326,9 @@ func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRe
 					if err != nil {
 						return nil, err
 					}
-					batch.Merge(worker.batchFromWorkflowRun(run, ret, overridepb))
+					batch.Merge(worker.batchFromWorkflowRun(run, ret, overridedpb))
 				} else {
-					batch.Merge(worker.batchFromWorkflowRun(run, nil, overridepb))
+					batch.Merge(worker.batchFromWorkflowRun(run, nil, overridedpb))
 				}
 			}
 		}
@@ -381,7 +381,7 @@ func (worker *githubWorker) fetchRepoActivity(ctx context.Context, repo githubRe
 	return batch, nil
 }
 
-func (worker *githubWorker) getOverridepb(ctx context.Context, repo githubRepoConfig, runID int64) (*yolopb.MetadataOverride, error) {
+func (worker *githubWorker) getOverridedpb(ctx context.Context, repo githubRepoConfig, runID int64) (*yolopb.MetadataOverride, error) {
 	// check for yolo.json
 	opts := &github.ListOptions{}
 	retArti, _, err := worker.svc.ghc.Actions.ListWorkflowRunArtifacts(ctx, repo.owner, repo.repo, runID, opts)
@@ -390,7 +390,7 @@ func (worker *githubWorker) getOverridepb(ctx context.Context, repo githubRepoCo
 	}
 	for _, arti := range retArti.Artifacts {
 		if arti.GetName() == "yolo.json" {
-			return getOverrideBuildpb(repo.owner, repo.repo, *arti.ID, worker.opts.Token)
+			return getOverridedBuildpb(repo.owner, repo.repo, *arti.ID, worker.opts.Token)
 		}
 	}
 	return nil, nil
