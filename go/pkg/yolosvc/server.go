@@ -4,11 +4,12 @@ import (
 	"context"
 	"crypto/subtle"
 	"fmt"
-	"google.golang.org/grpc/credentials/insecure"
 	"net"
 	"net/http"
 	"strings"
 	"time"
+
+	"google.golang.org/grpc/credentials/insecure"
 
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"github.com/go-chi/chi"
