@@ -71,13 +71,13 @@ func (s server) parse(fs *flag.FlagSet) {
 	fs.StringVar(&optsGlobal.server.iosPrivkeyPass, "ios-pass", "", "iOS signing: password for private key or p12 file")
 }
 
-func serverCommand(commonFlagsBuilder flagsBuilder) *climan.Command {
+func serverCommand() *climan.Command {
 	return &climan.Command{
 		Name:      `server`,
 		ShortHelp: `Start a Yolo Server`,
 		FFOptions: []ff.Option{ff.WithEnvVarNoPrefix()},
 		FlagSetBuilder: func(fs *flag.FlagSet) {
-			commonFlagsBuilder(fs)
+			optsGlobal.commonFlagsBuilder(fs)
 			optsGlobal.server.parse(fs)
 		},
 		Exec: func(ctx context.Context, _ []string) error {

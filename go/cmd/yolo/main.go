@@ -30,14 +30,18 @@ import (
 	ff "github.com/peterbourgon/ff/v3"
 )
 
-type flagsBuilder func(fs *flag.FlagSet)
-
 type GlobalOptions struct {
 	verbose     bool
 	logFormat   string
 	dbStorePath string
 
 	server server
+}
+
+func (g *GlobalOptions) commonFlagsBuilder(fs *flag.FlagSet) {
+	fs.BoolVar(&g.verbose, "v", false, "increase log verbosity")
+	fs.StringVar(&g.logFormat, "log-format", "console", strings.Join(zapconfig.AvailablePresets, ", "))
+	fs.StringVar(&g.dbStorePath, "db-path", ":memory:", "DB Store path")
 }
 
 var optsGlobal = &GlobalOptions{}
@@ -56,20 +60,14 @@ func yolo(args []string) error {
 	rand.Seed(time.Now().UnixNano())
 	rootFlagSet.SetOutput(os.Stderr)
 
-	commonFlagsBuilder := func(fs *flag.FlagSet) {
-		fs.BoolVar(&optsGlobal.verbose, "v", false, "increase log verbosity")
-		fs.StringVar(&optsGlobal.logFormat, "log-format", "console", strings.Join(zapconfig.AvailablePresets, ", "))
-		fs.StringVar(&optsGlobal.dbStorePath, "db-path", ":memory:", "DB Store path")
-	}
-
 	root := &climan.Command{
 		ShortUsage:     `server [flags] <subcommand>`,
-		FlagSetBuilder: commonFlagsBuilder,
+		FlagSetBuilder: optsGlobal.commonFlagsBuilder,
 		Subcommands: []*climan.Command{
-			serverCommand(commonFlagsBuilder),
-			dumpObjectsCommand(commonFlagsBuilder),
-			infoCommand(commonFlagsBuilder),
-			treeCommand(commonFlagsBuilder),
+			serverCommand(),
+			dumpObjectsCommand(),
+			infoCommand(),
+			treeCommand(),
 		},
 		FFOptions: []ff.Option{ff.WithEnvVarNoPrefix()},
 		Exec: func(_ context.Context, _ []string) error {

@@ -12,10 +12,10 @@ import (
 	"github.com/peterbourgon/ff/v3"
 )
 
-func dumpObjectsCommand(commonFlagsBuilder flagsBuilder) *climan.Command {
+func dumpObjectsCommand() *climan.Command {
 	return &climan.Command{
 		Name:           `dump-objects`,
-		FlagSetBuilder: commonFlagsBuilder,
+		FlagSetBuilder: optsGlobal.commonFlagsBuilder,
 		FFOptions:      []ff.Option{ff.WithEnvVarNoPrefix()},
 		Exec: func(_ context.Context, _ []string) error {
 			logger, err := loggerFromArgs(optsGlobal.verbose, optsGlobal.logFormat)
@@ -51,10 +51,10 @@ func dumpObjectsCommand(commonFlagsBuilder flagsBuilder) *climan.Command {
 	}
 }
 
-func treeCommand(commonFlagsBuilder flagsBuilder) *climan.Command {
+func treeCommand() *climan.Command {
 	return &climan.Command{
 		Name:           `tree`,
-		FlagSetBuilder: commonFlagsBuilder,
+		FlagSetBuilder: optsGlobal.commonFlagsBuilder,
 		FFOptions:      []ff.Option{ff.WithEnvVarNoPrefix()},
 		Exec: func(ctx context.Context, _ []string) error {
 			logger, err := loggerFromArgs(optsGlobal.verbose, optsGlobal.logFormat)
@@ -89,10 +89,10 @@ func treeCommand(commonFlagsBuilder flagsBuilder) *climan.Command {
 	}
 }
 
-func infoCommand(commonFlagsBuilder flagsBuilder) *climan.Command {
+func infoCommand() *climan.Command {
 	return &climan.Command{
 		Name:           `info`,
-		FlagSetBuilder: commonFlagsBuilder,
+		FlagSetBuilder: optsGlobal.commonFlagsBuilder,
 		FFOptions:      []ff.Option{ff.WithEnvVarNoPrefix()},
 		Exec: func(_ context.Context, _ []string) error {
 			logger, err := loggerFromArgs(optsGlobal.verbose, optsGlobal.logFormat)
