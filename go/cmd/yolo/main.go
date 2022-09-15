@@ -25,8 +25,8 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	circleci "github.com/jszwedko/go-circleci"
 	"github.com/peterbourgon/diskv"
-	ff "github.com/peterbourgon/ff/v2"
-	"github.com/peterbourgon/ff/v2/ffcli"
+	ff "github.com/peterbourgon/ff/v3"
+	"github.com/peterbourgon/ff/v3/ffcli"
 )
 
 var (

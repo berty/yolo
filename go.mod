@@ -21,7 +21,7 @@ require (
 	github.com/oklog/run v1.1.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/peterbourgon/diskv v2.0.1+incompatible
-	github.com/peterbourgon/ff/v2 v2.0.1
+	github.com/peterbourgon/ff/v3 v3.3.0
 	github.com/rs/cors v1.8.2
 	github.com/stretchr/signature v0.0.0-20160104132143-168b2a1e1b56
 	github.com/stretchr/testify v1.8.0

@@ -14,8 +14,8 @@ import (
 	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/jszwedko/go-circleci"
 	"github.com/oklog/run"
-	"github.com/peterbourgon/ff/v2"
-	"github.com/peterbourgon/ff/v2/ffcli"
+	"github.com/peterbourgon/ff/v3"
+	"github.com/peterbourgon/ff/v3/ffcli"
 	"github.com/tevino/abool"
 )
 
