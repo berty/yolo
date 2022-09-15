@@ -36,7 +36,7 @@ require (
 	moul.io/godev v1.7.0
 	moul.io/hcfilters v1.3.1
 	moul.io/pkgman v1.4.3
-	moul.io/u v1.24.1-0.20210613090436-cb608187834e
+	moul.io/u v1.25.1
 	moul.io/zapconfig v1.4.0
 	moul.io/zapgorm v1.1.5
 )
@@ -69,4 +69,5 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	moul.io/climan v1.0.0 // indirect
 )

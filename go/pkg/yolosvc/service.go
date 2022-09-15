@@ -9,13 +9,14 @@ import (
 	"berty.tech/yolo/v2/go/pkg/bintray"
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"berty.tech/yolo/v2/go/pkg/yolostore"
+	"go.uber.org/zap"
+	"moul.io/u"
+
 	"github.com/buildkite/go-buildkite/buildkite"
 	"github.com/google/go-github/v32/github"
 	"github.com/jinzhu/gorm"
 	"github.com/jszwedko/go-circleci"
 	"github.com/tevino/abool"
-	"go.uber.org/zap"
-	"moul.io/u"
 )
 
 type Service interface {
@@ -86,8 +87,8 @@ func NewService(db *gorm.DB, opts ServiceOpts) (Service, error) {
 		devMode:                opts.DevMode,
 		clearCache:             opts.ClearCache,
 		artifactsCachePath:     opts.ArtifactsCachePath,
-		iosPrivkeyPath:         u.MustExpandUser(opts.IOSPrivkeyPath),
-		iosProvPath:            u.MustExpandUser(opts.IOSProvPath),
+		iosPrivkeyPath:         u.MustExpandPath(opts.IOSPrivkeyPath),
+		iosProvPath:            u.MustExpandPath(opts.IOSProvPath),
 		iosPrivkeyPass:         opts.IOSPrivkeyPass,
 		artifactsCacheMapMutex: map[string]*sync.Mutex{},
 	}, nil
