@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 	"berty.tech/yolo/v2/go/pkg/bintray"
 	"go.uber.org/zap"
 	"golang.org/x/oauth2"
+	"moul.io/climan"
 	"moul.io/hcfilters"
 	"moul.io/zapconfig"
 
@@ -25,19 +27,34 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	circleci "github.com/jszwedko/go-circleci"
 	"github.com/peterbourgon/diskv"
-	ff "github.com/peterbourgon/ff/v2"
-	"github.com/peterbourgon/ff/v2/ffcli"
+	ff "github.com/peterbourgon/ff/v3"
 )
 
-var (
-	verbose        bool
-	logFormat      string
-	dbStorePath    string
-	withPreloading bool
-)
+type globalOptions struct {
+	verbose     bool
+	logFormat   string
+	dbStorePath string
+
+	server serverOpts
+}
+
+func (g *globalOptions) applyDefaults() {
+	g.verbose = false
+	g.logFormat = "console"
+	g.dbStorePath = ":memory:"
+}
+
+func (g *globalOptions) commonFlagsBuilder(fs *flag.FlagSet) {
+	fs.BoolVar(&g.verbose, "v", g.verbose, "increase log verbosity")
+	fs.StringVar(&g.logFormat, "log-format", g.logFormat, strings.Join(zapconfig.AvailablePresets, ", "))
+	fs.StringVar(&g.dbStorePath, "db-path", g.dbStorePath, "DB Store path")
+}
+
+var glOpts = &globalOptions{}
 
 func main() {
-	err := yolo(os.Args)
+	glOpts.applyDefaults()
+	err := yolo(os.Args[1:])
 	if err != nil {
 		log.Fatalf("err: %+v", err)
 		os.Exit(1)
@@ -49,25 +66,27 @@ func yolo(args []string) error {
 	rootFlagSet := flag.NewFlagSet("yolo", flag.ExitOnError)
 	rand.Seed(time.Now().UnixNano())
 	rootFlagSet.SetOutput(os.Stderr)
-	rootFlagSet.BoolVar(&verbose, "v", false, "increase log verbosity")
-	rootFlagSet.StringVar(&logFormat, "log-format", "console", strings.Join(zapconfig.AvailablePresets, ", "))
 
-	root := &ffcli.Command{
-		ShortUsage: `server [flags] <subcommand>`,
-		FlagSet:    rootFlagSet,
-		Subcommands: []*ffcli.Command{
+	root := &climan.Command{
+		ShortUsage:     `yolo [flags] <subcommand>`,
+		FlagSetBuilder: glOpts.commonFlagsBuilder,
+		Subcommands: []*climan.Command{
 			serverCommand(),
 			dumpObjectsCommand(),
 			infoCommand(),
 			treeCommand(),
 		},
-		Options: []ff.Option{ff.WithEnvVarNoPrefix()},
+		FFOptions: []ff.Option{ff.WithEnvVarNoPrefix()},
 		Exec: func(_ context.Context, _ []string) error {
 			return flag.ErrHelp
 		},
 	}
 
-	return root.ParseAndRun(context.Background(), os.Args[1:])
+	if err := root.Parse(args); err != nil {
+		return fmt.Errorf("parse error: %w", err)
+	}
+
+	return root.Run(context.Background())
 }
 
 func bintrayClientFromArgs(username, token string, logger *zap.Logger) (*bintray.Client, error) {

@@ -21,7 +21,7 @@ require (
 	github.com/oklog/run v1.1.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/peterbourgon/diskv v2.0.1+incompatible
-	github.com/peterbourgon/ff/v2 v2.0.1
+	github.com/peterbourgon/ff/v3 v3.3.0
 	github.com/rs/cors v1.8.2
 	github.com/stretchr/signature v0.0.0-20160104132143-168b2a1e1b56
 	github.com/stretchr/testify v1.8.0
@@ -36,7 +36,7 @@ require (
 	moul.io/godev v1.7.0
 	moul.io/hcfilters v1.3.1
 	moul.io/pkgman v1.4.3
-	moul.io/u v1.24.1-0.20210613090436-cb608187834e
+	moul.io/u v1.25.1
 	moul.io/zapconfig v1.4.0
 	moul.io/zapgorm v1.1.5
 )
@@ -69,4 +69,5 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	moul.io/climan v1.0.0 // indirect
 )

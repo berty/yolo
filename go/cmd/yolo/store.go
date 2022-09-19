@@ -2,37 +2,27 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 
 	"berty.tech/yolo/v2/go/pkg/yolopb"
 	"berty.tech/yolo/v2/go/pkg/yolosvc"
+	"moul.io/climan"
 	"moul.io/godev"
 
-	"github.com/peterbourgon/ff/v2"
-	"github.com/peterbourgon/ff/v2/ffcli"
+	"github.com/peterbourgon/ff/v3"
 )
 
-func storeFlagSet() *flag.FlagSet {
-	fs := flag.NewFlagSet("store", flag.ExitOnError)
-
-	fs.StringVar(&dbStorePath, "db-path", ":memory:", "DB Store path")
-	fs.BoolVar(&withPreloading, "with-preloading", false, "with auto DB preloading")
-
-	return fs
-}
-
-func dumpObjectsCommand() *ffcli.Command {
-	return &ffcli.Command{
-		Name:    `dump-objects`,
-		FlagSet: storeFlagSet(),
-		Options: []ff.Option{ff.WithEnvVarNoPrefix()},
+func dumpObjectsCommand() *climan.Command {
+	return &climan.Command{
+		Name:           `dump-objects`,
+		FlagSetBuilder: glOpts.commonFlagsBuilder,
+		FFOptions:      []ff.Option{ff.WithEnvVarNoPrefix()},
 		Exec: func(_ context.Context, _ []string) error {
-			logger, err := loggerFromArgs(verbose, logFormat)
+			logger, err := loggerFromArgs(glOpts.verbose, glOpts.logFormat)
 			if err != nil {
 				return err
 			}
-			db, err := dbFromArgs(dbStorePath, logger)
+			db, err := dbFromArgs(glOpts.dbStorePath, logger)
 			if err != nil {
 				return err
 			}
@@ -61,17 +51,17 @@ func dumpObjectsCommand() *ffcli.Command {
 	}
 }
 
-func treeCommand() *ffcli.Command {
-	return &ffcli.Command{
-		Name:    `tree`,
-		FlagSet: storeFlagSet(),
-		Options: []ff.Option{ff.WithEnvVarNoPrefix()},
+func treeCommand() *climan.Command {
+	return &climan.Command{
+		Name:           `tree`,
+		FlagSetBuilder: glOpts.commonFlagsBuilder,
+		FFOptions:      []ff.Option{ff.WithEnvVarNoPrefix()},
 		Exec: func(ctx context.Context, _ []string) error {
-			logger, err := loggerFromArgs(verbose, logFormat)
+			logger, err := loggerFromArgs(glOpts.verbose, glOpts.logFormat)
 			if err != nil {
 				return err
 			}
-			db, err := dbFromArgs(dbStorePath, logger)
+			db, err := dbFromArgs(glOpts.dbStorePath, logger)
 			if err != nil {
 				return err
 			}
@@ -99,17 +89,17 @@ func treeCommand() *ffcli.Command {
 	}
 }
 
-func infoCommand() *ffcli.Command {
-	return &ffcli.Command{
-		Name:    `info`,
-		FlagSet: storeFlagSet(),
-		Options: []ff.Option{ff.WithEnvVarNoPrefix()},
+func infoCommand() *climan.Command {
+	return &climan.Command{
+		Name:           `info`,
+		FlagSetBuilder: glOpts.commonFlagsBuilder,
+		FFOptions:      []ff.Option{ff.WithEnvVarNoPrefix()},
 		Exec: func(_ context.Context, _ []string) error {
-			logger, err := loggerFromArgs(verbose, logFormat)
+			logger, err := loggerFromArgs(glOpts.verbose, glOpts.logFormat)
 			if err != nil {
 				return err
 			}
-			db, err := dbFromArgs(dbStorePath, logger)
+			db, err := dbFromArgs(glOpts.dbStorePath, logger)
 			if err != nil {
 				return err
 			}
