@@ -30,23 +30,30 @@ import (
 	ff "github.com/peterbourgon/ff/v3"
 )
 
-type GlobalOptions struct {
+type globalOptions struct {
 	verbose     bool
 	logFormat   string
 	dbStorePath string
 
-	server server
+	server serverOpts
 }
 
-func (g *GlobalOptions) commonFlagsBuilder(fs *flag.FlagSet) {
-	fs.BoolVar(&g.verbose, "v", false, "increase log verbosity")
-	fs.StringVar(&g.logFormat, "log-format", "console", strings.Join(zapconfig.AvailablePresets, ", "))
-	fs.StringVar(&g.dbStorePath, "db-path", ":memory:", "DB Store path")
+func (g *globalOptions) applyDefaults() {
+	g.verbose = false
+	g.logFormat = "console"
+	g.dbStorePath = ":memory:"
 }
 
-var optsGlobal = &GlobalOptions{}
+func (g *globalOptions) commonFlagsBuilder(fs *flag.FlagSet) {
+	fs.BoolVar(&g.verbose, "v", g.verbose, "increase log verbosity")
+	fs.StringVar(&g.logFormat, "log-format", g.logFormat, strings.Join(zapconfig.AvailablePresets, ", "))
+	fs.StringVar(&g.dbStorePath, "db-path", g.dbStorePath, "DB Store path")
+}
+
+var glOpts = &globalOptions{}
 
 func main() {
+	glOpts.applyDefaults()
 	err := yolo(os.Args[1:])
 	if err != nil {
 		log.Fatalf("err: %+v", err)
@@ -61,8 +68,8 @@ func yolo(args []string) error {
 	rootFlagSet.SetOutput(os.Stderr)
 
 	root := &climan.Command{
-		ShortUsage:     `server [flags] <subcommand>`,
-		FlagSetBuilder: optsGlobal.commonFlagsBuilder,
+		ShortUsage:     `yolo [flags] <subcommand>`,
+		FlagSetBuilder: glOpts.commonFlagsBuilder,
 		Subcommands: []*climan.Command{
 			serverCommand(),
 			dumpObjectsCommand(),

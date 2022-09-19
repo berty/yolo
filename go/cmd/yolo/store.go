@@ -15,14 +15,14 @@ import (
 func dumpObjectsCommand() *climan.Command {
 	return &climan.Command{
 		Name:           `dump-objects`,
-		FlagSetBuilder: optsGlobal.commonFlagsBuilder,
+		FlagSetBuilder: glOpts.commonFlagsBuilder,
 		FFOptions:      []ff.Option{ff.WithEnvVarNoPrefix()},
 		Exec: func(_ context.Context, _ []string) error {
-			logger, err := loggerFromArgs(optsGlobal.verbose, optsGlobal.logFormat)
+			logger, err := loggerFromArgs(glOpts.verbose, glOpts.logFormat)
 			if err != nil {
 				return err
 			}
-			db, err := dbFromArgs(optsGlobal.dbStorePath, logger)
+			db, err := dbFromArgs(glOpts.dbStorePath, logger)
 			if err != nil {
 				return err
 			}
@@ -54,14 +54,14 @@ func dumpObjectsCommand() *climan.Command {
 func treeCommand() *climan.Command {
 	return &climan.Command{
 		Name:           `tree`,
-		FlagSetBuilder: optsGlobal.commonFlagsBuilder,
+		FlagSetBuilder: glOpts.commonFlagsBuilder,
 		FFOptions:      []ff.Option{ff.WithEnvVarNoPrefix()},
 		Exec: func(ctx context.Context, _ []string) error {
-			logger, err := loggerFromArgs(optsGlobal.verbose, optsGlobal.logFormat)
+			logger, err := loggerFromArgs(glOpts.verbose, glOpts.logFormat)
 			if err != nil {
 				return err
 			}
-			db, err := dbFromArgs(optsGlobal.dbStorePath, logger)
+			db, err := dbFromArgs(glOpts.dbStorePath, logger)
 			if err != nil {
 				return err
 			}
@@ -92,14 +92,14 @@ func treeCommand() *climan.Command {
 func infoCommand() *climan.Command {
 	return &climan.Command{
 		Name:           `info`,
-		FlagSetBuilder: optsGlobal.commonFlagsBuilder,
+		FlagSetBuilder: glOpts.commonFlagsBuilder,
 		FFOptions:      []ff.Option{ff.WithEnvVarNoPrefix()},
 		Exec: func(_ context.Context, _ []string) error {
-			logger, err := loggerFromArgs(optsGlobal.verbose, optsGlobal.logFormat)
+			logger, err := loggerFromArgs(glOpts.verbose, glOpts.logFormat)
 			if err != nil {
 				return err
 			}
-			db, err := dbFromArgs(optsGlobal.dbStorePath, logger)
+			db, err := dbFromArgs(glOpts.dbStorePath, logger)
 			if err != nil {
 				return err
 			}
